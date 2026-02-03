@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'user_type_controller.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../shared/widgets/primary_text_button.dart';
 
 class UserTypeView extends GetView<UserTypeController> {
   const UserTypeView({super.key});
@@ -20,12 +21,17 @@ class UserTypeView extends GetView<UserTypeController> {
             SizedBox(height: 20.h),
             Text(
               AppStrings.selectUserType,
-              style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF111111),
+                
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
               AppStrings.joinNowToStreamline,
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 14.sp, color: const Color(0xFF414141),),
             ),
 
             SizedBox(height: 40.h),
@@ -55,29 +61,11 @@ class UserTypeView extends GetView<UserTypeController> {
             // Continue Button
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: controller.onContinue,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    AppStrings.continueText,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              child: PrimaryTextButton(
+                text: AppStrings.continueText,
+                onPressed: controller.onContinue,
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -103,11 +91,13 @@ class UserTypeView extends GetView<UserTypeController> {
           // If the image asset itself has white space around the "card" graphic,
           // that is where the spacing is coming from.
           clipBehavior: Clip.antiAlias,
-          child: Image.asset(
-            imagePath,
-            width: double.infinity,
-            fit: BoxFit
-                .fitHeight, // Use cover to fill the container and cut off any baked-in white empty space
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Image.asset(
+              imagePath,
+              height: 150,
+              // fit:
+            ),
           ),
         );
       }),
