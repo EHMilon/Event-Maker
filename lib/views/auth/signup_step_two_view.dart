@@ -1,0 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import '../../core/themes/app_colors.dart';
+import '../../shared/widgets/primary_text_button.dart';
+import 'auth_controller.dart';
+
+class SignupStepTwoView extends GetView<AuthController> {
+  const SignupStepTwoView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 40.h),
+              Center(
+                child: Column(
+                  children: [
+                    Image.asset('assets/images/icon.png', height: 40.h),
+                    SizedBox(height: 20.h),
+                    Text(
+                      "Register New Account",
+                      style: TextStyle(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 40.w),
+                      child: Text(
+                        "Almost there! add your phone number & nationality.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 40.h),
+              Text(
+                "Nationality",
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              DropdownButtonFormField<String>(
+                value: controller.selectedNationality.value,
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: AppColors.lightGrey),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: AppColors.lightGrey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+                items: ['UAE', 'USA', 'UK', 'India', 'Bangladesh']
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: controller.updateNationality,
+              ),
+              SizedBox(height: 20.h),
+              Text(
+                "Phone",
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              IntlPhoneField(
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Phone Number',
+                  hintStyle: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.grey.withOpacity(0.5),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: AppColors.lightGrey),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: AppColors.lightGrey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+                initialCountryCode: 'AE',
+                onChanged: (phone) {
+                  controller.updatePhoneNumber(phone.completeNumber);
+                },
+              ),
+              SizedBox(height: 100.h), // Space for button
+              PrimaryTextButton(
+                text: "Continue",
+                onPressed: controller.onContinueSignup,
+              ),
+              SizedBox(height: 40.h),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

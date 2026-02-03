@@ -23,8 +23,8 @@ class MyApp extends StatelessWidget {
           title: 'Event Maker',
           debugShowCheckedModeBanner: false,
           theme: AppThemes.lightTheme,
-          darkTheme: AppThemes.darkTheme,
-          themeMode: ThemeMode.system,
+          // darkTheme: AppThemes.darkTheme,
+          themeMode: ThemeMode.light,
           initialRoute: AppRoutes.splash,
           getPages: AppRoutes.routes,
         );

@@ -6,33 +6,43 @@ import '../../core/themes/app_colors.dart';
 class PrimaryTextButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+  final Widget? icon;
 
   const PrimaryTextButton({
     super.key,
     required this.text,
     required this.onPressed,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56.h,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+    return SingleChildScrollView(
+      child: SizedBox(
+        width: double.infinity,
+        height: 56.h,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            elevation: 0,
           ),
-          elevation: 0,
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                text,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (icon != null) ...[SizedBox(width: 8.w), icon!],
+            ],
           ),
         ),
       ),
