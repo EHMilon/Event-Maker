@@ -17,6 +17,11 @@ import '../../views/auth/get_started_view.dart';
 import '../../views/profile/profile_view.dart';
 import '../../views/profile/profile_settings_view.dart';
 import '../../views/profile/add_image_view.dart';
+import '../../views/profile/change_password_view.dart';
+import '../../views/profile/transactions_view.dart';
+import '../../views/profile/bookmarks_view.dart';
+import '../../views/profile/faq_view.dart';
+import '../../views/profile/contact_us_view.dart';
 import '../../views/profile/profile_binding.dart';
 import '../../views/customer_flow/customer_flow_scaffold.dart';
 import '../../views/customer_flow/home/home_view.dart';
@@ -40,6 +45,11 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String profileSettings = '/profile-settings';
   static const String addImage = '/add-image';
+  static const String changePassword = '/change-password';
+  static const String transactions = '/transactions';
+  static const String bookmarks = '/bookmarks';
+  static const String faq = '/faq';
+  static const String contactUs = '/contact-us';
   static const String customerHome = '/customer-home';
   static const String serviceProviderHome = '/service-provider-home';
 
@@ -105,16 +115,13 @@ class AppRoutes {
       page: () => const ProfileView(),
       binding: ProfileBinding(),
     ),
-    GetPage(
-      name: profileSettings,
-      page: () => const ProfileSettingsView(),
-      binding: ProfileBinding(),
-    ),
-    GetPage(
-      name: addImage,
-      page: () => const AddImageView(),
-      binding: ProfileBinding(),
-    ),
+    GetPage(name: profileSettings, page: () => const ProfileSettingsView()),
+    GetPage(name: addImage, page: () => const AddImageView()),
+    GetPage(name: changePassword, page: () => const ChangePasswordView()),
+    GetPage(name: transactions, page: () => const TransactionsView()),
+    GetPage(name: bookmarks, page: () => const BookmarksView()),
+    GetPage(name: faq, page: () => const FAQView()),
+    GetPage(name: contactUs, page: () => const ContactUsView()),
     GetPage(
       name: customerHome,
       page: () => const CustomerFlowScaffold(),

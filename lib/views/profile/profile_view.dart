@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../core/themes/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 import 'profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -70,32 +71,32 @@ class ProfileView extends GetView<ProfileController> {
                 _buildMenuItem(
                   icon: 'assets/icons/profile_outline.svg',
                   title: 'My Profile',
-                  onTap: () => Get.toNamed('/profile-settings'),
+                  onTap: () => Get.toNamed(AppRoutes.profileSettings),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/security.svg',
                   title: 'Security',
-                  onTap: () {},
+                  onTap: () => Get.toNamed(AppRoutes.changePassword),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/wallet.svg',
                   title: 'My Transactions',
-                  onTap: () {},
+                  onTap: () => Get.toNamed(AppRoutes.transactions),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/saved.svg',
                   title: 'My Bookmarks',
-                  onTap: () {},
+                  onTap: () => Get.toNamed(AppRoutes.bookmarks),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/mail.svg',
                   title: 'Contact Us',
-                  onTap: () {},
+                  onTap: () => Get.toNamed(AppRoutes.contactUs),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/question-mark.svg',
                   title: 'FAQ',
-                  onTap: () {},
+                  onTap: () => Get.toNamed(AppRoutes.faq),
                 ),
                 SizedBox(height: 16.h),
                 _buildMenuItem(
