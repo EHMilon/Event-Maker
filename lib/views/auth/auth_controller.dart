@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import '../../shared/utils/user_preferences.dart';
+import '../../core/routes/app_routes.dart';
 
 /// Unified Auth Controller for all authentication screens.
 ///
@@ -33,8 +35,10 @@ class AuthController extends GetxController {
     selectedType.value = type;
   }
 
-  void onContinueUserType() {
+  void onContinueUserType() async {
     if (selectedType.value.isNotEmpty) {
+      // Save user type to shared preferences
+      await UserPreferences.setUserType(selectedType.value);
       Get.toNamed('/login');
     } else {
       Get.snackbar(
@@ -55,9 +59,16 @@ class AuthController extends GetxController {
     obscurePassword.value = !obscurePassword.value;
   }
 
-  void onLogin() {
+  void onLogin() async {
     // TODO: Implement actual login logic
-    Get.offAllNamed('/get-started');
+    // In a real app, you would:
+    // 1. Call backend API to authenticate
+    // 2. Get user type from backend response
+    // 3. Save user details to SharedPreferences
+
+    // For now, we simulate login and navigate based on saved user type
+    await UserPreferences.setLoggedIn(true);
+    Get.offAllNamed(AppRoutes.getStarted);
   }
 
   void onForgotPassword() {
@@ -105,39 +116,54 @@ class AuthController extends GetxController {
     Get.toNamed('/signup-step-two');
   }
 
-  void onContinueSignup() {
+  void onContinueSignup() async {
     // Stage 2: Additional Info
     if (phoneNumber.value.isEmpty) {
       Get.snackbar("Error", "Please enter your phone number");
       return;
     }
 
+    // Save user type to shared preferences
+    if (selectedType.value.isNotEmpty) {
+      await UserPreferences.setUserType(selectedType.value);
+    }
+
     if (selectedType.value == 'provider') {
-      Get.toNamed('/provider-details');
+      Get.toNamed(AppRoutes.providerDetails);
     } else {
       // For customer, go straight to get started
-      Get.offAllNamed('/get-started');
+      Get.offAllNamed(AppRoutes.getStarted);
     }
   }
 
-  void onContinueProviderDetails() {
+  void onContinueProviderDetails() async {
     if (selectedServiceType.value.isEmpty ||
         selectedRole.value.isEmpty ||
         selectedServiceCategory.value.isEmpty) {
       Get.snackbar("Error", "Please select all fields");
       return;
     }
+
+    // Save user type to shared preferences
+    await UserPreferences.setUserType('provider');
+
     // TODO: Implement actual registration logic for provider
-    Get.offAllNamed('/get-started');
+    Get.offAllNamed(AppRoutes.getStarted);
   }
 
   void onLoginFromSignup() {
-    Get.offAllNamed('/login');
+    Get.offAllNamed(AppRoutes.login);
   }
 
-  void onGetStarted() {
-    // Navigate to Get Started screen after successful login/signup
-    Get.offAllNamed('/home'); // Or wherever the home screen is
+  void onGetStarted() async {
+    // Navigate to appropriate home screen based on user type
+    String userType = await UserPreferences.getUserType();
+
+    if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+      Get.offAllNamed(AppRoutes.serviceProviderHome);
+    } else {
+      Get.offAllNamed(AppRoutes.customerHome);
+    }
   }
 
   // ===== Forgot Password Methods =====
@@ -175,7 +201,7 @@ class AuthController extends GetxController {
   }
 
   void onGoToLogin() {
-    Get.offAllNamed('/login');
+    Get.offAllNamed(AppRoutes.login);
   }
 
   // ===== Shared Methods =====

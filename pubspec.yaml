@@ -7,19 +7,19 @@ environment:
   sdk: ^3.10.7
 
 dependencies:
-  connectivity_plus: ^6.1.1 # check internet connection
-
+  connectivity_plus: ^6.1.1
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
+  flutter_hooks: ^0.21.3+1
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.3
   get: ^4.6.6
-  google_fonts: ^6.2.1 # use Inter font
-  pinput: ^5.0.0
-  skeletonizer: ^2.1.2
-  flutter_hooks: ^0.21.3+1
+  google_fonts: ^6.2.1
   intl_phone_field: ^3.2.0
+  pinput: ^5.0.0
+  shared_preferences: ^2.5.4
+  skeletonizer: ^2.1.2
 
 dev_dependencies:
   flutter_lints: ^6.0.0

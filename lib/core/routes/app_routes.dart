@@ -14,6 +14,12 @@ import '../../views/auth/congratulations_view.dart';
 import '../../views/auth/signup_step_two_view.dart';
 import '../../views/auth/provider_details_view.dart';
 import '../../views/auth/get_started_view.dart';
+import '../../views/profile/profile_view.dart';
+import '../../views/customer_flow/customer_flow_scaffold.dart';
+import '../../views/customer_flow/home/home_view.dart';
+import '../../views/customer_flow/home/home_binding.dart';
+import '../../views/service_provider_flow/home/sp_home_view.dart';
+import '../../views/service_provider_flow/home/sp_home_binding.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -28,6 +34,9 @@ class AppRoutes {
   static const String signupStepTwo = '/signup-step-two';
   static const String providerDetails = '/provider-details';
   static const String getStarted = '/get-started';
+  static const String profile = '/profile';
+  static const String customerHome = '/customer-home';
+  static const String serviceProviderHome = '/service-provider-home';
 
   static final routes = [
     GetPage(
@@ -86,5 +95,20 @@ class AppRoutes {
       page: () => const GetStartedView(),
       binding: AuthBinding(),
     ),
+    GetPage(
+      name: profile,
+      page: () => const ProfileView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: customerHome,
+      page: () => const CustomerFlowScaffold(),
+      binding: HomeBinding(),
+    ),
+    // GetPage(
+    //   name: serviceProviderHome,
+    //   page: () => const ServiceProviderHomeView(),
+    //   binding: ServiceProviderHomeBinding(),
+    // ),
   ];
 }
