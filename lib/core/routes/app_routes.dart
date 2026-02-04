@@ -15,6 +15,9 @@ import '../../views/auth/signup_step_two_view.dart';
 import '../../views/auth/provider_details_view.dart';
 import '../../views/auth/get_started_view.dart';
 import '../../views/profile/profile_view.dart';
+import '../../views/profile/profile_settings_view.dart';
+import '../../views/profile/add_image_view.dart';
+import '../../views/profile/profile_binding.dart';
 import '../../views/customer_flow/customer_flow_scaffold.dart';
 import '../../views/customer_flow/home/home_view.dart';
 import '../../views/customer_flow/home/home_binding.dart';
@@ -35,6 +38,8 @@ class AppRoutes {
   static const String providerDetails = '/provider-details';
   static const String getStarted = '/get-started';
   static const String profile = '/profile';
+  static const String profileSettings = '/profile-settings';
+  static const String addImage = '/add-image';
   static const String customerHome = '/customer-home';
   static const String serviceProviderHome = '/service-provider-home';
 
@@ -98,7 +103,17 @@ class AppRoutes {
     GetPage(
       name: profile,
       page: () => const ProfileView(),
-      binding: AuthBinding(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: profileSettings,
+      page: () => const ProfileSettingsView(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: addImage,
+      page: () => const AddImageView(),
+      binding: ProfileBinding(),
     ),
     GetPage(
       name: customerHome,

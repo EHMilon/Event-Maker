@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
+import 'package:event_maker/views/profile/profile_view.dart';
+
 class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   const CustomerFlowScaffold({super.key});
 
@@ -15,7 +17,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
       const HomeView(),
       const Center(child: Text('Map View')),
       const Center(child: Text('Bookings View')),
-      const Center(child: Text('Profile View')),
+      const ProfileView(),
     ];
 
     return Scaffold(
@@ -68,7 +70,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
-                'assets/icons/bookings_icon.svg',
+                'assets/icons/booking.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
                   controller.selectedIndex == 2
