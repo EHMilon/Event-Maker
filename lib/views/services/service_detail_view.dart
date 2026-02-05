@@ -1,6 +1,9 @@
+import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -232,21 +235,42 @@ class ServiceDetailView extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 16.h),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(16.r),
-                          child: Image.network(
-                            // Static map image for mockup
-                            'https://imgs.search.brave.com/5V3vLzV6l5z5vLzV6l5z5vLzV6l5z5vLzV6l5z5vLzV6l5z/rs:fit:860:0:0/g:ce/aHR0cHM6Ly9tYXBz/Lmdvb2dsZWFwaXMu/Y29tL21hcHMvYXBp/L3N0YXRpY21hcD9j/ZW50ZXI9NDAuNzE0/NzI4LC03My45OTg2/NzImem9vbT0xMiZz/aXplPTQwMHw0MDAm/bWFwdHlwZT1yb2Fk/bWFwJmtleT1XQWlc/X0tFWQ',
+                        GestureDetector(
+                          onTap: () {
+                            Get.toNamed(AppRoutes.mapResults);
+                          },
+                          child: SizedBox(
                             height: 180.h,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 180.h,
-                              color: AppColors.lightGrey,
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Map View',
-                                style: TextStyle(color: AppColors.grey),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16.r),
+                              child: FlutterMap(
+                                options: MapOptions(
+                                  initialCenter: const LatLng(24.4539, 54.3773),
+                                  initialZoom: 13.0,
+                                  interactionOptions: const InteractionOptions(
+                                    flags: InteractiveFlag.none,
+                                  ),
+                                ),
+                                children: [
+                                  TileLayer(
+                                    urlTemplate:
+                                        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+                                    userAgentPackageName:
+                                        'com.example.event_maker',
+                                  ),
+                                  MarkerLayer(
+                                    markers: [
+                                      const Marker(
+                                        point: LatLng(24.4539, 54.3773),
+                                        child: Icon(
+                                          Icons.location_on,
+                                          color: AppColors.error,
+                                          size: 30,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
                           ),

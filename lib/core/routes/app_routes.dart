@@ -30,6 +30,8 @@ import '../../views/service_provider_flow/home/sp_home_view.dart';
 import '../../views/service_provider_flow/home/sp_home_binding.dart';
 import '../../views/customer_flow/map/map_results_view.dart';
 import '../../views/customer_flow/map/map_results_binding.dart';
+import '../../views/notifications/notification_view.dart';
+import '../../views/notifications/notification_binding.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -54,9 +56,15 @@ class AppRoutes {
   static const String contactUs = '/contact-us';
   static const String customerHome = '/customer-home';
   static const String serviceProviderHome = '/service-provider-home';
+  static const String notifications = '/notifications';
   static const String mapResults = '/map-results';
 
   static final routes = [
+    GetPage(
+      name: notifications,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+    ),
     GetPage(
       name: splash,
       page: () => const SplashView(),
