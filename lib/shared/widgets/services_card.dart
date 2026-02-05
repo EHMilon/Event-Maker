@@ -49,17 +49,31 @@ class ServicesCard extends StatelessWidget {
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(16.r),
                   ),
-                  child: Image.asset(
-                    imagePath,
-                    height: 120.h,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 120.h,
-                      color: AppColors.lightGrey,
-                      child: const Icon(Icons.broken_image),
-                    ),
-                  ),
+                  child: imagePath.startsWith('http')
+                      ? Image.network(
+                          imagePath,
+                          height: 120.h,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                height: 120.h,
+                                color: AppColors.lightGrey,
+                                child: const Icon(Icons.broken_image),
+                              ),
+                        )
+                      : Image.asset(
+                          imagePath,
+                          height: 120.h,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                height: 120.h,
+                                color: AppColors.lightGrey,
+                                child: const Icon(Icons.broken_image),
+                              ),
+                        ),
                 ),
                 Positioned(
                   top: 8.h,

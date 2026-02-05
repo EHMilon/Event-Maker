@@ -1,4 +1,6 @@
 import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/views/services/service_detail_view.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/home/home_controller.dart';
 import 'package:event_maker/views/customer_flow/home/widgets/category_item.dart';
@@ -220,16 +222,64 @@ class HomeView extends GetView<HomeController> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: List.generate(
-          3,
-          (index) => ServicesCard(
-            imagePath: imageUrls[type] ?? '',
-            title: 'Rose garden wedding',
+        children: List.generate(3, (index) {
+          final imageUrl = imageUrls[type] ?? '';
+          final title = '${type.capitalizeFirst} Service ${index + 1}';
+
+          ServiceType serviceType = ServiceType.event;
+          switch (type) {
+            case 'photography':
+              serviceType = ServiceType.photography;
+              break;
+            case 'catering':
+              serviceType = ServiceType.catering;
+              break;
+            case 'cleaning':
+              serviceType = ServiceType.cleaning;
+              break;
+            case 'music':
+              serviceType = ServiceType.music;
+              break;
+            case 'filming':
+              serviceType = ServiceType.filming;
+              break;
+          }
+
+          return ServicesCard(
+            imagePath: imageUrl,
+            title: title,
             location: 'AD, Louver Museum',
             price: '120 AED',
             rating: '4.5',
-          ),
-        ),
+            onTap: () {
+              Get.to(
+                () => ServiceDetailView(
+                  service: ServiceModel(
+                    id: '$type-$index',
+                    title: title,
+                    description:
+                        'This is a premium $type service offering the best quality experiences for your events. We ensure professional handling and top-tier equipment/ingredients to make your special day memorable.',
+                    images: [imageUrl],
+                    type: serviceType,
+                    provider: ServiceProvider(
+                      name: 'Premium $type Provider',
+                      role: 'Professional',
+                      imageUrl:
+                          'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1000&auto=format&fit=crop',
+                      isVerified: true,
+                    ),
+                    location: 'AD, Louver Museum',
+                    rating: 4.5,
+                    reviewCount: 50 + index * 10,
+                    basePrice: 120,
+                    priceUnit: 'AED',
+                    date: DateTime.now().add(Duration(days: index + 1)),
+                  ),
+                ),
+              );
+            },
+          );
+        }),
       ),
     );
   }
