@@ -28,6 +28,8 @@ import '../../views/customer_flow/home/home_view.dart';
 import '../../views/customer_flow/home/home_binding.dart';
 import '../../views/service_provider_flow/home/sp_home_view.dart';
 import '../../views/service_provider_flow/home/sp_home_binding.dart';
+import '../../views/customer_flow/map/map_results_view.dart';
+import '../../views/customer_flow/map/map_results_binding.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -52,6 +54,7 @@ class AppRoutes {
   static const String contactUs = '/contact-us';
   static const String customerHome = '/customer-home';
   static const String serviceProviderHome = '/service-provider-home';
+  static const String mapResults = '/map-results';
 
   static final routes = [
     GetPage(
@@ -129,8 +132,12 @@ class AppRoutes {
     ),
     // GetPage(
     //   name: serviceProviderHome,
-    //   page: () => const ServiceProviderHomeView(),
     //   binding: ServiceProviderHomeBinding(),
     // ),
+    GetPage(
+      name: mapResults,
+      page: () => const MapResultsView(),
+      binding: MapResultsBinding(),
+    ),
   ];
 }

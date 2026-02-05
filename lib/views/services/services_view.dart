@@ -1,3 +1,5 @@
+import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
+import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:event_maker/views/services/service_detail_view.dart';
 import 'package:event_maker/views/services/services_controller.dart';
@@ -32,6 +34,17 @@ class ServicesView extends GetView<ServicesController> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.map_outlined, color: Colors.black),
+            onPressed: () => Get.to(
+              () => const MapResultsView(),
+              binding: MapResultsBinding(),
+              transition: Transition.fadeIn,
+            ),
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),

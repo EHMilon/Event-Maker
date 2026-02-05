@@ -12,11 +12,15 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_hooks: ^0.21.3+1
+  flutter_map: ^8.2.2
+  flutter_polyline_points: ^3.1.0
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.3
+  geolocator: ^14.0.2
   get: ^4.6.6
   google_fonts: ^6.2.1
   intl_phone_field: ^3.2.0
+  latlong2: ^0.9.1
   pinput: ^5.0.0
   shared_preferences: ^2.5.4
   skeletonizer: ^2.1.2

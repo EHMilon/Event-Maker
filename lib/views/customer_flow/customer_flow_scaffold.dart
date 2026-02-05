@@ -1,6 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/views/customer_flow/customer_flow_controller.dart';
 import 'package:event_maker/views/customer_flow/home/home_view.dart';
+import 'package:event_maker/views/customer_flow/map/map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,7 +16,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const HomeView(),
-      const Center(child: Text('Map View')),
+      const MapView(),
       const Center(child: Text('Bookings View')),
       const ProfileView(),
     ];
