@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import 'package:event_maker/views/profile/profile_view.dart';
+import 'package:event_maker/views/customer_flow/bookings/bookmarks_view.dart';
 
 class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   const CustomerFlowScaffold({super.key});
@@ -17,7 +18,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
     final List<Widget> pages = [
       const HomeView(),
       const MapView(),
-      const Center(child: Text('Bookings View')),
+      const BookmarksView(),
       const ProfileView(),
     ];
 

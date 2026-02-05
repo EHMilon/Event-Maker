@@ -19,7 +19,7 @@ import '../../views/profile/profile_settings_view.dart';
 import '../../views/profile/add_image_view.dart';
 import '../../views/profile/change_password_view.dart';
 import '../../views/profile/transactions_view.dart';
-import '../../views/profile/bookmarks_view.dart';
+import '../../views/customer_flow/bookings/bookmarks_view.dart';
 import '../../views/profile/faq_view.dart';
 import '../../views/profile/contact_us_view.dart';
 import '../../views/profile/profile_binding.dart';
@@ -130,7 +130,11 @@ class AppRoutes {
     GetPage(name: addImage, page: () => const AddImageView()),
     GetPage(name: changePassword, page: () => const ChangePasswordView()),
     GetPage(name: transactions, page: () => const TransactionsView()),
-    GetPage(name: bookmarks, page: () => const BookmarksView()),
+    GetPage(
+      name: bookmarks,
+      page: () => const BookmarksView(),
+      binding: ProfileBinding(),
+    ),
     GetPage(name: faq, page: () => const FAQView()),
     GetPage(name: contactUs, page: () => const ContactUsView()),
     GetPage(

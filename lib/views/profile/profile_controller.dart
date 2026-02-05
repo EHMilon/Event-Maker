@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import '../../data/models/service_model.dart';
 import '../../shared/utils/user_preferences.dart';
 
 class ProfileController extends GetxController {
@@ -40,7 +41,7 @@ class ProfileController extends GetxController {
   // Mock data lists
   final RxList<Map<String, dynamic>> transactions =
       <Map<String, dynamic>>[].obs;
-  final RxList<Map<String, dynamic>> bookmarks = <Map<String, dynamic>>[].obs;
+  final RxList<ServiceModel> bookmarks = <ServiceModel>[].obs;
   final RxList<Map<String, dynamic>> faqs = <Map<String, dynamic>>[].obs;
 
   @override
@@ -79,27 +80,55 @@ class ProfileController extends GetxController {
     ]);
 
     bookmarks.assignAll([
-      {
-        'title': 'Cleaning Service',
-        'provider': 'Clean World Inc.',
-        'location': 'Sharjah',
-        'price': '120',
-        'image': 'assets/images/cleaning.jpg',
-      },
-      {
-        'title': 'Corporate Event',
-        'provider': 'Tech Solutions Inc.',
-        'location': 'Convention Center',
-        'price': '120',
-        'image': 'assets/images/congress.png',
-      },
-      {
-        'title': 'Wedding Photoshoot',
-        'provider': 'Darwish Studio',
-        'location': 'Al-Louvre Museum',
-        'price': '120',
-        'image': 'assets/images/photography.jpg',
-      },
+      ServiceModel(
+        id: '1',
+        title: 'Cleaning Service',
+        description: 'Professional cleaning services for your home and office.',
+        images: ['assets/images/cleaning.jpg'],
+        type: ServiceType.cleaning,
+        provider: ServiceProvider(
+          name: 'Clean World Inc.',
+          role: 'Professional Cleaning',
+          imageUrl: 'assets/images/person.jpg',
+        ),
+        location: 'Sharjah',
+        basePrice: 120,
+        rating: 4.8,
+        reviewCount: 120,
+      ),
+      ServiceModel(
+        id: '2',
+        title: 'Corporate Event',
+        description: 'High-end corporate event planning and execution.',
+        images: ['assets/images/congress.png'],
+        type: ServiceType.event,
+        provider: ServiceProvider(
+          name: 'Tech Solutions Inc.',
+          role: 'Event Planner',
+          imageUrl: 'assets/images/person.jpg',
+        ),
+        location: 'Convention Center',
+        basePrice: 500,
+        rating: 4.5,
+        reviewCount: 85,
+      ),
+      ServiceModel(
+        id: '3',
+        title: 'Wedding Photoshoot',
+        description:
+            'Capture your special moments with our expert photographers.',
+        images: ['assets/images/photography.jpg'],
+        type: ServiceType.photography,
+        provider: ServiceProvider(
+          name: 'Darwish Studio',
+          role: 'Photographer',
+          imageUrl: 'assets/images/person.jpg',
+        ),
+        location: 'Al-Louvre Museum',
+        basePrice: 250,
+        rating: 4.9,
+        reviewCount: 210,
+      ),
     ]);
 
     faqs.assignAll([
@@ -142,7 +171,10 @@ class ProfileController extends GetxController {
     }
     // TODO: Validate current password with backend
     // Navigate to OTP verification for password change with auth flow parameter
-    Get.toNamed('/otp-verification', parameters: {'authFlow': 'change-password'});
+    Get.toNamed(
+      '/otp-verification',
+      parameters: {'authFlow': 'change-password'},
+    );
   }
 
   Future<void> updateProfile() async {

@@ -142,7 +142,7 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
-      contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 4.h),
+      contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }
 
