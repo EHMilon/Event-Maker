@@ -14,6 +14,24 @@ class ProfileController extends GetxController {
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+  // Password visibility states
+  final RxBool isCurrentPasswordVisible = false.obs;
+  final RxBool isNewPasswordVisible = false.obs;
+  final RxBool isConfirmPasswordVisible = false.obs;
+
+  // Toggle visibility methods
+  void toggleCurrentPasswordVisibility() {
+    isCurrentPasswordVisible.value = !isCurrentPasswordVisible.value;
+  }
+
+  void toggleNewPasswordVisibility() {
+    isNewPasswordVisible.value = !isNewPasswordVisible.value;
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
+  }
+
   final RxString userName = 'John Doe'.obs;
   final RxString userEmail = 'example@gmail.com'.obs;
   final RxString profileImage = 'assets/images/person.jpg'.obs;
@@ -122,16 +140,9 @@ class ProfileController extends GetxController {
       );
       return;
     }
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
-    isLoading.value = false;
-    Get.back();
-    Get.snackbar(
-      'Success',
-      'Password updated successfully',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+    // TODO: Validate current password with backend
+    // Navigate to OTP verification for password change with auth flow parameter
+    Get.toNamed('/otp-verification', parameters: {'authFlow': 'change-password'});
   }
 
   Future<void> updateProfile() async {

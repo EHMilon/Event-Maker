@@ -177,7 +177,13 @@ class AuthController extends GetxController {
 
   void onVerify() {
     // TODO: Verify OTP logic
-    Get.toNamed('/reset-password-new');
+    // Check if this is a change password flow from parameters or state
+    String? authFlow = Get.parameters['authFlow'];
+    if (authFlow == 'change-password' || currentAuthFlow.value == 'change-password') {
+      Get.toNamed('/congratulations');
+    } else {
+      Get.toNamed('/reset-password-new');
+    }
   }
 
   void onResend() {
@@ -201,7 +207,13 @@ class AuthController extends GetxController {
   }
 
   void onGoToLogin() {
-    Get.offAllNamed(AppRoutes.login);
+    // Navigate based on auth flow - for change password, go to profile
+    if (currentAuthFlow.value == 'change-password') {
+      currentAuthFlow.value = ''; // Reset auth flow
+      Get.offAllNamed('/profile');
+    } else {
+      Get.offAllNamed(AppRoutes.login);
+    }
   }
 
   // ===== Shared Methods =====

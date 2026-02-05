@@ -34,36 +34,40 @@ class ProfileView extends GetView<ProfileController> {
             child: Column(
               children: [
                 SizedBox(height: 20.h),
-                // Profile Picture
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(3.r),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primary,
-                            width: 2.w,
+                // Profile Picture 
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(3.r),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary,
+                              width: 2.w,
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 50.r,
+                            backgroundImage: AssetImage(
+                              controller.profileImage.value,
+                            ),
                           ),
                         ),
-                        child: CircleAvatar(
-                          radius: 50.r,
-                          backgroundImage: AssetImage(
-                            controller.profileImage.value,
+                        SizedBox(height: 12.h),
+                        Text(
+                          controller.userName.value,
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
                           ),
                         ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        controller.userName.value,
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 32.h),

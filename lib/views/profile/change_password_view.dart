@@ -51,10 +51,15 @@ class ChangePasswordView extends GetView<ProfileController> {
                 CustomTextField(
                   controller: controller.currentPasswordController,
                   hintText: '********',
-                  obscureText: true,
-                  suffixIcon: const Icon(
-                    Icons.visibility_off_outlined,
-                    color: AppColors.grey,
+                  obscureText: !controller.isCurrentPasswordVisible.value,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.isCurrentPasswordVisible.value
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.grey,
+                    ),
+                    onPressed: controller.toggleCurrentPasswordVisibility,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -70,10 +75,15 @@ class ChangePasswordView extends GetView<ProfileController> {
                 CustomTextField(
                   controller: controller.newPasswordController,
                   hintText: '********',
-                  obscureText: true,
-                  suffixIcon: const Icon(
-                    Icons.visibility_off_outlined,
-                    color: AppColors.grey,
+                  obscureText: !controller.isNewPasswordVisible.value,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.isNewPasswordVisible.value
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.grey,
+                    ),
+                    onPressed: controller.toggleNewPasswordVisibility,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -89,10 +99,15 @@ class ChangePasswordView extends GetView<ProfileController> {
                 CustomTextField(
                   controller: controller.confirmPasswordController,
                   hintText: '********',
-                  obscureText: true,
-                  suffixIcon: const Icon(
-                    Icons.visibility_off_outlined,
-                    color: AppColors.grey,
+                  obscureText: !controller.isConfirmPasswordVisible.value,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.isConfirmPasswordVisible.value
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.grey,
+                    ),
+                    onPressed: controller.toggleConfirmPasswordVisibility,
                   ),
                 ),
                 SizedBox(height: 200.h),
