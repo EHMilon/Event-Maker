@@ -1,6 +1,8 @@
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/views/services/vendor_profile_view.dart';
+import 'package:event_maker/data/models/review_model.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
@@ -97,74 +99,147 @@ class ServiceDetailView extends StatelessWidget {
                         SizedBox(height: 16.h),
 
                         // Provider Info
-                        Row(
-                          children: [
-                            Container(
-                              width: 45.w,
-                              height: 45.w,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12.r),
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                    service.provider.imageUrl,
+                        GestureDetector(
+                          onTap: () {
+                            // Update provider with mock data for the profile screen
+                            final enhancedProvider = ServiceProvider(
+                              name: service.provider.name,
+                              role: service.provider.role,
+                              imageUrl: service.provider.imageUrl,
+                              isVerified: service.provider.isVerified,
+                              bannerUrl:
+                                  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
+                              certifications: [
+                                'Professional Chef',
+                                'Pizza Artisan',
+                              ],
+                              bio:
+                                  'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
+                              services: [
+                                ServiceModel(
+                                  id: '1',
+                                  title: 'Rose garden wedding',
+                                  description:
+                                      'Rose garden wedding description',
+                                  images: [
+                                    'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop',
+                                  ],
+                                  type: ServiceType.event,
+                                  provider: service.provider,
+                                  location: 'AD, Louver Museum',
+                                  rating: 4.5,
+                                  basePrice: 120,
+                                ),
+                                ServiceModel(
+                                  id: '2',
+                                  title: 'Rose garden wedding',
+                                  description:
+                                      'Rose garden wedding description',
+                                  images: [
+                                    'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop',
+                                  ],
+                                  type: ServiceType.event,
+                                  provider: service.provider,
+                                  location: 'AD, Louver Museum',
+                                  rating: 4.5,
+                                  basePrice: 120,
+                                ),
+                              ],
+                              reviews: [
+                                ReviewModel(
+                                  userName: 'John Doe',
+                                  userImageUrl:
+                                      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
+                                  date: '10 Feb',
+                                  rating: 4,
+                                  reviewText:
+                                      'Thank you, Fresh Food L.L.C! That was a great event.',
+                                ),
+                                ReviewModel(
+                                  userName: 'John Doe',
+                                  userImageUrl:
+                                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+                                  date: '10 Feb',
+                                  rating: 5,
+                                  reviewText:
+                                      'Thank you, Fresh Food L.L.C! That was a great event.',
+                                ),
+                              ],
+                            );
+                            Get.to(
+                              () => const VendorProfileView(),
+                              arguments: enhancedProvider,
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 45.w,
+                                height: 45.w,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      service.provider.imageUrl,
+                                    ),
+                                    fit: BoxFit.cover,
                                   ),
-                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 12.w),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      service.provider.name,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    if (service.provider.isVerified) ...[
-                                      SizedBox(width: 4.w),
-                                      Icon(
-                                        Icons.verified,
-                                        color: Colors.orange,
-                                        size: 16.r,
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                if (service.rating != null)
+                              SizedBox(width: 12.w),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Row(
                                     children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
-                                        size: 14.r,
-                                      ),
-                                      SizedBox(width: 4.w),
                                       Text(
-                                        '${service.rating} (${service.reviewCount} reviews)',
+                                        service.provider.name,
                                         style: GoogleFonts.inter(
-                                          fontSize: 12.sp,
-                                          color: AppColors.textSecondary,
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.textPrimary,
                                         ),
                                       ),
+                                      if (service.provider.isVerified) ...[
+                                        SizedBox(width: 4.w),
+                                        Icon(
+                                          Icons.verified,
+                                          color: Colors.orange,
+                                          size: 16.r,
+                                        ),
+                                      ],
                                     ],
-                                  )
-                                else
-                                  Text(
-                                    service.provider.role,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      color: AppColors.textSecondary,
-                                    ),
                                   ),
-                              ],
-                            ),
-                          ],
+                                  if (service.rating != null)
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                          size: 14.r,
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Text(
+                                          '${service.rating} (${service.reviewCount} reviews)',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            color: AppColors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  else
+                                    Text(
+                                      service.provider.role,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.sp,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(height: 24.h),
 

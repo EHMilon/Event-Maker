@@ -32,6 +32,7 @@ import '../../views/customer_flow/map/map_results_view.dart';
 import '../../views/customer_flow/map/map_results_binding.dart';
 import '../../views/notifications/notification_view.dart';
 import '../../views/notifications/notification_binding.dart';
+import '../../views/services/vendor_profile_view.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -58,6 +59,7 @@ class AppRoutes {
   static const String serviceProviderHome = '/service-provider-home';
   static const String notifications = '/notifications';
   static const String mapResults = '/map-results';
+  static const String vendorProfile = '/vendor-profile';
 
   static final routes = [
     GetPage(
@@ -151,5 +153,6 @@ class AppRoutes {
       page: () => const MapResultsView(),
       binding: MapResultsBinding(),
     ),
+    GetPage(name: vendorProfile, page: () => const VendorProfileView()),
   ];
 }

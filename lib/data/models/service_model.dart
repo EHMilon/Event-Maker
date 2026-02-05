@@ -1,3 +1,5 @@
+import 'review_model.dart';
+
 enum ServiceType {
   event,
   photography,
@@ -44,13 +46,23 @@ class ServiceProvider {
   final String name;
   final String role;
   final String imageUrl;
+  final String? bannerUrl;
   final bool isVerified;
+  final List<String>? certifications;
+  final String? bio;
+  final List<ServiceModel>? services;
+  final List<ReviewModel>? reviews;
 
   ServiceProvider({
     required this.name,
     required this.role,
     required this.imageUrl,
+    this.bannerUrl,
     this.isVerified = false,
+    this.certifications,
+    this.bio,
+    this.services,
+    this.reviews,
   });
 }
 
