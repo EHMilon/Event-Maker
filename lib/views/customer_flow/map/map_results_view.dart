@@ -155,26 +155,32 @@ class MapResultsView extends GetView<MapResultsController> {
                     ),
                   ),
                   SizedBox(width: 8.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        service.title,
-                        style: GoogleFonts.inter(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
-                          color: isBlue ? AppColors.white : AppColors.black,
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          service.title,
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            color: isBlue ? AppColors.white : AppColors.black,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                      Text(
-                        '${service.basePrice} ${service.priceUnit}',
-                        style: GoogleFonts.inter(
-                          fontSize: 9.sp,
-                          color: isBlue ? AppColors.lightGrey : AppColors.grey,
+                        Text(
+                          '${service.basePrice} ${service.priceUnit}',
+                          style: GoogleFonts.inter(
+                            fontSize: 9.sp,
+                            color: isBlue ? AppColors.lightGrey : AppColors.grey,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -241,8 +247,11 @@ class MapResultsView extends GetView<MapResultsController> {
                         fontWeight: FontWeight.w700,
                         color: AppColors.black,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.location_on,
@@ -250,7 +259,7 @@ class MapResultsView extends GetView<MapResultsController> {
                           color: AppColors.grey,
                         ),
                         SizedBox(width: 4.w),
-                        Expanded(
+                        Flexible(
                           child: Text(
                             service.location,
                             style: GoogleFonts.inter(
@@ -258,8 +267,10 @@ class MapResultsView extends GetView<MapResultsController> {
                               color: AppColors.grey,
                             ),
                             overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
+                        SizedBox(width: 6.w),
                         Icon(Icons.star, size: 16.r, color: Colors.amber),
                         SizedBox(width: 4.w),
                         Text(
@@ -269,32 +280,37 @@ class MapResultsView extends GetView<MapResultsController> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        SizedBox(width: 10.w),
+                        SizedBox(width: 6.w),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(5.r),
-                          ),
-                          child: Text(
-                            service.provider.role,
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w500,
+                        Flexible(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(5.r),
+                            ),
+                            child: Text(
+                              service.provider.role,
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(right: 15.w),
+                        SizedBox(width: 8.w),
+                        Flexible(
                           child: Text(
                             '${service.basePrice?.toStringAsFixed(2) ?? '0.00'} ${service.priceUnit}',
                             style: GoogleFonts.inter(
@@ -302,6 +318,9 @@ class MapResultsView extends GetView<MapResultsController> {
                               fontWeight: FontWeight.bold,
                               color: AppColors.black,
                             ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            textAlign: TextAlign.end,
                           ),
                         ),
                       ],

@@ -30,7 +30,7 @@ class BookServiceRequestView extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +75,7 @@ class BookServiceRequestView extends StatelessWidget {
               ),
             ),
 
-            Spacer(),
+            SizedBox(height: 24.h),
 
             PrimaryTextButton(
               onPressed: () {

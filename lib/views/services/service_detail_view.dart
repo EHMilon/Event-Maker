@@ -380,28 +380,23 @@ class ServiceDetailView extends StatelessWidget {
                                       selectedPackageIndex.value = index,
                                   child: Container(
                                     margin: EdgeInsets.only(bottom: 16.h),
-                                    padding: EdgeInsets.all(16.r),
+                                    padding: EdgeInsets.all(20.r),
                                     decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.white
-                                          : AppColors.white,
-                                      borderRadius: BorderRadius.circular(16.r),
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20.r),
                                       border: Border.all(
                                         color: isSelected
                                             ? AppColors.primary
                                             : AppColors.lightGrey,
-                                        width: isSelected ? 1.5 : 1,
+                                        width: isSelected ? 2 : 1,
                                       ),
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                color: AppColors.primary
-                                                    .withOpacity(0.1),
-                                                blurRadius: 10,
-                                                spreadRadius: 2,
-                                              ),
-                                            ]
-                                          : null,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
                                     ),
                                     child: Column(
                                       crossAxisAlignment:
@@ -410,67 +405,71 @@ class ServiceDetailView extends StatelessWidget {
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               package.name,
                                               style: GoogleFonts.inter(
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
+                                                fontSize: 18.sp,
+                                                fontWeight: FontWeight.w500,
                                                 color: AppColors.textPrimary,
                                               ),
                                             ),
                                             Container(
-                                              width: 20.r,
-                                              height: 20.r,
+                                              width: 24.r,
+                                              height: 24.r,
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
+                                                color: isSelected
+                                                    ? AppColors.primary
+                                                    : Colors.transparent,
                                                 border: Border.all(
                                                   color: isSelected
                                                       ? AppColors.primary
                                                       : AppColors.grey,
                                                   width: 1.5,
                                                 ),
-                                                color: isSelected
-                                                    ? AppColors.primary
-                                                    : Colors.transparent,
                                               ),
                                               child: isSelected
                                                   ? Icon(
                                                       Icons.check,
-                                                      size: 14.r,
+                                                      size: 16.r,
                                                       color: Colors.white,
                                                     )
                                                   : null,
                                             ),
                                           ],
                                         ),
-                                        SizedBox(height: 8.h),
+                                        SizedBox(height: 4.h),
                                         Text(
                                           '${package.price.toInt()} ${service.priceUnit}',
                                           style: GoogleFonts.inter(
-                                            fontSize: 18.sp,
+                                            fontSize: 22.sp,
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.primary,
                                           ),
                                         ),
-                                        SizedBox(height: 12.h),
+                                        SizedBox(height: 20.h),
                                         ...package.features.map(
                                           (feature) => Padding(
                                             padding: EdgeInsets.only(
-                                              bottom: 6.h,
+                                              bottom: 12.h,
                                             ),
                                             child: Row(
                                               children: [
                                                 Icon(
                                                   Icons.check,
-                                                  size: 16.r,
-                                                  color: Colors.green,
+                                                  size: 18.r,
+                                                  color: const Color(
+                                                    0xFF00C566,
+                                                  ), // Green check
                                                 ),
-                                                SizedBox(width: 8.w),
+                                                SizedBox(width: 12.w),
                                                 Text(
                                                   feature,
                                                   style: GoogleFonts.inter(
-                                                    fontSize: 13.sp,
+                                                    fontSize: 14.sp,
                                                     color:
                                                         AppColors.textSecondary,
                                                   ),
@@ -544,13 +543,20 @@ class ServiceDetailView extends StatelessWidget {
                     AppRoutes.bookServiceDate,
                     arguments: {
                       'service': service,
-                      'package': service.packages?[selectedPackageIndex.value],
+                      'package': service.packages != null
+                          ? service.packages![selectedPackageIndex.value]
+                          : null,
                     },
                   );
                 } else {
                   Get.toNamed(
                     AppRoutes.payment,
-                    arguments: {'service': service, 'package': null},
+                    arguments: {
+                      'service': service,
+                      'package': service.packages != null
+                          ? service.packages![selectedPackageIndex.value]
+                          : null,
+                    },
                   );
                 }
               },

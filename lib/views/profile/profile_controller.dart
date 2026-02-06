@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/service_model.dart';
 import '../../data/mock/mock_data.dart';
 import '../../shared/utils/user_preferences.dart';
+import '../../views/customer_flow/home/home_controller.dart';
 
 class ProfileController extends GetxController {
   final nameController = TextEditingController();
@@ -44,6 +45,9 @@ class ProfileController extends GetxController {
       <Map<String, dynamic>>[].obs;
   final RxList<ServiceModel> bookmarks = <ServiceModel>[].obs;
   final RxList<Map<String, dynamic>> faqs = <Map<String, dynamic>>[].obs;
+
+  // Reactive property to notify when bookmarks change
+  final RxBool bookmarksChanged = false.obs;
 
   @override
   void onInit() {
@@ -109,6 +113,104 @@ class ProfileController extends GetxController {
         'isExpanded': false.obs,
       },
     ]);
+  }
+
+  /// Remove a bookmark by service ID and sync with HomeController
+  void removeBookmark(String serviceId) {
+    bookmarks.removeWhere((service) => service.id == serviceId);
+    
+    // Notify HomeController to update its state
+    _syncHomeController(serviceId, false);
+    
+    // Show snackbar for feedback
+    Get.snackbar(
+      'Removed',
+      'Service removed from bookmarks',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.grey[800],
+      colorText: Colors.white,
+      duration: const Duration(seconds: 1),
+    );
+  }
+
+  /// Add a bookmark by service ID and sync with HomeController
+  void addBookmark(ServiceModel service) {
+    if (!bookmarks.any((s) => s.id == service.id)) {
+      bookmarks.add(service);
+      
+      // Notify HomeController to update its state
+      _syncHomeController(service.id, true);
+      
+      // Show snackbar for feedback
+      Get.snackbar(
+        'Bookmarked',
+        'Service added to bookmarks',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green[700],
+        colorText: Colors.white,
+        duration: const Duration(seconds: 1),
+      );
+    }
+  }
+
+  /// Sync HomeController when bookmarks change
+  void _syncHomeController(String serviceId, bool isBookmarked) {
+    try {
+      final HomeController homeController = Get.find<HomeController>();
+      
+      // Update allServices in HomeController
+      final serviceIndex = homeController.allServices.indexWhere((s) => s.id == serviceId);
+      if (serviceIndex != -1) {
+        final service = homeController.allServices[serviceIndex];
+        homeController.allServices[serviceIndex] = ServiceModel(
+          id: service.id,
+          title: service.title,
+          description: service.description,
+          images: service.images,
+          type: service.type,
+          provider: service.provider,
+          location: service.location,
+          rating: service.rating,
+          reviewCount: service.reviewCount,
+          date: service.date,
+          basePrice: service.basePrice,
+          priceUnit: service.priceUnit,
+          packages: service.packages,
+          isBookmarked: isBookmarked,
+        );
+      }
+      
+      // Also update searchResults if searching
+      if (homeController.searchResults.isNotEmpty) {
+        final searchIndex = homeController.searchResults.indexWhere((s) => s.id == serviceId);
+        if (searchIndex != -1) {
+          final service = homeController.searchResults[searchIndex];
+          homeController.searchResults[searchIndex] = ServiceModel(
+            id: service.id,
+            title: service.title,
+            description: service.description,
+            images: service.images,
+            type: service.type,
+            provider: service.provider,
+            location: service.location,
+            rating: service.rating,
+            reviewCount: service.reviewCount,
+            date: service.date,
+            basePrice: service.basePrice,
+            priceUnit: service.priceUnit,
+            packages: service.packages,
+            isBookmarked: isBookmarked,
+          );
+        }
+      }
+    } catch (e) {
+      // HomeController might not be initialized yet
+    }
+  }
+
+  /// Check if a service is bookmarked
+  bool isBookmarked(String serviceId) {
+    return bookmarks.any((service) => service.id == serviceId);
   }
 
   Future<void> changePassword() async {

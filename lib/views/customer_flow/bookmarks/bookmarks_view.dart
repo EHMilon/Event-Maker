@@ -117,10 +117,22 @@ class BookmarksView extends GetView<ProfileController> {
                                           ),
                                         ),
                                       ),
-                                      const Icon(
-                                        Icons.bookmark,
-                                        color: AppColors.primary,
-                                        size: 20,
+                                      GestureDetector(
+                                        onTap: () {
+                                          controller.removeBookmark(item.id);
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(4.r),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(4.r),
+                                          ),
+                                          child: Icon(
+                                            Icons.bookmark,
+                                            color: AppColors.primary,
+                                            size: 20,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),

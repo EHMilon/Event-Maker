@@ -19,7 +19,8 @@ class MockData {
     ServiceModel(
       id: 'cat-1',
       title: 'Gourmet Catering',
-      description: 'Exquisite catering services for all your events. From intimate gatherings to grand celebrations.',
+      description:
+          'Exquisite catering services for all your events. From intimate gatherings to grand celebrations.',
       images: [imgCatering],
       type: ServiceType.catering,
       provider: ServiceProvider(
@@ -27,7 +28,8 @@ class MockData {
         role: 'Head Chef',
         imageUrl: imgPerson,
         isVerified: true,
-        bio: 'Award-winning chef with 15 years of experience in international cuisine.',
+        bio:
+            'Award-winning chef with 15 years of experience in international cuisine.',
       ),
       location: 'Marina Mall, Abu Dhabi',
       rating: 4.8,
@@ -39,7 +41,8 @@ class MockData {
     ServiceModel(
       id: 'cat-2',
       title: 'BBQ & Grilling Pro',
-      description: 'Professional BBQ and grilling services for outdoor events and parties.',
+      description:
+          'Professional BBQ and grilling services for outdoor events and parties.',
       images: [imgCatering],
       type: ServiceType.catering,
       provider: ServiceProvider(
@@ -79,7 +82,8 @@ class MockData {
     ServiceModel(
       id: 'film-1',
       title: 'Cinematic Wedding Films',
-      description: 'Beautiful cinematic films that capture your special day in stunning HD quality.',
+      description:
+          'Beautiful cinematic films that capture your special day in stunning HD quality.',
       images: [imgFilming],
       type: ServiceType.filming,
       provider: ServiceProvider(
@@ -92,13 +96,49 @@ class MockData {
       rating: 4.9,
       reviewCount: 312,
       basePrice: 350,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
+      packages: [
+        ServicePackage(
+          name: 'Basic',
+          price: 120,
+          features: [
+            '4 hours coverage',
+            '100 edited photos',
+            'Online gallery',
+            'Basic retouching',
+          ],
+        ),
+        ServicePackage(
+          name: 'Standard',
+          price: 299,
+          features: [
+            '6 hours coverage',
+            '200 edited photos',
+            'Online gallery',
+            'Advanced retouching',
+            'Photo album',
+          ],
+        ),
+        ServicePackage(
+          name: 'Premium',
+          price: 499,
+          features: [
+            '8 hours coverage',
+            '300 edited photos',
+            'Online gallery',
+            'Advanced retouching',
+            'Photo album',
+            'Video highlights',
+          ],
+        ),
+      ],
     ),
     ServiceModel(
       id: 'film-2',
       title: 'Music Video Production',
-      description: 'High-quality music video production with professional equipment.',
+      description:
+          'High-quality music video production with professional equipment.',
       images: [imgFilming],
       type: ServiceType.filming,
       provider: ServiceProvider(
@@ -111,13 +151,36 @@ class MockData {
       rating: 4.7,
       reviewCount: 178,
       basePrice: 400,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: true,
+      packages: [
+        ServicePackage(
+          name: 'Social Media Edit',
+          price: 400,
+          features: [
+            '1 minute video',
+            'Vertical & Horizontal',
+            'Color grading',
+            'Background music',
+          ],
+        ),
+        ServicePackage(
+          name: 'Professional Video',
+          price: 1200,
+          features: [
+            '4 minute video',
+            'Advanced editing',
+            'Professional lighting',
+            'Drone shots included',
+          ],
+        ),
+      ],
     ),
     ServiceModel(
       id: 'film-3',
       title: 'Documentary Services',
-      description: 'Professional documentary filming for corporate and personal projects.',
+      description:
+          'Professional documentary filming for corporate and personal projects.',
       images: [imgFilming],
       type: ServiceType.filming,
       provider: ServiceProvider(
@@ -138,7 +201,8 @@ class MockData {
     ServiceModel(
       id: 'clean-1',
       title: 'Deep Home Cleaning',
-      description: 'Thorough deep cleaning for your entire home using eco-friendly products.',
+      description:
+          'Thorough deep cleaning for your entire home using eco-friendly products.',
       images: [imgCleaning],
       type: ServiceType.cleaning,
       provider: ServiceProvider(
@@ -157,7 +221,8 @@ class MockData {
     ServiceModel(
       id: 'clean-2',
       title: 'Office Sanitization',
-      description: 'Complete office cleaning and sanitization services for workplaces.',
+      description:
+          'Complete office cleaning and sanitization services for workplaces.',
       images: [imgCleaning],
       type: ServiceType.cleaning,
       provider: ServiceProvider(
@@ -176,7 +241,8 @@ class MockData {
     ServiceModel(
       id: 'clean-3',
       title: 'Post-Event Cleanup',
-      description: 'Quick and efficient cleanup services after events and parties.',
+      description:
+          'Quick and efficient cleanup services after events and parties.',
       images: [imgCleaning],
       type: ServiceType.cleaning,
       provider: ServiceProvider(
@@ -197,7 +263,8 @@ class MockData {
     ServiceModel(
       id: 'music-1',
       title: 'Jazz Band Performance',
-      description: 'Live jazz band performances for events, weddings, and parties.',
+      description:
+          'Live jazz band performances for events, weddings, and parties.',
       images: [imgMusic],
       type: ServiceType.music,
       provider: ServiceProvider(
@@ -216,7 +283,8 @@ class MockData {
     ServiceModel(
       id: 'music-2',
       title: 'Professional DJ Set',
-      description: 'Experienced DJ for parties, weddings, and corporate events.',
+      description:
+          'Experienced DJ for parties, weddings, and corporate events.',
       images: [imgMusic],
       type: ServiceType.music,
       provider: ServiceProvider(
@@ -256,7 +324,8 @@ class MockData {
     ServiceModel(
       id: 'photo-1',
       title: 'Portrait Photography',
-      description: 'Professional portrait photography for individuals and families.',
+      description:
+          'Professional portrait photography for individuals and families.',
       images: [imgPhotography],
       type: ServiceType.photography,
       provider: ServiceProvider(
@@ -269,13 +338,35 @@ class MockData {
       rating: 4.7,
       reviewCount: 267,
       basePrice: 150,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
+      packages: [
+        ServicePackage(
+          name: 'Individual Portrait',
+          price: 150,
+          features: [
+            '30 minutes session',
+            '5 high-res photos',
+            '1 outfit change',
+          ],
+        ),
+        ServicePackage(
+          name: 'Family Session',
+          price: 350,
+          features: [
+            '60 minutes session',
+            '15 high-res photos',
+            'Group and individual shots',
+            'Online gallery',
+          ],
+        ),
+      ],
     ),
     ServiceModel(
       id: 'photo-2',
       title: 'Wedding Photography',
-      description: 'Capture your special moments with our expert wedding photographers.',
+      description:
+          'Capture your special moments with our expert wedding photographers.',
       images: [imgPhotography],
       type: ServiceType.photography,
       provider: ServiceProvider(
@@ -288,13 +379,49 @@ class MockData {
       rating: 4.9,
       reviewCount: 567,
       basePrice: 350,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: true,
+      packages: [
+        ServicePackage(
+          name: 'Basic',
+          price: 120,
+          features: [
+            '4 hours coverage',
+            '100 edited photos',
+            'Online gallery',
+            'Basic retouching',
+          ],
+        ),
+        ServicePackage(
+          name: 'Standard',
+          price: 299,
+          features: [
+            '6 hours coverage',
+            '200 edited photos',
+            'Online gallery',
+            'Advanced retouching',
+            'Photo album',
+          ],
+        ),
+        ServicePackage(
+          name: 'Premium',
+          price: 499,
+          features: [
+            '8 hours coverage',
+            '300 edited photos',
+            'Online gallery',
+            'Advanced retouching',
+            'Photo album',
+            'Video highlights',
+          ],
+        ),
+      ],
     ),
     ServiceModel(
       id: 'photo-3',
       title: 'Product Photography',
-      description: 'Professional product photography for e-commerce and marketing.',
+      description:
+          'Professional product photography for e-commerce and marketing.',
       images: [imgPhotography],
       type: ServiceType.photography,
       provider: ServiceProvider(
@@ -313,7 +440,9 @@ class MockData {
   ];
 
   // Bookmark services (subset with isBookmarked: true)
-  static final List<ServiceModel> bookmarkedServices = homeServices.where((s) => s.isBookmarked).toList();
+  static final List<ServiceModel> bookmarkedServices = homeServices
+      .where((s) => s.isBookmarked)
+      .toList();
 
   // Get services by type
   static List<ServiceModel> getServicesByType(ServiceType type) {
