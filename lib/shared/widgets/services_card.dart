@@ -10,6 +10,7 @@ class ServicesCard extends StatelessWidget {
   final String price;
   final String rating;
   final bool isBookmarked;
+  final bool useFullWidth;
   final VoidCallback? onTap;
   final VoidCallback? onBookmarkTap;
 
@@ -21,17 +22,24 @@ class ServicesCard extends StatelessWidget {
     required this.price,
     required this.rating,
     this.isBookmarked = false,
+    this.useFullWidth = false,
     this.onTap,
     this.onBookmarkTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cardWidth = useFullWidth ? double.infinity : 180.w;
+    final cardMargin = useFullWidth 
+        ? EdgeInsets.only(bottom: 16.h) 
+        : EdgeInsets.only(right: 16.w);
+    final imageHeight = useFullWidth ? 180.h : 120.h;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 180.w,
-        margin: EdgeInsets.only(right: 16.w),
+        width: cardWidth,
+        margin: cardMargin,
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
@@ -56,24 +64,24 @@ class ServicesCard extends StatelessWidget {
                   child: imagePath.startsWith('http')
                       ? Image.network(
                           imagePath,
-                          height: 120.h,
+                          height: imageHeight,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Container(
-                                height: 120.h,
+                                height: imageHeight,
                                 color: AppColors.lightGrey,
                                 child: const Icon(Icons.broken_image),
                               ),
                         )
                       : Image.asset(
                           imagePath,
-                          height: 120.h,
+                          height: imageHeight,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Container(
-                                height: 120.h,
+                                height: imageHeight,
                                 color: AppColors.lightGrey,
                                 child: const Icon(Icons.broken_image),
                               ),

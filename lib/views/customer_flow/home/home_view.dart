@@ -114,7 +114,7 @@ class HomeView extends GetView<HomeController> {
                   ),
                   SizedBox(height: 24.h),
                   // Service Categories
-                  _buildSectionHeader('Service Categories', () {}),
+                  _buildSectionHeader('Service Categories', 'all', 'All Categories'),
                   SizedBox(height: 16.h),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -154,22 +154,22 @@ class HomeView extends GetView<HomeController> {
                   ),
                   SizedBox(height: 24.h),
                   // Catering Services
-                  _buildSectionHeader('Catering Services', () {}),
+                  _buildSectionHeader('Catering Services', 'catering', 'Catering Services'),
                   SizedBox(height: 16.h),
                   _buildHorizontalList('catering'),
                   SizedBox(height: 24.h),
                   // Filming Events
-                  _buildSectionHeader('Filming Events', () {}),
+                  _buildSectionHeader('Filming Events', 'filming', 'Filming Events'),
                   SizedBox(height: 16.h),
                   _buildHorizontalList('filming'),
                   SizedBox(height: 24.h),
                   // Cleaning Services
-                  _buildSectionHeader('Cleaning Services', () {}),
+                  _buildSectionHeader('Cleaning Services', 'cleaning', 'Cleaning Services'),
                   SizedBox(height: 16.h),
                   _buildHorizontalList('cleaning'),
                   SizedBox(height: 24.h),
                   // Music Events
-                  _buildSectionHeader('Music Events', () {}),
+                  _buildSectionHeader('Music Events', 'music', 'Music Events'),
                   SizedBox(height: 16.h),
                   _buildHorizontalList('music'),
                   SizedBox(height: 80.h), // Extra space for bottom nav
@@ -182,7 +182,11 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  Widget _buildSectionHeader(String title, VoidCallback onSeeAll) {
+  /// Build section header with "See All" button
+  /// [title] - The section title
+  /// [categoryType] - The category type for filtering services
+  /// [categoryName] - The display name for the app bar in the next screen
+  Widget _buildSectionHeader(String title, String categoryType, String categoryName) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -195,7 +199,16 @@ class HomeView extends GetView<HomeController> {
           ),
         ),
         TextButton(
-          onPressed: onSeeAll,
+          onPressed: () {
+            // Navigate to CategoryServicesView with the category type and name
+            Get.toNamed(
+              AppRoutes.categoryServices,
+              arguments: {
+                'categoryType': categoryType,
+                'categoryName': categoryName,
+              },
+            );
+          },
           child: Row(
             children: [
               Text(

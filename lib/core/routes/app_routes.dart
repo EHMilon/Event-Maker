@@ -33,6 +33,8 @@ import '../../views/customer_flow/map/map_results_binding.dart';
 import '../../views/notifications/notification_view.dart';
 import '../../views/notifications/notification_binding.dart';
 import '../../views/services/vendor_profile_view.dart';
+import '../../views/services/category_services_view.dart';
+import '../../views/services/category_services_controller.dart';
 import '../../views/customer_flow/booking/book_service_date_view.dart';
 import '../../views/customer_flow/booking/book_service_request_view.dart';
 import '../../views/customer_flow/booking/payment_confirmation_view.dart';
@@ -77,6 +79,7 @@ class AppRoutes {
   static const String spamReport = '/spam-report';
   static const String viewCertificate = '/view-certificate';
   static const String addReview = '/add-review';
+  static const String categoryServices = '/category-services';
 
   static final routes = [
     GetPage(
@@ -199,5 +202,27 @@ class AppRoutes {
     GetPage(name: spamReport, page: () => const SpamReportView()),
     GetPage(name: viewCertificate, page: () => const ViewCertificateView()),
     GetPage(name: addReview, page: () => const AddReviewView()),
+    // Category Services route
+    GetPage(
+      name: categoryServices,
+      page: () {
+        final arguments = Get.arguments as Map<String, dynamic>?;
+        return CategoryServicesView(
+          categoryType: arguments?['categoryType'] ?? 'catering',
+          categoryName: arguments?['categoryName'] ?? 'Services',
+        );
+      },
+      binding: BindingsBuilder(() {
+        final arguments = Get.arguments as Map<String, dynamic>?;
+        final categoryType = arguments?['categoryType'] ?? 'catering';
+        Get.lazyPut<CategoryServicesController>(
+          () => CategoryServicesController(
+            categoryType: categoryType,
+            categoryName: arguments?['categoryName'] ?? 'Services',
+          ),
+          tag: '${categoryType}_${arguments?["categoryName"] ?? "Services"}',
+        );
+      }),
+    ),
   ];
 }
