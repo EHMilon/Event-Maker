@@ -12,7 +12,7 @@ class ServicesController extends GetxController {
     loadServices();
   }
 
-  void loadServices() async {
+  Future<void> loadServices() async {
     try {
       isLoading.value = true;
       // Simulate network check (mock)
@@ -39,87 +39,85 @@ class ServicesController extends GetxController {
             name: 'Artcell',
             role: 'Organizer',
             imageUrl:
-                'https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1978&auto=format&fit=crop', // Logo placeholder
+                'https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1978&auto=format&fit=crop',
             isVerified: true,
           ),
           location: '5Church Rooftop, Abu Dhabi',
           date: DateTime(2025, 12, 23, 15, 30),
-          basePrice: 120,
+          basePrice: 150,
           priceUnit: 'AED',
         ),
         ServiceModel(
           id: '2',
-          title: 'Elite Event Photography',
+          title: 'Premium Home Cleaning',
           description:
-              'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
+              'Professional deep cleaning services for your home. Our experienced team uses eco-friendly products to ensure every corner of your house is spotless and sanitized.',
           images: [
-            'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1000&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1581578731548-c64695ce6958?q=80&w=1000&auto=format&fit=crop',
           ],
-          type: ServiceType.photography,
+          type: ServiceType.cleaning,
           provider: ServiceProvider(
-            name: 'John Doe Photography',
+            name: 'Sparkle Cleaners',
             role: 'Service Provider',
             imageUrl:
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1521791136064-7986c29598a5?q=80&w=1000&auto=format&fit=crop',
             isVerified: true,
           ),
-          location: 'Airport Rd - Al Manhal - W14 02 - Abu Dhabi',
-          rating: 4.5,
-          reviewCount: 124,
+          location: 'Main Street, Abu Dhabi',
+          rating: 4.8,
+          reviewCount: 85,
           packages: [
             ServicePackage(
               name: 'Basic',
-              price: 120,
+              price: 100,
               features: [
-                '4 hours coverage',
-                '100 edited photos',
-                'Online gallery',
-                'Basic retouching',
+                '2 hours cleaning',
+                'Vacuuming & Mopping',
+                'Bathroom cleaning',
               ],
             ),
             ServicePackage(
               name: 'Standard',
-              price: 299,
+              price: 180,
               features: [
-                '6 hours coverage',
-                '200 edited photos',
-                'Online gallery',
-                'Advanced retouching',
-                'Photo album',
+                '4 hours cleaning',
+                'Kitchen deep clean',
+                'Window cleaning',
+                'Dusting',
               ],
             ),
             ServicePackage(
               name: 'Premium',
-              price: 499,
+              price: 300,
               features: [
-                '8 hours coverage',
-                '300 edited photos',
-                'Online gallery',
-                'Advanced retouching',
-                'Photo album',
-                'Video highlights',
+                'Full house deep clean',
+                'Upholstery cleaning',
+                'Disinfection service',
+                'Laundry service',
               ],
             ),
           ],
         ),
         ServiceModel(
           id: '3',
-          title: 'Professional Bengali Cooking Training',
+          title: 'Professional Gym Trainer',
           description:
-              'Master the art of Bengali cuisine in this immersive, hands-on training program. You will explore the balance of the "Panch Phoron" (five-spice blend) and learn authentic techniques for signature dishes like Shorshe Ilish, Kosha Mangsho, and delicate Mishti Doi.',
+              'Get in shape with personalized fitness training. I specialize in weight loss, muscle gain, and overall functional fitness. Available for one-on-one sessions at your preferred location or gym.',
           images: [
-            'https://images.unsplash.com/photo-1556910638-6cdac31d44dc?q=80&w=1000&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1571019623518-f61db090f05e?q=80&w=1000&auto=format&fit=crop',
           ],
           type: ServiceType.training,
           provider: ServiceProvider(
-            name: 'Keka Ferdousi',
-            role: 'Chef',
+            name: 'Alex Johnson',
+            role: 'Fitness Coach',
             imageUrl:
-                'https://images.unsplash.com/photo-1583394293214-28ded15ee548?q=80&w=1000&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=1000&auto=format&fit=crop',
+            isVerified: true,
           ),
-          location: 'Airport Rd - Al Manhal - W14 02 - Abu Dhabi',
-          date: DateTime(2025, 12, 23, 15, 30),
-          basePrice: 120,
+          location: 'Khalidiya, Abu Dhabi',
+          rating: 4.9,
+          reviewCount: 42,
+          basePrice: 200,
           priceUnit: 'AED',
         ),
       ];

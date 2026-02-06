@@ -1,12 +1,10 @@
-import 'package:event_maker/views/notifications/notification_controller.dart';
 import 'package:event_maker/views/services/services_controller.dart';
 import 'package:get/get.dart';
 
-class NotificationBinding extends Bindings {
+class BookingBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => NotificationController());
-    // Ensure ServicesController is available for payment navigation
+    // Ensure ServicesController is available for the booking flow
     if (!Get.isRegistered<ServicesController>()) {
       Get.lazyPut<ServicesController>(() => ServicesController());
     }

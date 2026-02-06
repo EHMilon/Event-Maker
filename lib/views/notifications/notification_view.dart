@@ -1,5 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/views/notifications/notification_controller.dart';
+import 'package:event_maker/views/services/services_controller.dart';
+import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -48,58 +50,87 @@ class NotificationView extends GetView<NotificationController> {
   }
 
   Widget _buildNotificationCard(NotificationModel notification) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 8.h),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.lightGrey),
+    return GestureDetector(
+      onTap: () async {
+        if (notification.body.toLowerCase().contains('accepted')) {
+          // Get service data for payment
+          final servicesController = Get.find<ServicesController>();
+
+          // Wait for services to load if they haven't yet
+          if (servicesController.services.isEmpty) {
+            await servicesController.loadServices();
+          }
+
+          // Check again after loading
+          if (servicesController.services.isNotEmpty) {
+            final mockService = servicesController.services.first;
+            Get.toNamed(
+              AppRoutes.payment,
+              arguments: {
+                'service': mockService,
+                'package': mockService.packages?.first,
+              },
+            );
+          } else {
+            // Fallback: Show error if services still not loaded
+            Get.snackbar(
+              'Error',
+              'Unable to load service data. Please try again.',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          }
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 8.h),
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.lightGrey),
           boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildNotificationIcon(),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  notification.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  notification.body,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: AppColors.grey,
-                  ),
-                ),
-              ],
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            notification.timeAgo,
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              color: AppColors.grey,
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildNotificationIcon(),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification.title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    notification.body,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            SizedBox(width: 12.w),
+            Text(
+              notification.timeAgo,
+              style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.grey),
+            ),
+          ],
+        ),
       ),
     );
   }

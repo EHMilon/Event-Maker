@@ -19,7 +19,7 @@ import '../../views/profile/profile_settings_view.dart';
 import '../../views/profile/add_image_view.dart';
 import '../../views/profile/change_password_view.dart';
 import '../../views/profile/transactions_view.dart';
-import '../../views/customer_flow/bookings/bookmarks_view.dart';
+import '../../views/customer_flow/bookmarks/bookmarks_view.dart';
 import '../../views/profile/faq_view.dart';
 import '../../views/profile/contact_us_view.dart';
 import '../../views/profile/profile_binding.dart';
@@ -33,6 +33,12 @@ import '../../views/customer_flow/map/map_results_binding.dart';
 import '../../views/notifications/notification_view.dart';
 import '../../views/notifications/notification_binding.dart';
 import '../../views/services/vendor_profile_view.dart';
+import '../../views/customer_flow/booking/book_service_date_view.dart';
+import '../../views/customer_flow/booking/book_service_request_view.dart';
+import '../../views/customer_flow/booking/payment_confirmation_view.dart';
+import '../../views/customer_flow/booking/payment_view.dart';
+import '../../views/customer_flow/booking/booking_request_sent_view.dart';
+import '../../views/customer_flow/booking/booking_binding.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -60,6 +66,11 @@ class AppRoutes {
   static const String notifications = '/notifications';
   static const String mapResults = '/map-results';
   static const String vendorProfile = '/vendor-profile';
+  static const String bookServiceDate = '/book-service-date';
+  static const String bookServiceRequest = '/book-service-request';
+  static const String payment = '/payment';
+  static const String paymentConfirmation = '/payment-confirmation';
+  static const String bookingRequestSent = '/booking-request-sent';
 
   static final routes = [
     GetPage(
@@ -154,5 +165,30 @@ class AppRoutes {
       binding: MapResultsBinding(),
     ),
     GetPage(name: vendorProfile, page: () => const VendorProfileView()),
+    GetPage(
+      name: bookServiceDate,
+      page: () => const BookServiceDateView(),
+      binding: BookingBinding(),
+    ),
+    GetPage(
+      name: bookServiceRequest,
+      page: () => const BookServiceRequestView(),
+      binding: BookingBinding(),
+    ),
+    GetPage(
+      name: payment,
+      page: () => const PaymentView(),
+      binding: BookingBinding(),
+    ),
+    GetPage(
+      name: paymentConfirmation,
+      page: () => const PaymentConfirmationView(),
+      binding: BookingBinding(),
+    ),
+    GetPage(
+      name: bookingRequestSent,
+      page: () => const BookingRequestSentView(),
+      binding: BookingBinding(),
+    ),
   ];
 }

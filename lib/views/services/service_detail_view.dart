@@ -20,6 +20,9 @@ class ServiceDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Local state for package selection
     final RxInt selectedPackageIndex = 0.obs;
+    final isHospitality =
+        service.type == ServiceType.cleaning ||
+        service.type == ServiceType.catering;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -354,7 +357,8 @@ class ServiceDetailView extends StatelessWidget {
 
                         // Pricing / Packages
                         if (service.packages != null &&
-                            service.packages!.isNotEmpty) ...[
+                            service.packages!.isNotEmpty &&
+                            isHospitality) ...[
                           Text(
                             'Packages & Pricings',
                             style: GoogleFonts.inter(
@@ -536,7 +540,20 @@ class ServiceDetailView extends StatelessWidget {
             right: 24.w,
             child: PrimaryTextButton(
               onPressed: () {
-                // Booking logic
+                if (isHospitality) {
+                  Get.toNamed(
+                    AppRoutes.bookServiceDate,
+                    arguments: {
+                      'service': service,
+                      'package': service.packages?[selectedPackageIndex.value],
+                    },
+                  );
+                } else {
+                  Get.toNamed(
+                    AppRoutes.payment,
+                    arguments: {'service': service, 'package': null},
+                  );
+                }
               },
               text: 'Book Now',
             ),
