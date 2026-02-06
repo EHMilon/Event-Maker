@@ -24,6 +24,7 @@ class ServiceModel {
   final double? basePrice;
   final String priceUnit;
   final List<ServicePackage>? packages;
+  final bool isBookmarked;
 
   ServiceModel({
     required this.id,
@@ -39,6 +40,7 @@ class ServiceModel {
     this.basePrice,
     this.priceUnit = 'AED',
     this.packages,
+    this.isBookmarked = false,
   });
 }
 

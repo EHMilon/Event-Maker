@@ -68,6 +68,7 @@ class ServicesView extends GetView<ServicesController> {
                     location: 'Location',
                     price: '100',
                     rating: '4.5',
+                    isBookmarked: false,
                     onTap: () {},
                   );
                 },
@@ -94,6 +95,7 @@ class ServicesView extends GetView<ServicesController> {
                 price:
                     '${service.basePrice?.toInt() ?? 0} ${service.priceUnit}',
                 rating: service.rating?.toString() ?? 'N/A',
+                isBookmarked: service.isBookmarked,
                 onTap: () {
                   Get.to(() => ServiceDetailView(service: service));
                 },

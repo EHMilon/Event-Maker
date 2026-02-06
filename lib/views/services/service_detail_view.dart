@@ -357,8 +357,7 @@ class ServiceDetailView extends StatelessWidget {
 
                         // Pricing / Packages
                         if (service.packages != null &&
-                            service.packages!.isNotEmpty &&
-                            isHospitality) ...[
+                            service.packages!.isNotEmpty) ...[
                           Text(
                             'Packages & Pricings',
                             style: GoogleFonts.inter(

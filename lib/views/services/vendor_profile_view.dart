@@ -206,6 +206,7 @@ class VendorProfileView extends StatelessWidget {
                               location: service.location,
                               price: service.basePrice?.toString() ?? '0',
                               rating: service.rating?.toString() ?? '0',
+                              isBookmarked: service.isBookmarked,
                               onTap: () {
                                 // Navigate back to detail or show another detail
                                 Get.snackbar(
@@ -293,12 +294,18 @@ class VendorProfileView extends StatelessWidget {
                 ),
                 const PopupMenuDivider(),
                 PopupMenuItem(
+                  value: 'certification',
+                  child: Text('View Certification', style: GoogleFonts.inter()),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
                   value: 'report',
                   child: Text(
                     'Spam & Report',
                     style: GoogleFonts.inter(color: Colors.red),
                   ),
                 ),
+                
               ],
             ),
           ),

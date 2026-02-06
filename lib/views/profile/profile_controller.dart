@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/service_model.dart';
+import '../../data/mock/mock_data.dart';
 import '../../shared/utils/user_preferences.dart';
 
 class ProfileController extends GetxController {
@@ -72,64 +73,15 @@ class ProfileController extends GetxController {
   void loadMockData() {
     transactions.assignAll([
       {'title': 'Catering Service', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'Photography', 'time': '5 min ago', 'amount': '105'},
-      {'title': 'Atif Aslam Concert', 'time': '2 days ago', 'amount': '105'},
-      {'title': 'Videography', 'time': '10 days ago', 'amount': '105'},
-      {'title': 'Cleaning Service', 'time': '15 days ago', 'amount': '105'},
-      {'title': 'Coke Studio Concert', 'time': '28 days ago', 'amount': '105'},
+      {'title': 'Photography Package', 'time': '5 min ago', 'amount': '250'},
+      {'title': 'Atif Aslam Concert', 'time': '2 days ago', 'amount': '350'},
+      {'title': 'Videography Session', 'time': '10 days ago', 'amount': '400'},
+      {'title': 'Deep Cleaning', 'time': '15 days ago', 'amount': '150'},
+      {'title': 'Music Event', 'time': '28 days ago', 'amount': '500'},
     ]);
 
-    bookmarks.assignAll([
-      ServiceModel(
-        id: '1',
-        title: 'Cleaning Service',
-        description: 'Professional cleaning services for your home and office.',
-        images: ['assets/images/cleaning.jpg'],
-        type: ServiceType.cleaning,
-        provider: ServiceProvider(
-          name: 'Clean World Inc.',
-          role: 'Professional Cleaning',
-          imageUrl: 'assets/images/person.jpg',
-        ),
-        location: 'Sharjah',
-        basePrice: 120,
-        rating: 4.8,
-        reviewCount: 120,
-      ),
-      ServiceModel(
-        id: '2',
-        title: 'Corporate Event',
-        description: 'High-end corporate event planning and execution.',
-        images: ['assets/images/congress.png'],
-        type: ServiceType.event,
-        provider: ServiceProvider(
-          name: 'Tech Solutions Inc.',
-          role: 'Event Planner',
-          imageUrl: 'assets/images/person.jpg',
-        ),
-        location: 'Convention Center',
-        basePrice: 500,
-        rating: 4.5,
-        reviewCount: 85,
-      ),
-      ServiceModel(
-        id: '3',
-        title: 'Wedding Photoshoot',
-        description:
-            'Capture your special moments with our expert photographers.',
-        images: ['assets/images/photography.jpg'],
-        type: ServiceType.photography,
-        provider: ServiceProvider(
-          name: 'Darwish Studio',
-          role: 'Photographer',
-          imageUrl: 'assets/images/person.jpg',
-        ),
-        location: 'Al-Louvre Museum',
-        basePrice: 250,
-        rating: 4.9,
-        reviewCount: 210,
-      ),
-    ]);
+    // Use bookmarked services from centralized mock data
+    bookmarks.assignAll(MockData.bookmarkedServices);
 
     faqs.assignAll([
       {

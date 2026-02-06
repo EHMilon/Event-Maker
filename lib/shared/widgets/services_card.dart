@@ -9,7 +9,9 @@ class ServicesCard extends StatelessWidget {
   final String location;
   final String price;
   final String rating;
+  final bool isBookmarked;
   final VoidCallback? onTap;
+  final VoidCallback? onBookmarkTap;
 
   const ServicesCard({
     super.key,
@@ -18,7 +20,9 @@ class ServicesCard extends StatelessWidget {
     required this.location,
     required this.price,
     required this.rating,
+    this.isBookmarked = false,
     this.onTap,
+    this.onBookmarkTap,
   });
 
   @override
@@ -78,16 +82,19 @@ class ServicesCard extends StatelessWidget {
                 Positioned(
                   top: 8.h,
                   right: 8.w,
-                  child: Container(
-                    padding: EdgeInsets.all(6.r),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Icon(
-                      Icons.bookmark_border,
-                      size: 18.r,
-                      color: Colors.white,
+                  child: GestureDetector(
+                    onTap: onBookmarkTap,
+                    child: Container(
+                      padding: EdgeInsets.all(6.r),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                        size: 18.r,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
