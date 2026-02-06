@@ -39,6 +39,9 @@ import '../../views/customer_flow/booking/payment_confirmation_view.dart';
 import '../../views/customer_flow/booking/payment_view.dart';
 import '../../views/customer_flow/booking/booking_request_sent_view.dart';
 import '../../views/customer_flow/booking/booking_binding.dart';
+import '../../views/services/spam_report_view.dart';
+import '../../views/services/view_certificate_view.dart';
+import '../../views/services/add_review_view.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -71,6 +74,9 @@ class AppRoutes {
   static const String payment = '/payment';
   static const String paymentConfirmation = '/payment-confirmation';
   static const String bookingRequestSent = '/booking-request-sent';
+  static const String spamReport = '/spam-report';
+  static const String viewCertificate = '/view-certificate';
+  static const String addReview = '/add-review';
 
   static final routes = [
     GetPage(
@@ -190,5 +196,8 @@ class AppRoutes {
       page: () => const BookingRequestSentView(),
       binding: BookingBinding(),
     ),
+    GetPage(name: spamReport, page: () => const SpamReportView()),
+    GetPage(name: viewCertificate, page: () => const ViewCertificateView()),
+    GetPage(name: addReview, page: () => const AddReviewView()),
   ];
 }

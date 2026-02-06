@@ -98,7 +98,6 @@ class VendorProfileView extends StatelessWidget {
                     children: [
                       // This SizedBox ensures the content starts *after* the bottom half of the profile image
                       // It aligns the content properly relative to the profile picture's bottom edge.
-
                       Text(
                         vendor.name,
                         style: GoogleFonts.inter(
@@ -282,9 +281,20 @@ class VendorProfileView extends StatelessWidget {
               ),
               onSelected: (value) {
                 if (value == 'review') {
-                  Get.snackbar('Review', 'Leave a review feature coming soon');
+                  // Navigate to Add Review screen
+                  Get.toNamed(
+                    '/add-review',
+                    arguments: {
+                      'vendorName': vendor.name,
+                      'vendorLogo': vendor.imageUrl,
+                    },
+                  );
+                } else if (value == 'certification') {
+                  // Navigate to View Certificate screen
+                  Get.toNamed('/view-certificate');
                 } else if (value == 'report') {
-                  Get.snackbar('Report', 'Report feature coming soon');
+                  // Navigate to Spam & Report screen
+                  Get.toNamed('/spam-report');
                 }
               },
               itemBuilder: (context) => [
@@ -305,7 +315,6 @@ class VendorProfileView extends StatelessWidget {
                     style: GoogleFonts.inter(color: Colors.red),
                   ),
                 ),
-                
               ],
             ),
           ),
