@@ -53,6 +53,10 @@ import 'package:event_maker/views/service_provider_flow/documents/add_document_v
 import 'package:event_maker/views/service_provider_flow/documents/documents_binding.dart';
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_view.dart';
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_binding.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_event_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_training_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -93,6 +97,9 @@ class AppRoutes {
   static const String spDocuments = '/sp-documents-view';
   static const String spAddDocument = '/sp-add-document-view';
   static const String spSchedule = '/sp-schedule-view';
+  static const String addService = '/add-service';
+  static const String addEvent = '/add-event';
+  static const String addTraining = '/add-training';
 
   static final routes = [
     GetPage(
@@ -269,6 +276,21 @@ class AppRoutes {
         final arguments = Get.arguments as Map<String, dynamic>?;
         return ServiceDetailDecisionView(request: arguments?['request']);
       },
+    ),
+    GetPage(
+      name: addService,
+      page: () => const AddServiceView(),
+      binding: AddScreensBinding(),
+    ),
+    GetPage(
+      name: addEvent,
+      page: () => const AddEventView(),
+      binding: AddScreensBinding(),
+    ),
+    GetPage(
+      name: addTraining,
+      page: () => const AddTrainingView(),
+      binding: AddScreensBinding(),
     ),
   ];
 }

@@ -5,6 +5,10 @@ import 'package:event_maker/views/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_event_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_training_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -63,26 +67,29 @@ class SPServicesView extends GetView<SPServicesController> {
                     ),
                   ),
                   SizedBox(width: 12.w),
-                  Container(
-                    height: 50.h,
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.add, color: Colors.white, size: 20.r),
-                        SizedBox(width: 4.w),
-                        Text(
-                          'Add',
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
+                  GestureDetector(
+                    onTap: () => _showAddOptions(context),
+                    child: Container(
+                      height: 50.h,
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.add, color: Colors.white, size: 20.r),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'Add',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -139,6 +146,93 @@ class SPServicesView extends GetView<SPServicesController> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showAddOptions(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Select Category',
+              style: GoogleFonts.inter(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: 20.h),
+            _buildOptionItem(
+              icon: Icons.miscellaneous_services,
+              title: 'Services',
+              onTap: () {
+                Get.back();
+                Get.to(
+                  () => const AddServiceView(),
+                  binding: AddScreensBinding(),
+                );
+              },
+            ),
+            _buildOptionItem(
+              icon: Icons.event,
+              title: 'Events',
+              onTap: () {
+                Get.back();
+                Get.to(
+                  () => const AddEventView(),
+                  binding: AddScreensBinding(),
+                );
+              },
+            ),
+            _buildOptionItem(
+              icon: Icons.school,
+              title: 'Trainings',
+              onTap: () {
+                Get.back();
+                Get.to(
+                  () => const AddTrainingView(),
+                  binding: AddScreensBinding(),
+                );
+              },
+            ),
+            SizedBox(height: 20.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: EdgeInsets.all(8.r),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Icon(icon, color: AppColors.primary, size: 24.r),
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      onTap: onTap,
     );
   }
 }
