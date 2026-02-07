@@ -1,0 +1,549 @@
+import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class SPHomeView extends GetView<SPHomeController> {
+  const SPHomeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFBFBFE),
+      body: SafeArea(
+        child: Obx(
+          () => Skeletonizer(
+            enabled: controller.isLoading.value,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  SizedBox(height: 25.h),
+                  _buildAnalyticsSection(),
+                  SizedBox(height: 30.h),
+                  _buildQuickActions(),
+                  SizedBox(height: 30.h),
+                  _buildActiveOrdersHeader(),
+                  SizedBox(height: 15.h),
+                  _buildActiveOrdersList(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.wb_sunny_outlined,
+                  size: 16,
+                  color: Colors.orange,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  'Good Morning',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 4.h),
+            Row(
+              children: [
+                Text(
+                  'Fresh Food L.L.C',
+                  style: GoogleFonts.inter(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    color: Colors.amber,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 14),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Container(
+          height: 44.h,
+          width: 44.h,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEEEFFF),
+            shape: BoxShape.circle,
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/notification.svg',
+                height: 22.h,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.primary,
+                  BlendMode.srcIn,
+                ),
+              ),
+              Positioned(
+                top: 12.h,
+                right: 12.w,
+                child: Container(
+                  height: 4.h,
+                  width: 4.h,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnalyticsSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Analytics',
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'Based on last 30 days',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16.w,
+              mainAxisSpacing: 16.h,
+              childAspectRatio: 0.95,
+            ),
+            itemCount: 4,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildStatCard(
+                  icon: Icons.currency_exchange,
+                  iconColor: const Color(0xFF3B82F6),
+                  label: 'Total Earnings',
+                  value: controller.totalEarnings.value,
+                  change: controller.earningsChange.value,
+                  isUp: true,
+                );
+              } else if (index == 1) {
+                return _buildStatCard(
+                  icon: Icons.inventory_2_outlined,
+                  iconColor: const Color(0xFFA855F7),
+                  label: 'Total Requests',
+                  value: '${controller.totalRequests.value}',
+                  change: controller.requestsChange.value,
+                  isUp: true,
+                );
+              } else if (index == 2) {
+                return _buildStatCard(
+                  icon: Icons.check_circle_outline,
+                  iconColor: const Color(0xFF10B981),
+                  label: 'Completed',
+                  value: '${controller.completedOrders.value}',
+                  change: controller.completedChange.value,
+                  isUp: false,
+                );
+              } else {
+                return _buildStatCard(
+                  icon: Icons.schedule_outlined,
+                  iconColor: const Color(0xFFF59E0B),
+                  label: 'Pending',
+                  value: '${controller.pendingOrders.value}',
+                  change: controller.pendingChange.value,
+                  isUp: true,
+                );
+              }
+            },
+          ),
+          SizedBox(height: 24.h),
+          _buildTotalBalanceCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+    required String change,
+    required bool isUp,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFF1F1F5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 14),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    text: label,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: GoogleFonts.inter(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Icon(
+                isUp ? Icons.trending_up : Icons.trending_down,
+                size: 14,
+                color: isUp ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+              ),
+              SizedBox(width: 4.w),
+              Expanded(
+                child: RichText(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '$change ',
+                        style: TextStyle(
+                          color: isUp
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFEF4444),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const TextSpan(text: 'from last month'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTotalBalanceCard() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFF1F1F5)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F1F5),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: SvgPicture.asset(
+              'assets/icons/wallet.svg',
+              height: 20.h,
+              colorFilter: const ColorFilter.mode(
+                AppColors.textPrimary,
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Balance',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                Text(
+                  controller.totalBalance.value,
+                  style: GoogleFonts.inter(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildActionItem(
+          Icons.add_circle,
+          'Add Service',
+          const Color(0xFF22C55E),
+        ),
+        _buildActionItem(
+          Icons.calendar_today,
+          'Schedule',
+          const Color(0xFF3B82F6),
+        ),
+        _buildActionItem(
+          Icons.account_balance_wallet,
+          'Earnings',
+          const Color(0xFFF59E0B),
+        ),
+        _buildActionItem(
+          Icons.description,
+          'Documents',
+          const Color(0xFF14B8A6),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionItem(IconData icon, String label, Color color) {
+    return Column(
+      children: [
+        Container(
+          height: 64.h,
+          width: 64.h,
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: color, size: 28),
+        ),
+        SizedBox(height: 10.h),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActiveOrdersHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Active Orders',
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {},
+          child: Row(
+            children: [
+              Text(
+                'See All',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              SizedBox(width: 4.w),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 10,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActiveOrdersList() {
+    return Column(
+      children: List.generate(
+        4,
+        (index) => Padding(
+          padding: EdgeInsets.only(bottom: 16.h),
+          child: _buildOrderCard(index),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderCard(int index) {
+    final List<String> titles = [
+      'Catering services for home event',
+      'Catering services for home event',
+      'Outdoor party catering services',
+      'Corporate inhouse event managment',
+    ];
+    final List<int> badges = [2, 2, 5, 1];
+
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.r),
+            child: Image.network(
+              'https://picsum.photos/id/${index + 40}/120/120',
+              width: 64.w,
+              height: 64.h,
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Text(
+              titles[index % titles.length],
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
+            ),
+          ),
+          Container(
+            height: 24.h,
+            width: 24.h,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFB485FF),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '${badges[index % badges.length]}',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -27,7 +27,8 @@ import '../../views/customer_flow/customer_flow_scaffold.dart';
 import '../../views/customer_flow/home/home_view.dart';
 import '../../views/customer_flow/home/home_binding.dart';
 import '../../views/service_provider_flow/home/sp_home_view.dart';
-import '../../views/service_provider_flow/home/sp_home_binding.dart';
+import '../../views/service_provider_flow/service_provider_binding.dart';
+import '../../views/service_provider_flow/service_provider_scaffold.dart';
 import '../../views/customer_flow/map/map_results_view.dart';
 import '../../views/customer_flow/map/map_results_binding.dart';
 import '../../views/notifications/notification_view.dart';
@@ -164,10 +165,11 @@ class AppRoutes {
       page: () => const CustomerFlowScaffold(),
       binding: HomeBinding(),
     ),
-    // GetPage(
-    //   name: serviceProviderHome,
-    //   binding: ServiceProviderHomeBinding(),
-    // ),
+    GetPage(
+      name: serviceProviderHome,
+      page: () => const ServiceProviderScaffold(),
+      binding: ServiceProviderBinding(),
+    ),
     GetPage(
       name: mapResults,
       page: () => const MapResultsView(),
