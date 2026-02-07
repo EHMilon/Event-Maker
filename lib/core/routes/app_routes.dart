@@ -1,55 +1,58 @@
 import 'package:get/get.dart';
-import '../../views/splash/splash_view.dart';
-import '../../views/splash/splash_binding.dart';
-import '../../views/onboarding/onboarding_view.dart';
-import '../../views/onboarding/onboarding_binding.dart';
-import '../../views/auth/user_type_view.dart';
-import '../../views/auth/login_view.dart';
-import '../../views/auth/auth_binding.dart';
-import '../../views/auth/signup_view.dart';
-import '../../views/auth/forgot_password_view.dart';
-import '../../views/auth/otp_verification_view.dart';
-import '../../views/auth/reset_password_view.dart';
-import '../../views/auth/congratulations_view.dart';
-import '../../views/auth/signup_step_two_view.dart';
-import '../../views/auth/provider_details_view.dart';
-import '../../views/auth/get_started_view.dart';
-import '../../views/profile/profile_view.dart';
-import '../../views/profile/profile_settings_view.dart';
-import '../../views/profile/add_image_view.dart';
-import '../../views/profile/change_password_view.dart';
-import '../../views/profile/transactions_view.dart';
-import '../../views/customer_flow/bookmarks/bookmarks_view.dart';
-import '../../views/profile/faq_view.dart';
-import '../../views/profile/contact_us_view.dart';
-import '../../views/profile/profile_binding.dart';
-import '../../views/customer_flow/customer_flow_scaffold.dart';
-import '../../views/customer_flow/home/home_view.dart';
-import '../../views/customer_flow/home/home_binding.dart';
-import '../../views/service_provider_flow/home/sp_home_view.dart';
-import '../../views/service_provider_flow/service_provider_controller.dart';
-import '../../views/service_provider_flow/home/sp_home_controller.dart';
-import '../../views/service_provider_flow/requests/requests_controller.dart';
-import '../../views/service_provider_flow/services/sp_services_controller.dart';
-import '../../views/profile/profile_controller.dart';
-import '../../views/service_provider_flow/service_provider_scaffold.dart';
-import '../../views/customer_flow/map/map_results_view.dart';
-import '../../views/customer_flow/map/map_results_binding.dart';
-import '../../views/notifications/notification_view.dart';
-import '../../views/notifications/notification_binding.dart';
-import '../../views/services/vendor_profile_view.dart';
-import '../../views/services/category_services_view.dart';
-import '../../views/services/category_services_controller.dart';
-import '../../views/customer_flow/booking/book_service_date_view.dart';
-import '../../views/customer_flow/booking/book_service_request_view.dart';
-import '../../views/customer_flow/booking/payment_confirmation_view.dart';
-import '../../views/customer_flow/booking/payment_view.dart';
-import '../../views/customer_flow/booking/booking_request_sent_view.dart';
-import '../../views/customer_flow/booking/booking_binding.dart';
-import '../../views/services/spam_report_view.dart';
-import '../../views/services/view_certificate_view.dart';
-import '../../views/services/add_review_view.dart';
-import '../../views/services/service_detail_decision_view.dart';
+import 'package:event_maker/views/splash/splash_view.dart';
+import 'package:event_maker/views/splash/splash_binding.dart';
+import 'package:event_maker/views/onboarding/onboarding_view.dart';
+import 'package:event_maker/views/onboarding/onboarding_binding.dart';
+import 'package:event_maker/views/auth/user_type_view.dart';
+import 'package:event_maker/views/auth/login_view.dart';
+import 'package:event_maker/views/auth/auth_binding.dart';
+import 'package:event_maker/views/auth/signup_view.dart';
+import 'package:event_maker/views/auth/forgot_password_view.dart';
+import 'package:event_maker/views/auth/otp_verification_view.dart';
+import 'package:event_maker/views/auth/reset_password_view.dart';
+import 'package:event_maker/views/auth/congratulations_view.dart';
+import 'package:event_maker/views/auth/signup_step_two_view.dart';
+import 'package:event_maker/views/auth/provider_details_view.dart';
+import 'package:event_maker/views/auth/get_started_view.dart';
+import 'package:event_maker/views/profile/profile_view.dart';
+import 'package:event_maker/views/profile/profile_settings_view.dart';
+import 'package:event_maker/views/profile/add_image_view.dart';
+import 'package:event_maker/views/profile/change_password_view.dart';
+import 'package:event_maker/views/profile/transactions_view.dart';
+import 'package:event_maker/views/customer_flow/bookmarks/bookmarks_view.dart';
+import 'package:event_maker/views/profile/faq_view.dart';
+import 'package:event_maker/views/profile/contact_us_view.dart';
+import 'package:event_maker/views/profile/profile_binding.dart';
+import 'package:event_maker/views/customer_flow/customer_flow_scaffold.dart';
+import 'package:event_maker/views/customer_flow/home/home_binding.dart';
+import 'package:event_maker/views/service_provider_flow/service_provider_controller.dart';
+import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
+import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
+import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
+import 'package:event_maker/views/profile/profile_controller.dart';
+import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
+import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
+import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
+import 'package:event_maker/views/notifications/notification_view.dart';
+import 'package:event_maker/views/notifications/notification_binding.dart';
+import 'package:event_maker/views/services/vendor_profile_view.dart';
+import 'package:event_maker/views/services/category_services_view.dart';
+import 'package:event_maker/views/services/category_services_controller.dart';
+import 'package:event_maker/views/customer_flow/booking/book_service_date_view.dart';
+import 'package:event_maker/views/customer_flow/booking/book_service_request_view.dart';
+import 'package:event_maker/views/customer_flow/booking/payment_confirmation_view.dart';
+import 'package:event_maker/views/customer_flow/booking/payment_view.dart';
+import 'package:event_maker/views/customer_flow/booking/booking_request_sent_view.dart';
+import 'package:event_maker/views/customer_flow/booking/booking_binding.dart';
+import 'package:event_maker/views/services/spam_report_view.dart';
+import 'package:event_maker/views/services/view_certificate_view.dart';
+import 'package:event_maker/views/services/add_review_view.dart';
+import 'package:event_maker/views/services/service_detail_decision_view.dart';
+import 'package:event_maker/views/service_provider_flow/documents/documents_view.dart';
+import 'package:event_maker/views/service_provider_flow/documents/add_document_view.dart';
+import 'package:event_maker/views/service_provider_flow/documents/documents_binding.dart';
+import 'package:event_maker/views/service_provider_flow/schedule/schedule_view.dart';
+import 'package:event_maker/views/service_provider_flow/schedule/schedule_binding.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -87,12 +90,30 @@ class AppRoutes {
   static const String addReview = '/add-review';
   static const String categoryServices = '/category-services';
   static const String serviceDetailWithDecision = '/service-detail-decision';
+  static const String spDocuments = '/sp-documents-view';
+  static const String spAddDocument = '/sp-add-document-view';
+  static const String spSchedule = '/sp-schedule-view';
 
   static final routes = [
     GetPage(
       name: notifications,
       page: () => const NotificationView(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: spDocuments,
+      page: () => const DocumentsView(),
+      binding: DocumentsBinding(),
+    ),
+    GetPage(
+      name: spAddDocument,
+      page: () => AddDocumentView(),
+      binding: DocumentsBinding(),
+    ),
+    GetPage(
+      name: spSchedule,
+      page: () => const ScheduleView(),
+      binding: ScheduleBinding(),
     ),
     GetPage(
       name: splash,

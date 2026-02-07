@@ -384,55 +384,67 @@ class SPHomeView extends GetView<SPHomeController> {
           Icons.add_circle,
           'Add Service',
           const Color(0xFF22C55E),
+          onTap: () {},
         ),
         _buildActionItem(
           Icons.calendar_today,
           'Schedule',
           const Color(0xFF3B82F6),
+          onTap: () => Get.toNamed(AppRoutes.spSchedule),
         ),
         _buildActionItem(
           Icons.account_balance_wallet,
           'Earnings',
           const Color(0xFFF59E0B),
+          onTap: () {},
         ),
         _buildActionItem(
           Icons.description,
           'Documents',
           const Color(0xFF14B8A6),
+          onTap: () => Get.toNamed(AppRoutes.spDocuments),
         ),
       ],
     );
   }
 
-  Widget _buildActionItem(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        Container(
-          height: 64.h,
-          width: 64.h,
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+  Widget _buildActionItem(
+    IconData icon,
+    String label,
+    Color color, {
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            height: 64.h,
+            width: 64.h,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: color, size: 28),
           ),
-          child: Icon(icon, color: color, size: 28),
-        ),
-        SizedBox(height: 10.h),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
+          SizedBox(height: 10.h),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
