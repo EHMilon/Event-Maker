@@ -1,3 +1,4 @@
+import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:flutter/material.dart';
@@ -90,37 +91,41 @@ class SPHomeView extends GetView<SPHomeController> {
             ),
           ],
         ),
-        Container(
-          height: 44.h,
-          width: 44.h,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEEEFFF),
-            shape: BoxShape.circle,
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SvgPicture.asset(
-                'assets/icons/notification.svg',
-                height: 22.h,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.primary,
-                  BlendMode.srcIn,
-                ),
-              ),
-              Positioned(
-                top: 12.h,
-                right: 12.w,
-                child: Container(
-                  height: 4.h,
-                  width: 4.h,
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
+        InkWell(
+          onTap: () => Get.toNamed(AppRoutes.notifications),
+          borderRadius: BorderRadius.circular(50.r),
+          child: Container(
+            height: 44.h,
+            width: 44.h,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEFFF),
+              shape: BoxShape.circle,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/notification.svg',
+                  height: 22.h,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primary,
+                    BlendMode.srcIn,
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  top: 12.h,
+                  right: 12.w,
+                  child: Container(
+                    height: 4.h,
+                    width: 4.h,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

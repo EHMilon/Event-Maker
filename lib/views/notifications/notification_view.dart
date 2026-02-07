@@ -1,6 +1,5 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/views/notifications/notification_controller.dart';
-import 'package:event_maker/views/services/services_controller.dart';
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -16,15 +15,36 @@ class NotificationView extends GetView<NotificationController> {
       backgroundColor: AppColors.white,
       appBar: _buildAppBar(),
       body: SafeArea(
-        child: Obx(
-          () => ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-            itemCount: controller.notifications.length,
-            itemBuilder: (context, index) {
-              final notification = controller.notifications[index];
-              return _buildNotificationCard(notification);
-            },
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+              child: Text(
+                'Service Requests',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Obx(
+                () => ListView.builder(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 8.h,
+                  ),
+                  itemCount: controller.serviceRequests.length,
+                  itemBuilder: (context, index) {
+                    final request = controller.serviceRequests[index];
+                    return _buildServiceRequestCard(request);
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -46,43 +66,28 @@ class NotificationView extends GetView<NotificationController> {
           color: AppColors.black,
         ),
       ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.more_vert, color: AppColors.black),
+          onPressed: () {
+            // TODO: Add options menu
+          },
+        ),
+      ],
     );
   }
 
-  Widget _buildNotificationCard(NotificationModel notification) {
+  Widget _buildServiceRequestCard(ServiceRequest request) {
     return GestureDetector(
-      onTap: () async {
-        if (notification.body.toLowerCase().contains('accepted')) {
-          // Get service data for payment
-          final servicesController = Get.find<ServicesController>();
-
-          // Wait for services to load if they haven't yet
-          if (servicesController.services.isEmpty) {
-            await servicesController.loadServices();
-          }
-
-          // Check again after loading
-          if (servicesController.services.isNotEmpty) {
-            final mockService = servicesController.services.first;
-            Get.toNamed(
-              AppRoutes.payment,
-              arguments: {
-                'service': mockService,
-                'package': mockService.packages?.first,
-              },
-            );
-          } else {
-            // Fallback: Show error if services still not loaded
-            Get.snackbar(
-              'Error',
-              'Unable to load service data. Please try again.',
-              snackPosition: SnackPosition.BOTTOM,
-            );
-          }
-        }
+      onTap: () {
+        // Navigate to service detail view with accept/reject buttons
+        Get.toNamed(
+          AppRoutes.serviceDetailWithDecision,
+          arguments: {'request': request},
+        );
       },
       child: Container(
-        margin: EdgeInsets.only(bottom: 8.h),
+        margin: EdgeInsets.only(bottom: 12.h),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -96,38 +101,115 @@ class NotificationView extends GetView<NotificationController> {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildNotificationIcon(),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // Customer info row
+            Row(
+              children: [
+                _buildCustomerAvatar(request.customerImage),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        request.customerName,
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        'has sent you a request',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          color: AppColors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  _formatTimeAgo(request.date),
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            // Service info
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: AppColors.lightGrey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
                 children: [
-                  Text(
-                    notification.title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
+                  Container(
+                    width: 48.w,
+                    height: 48.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: const Icon(
+                      Icons.request_quote,
+                      color: Colors.white,
+                      size: 24,
                     ),
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    notification.body,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: AppColors.grey,
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          request.serviceTitle,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          '${request.price.toInt()} ${request.priceUnit}',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(request.status),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      _getStatusText(request.status),
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            SizedBox(width: 12.w),
-            Text(
-              notification.timeAgo,
-              style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.grey),
             ),
           ],
         ),
@@ -135,39 +217,64 @@ class NotificationView extends GetView<NotificationController> {
     );
   }
 
-  Widget _buildNotificationIcon() {
+  Widget _buildCustomerAvatar(String imageUrl) {
     return Container(
       width: 48.w,
       height: 48.w,
       clipBehavior: Clip.antiAlias,
-      decoration: const BoxDecoration(
-        color: AppColors.black,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Image.asset(
-          'assets/images/food_fresho_logo.png',
-          width: 48.w,
-          height: 48.h,
-          fit: BoxFit.cover,
-        ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(50.r)),
+      child: Image.network(
+        imageUrl,
+        width: 48.w,
+        height: 48.h,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: 48.w,
+            height: 48.h,
+            decoration: const BoxDecoration(
+              color: AppColors.lightGrey,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.person, color: AppColors.grey),
+          );
+        },
       ),
     );
   }
-}
 
-class NotificationModel {
-  final String id;
-  final String title;
-  final String body;
-  final String timeAgo;
-  final bool isRead;
+  Color _getStatusColor(RequestStatus status) {
+    switch (status) {
+      case RequestStatus.pending:
+        return AppColors.primary;
+      case RequestStatus.accepted:
+        return const Color(0xFF00C566); // Green
+      case RequestStatus.rejected:
+        return AppColors.error;
+    }
+  }
 
-  NotificationModel({
-    required this.id,
-    required this.title,
-    required this.body,
-    required this.timeAgo,
-    this.isRead = false,
-  });
+  String _getStatusText(RequestStatus status) {
+    switch (status) {
+      case RequestStatus.pending:
+        return 'Pending';
+      case RequestStatus.accepted:
+        return 'Accepted';
+      case RequestStatus.rejected:
+        return 'Rejected';
+    }
+  }
+
+  String _formatTimeAgo(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
+  }
 }

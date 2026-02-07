@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:event_maker/views/profile/profile_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/sp_services_view.dart';
+import 'package:event_maker/views/service_provider_flow/requests/requests_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ServiceProviderScaffold extends GetView<ServiceProviderController> {
@@ -15,8 +17,8 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const SPHomeView(),
-      const Center(child: Text('Requests')),
-      const Center(child: Text('Services')),
+      const RequestsView(),
+      const SPServicesView(),
       const ProfileView(),
     ];
 

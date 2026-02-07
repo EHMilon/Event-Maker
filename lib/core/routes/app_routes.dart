@@ -27,7 +27,11 @@ import '../../views/customer_flow/customer_flow_scaffold.dart';
 import '../../views/customer_flow/home/home_view.dart';
 import '../../views/customer_flow/home/home_binding.dart';
 import '../../views/service_provider_flow/home/sp_home_view.dart';
-import '../../views/service_provider_flow/service_provider_binding.dart';
+import '../../views/service_provider_flow/service_provider_controller.dart';
+import '../../views/service_provider_flow/home/sp_home_controller.dart';
+import '../../views/service_provider_flow/requests/requests_controller.dart';
+import '../../views/service_provider_flow/services/sp_services_controller.dart';
+import '../../views/profile/profile_controller.dart';
 import '../../views/service_provider_flow/service_provider_scaffold.dart';
 import '../../views/customer_flow/map/map_results_view.dart';
 import '../../views/customer_flow/map/map_results_binding.dart';
@@ -45,6 +49,7 @@ import '../../views/customer_flow/booking/booking_binding.dart';
 import '../../views/services/spam_report_view.dart';
 import '../../views/services/view_certificate_view.dart';
 import '../../views/services/add_review_view.dart';
+import '../../views/services/service_detail_decision_view.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -81,6 +86,7 @@ class AppRoutes {
   static const String viewCertificate = '/view-certificate';
   static const String addReview = '/add-review';
   static const String categoryServices = '/category-services';
+  static const String serviceDetailWithDecision = '/service-detail-decision';
 
   static final routes = [
     GetPage(
@@ -168,7 +174,17 @@ class AppRoutes {
     GetPage(
       name: serviceProviderHome,
       page: () => const ServiceProviderScaffold(),
-      binding: ServiceProviderBinding(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ServiceProviderController>(
+          () => ServiceProviderController(),
+        );
+        Get.lazyPut<SPHomeController>(() => SPHomeController());
+        Get.lazyPut<RequestsController>(() => RequestsController());
+        Get.lazyPut<SPServicesController>(() => SPServicesController());
+        Get.put(
+          ProfileController(),
+        ); // Using put for profile as it might be needed by other views
+      }),
     ),
     GetPage(
       name: mapResults,
@@ -225,6 +241,13 @@ class AppRoutes {
           tag: '${categoryType}_${arguments?["categoryName"] ?? "Services"}',
         );
       }),
+    ),
+    GetPage(
+      name: serviceDetailWithDecision,
+      page: () {
+        final arguments = Get.arguments as Map<String, dynamic>?;
+        return ServiceDetailDecisionView(request: arguments?['request']);
+      },
     ),
   ];
 }

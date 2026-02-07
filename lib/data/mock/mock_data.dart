@@ -449,6 +449,81 @@ class MockData {
     return homeServices.where((s) => s.type == type).toList();
   }
 
+  // Requests mock data for SP
+  static final List<ServiceModel> requests = [
+    ServiceModel(
+      id: 'req-1',
+      title: 'Wedding Catering Services',
+      description:
+          'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
+      images: [
+        'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop',
+      ],
+      type: ServiceType.catering,
+      provider: ServiceProvider(
+        name: 'Elite Event Photography',
+        role: 'Photographer',
+        imageUrl: imgPerson,
+        isVerified: true,
+      ),
+      location:
+          'Airport Rd - Al Manhal - W14 02 - Abu Dhabi - United Arab Emirates',
+      date: DateTime(2026, 1, 10, 16, 0),
+      basePrice: 120,
+      priceUnit: 'AED',
+      packages: [
+        ServicePackage(
+          name: 'Basic',
+          price: 120,
+          features: [
+            '4 hours coverage',
+            '100 edited photos',
+            'Online gallery',
+            'Basic retouching',
+          ],
+        ),
+      ],
+    ),
+    ServiceModel(
+      id: 'req-2',
+      title: 'Corporate Event Planning',
+      description: 'Professional event planning for corporate needs.',
+      images: [
+        'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop',
+      ],
+      type: ServiceType.event,
+      provider: ServiceProvider(
+        name: 'Pro Events',
+        role: 'Planner',
+        imageUrl: imgPerson,
+        isVerified: true,
+      ),
+      location: 'Business Bay, Dubai',
+      date: DateTime(2026, 1, 10, 16, 0),
+      basePrice: 200,
+      priceUnit: 'AED',
+    ),
+    ServiceModel(
+      id: 'req-3',
+      title: 'Birthday Party Décor',
+      description: 'Stunning decorations for birthday parties.',
+      images: [
+        'https://images.unsplash.com/photo-1530103043960-ef38714abb15?q=80&w=1000&auto=format&fit=crop',
+      ],
+      type: ServiceType.event,
+      provider: ServiceProvider(
+        name: 'Decor Masters',
+        role: 'Decorator',
+        imageUrl: imgPerson,
+        isVerified: true,
+      ),
+      location: 'Corniche, Abu Dhabi',
+      date: DateTime(2026, 1, 10, 16, 0),
+      basePrice: 150,
+      priceUnit: 'AED',
+    ),
+  ];
+
   // Get services for home section
   static List<ServiceModel> getHomeSectionServices(String section) {
     final typeMap = {

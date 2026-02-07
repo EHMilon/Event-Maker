@@ -9,12 +9,117 @@ import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:event_maker/shared/widgets/confirmation_dialog.dart';
+import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ServiceDetailView extends StatelessWidget {
   final ServiceModel service;
+  final bool showEditButton;
+  final bool isRequest;
 
-  const ServiceDetailView({super.key, required this.service});
+  const ServiceDetailView({
+    super.key,
+    required this.service,
+    this.showEditButton = false,
+    this.isRequest = false,
+  });
+
+  void _showRejectDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: 'Confirm Request Rejection',
+        subtitle:
+            'Are you sure you want to reject this request? Please note the client will be notified.',
+        mainButtonText: 'Reject',
+        mainButtonColor: AppColors.error,
+        onMainButtonPressed: () {
+          final controller = Get.find<RequestsController>();
+          controller.rejectRequest(service);
+          Get.back(); // Close dialog
+          Get.back(); // Go back to list
+          Get.snackbar(
+            'Success',
+            'Request rejected',
+            backgroundColor: AppColors.error.withOpacity(0.1),
+            colorText: AppColors.error,
+          );
+        },
+        icon: _buildDialogIcon(Icons.close, AppColors.error),
+      ),
+    );
+  }
+
+  void _showAcceptDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: 'Request Accepted Successfully',
+        subtitle:
+            'You have successfully accepted the request. The client will be notified shortly.',
+        mainButtonText: 'Done',
+        mainButtonColor: AppColors.primary,
+        onMainButtonPressed: () {
+          final controller = Get.find<RequestsController>();
+          controller.acceptRequest(service);
+          Get.back(); // Close dialog
+          Get.back(); // Go back to list
+        },
+        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
+      ),
+    );
+  }
+
+  Widget _buildDialogIcon(IconData iconData, Color color) {
+    return Container(
+      width: 120.w,
+      height: 100.h,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Basic laptop/document shape
+          Container(
+            width: 80.w,
+            height: 60.h,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: color.withOpacity(0.3), width: 2),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 65.h),
+            width: 100.w,
+            height: 6.h,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(3.r),
+            ),
+          ),
+          // Centered Icon
+          Positioned(
+            top: 15.h,
+            child: Container(
+              padding: EdgeInsets.all(12.r),
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(iconData, color: Colors.white, size: 32.r),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,14 +195,32 @@ class ServiceDetailView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          service.title,
-                          style: GoogleFonts.inter(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                            height: 1.2,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                service.title,
+                                style: GoogleFonts.inter(
+                                  fontSize: 24.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                            if (showEditButton)
+                              IconButton(
+                                onPressed: () {
+                                  // TODO: Implement edit functionality
+                                },
+                                icon: Icon(
+                                  Icons.edit_outlined,
+                                  color: AppColors.primary,
+                                  size: 24.r,
+                                ),
+                              ),
+                          ],
                         ),
                         SizedBox(height: 16.h),
 
@@ -531,38 +654,73 @@ class ServiceDetailView extends StatelessWidget {
             ),
           ),
 
-          // Book Now Button
-          Positioned(
-            bottom: 30.h,
-            left: 24.w,
-            right: 24.w,
-            child: PrimaryTextButton(
-              onPressed: () {
-                if (isHospitality) {
-                  Get.toNamed(
-                    AppRoutes.bookServiceDate,
-                    arguments: {
-                      'service': service,
-                      'package': service.packages != null
-                          ? service.packages![selectedPackageIndex.value]
-                          : null,
-                    },
-                  );
-                } else {
-                  Get.toNamed(
-                    AppRoutes.payment,
-                    arguments: {
-                      'service': service,
-                      'package': service.packages != null
-                          ? service.packages![selectedPackageIndex.value]
-                          : null,
-                    },
-                  );
-                }
-              },
-              text: 'Book Now',
+          // Bottom Buttons
+          if (!showEditButton)
+            Positioned(
+              bottom: 30.h,
+              left: 24.w,
+              right: 24.w,
+              child: isRequest
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => _showRejectDialog(context),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              side: BorderSide(color: AppColors.lightGrey),
+                            ),
+                            child: Text(
+                              'Reject',
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 16.w),
+                        Expanded(
+                          child: PrimaryTextButton(
+                            onPressed: () => _showAcceptDialog(context),
+                            text: 'Accept',
+                          ),
+                        ),
+                      ],
+                    )
+                  : PrimaryTextButton(
+                      onPressed: () {
+                        if (isHospitality) {
+                          Get.toNamed(
+                            AppRoutes.bookServiceDate,
+                            arguments: {
+                              'service': service,
+                              'package': service.packages != null
+                                  ? service.packages![selectedPackageIndex
+                                        .value]
+                                  : null,
+                            },
+                          );
+                        } else {
+                          Get.toNamed(
+                            AppRoutes.payment,
+                            arguments: {
+                              'service': service,
+                              'package': service.packages != null
+                                  ? service.packages![selectedPackageIndex
+                                        .value]
+                                  : null,
+                            },
+                          );
+                        }
+                      },
+                      text: 'Book Now',
+                    ),
             ),
-          ),
         ],
       ),
     );
