@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../data/models/service_model.dart';
+import '../../data/models/review_model.dart';
 import '../../data/mock/mock_data.dart';
 import '../../shared/utils/user_preferences.dart';
 import '../../views/customer_flow/home/home_controller.dart';
@@ -45,6 +46,8 @@ class ProfileController extends GetxController {
       <Map<String, dynamic>>[].obs;
   final RxList<ServiceModel> bookmarks = <ServiceModel>[].obs;
   final RxList<Map<String, dynamic>> faqs = <Map<String, dynamic>>[].obs;
+  final RxList<ServiceModel> providerServices = <ServiceModel>[].obs;
+  final RxList<ReviewModel> providerReviews = <ReviewModel>[].obs;
 
   // Reactive property to notify when bookmarks change
   final RxBool bookmarksChanged = false.obs;
@@ -113,15 +116,52 @@ class ProfileController extends GetxController {
         'isExpanded': false.obs,
       },
     ]);
+
+    // Populate provider specific data
+    providerServices.assignAll(MockData.homeServices.take(5).toList());
+
+    providerReviews.assignAll([
+      ReviewModel(
+        userName: 'John Doe',
+        userImageUrl: 'https://picsum.photos/id/10/100/100',
+        date: '10 Feb',
+        rating: 4,
+        reviewText: 'Thank you, Fresh Food L.L.C! That was a great event.',
+      ),
+      ReviewModel(
+        userName: 'Jane Smith',
+        userImageUrl: 'https://picsum.photos/id/11/100/100',
+        date: '08 Feb',
+        rating: 5,
+        reviewText:
+            'Excellent catering service. The food was delicious and the staff was very professional.',
+      ),
+      ReviewModel(
+        userName: 'Mike Johnson',
+        userImageUrl: 'https://picsum.photos/id/12/100/100',
+        date: '05 Feb',
+        rating: 5,
+        reviewText:
+            'Highly recommended for any corporate event. Perfectly organized.',
+      ),
+      ReviewModel(
+        userName: 'Sarah Wilson',
+        userImageUrl: 'https://picsum.photos/id/13/100/100',
+        date: '01 Feb',
+        rating: 4,
+        reviewText:
+            'Great experience overall. Just a small delay in setup but everything else was perfect.',
+      ),
+    ]);
   }
 
   /// Remove a bookmark by service ID and sync with HomeController
   void removeBookmark(String serviceId) {
     bookmarks.removeWhere((service) => service.id == serviceId);
-    
+
     // Notify HomeController to update its state
     _syncHomeController(serviceId, false);
-    
+
     // Show snackbar for feedback
     Get.snackbar(
       'Removed',
@@ -137,10 +177,10 @@ class ProfileController extends GetxController {
   void addBookmark(ServiceModel service) {
     if (!bookmarks.any((s) => s.id == service.id)) {
       bookmarks.add(service);
-      
+
       // Notify HomeController to update its state
       _syncHomeController(service.id, true);
-      
+
       // Show snackbar for feedback
       Get.snackbar(
         'Bookmarked',
@@ -157,9 +197,11 @@ class ProfileController extends GetxController {
   void _syncHomeController(String serviceId, bool isBookmarked) {
     try {
       final HomeController homeController = Get.find<HomeController>();
-      
+
       // Update allServices in HomeController
-      final serviceIndex = homeController.allServices.indexWhere((s) => s.id == serviceId);
+      final serviceIndex = homeController.allServices.indexWhere(
+        (s) => s.id == serviceId,
+      );
       if (serviceIndex != -1) {
         final service = homeController.allServices[serviceIndex];
         homeController.allServices[serviceIndex] = ServiceModel(
@@ -179,10 +221,12 @@ class ProfileController extends GetxController {
           isBookmarked: isBookmarked,
         );
       }
-      
+
       // Also update searchResults if searching
       if (homeController.searchResults.isNotEmpty) {
-        final searchIndex = homeController.searchResults.indexWhere((s) => s.id == serviceId);
+        final searchIndex = homeController.searchResults.indexWhere(
+          (s) => s.id == serviceId,
+        );
         if (searchIndex != -1) {
           final service = homeController.searchResults[searchIndex];
           homeController.searchResults[searchIndex] = ServiceModel(

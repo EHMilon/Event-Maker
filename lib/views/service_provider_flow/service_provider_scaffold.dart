@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:event_maker/views/profile/profile_view.dart';
+import 'package:event_maker/views/profile/service_provider_profile_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_view.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +19,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
       const SPHomeView(),
       const RequestsView(),
       const SPServicesView(),
-      const ProfileView(),
+      const ServiceProviderProfileView(),
     ];
 
     return Scaffold(

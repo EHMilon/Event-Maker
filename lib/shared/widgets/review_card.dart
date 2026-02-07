@@ -6,14 +6,21 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ReviewCard extends StatelessWidget {
   final ReviewModel review;
+  final bool useFullWidth;
 
-  const ReviewCard({super.key, required this.review});
+  const ReviewCard({
+    super.key,
+    required this.review,
+    this.useFullWidth = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250.w,
-      margin: EdgeInsets.only(right: 16.w),
+      width: useFullWidth ? double.infinity : 250.w,
+      margin: useFullWidth
+          ? EdgeInsets.only(bottom: 16.h)
+          : EdgeInsets.only(right: 16.w),
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
         color: AppColors.white,
