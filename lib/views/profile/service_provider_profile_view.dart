@@ -115,7 +115,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     fontWeight: FontWeight.w400,
                   ),
                   tabs: const [
-                    Tab(text: 'ABOUT'),
+                    Tab(text: '     ABOUT'),
                     Tab(text: 'REVIEWS'),
                   ],
                 ),

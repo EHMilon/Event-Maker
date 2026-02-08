@@ -1,0 +1,139 @@
+import 'dart:io';
+import 'package:event_maker/core/routes/app_routes.dart';
+import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/data/models/certification_model.dart';
+import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class ViewCertificateView extends GetView<CertificationController> {
+  const ViewCertificateView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final CertificationModel cert = Get.arguments;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
+          'View Certificate',
+          style: GoogleFonts.inter(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Certificate Image
+            Container(
+              width: double.infinity,
+              height: 250.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12.r),
+                child: cert.imageUrl != null
+                    ? cert.imageUrl!.startsWith('assets/')
+                          ? Image.asset(cert.imageUrl!, fit: BoxFit.cover)
+                          : Image.file(File(cert.imageUrl!), fit: BoxFit.cover)
+                    : const Icon(
+                        Icons.description,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+              ),
+            ),
+            SizedBox(height: 32.h),
+
+            // Details
+            _buildDetailField('Document Title', cert.title),
+            SizedBox(height: 16.h),
+            _buildDetailField('Institute', cert.school),
+            SizedBox(height: 16.h),
+            _buildDetailField('Passing Year', cert.date),
+
+            SizedBox(height: 100.h),
+            // Edit Button
+            SizedBox(
+              width: double.infinity,
+              height: 56.h,
+              child: ElevatedButton(
+                onPressed: () {
+                  controller.prepareEdit(cert);
+                  Get.toNamed(
+                    AppRoutes.spEditCertification,
+                    arguments: cert.id,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Text(
+                  'Edit',
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailField(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

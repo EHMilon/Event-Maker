@@ -40,6 +40,9 @@ class ProfileController extends GetxController {
   final RxString userEmail = 'example@gmail.com'.obs;
   final RxString profileImage = 'assets/images/person.jpg'.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isServiceProvider = false.obs;
+  final RxBool isAvailable = true.obs;
+  final RxString walletBalance = '1250'.obs;
 
   // Mock data lists
   final RxList<Map<String, dynamic>> transactions =
@@ -68,11 +71,16 @@ class ProfileController extends GetxController {
     if (userData != null) {
       userName.value = userData['name'] ?? 'John Doe';
       userEmail.value = userData['email'] ?? 'example@gmail.com';
+      isServiceProvider.value =
+          userData['type'] == UserPreferences.USER_TYPE_SERVICE_PROVIDER;
 
       nameController.text = userName.value;
       emailController.text = userEmail.value;
       phoneController.text = '000-0000-000'; // Mock data
       nationalityController.text = 'UAE'; // Mock data
+    } else {
+      // Default to guest or customer
+      isServiceProvider.value = await UserPreferences.isServiceProvider();
     }
     isLoading.value = false;
   }
@@ -298,6 +306,11 @@ class ProfileController extends GetxController {
   Future<void> logOut() async {
     await UserPreferences.clearUserData();
     Get.offAllNamed('/login');
+  }
+
+  void toggleAvailability(bool value) {
+    isAvailable.value = value;
+    // TODO: Update availability on backend
   }
 
   @override

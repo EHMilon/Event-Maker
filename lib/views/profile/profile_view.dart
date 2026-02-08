@@ -18,7 +18,7 @@ class ProfileView extends GetView<ProfileController> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Profile',
+          'Settings',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 24.sp,
@@ -34,12 +34,13 @@ class ProfileView extends GetView<ProfileController> {
             child: Column(
               children: [
                 SizedBox(height: 20.h),
-                // Profile Picture 
+                // Profile Picture
                 Container(
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.w),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           padding: EdgeInsets.all(3.r),
@@ -74,24 +75,56 @@ class ProfileView extends GetView<ProfileController> {
                 // Menu Items
                 _buildMenuItem(
                   icon: 'assets/icons/profile_outline.svg',
-                  title: 'My Profile',
+                  title: 'Profile Settings',
                   onTap: () => Get.toNamed(AppRoutes.profileSettings),
                 ),
                 _buildMenuItem(
-                  icon: 'assets/icons/security.svg',
+                  icon: 'assets/icons/shield-check.svg',
                   title: 'Security',
                   onTap: () => Get.toNamed(AppRoutes.changePassword),
                 ),
-                _buildMenuItem(
-                  icon: 'assets/icons/wallet.svg',
-                  title: 'My Transactions',
-                  onTap: () => Get.toNamed(AppRoutes.transactions),
-                ),
-                _buildMenuItem(
-                  icon: 'assets/icons/saved.svg',
-                  title: 'My Bookmarks',
-                  onTap: () => Get.toNamed(AppRoutes.bookmarks),
-                ),
+                if (controller.isServiceProvider.value) ...[
+                  _buildMenuItem(
+                    icon: 'assets/icons/scroll-text.svg',
+                    title: 'Certifications',
+                    onTap: () => Get.toNamed(AppRoutes.spCertifications),
+                  ),
+                  _buildMenuItem(
+                    icon: 'assets/icons/calendar-check-2.svg',
+                    title: 'My Availability',
+                    onTap: () {},
+                    trailing: Switch(
+                      value: controller.isAvailable.value,
+                      onChanged: (value) =>
+                          controller.toggleAvailability(value),
+                      activeColor: AppColors.primary,
+                    ),
+                  ),
+                  _buildMenuItem(
+                    icon: 'assets/icons/wallet.svg',
+                    title: 'My Wallet',
+                    onTap: () => Get.toNamed(AppRoutes.transactions),
+                    trailing: Text(
+                      '${controller.walletBalance.value} AED',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF9747FF),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  _buildMenuItem(
+                    icon: 'assets/icons/wallet.svg',
+                    title: 'My Transactions',
+                    onTap: () => Get.toNamed(AppRoutes.transactions),
+                  ),
+                  _buildMenuItem(
+                    icon: 'assets/icons/saved.svg',
+                    title: 'My Bookmarks',
+                    onTap: () => Get.toNamed(AppRoutes.bookmarks),
+                  ),
+                ],
                 _buildMenuItem(
                   icon: 'assets/icons/mail.svg',
                   title: 'Contact Us',
@@ -123,6 +156,7 @@ class ProfileView extends GetView<ProfileController> {
     required String title,
     required VoidCallback onTap,
     Color? titleColor,
+    Widget? trailing,
   }) {
     return ListTile(
       onTap: onTap,
@@ -142,6 +176,7 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
+      trailing: trailing,
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }

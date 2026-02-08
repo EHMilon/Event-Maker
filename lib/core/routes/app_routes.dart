@@ -57,6 +57,11 @@ import 'package:event_maker/views/service_provider_flow/services/add_service_vie
 import 'package:event_maker/views/service_provider_flow/services/add_event_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_training_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
+import 'package:event_maker/views/service_provider_flow/certifications/certification_list_view.dart';
+import 'package:event_maker/views/service_provider_flow/certifications/view_certificate_view.dart'
+    as sp_view;
+import 'package:event_maker/views/service_provider_flow/certifications/add_edit_certificate_view.dart';
+import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -100,6 +105,10 @@ class AppRoutes {
   static const String addService = '/add-service';
   static const String addEvent = '/add-event';
   static const String addTraining = '/add-training';
+  static const String spCertifications = '/sp-certifications';
+  static const String spViewCertification = '/sp-view-certification';
+  static const String spAddCertification = '/sp-add-certification';
+  static const String spEditCertification = '/sp-edit-certification';
 
   static final routes = [
     GetPage(
@@ -291,6 +300,28 @@ class AppRoutes {
       name: addTraining,
       page: () => const AddTrainingView(),
       binding: AddScreensBinding(),
+    ),
+    GetPage(
+      name: spCertifications,
+      page: () => const CertificationListView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CertificationController>(() => CertificationController());
+      }),
+    ),
+    GetPage(
+      name: spViewCertification,
+      page: () => const sp_view.ViewCertificateView(),
+    ),
+    GetPage(
+      name: spAddCertification,
+      page: () => const AddEditCertificateView(isEdit: false),
+    ),
+    GetPage(
+      name: spEditCertification,
+      page: () {
+        final certId = Get.arguments as String;
+        return AddEditCertificateView(isEdit: true, certificateId: certId);
+      },
     ),
   ];
 }
