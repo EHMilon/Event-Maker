@@ -465,7 +465,7 @@ class SPHomeView extends GetView<SPHomeController> {
           ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () => Get.toNamed(AppRoutes.spActiveOrders),
           child: Row(
             children: [
               Text(

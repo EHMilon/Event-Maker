@@ -63,6 +63,7 @@ import 'package:event_maker/views/service_provider_flow/certifications/view_cert
     as sp_view;
 import 'package:event_maker/views/service_provider_flow/certifications/add_edit_certificate_view.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
+import 'package:event_maker/views/service_provider_flow/active_orders/sp_active_orders_view.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -111,6 +112,7 @@ class AppRoutes {
   static const String spViewCertification = '/sp-view-certification';
   static const String spAddCertification = '/sp-add-certification';
   static const String spEditCertification = '/sp-edit-certification';
+  static const String spActiveOrders = '/sp-active-orders';
 
   static final routes = [
     GetPage(
@@ -325,6 +327,10 @@ class AppRoutes {
         final certId = Get.arguments as String;
         return AddEditCertificateView(isEdit: true, certificateId: certId);
       },
+    ),
+    GetPage(
+      name: spActiveOrders,
+      page: () => const SPActiveOrdersView(),
     ),
   ];
 }
