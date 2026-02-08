@@ -87,12 +87,13 @@ class ProfileController extends GetxController {
 
   void loadMockData() {
     transactions.assignAll([
-      {'title': 'Catering Service', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'Photography Package', 'time': '5 min ago', 'amount': '250'},
-      {'title': 'Atif Aslam Concert', 'time': '2 days ago', 'amount': '350'},
-      {'title': 'Videography Session', 'time': '10 days ago', 'amount': '400'},
-      {'title': 'Deep Cleaning', 'time': '15 days ago', 'amount': '150'},
-      {'title': 'Music Event', 'time': '28 days ago', 'amount': '500'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
+      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
     ]);
 
     // Use bookmarked services from centralized mock data

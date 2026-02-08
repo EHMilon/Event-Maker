@@ -19,6 +19,7 @@ import 'package:event_maker/views/profile/profile_settings_view.dart';
 import 'package:event_maker/views/profile/add_image_view.dart';
 import 'package:event_maker/views/profile/change_password_view.dart';
 import 'package:event_maker/views/profile/transactions_view.dart';
+import 'package:event_maker/views/profile/wallet_view.dart';
 import 'package:event_maker/views/customer_flow/bookmarks/bookmarks_view.dart';
 import 'package:event_maker/views/profile/faq_view.dart';
 import 'package:event_maker/views/profile/contact_us_view.dart';
@@ -105,6 +106,7 @@ class AppRoutes {
   static const String addService = '/add-service';
   static const String addEvent = '/add-event';
   static const String addTraining = '/add-training';
+  static const String spWallet = '/sp-wallet';
   static const String spCertifications = '/sp-certifications';
   static const String spViewCertification = '/sp-view-certification';
   static const String spAddCertification = '/sp-add-certification';
@@ -196,6 +198,7 @@ class AppRoutes {
     GetPage(name: addImage, page: () => const AddImageView()),
     GetPage(name: changePassword, page: () => const ChangePasswordView()),
     GetPage(name: transactions, page: () => const TransactionsView()),
+    GetPage(name: spWallet, page: () => const WalletView()),
     GetPage(
       name: bookmarks,
       page: () => const BookmarksView(),

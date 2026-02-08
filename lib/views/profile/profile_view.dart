@@ -103,7 +103,7 @@ class ProfileView extends GetView<ProfileController> {
                   _buildMenuItem(
                     icon: 'assets/icons/wallet.svg',
                     title: 'My Wallet',
-                    onTap: () => Get.toNamed(AppRoutes.transactions),
+                    onTap: () => Get.toNamed(AppRoutes.spWallet),
                     trailing: Text(
                       '${controller.walletBalance.value} AED',
                       style: TextStyle(

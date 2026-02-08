@@ -324,55 +324,58 @@ class SPHomeView extends GetView<SPHomeController> {
   }
 
   Widget _buildTotalBalanceCard() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF1F1F5)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F1F5),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: SvgPicture.asset(
-              'assets/icons/wallet.svg',
-              height: 20.h,
-              colorFilter: const ColorFilter.mode(
-                AppColors.textPrimary,
-                BlendMode.srcIn,
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.spWallet),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: const Color(0xFFF1F1F5)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F1F5),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: SvgPicture.asset(
+                'assets/icons/wallet.svg',
+                height: 20.h,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total Balance',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w400,
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Total Balance',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
-                Text(
-                  controller.totalBalance.value,
-                  style: GoogleFonts.inter(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                  Text(
+                    controller.totalBalance.value,
+                    style: GoogleFonts.inter(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -397,7 +400,7 @@ class SPHomeView extends GetView<SPHomeController> {
           Icons.account_balance_wallet,
           'Earnings',
           const Color(0xFFF59E0B),
-          onTap: () {},
+          onTap: () => Get.toNamed(AppRoutes.spWallet),
         ),
         _buildActionItem(
           Icons.description,
