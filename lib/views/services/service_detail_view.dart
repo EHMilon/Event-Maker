@@ -666,19 +666,20 @@ class ServiceDetailView extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () => _showRejectDialog(context),
-                            style: OutlinedButton.styleFrom(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.white,
                               padding: EdgeInsets.symmetric(vertical: 16.h),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
-                              side: BorderSide(color: AppColors.lightGrey),
+                              elevation: 0,
                             ),
                             child: Text(
                               'Reject',
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: Colors.black,
                               ),
                             ),
                           ),

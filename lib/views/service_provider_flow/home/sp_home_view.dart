@@ -1,5 +1,6 @@
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/shared/widgets/add_options_bottom_sheet.dart';
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -28,7 +29,7 @@ class SPHomeView extends GetView<SPHomeController> {
                   SizedBox(height: 25.h),
                   _buildAnalyticsSection(),
                   SizedBox(height: 30.h),
-                  _buildQuickActions(),
+                  _buildQuickActions(context),
                   SizedBox(height: 30.h),
                   _buildActiveOrdersHeader(),
                   SizedBox(height: 15.h),
@@ -376,7 +377,7 @@ class SPHomeView extends GetView<SPHomeController> {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -384,7 +385,7 @@ class SPHomeView extends GetView<SPHomeController> {
           Icons.add_circle,
           'Add Service',
           const Color(0xFF22C55E),
-          onTap: () {},
+          onTap: () => AddOptionsBottomSheet.show(context),
         ),
         _buildActionItem(
           Icons.calendar_today,

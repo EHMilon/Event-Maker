@@ -20,10 +20,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => Get.back(),
-          ),
+
           title: Text(
             'My Profile',
             style: GoogleFonts.inter(
@@ -48,7 +45,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
         ),
         body: Column(
           children: [
-            SizedBox(height: 20.h),
+            SizedBox(height: 16.h),
             // Profile Image
             Center(
               child: Container(
@@ -98,25 +95,31 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                 ),
               ],
             ),
-            SizedBox(height: 32.h),
+            SizedBox(height: 16.h),
             // Tab Bar
-            TabBar(
-              indicatorColor: AppColors.primary,
-              indicatorSize: TabBarIndicatorSize.label,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textSecondary,
-              labelStyle: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Center(
+                child: TabBar(
+                  isScrollable: true,
+                  indicatorColor: AppColors.primary,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.textSecondary,
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  tabs: const [
+                    Tab(text: 'ABOUT'),
+                    Tab(text: 'REVIEWS'),
+                  ],
+                ),
               ),
-              unselectedLabelStyle: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-              ),
-              tabs: const [
-                Tab(text: 'ABOUT'),
-                Tab(text: 'REVIEWS'),
-              ],
             ),
             // Tab Bar View
             Expanded(
