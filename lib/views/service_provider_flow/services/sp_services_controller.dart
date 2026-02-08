@@ -4,6 +4,29 @@ import 'package:get/get.dart';
 class SPServicesController extends GetxController {
   var isLoading = true.obs;
   var services = <ServiceModel>[].obs;
+  var searchQuery = ''.obs;
+
+  /// Filtered services based on search query
+  List<ServiceModel> get filteredServices {
+    if (searchQuery.value.isEmpty) {
+      return services;
+    }
+    return services.where((service) {
+      return service.title.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          service.description.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          service.location.toLowerCase().contains(searchQuery.value.toLowerCase());
+    }).toList();
+  }
+
+  /// Update search query
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  /// Clear search
+  void clearSearch() {
+    searchQuery.value = '';
+  }
 
   @override
   void onInit() {

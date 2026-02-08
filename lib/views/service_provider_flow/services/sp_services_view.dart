@@ -46,6 +46,7 @@ class SPServicesView extends GetView<SPServicesController> {
                         ),
                       ),
                       child: TextField(
+                        onChanged: controller.updateSearchQuery,
                         decoration: InputDecoration(
                           hintText: 'Search',
                           hintStyle: GoogleFonts.inter(
@@ -57,6 +58,16 @@ class SPServicesView extends GetView<SPServicesController> {
                             color: AppColors.textSecondary.withOpacity(0.5),
                             size: 22.r,
                           ),
+                          suffixIcon: controller.searchQuery.value.isNotEmpty
+                              ? GestureDetector(
+                                  onTap: controller.clearSearch,
+                                  child: Icon(
+                                    Icons.close,
+                                    color: AppColors.textSecondary.withOpacity(0.5),
+                                    size: 20.r,
+                                  ),
+                                )
+                              : null,
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                         ),
@@ -102,7 +113,7 @@ class SPServicesView extends GetView<SPServicesController> {
                       child: ListView.builder(
                         itemCount: controller.isLoading.value
                             ? 5
-                            : controller.services.length,
+                            : controller.filteredServices.length,
                         physics: const AlwaysScrollableScrollPhysics(
                           parent: BouncingScrollPhysics(),
                         ),
@@ -115,7 +126,7 @@ class SPServicesView extends GetView<SPServicesController> {
                               onTap: () {},
                             );
                           }
-                          final service = controller.services[index];
+                          final service = controller.filteredServices[index];
                           return SpServiceCard(
                             imagePath: service.images.isNotEmpty
                                 ? service.images.first
