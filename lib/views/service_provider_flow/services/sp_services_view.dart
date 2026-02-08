@@ -123,14 +123,17 @@ class SPServicesView extends GetView<SPServicesController> {
                             title: service.title,
                             dateTime:
                                 '10th Jan - Fri - 4:00 PM', // Mock date format
-                            onTap: () {
-                              Get.to(
+                            onTap: () async {
+                              final result = await Get.to(
                                 () => ServiceDetailView(
                                   service: service,
-                                  showEditButton:
-                                      true, // Passing flag to show edit button
+                                  showEditButton: true,
                                 ),
                               );
+                              // Refresh services when coming back from edit
+                              if (result == true) {
+                                controller.refreshServices();
+                              }
                             },
                           );
                         },

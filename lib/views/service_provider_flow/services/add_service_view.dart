@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../data/models/service_model.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/primary_text_button.dart';
 import '../../../shared/widgets/upload_widget.dart';
@@ -12,8 +13,34 @@ import 'add_service_controller.dart';
 import 'date_and_time_view.dart';
 import 'packages_pricings_view.dart';
 
-class AddServiceView extends GetView<AddServiceController> {
-  const AddServiceView({super.key});
+class AddServiceView extends StatefulWidget {
+  final ServiceModel? service;
+  final bool isEdit;
+
+  const AddServiceView({
+    super.key,
+    this.service,
+    this.isEdit = false,
+  });
+
+  @override
+  State<AddServiceView> createState() => _AddServiceViewState();
+}
+
+class _AddServiceViewState extends State<AddServiceView> {
+  late final AddServiceController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<AddServiceController>();
+    // Initialize with service data if editing
+    Future.delayed(Duration.zero, () {
+      if (widget.isEdit && widget.service != null) {
+        controller.initWithService(widget.service!);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +54,7 @@ class AddServiceView extends GetView<AddServiceController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Add New Service',
+          widget.isEdit ? 'Edit Service' : 'Add New Service',
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -140,8 +167,13 @@ class AddServiceView extends GetView<AddServiceController> {
                 ),
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
-                  text: 'Add Service',
-                  onPressed: () => controller.saveService(),
+                  text: widget.isEdit ? 'Update Service' : 'Add Service',
+                  onPressed: () async {
+                    await controller.saveService(
+                      isEdit: widget.isEdit,
+                      existingService: widget.service,
+                    );
+                  },
                 ),
                 SizedBox(height: 20.h),
               ],

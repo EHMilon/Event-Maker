@@ -88,4 +88,17 @@ class SPServicesController extends GetxController {
   void refreshServices() {
     loadMockData();
   }
+
+  /// Add a new service to the list
+  void addService(ServiceModel service) {
+    services.insert(0, service);
+  }
+
+  /// Update an existing service in the list
+  void updateService(ServiceModel updatedService) {
+    final index = services.indexWhere((s) => s.id == updatedService.id);
+    if (index != -1) {
+      services[index] = updatedService;
+    }
+  }
 }

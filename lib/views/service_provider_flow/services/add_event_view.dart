@@ -4,13 +4,40 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../data/models/service_model.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/primary_text_button.dart';
 import '../../../shared/widgets/upload_widget.dart';
 import 'add_event_controller.dart';
 
-class AddEventView extends GetView<AddEventController> {
-  const AddEventView({super.key});
+class AddEventView extends StatefulWidget {
+  final ServiceModel? service;
+  final bool isEdit;
+
+  const AddEventView({
+    super.key,
+    this.service,
+    this.isEdit = false,
+  });
+
+  @override
+  State<AddEventView> createState() => _AddEventViewState();
+}
+
+class _AddEventViewState extends State<AddEventView> {
+  late final AddEventController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<AddEventController>();
+    // Initialize with service data if editing
+    Future.delayed(Duration.zero, () {
+      if (widget.isEdit && widget.service != null) {
+        controller.initWithService(widget.service!);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +51,7 @@ class AddEventView extends GetView<AddEventController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Add New Event',
+          widget.isEdit ? 'Edit Event' : 'Add New Event',
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -127,8 +154,13 @@ class AddEventView extends GetView<AddEventController> {
                 ),
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
-                  text: 'Add Event',
-                  onPressed: () => controller.addEvent(),
+                  text: widget.isEdit ? 'Update Event' : 'Add Event',
+                  onPressed: () async {
+                    await controller.addEvent(
+                      isEdit: widget.isEdit,
+                      existingService: widget.service,
+                    );
+                  },
                 ),
                 SizedBox(height: 20.h),
               ],

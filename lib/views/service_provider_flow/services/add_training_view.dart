@@ -4,13 +4,40 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/themes/app_colors.dart';
+import '../../../data/models/service_model.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/primary_text_button.dart';
 import '../../../shared/widgets/upload_widget.dart';
 import 'add_training_controller.dart';
 
-class AddTrainingView extends GetView<AddTrainingController> {
-  const AddTrainingView({super.key});
+class AddTrainingView extends StatefulWidget {
+  final ServiceModel? service;
+  final bool isEdit;
+
+  const AddTrainingView({
+    super.key,
+    this.service,
+    this.isEdit = false,
+  });
+
+  @override
+  State<AddTrainingView> createState() => _AddTrainingViewState();
+}
+
+class _AddTrainingViewState extends State<AddTrainingView> {
+  late final AddTrainingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<AddTrainingController>();
+    // Initialize with service data if editing
+    Future.delayed(Duration.zero, () {
+      if (widget.isEdit && widget.service != null) {
+        controller.initWithService(widget.service!);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +51,7 @@ class AddTrainingView extends GetView<AddTrainingController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Add New Training',
+          widget.isEdit ? 'Edit Training' : 'Add New Training',
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -117,8 +144,13 @@ class AddTrainingView extends GetView<AddTrainingController> {
                 ),
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
-                  text: 'Add Training',
-                  onPressed: () => controller.addTraining(),
+                  text: widget.isEdit ? 'Update Training' : 'Add Training',
+                  onPressed: () async {
+                    await controller.addTraining(
+                      isEdit: widget.isEdit,
+                      existingService: widget.service,
+                    );
+                  },
                 ),
                 SizedBox(height: 20.h),
               ],
