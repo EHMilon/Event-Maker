@@ -117,7 +117,7 @@ class ProviderDetailsView extends GetView<AuthController> {
     required Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       hint: Text(
         hint,
         style: TextStyle(

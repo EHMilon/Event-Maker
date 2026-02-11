@@ -1,5 +1,3 @@
-import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/views/notifications/notification_view.dart';
 import 'package:get/get.dart';
 
 class NotificationController extends GetxController {

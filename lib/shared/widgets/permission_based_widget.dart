@@ -43,7 +43,7 @@ class PermissionBasedWidget extends StatelessWidget {
   final VoidCallback? onPermissionDenied;
 
   const PermissionBasedWidget({
-    Key? key,
+    super.key,
     this.serviceProviderChild,
     this.customerChild,
     this.fallbackChild,
@@ -52,7 +52,7 @@ class PermissionBasedWidget extends StatelessWidget {
     this.fallbackBuilder,
     this.allowedRoles,
     this.onPermissionDenied,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,11 +112,11 @@ class EditButtonForServiceProviderOnly extends StatelessWidget {
   final IconData? icon;
 
   const EditButtonForServiceProviderOnly({
-    Key? key,
+    super.key,
     this.onPressed,
     this.text = 'Edit',
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -163,11 +163,11 @@ class ReactivePermissionWidget extends StatelessWidget {
   final Widget Function()? fallbackBuilder;
 
   const ReactivePermissionWidget({
-    Key? key,
+    super.key,
     required this.serviceProviderBuilder,
     required this.customerBuilder,
     this.fallbackBuilder,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

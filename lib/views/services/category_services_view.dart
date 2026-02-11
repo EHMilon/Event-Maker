@@ -1,5 +1,4 @@
 import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/views/services/category_services_controller.dart';
 import 'package:event_maker/views/services/service_detail_view.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';

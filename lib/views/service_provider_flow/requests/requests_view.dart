@@ -112,7 +112,7 @@ class RequestsView extends GetView<RequestsController> {
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
 
-    return '${day}$suffix $monthShort - $weekdayShort - $hour:$minute $period';
+    return '$day$suffix $monthShort - $weekdayShort - $hour:$minute $period';
   }
 
   String _getDaySuffix(int day) {

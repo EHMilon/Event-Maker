@@ -1,4 +1,3 @@
-import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/views/notifications/notification_controller.dart';

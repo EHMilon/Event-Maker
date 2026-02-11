@@ -97,7 +97,7 @@ class ProfileView extends GetView<ProfileController> {
                       value: controller.isAvailable.value,
                       onChanged: (value) =>
                           controller.toggleAvailability(value),
-                      activeColor: AppColors.primary,
+                      activeThumbColor: AppColors.primary,
                     ),
                   ),
                   _buildMenuItem(

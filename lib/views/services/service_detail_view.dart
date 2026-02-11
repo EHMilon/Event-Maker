@@ -101,7 +101,7 @@ class ServiceDetailView extends StatelessWidget {
   }
 
   Widget _buildDialogIcon(IconData iconData, Color color) {
-    return Container(
+    return SizedBox(
       width: 120.w,
       height: 100.h,
       child: Stack(
