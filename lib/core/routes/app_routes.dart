@@ -36,8 +36,8 @@ import 'package:event_maker/views/service_provider_flow/profile/profile_controll
 import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
-import 'package:event_maker/views/service_provider_flow/notifications/notification_view.dart';
 import 'package:event_maker/views/service_provider_flow/notifications/notification_binding.dart';
+import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:event_maker/views/customer_flow/notifications/notification_view.dart';
 import 'package:event_maker/views/customer_flow/notifications/notification_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
@@ -123,8 +123,10 @@ class AppRoutes {
   static final routes = [
     GetPage(
       name: notifications,
-      page: () => NotificationView(),
-      binding: NotificationBinding(),
+      page: () => const SPRequestsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<RequestsController>(() => RequestsController());
+      }),
     ),
     GetPage(
       name: customerNotifications,
@@ -133,8 +135,10 @@ class AppRoutes {
     ),
     GetPage(
       name: serviceProviderNotifications,
-      page: () => NotificationView(),
-      binding: NotificationBinding(),
+      page: () => const SPRequestsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<RequestsController>(() => RequestsController());
+      }),
     ),
     GetPage(
       name: spDocuments,

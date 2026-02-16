@@ -1,4 +1,5 @@
 import 'package:event_maker/views/service_provider_flow/notifications/notification_controller.dart';
+import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:get/get.dart';
 
 class ServiceProviderController extends GetxController {
@@ -13,5 +14,6 @@ class ServiceProviderController extends GetxController {
   void onInit() {
     super.onInit();
     Get.lazyPut<NotificationController>(() => NotificationController());
+    Get.lazyPut<RequestsController>(() => RequestsController());
   }
 }
