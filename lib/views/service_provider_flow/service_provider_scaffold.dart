@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:event_maker/views/profile/service_provider_profile_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/sp_services_view.dart';
-import 'package:event_maker/views/service_provider_flow/requests/requests_view.dart';
+import 'package:event_maker/views/service_provider_flow/profile/service_provider_profile_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/services_view.dart';
+import 'package:event_maker/views/service_provider_flow/notifications/notification_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ServiceProviderScaffold extends GetView<ServiceProviderController> {
@@ -17,8 +17,8 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const SPHomeView(),
-      const RequestsView(),
-      const SPServicesView(),
+        NotificationView(),
+        const ServicesView(),
       const ServiceProviderProfileView(),
     ];
 
@@ -60,7 +60,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                 label: 'Home',
                 index: 0,
               ),
-              BottomNavigationBarItem(
+        BottomNavigationBarItem(
                 icon: Stack(
                   children: [
                     SvgPicture.asset(
@@ -87,17 +87,12 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                     ),
                   ],
                 ),
-                label: 'Requests',
+                label: 'Notifications',
               ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.settings_outlined,
-                  size: 24.h,
-                  color: controller.selectedIndex == 2
-                      ? AppColors.primary
-                      : const Color(0xFFB0B0C3),
-                ),
+              _buildBottomNavItem(
+                iconPath: 'assets/icons/service.svg',
                 label: 'Services',
+                index: 2,
               ),
               _buildBottomNavItem(
                 iconPath: 'assets/icons/profile.svg',

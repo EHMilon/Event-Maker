@@ -93,7 +93,7 @@ class SPHomeView extends GetView<SPHomeController> {
           ],
         ),
         InkWell(
-          onTap: () => Get.toNamed(AppRoutes.notifications),
+          onTap: () => Get.toNamed(AppRoutes.serviceProviderNotifications),
           borderRadius: BorderRadius.circular(50.r),
           child: Container(
             height: 44.h,

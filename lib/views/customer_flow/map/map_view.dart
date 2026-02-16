@@ -81,7 +81,7 @@ class MapView extends GetView<MapController> {
                       ),
                       SizedBox(height: 24.h),
                       // Select Main Category
-                      _buildLabel('Select Categories'),
+                      _buildLabel('Categories'),
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -127,7 +127,7 @@ class MapView extends GetView<MapController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildLabel('Select Categories'),
+                          _buildLabel('Sub Categories'),
                           TextButton(
                             onPressed: () => controller.selectAll(),
                             child: Text(

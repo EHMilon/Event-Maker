@@ -7,8 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-import 'package:event_maker/views/profile/profile_view.dart';
-import 'package:event_maker/views/customer_flow/bookmarks/bookmarks_view.dart';
+import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
+import 'package:event_maker/views/customer_flow/requests/customer_requests_view.dart';
 
 class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   const CustomerFlowScaffold({super.key});
@@ -18,17 +18,17 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
     final List<Widget> pages = [
       const HomeView(),
       const MapView(),
-      const BookmarksView(),
+      const CustomerRequestsView(),
       const ProfileView(),
     ];
 
     return Scaffold(
       body: Obx(
-        () => IndexedStack(index: controller.selectedIndex, children: pages),
+        () => IndexedStack(index: controller.selectedIndex.value, children: pages),
       ),
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
-          currentIndex: controller.selectedIndex,
+          currentIndex: controller.selectedIndex.value,
           onTap: controller.changeIndex,
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.primary,
@@ -49,7 +49,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                 'assets/icons/home.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 0
+                  controller.selectedIndex.value == 0
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
@@ -62,7 +62,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                 'assets/icons/map.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 1
+                  controller.selectedIndex.value == 1
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
@@ -72,23 +72,23 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
-                'assets/icons/booking.svg',
+                'assets/icons/notification.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 2
+                  controller.selectedIndex.value == 2
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Bookings',
+              label: 'Notifications',
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
                 'assets/icons/profile.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 3
+                  controller.selectedIndex.value == 3
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,

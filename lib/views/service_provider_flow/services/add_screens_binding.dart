@@ -1,13 +1,9 @@
 import 'package:get/get.dart';
-import 'add_service_controller.dart';
-import 'add_event_controller.dart';
-import 'add_training_controller.dart';
 
-class AddScreensBinding extends Bindings {
+class AddScreensBinding implements Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AddServiceController>(() => AddServiceController());
-    Get.lazyPut<AddEventController>(() => AddEventController());
-    Get.lazyPut<AddTrainingController>(() => AddTrainingController());
+    // TODO: Add any required dependencies for the add screens
+    // For example: Get.lazyPut(() => YourController());
   }
 }

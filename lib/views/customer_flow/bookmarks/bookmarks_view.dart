@@ -1,11 +1,11 @@
-import 'package:event_maker/views/services/service_detail_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/themes/app_colors.dart';
-import '../../profile/profile_controller.dart';
+import '../../service_provider_flow/profile/profile_controller.dart';
 
 class BookmarksView extends GetView<ProfileController> {
   const BookmarksView({super.key});

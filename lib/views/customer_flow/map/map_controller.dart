@@ -8,7 +8,7 @@ class MapController extends GetxController {
   final locationSearch = ''.obs;
 
   final selectedMainCategory = 'Hospitality'.obs;
-  final mainCategories = ['Hospitality', 'Event Maker', 'Professional Trainer'];
+  final mainCategories = ['Hospitality', 'Event', 'Professional Trainer'];
 
   final selectedSubCategories = <String>[].obs;
   final subCategories = <Map<String, dynamic>>[].obs;

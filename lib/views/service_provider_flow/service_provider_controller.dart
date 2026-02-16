@@ -1,3 +1,4 @@
+import 'package:event_maker/views/service_provider_flow/notifications/notification_controller.dart';
 import 'package:get/get.dart';
 
 class ServiceProviderController extends GetxController {
@@ -6,5 +7,11 @@ class ServiceProviderController extends GetxController {
 
   void changeIndex(int index) {
     _selectedIndex.value = index;
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    Get.lazyPut<NotificationController>(() => NotificationController());
   }
 }

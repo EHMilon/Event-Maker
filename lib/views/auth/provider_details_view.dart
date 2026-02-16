@@ -56,7 +56,7 @@ class ProviderDetailsView extends GetView<AuthController> {
                       ? null
                       : controller.selectedServiceType.value,
                   hint: "Select",
-                  items: ['Hospitality', 'Event Maker', 'Professional Trainer'],
+                  items: ['Hospitality', 'Event', 'Professional Trainer'],
                   onChanged: controller.updateServiceType,
                 ),
               ),

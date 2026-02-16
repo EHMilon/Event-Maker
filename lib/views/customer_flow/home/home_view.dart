@@ -1,7 +1,7 @@
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/views/services/service_detail_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/home/home_controller.dart';
 import 'package:event_maker/views/customer_flow/home/widgets/category_item.dart';
@@ -85,7 +85,7 @@ class _HomeViewState extends State<HomeView> {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () => Get.toNamed(AppRoutes.notifications),
+                        onTap: () => Get.toNamed(AppRoutes.customerNotifications),
                         child: Container(
                           padding: EdgeInsets.all(10.r),
                           decoration: BoxDecoration(
