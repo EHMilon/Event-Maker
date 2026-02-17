@@ -47,7 +47,7 @@ class ServicesView extends GetView<SPServicesController> {
         Text(
           'My Services',
           style: GoogleFonts.inter(
-            fontSize: 22.sp,
+            fontSize: 24.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),

@@ -24,7 +24,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           title: Text(
             'My Profile',
             style: GoogleFonts.inter(
-              fontSize: 20.sp,
+              fontSize: 24.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),

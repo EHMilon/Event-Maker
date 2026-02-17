@@ -33,24 +33,36 @@ class ServiceDetailView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: 'Confirm Request Rejection',
-        subtitle:
-            'Are you sure you want to reject this request? Please note the client will be notified.',
-        mainButtonText: 'Reject',
+        title: 'confirmRejectTitle'.tr,
+        subtitle: 'confirmRejectSubtitle'.tr,
+        mainButtonText: 'reject'.tr,
         mainButtonColor: AppColors.error,
+        onMainButtonPressed: () {
+          // TODO: Send reject request to backend API
+          Get.back(); // Close confirmation dialog
+          _showRejectSuccessDialog(context);
+        },
+        icon: _buildDialogIcon(Icons.close, AppColors.error),
+      ),
+    );
+  }
+
+  void _showRejectSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ConfirmationDialog(
+        title: 'rejectSuccessTitle'.tr,
+        subtitle: 'rejectSuccessSubtitle'.tr,
+        mainButtonText: 'done'.tr,
+        mainButtonColor: AppColors.primary,
         onMainButtonPressed: () {
           final controller = Get.find<RequestsController>();
           controller.rejectRequest(service);
-          Get.back(); // Close dialog
+          Get.back(); // Close success dialog
           Get.back(); // Go back to list
-          Get.snackbar(
-            'Success',
-            'Request rejected',
-            backgroundColor: AppColors.error.withOpacity(0.1),
-            colorText: AppColors.error,
-          );
         },
-        icon: _buildDialogIcon(Icons.close, AppColors.error),
+        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
       ),
     );
   }
@@ -84,15 +96,33 @@ class ServiceDetailView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: 'Request Accepted Successfully',
-        subtitle:
-            'You have successfully accepted the request. The client will be notified shortly.',
-        mainButtonText: 'Done',
+        title: 'confirmAcceptTitle'.tr,
+        subtitle: 'confirmAcceptSubtitle'.tr,
+        mainButtonText: 'accept'.tr,
+        mainButtonColor: AppColors.primary,
+        onMainButtonPressed: () {
+          // TODO: Send accept request to backend API
+          Get.back(); // Close confirmation dialog
+          _showAcceptSuccessDialog(context);
+        },
+        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
+      ),
+    );
+  }
+
+  void _showAcceptSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ConfirmationDialog(
+        title: 'acceptSuccessTitle'.tr,
+        subtitle: 'acceptSuccessSubtitle'.tr,
+        mainButtonText: 'done'.tr,
         mainButtonColor: AppColors.primary,
         onMainButtonPressed: () {
           final controller = Get.find<RequestsController>();
           controller.acceptRequest(service);
-          Get.back(); // Close dialog
+          Get.back(); // Close success dialog
           Get.back(); // Go back to list
         },
         icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
@@ -142,7 +172,7 @@ class ServiceDetailView extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(iconData, color: Colors.white, size: 32.r),
+              child: Icon(iconData, color: AppColors.white, size: 32.r),
             ),
           ),
         ],
@@ -159,7 +189,7 @@ class ServiceDetailView extends StatelessWidget {
         service.type == ServiceType.catering;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: Stack(
         children: [
           // Background Image
@@ -184,10 +214,10 @@ class ServiceDetailView extends StatelessWidget {
                   expandedHeight: 200.h,
                   leading: IconButton(
                     icon: CircleAvatar(
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColors.white,
                       child: Icon(
                         Icons.arrow_back,
-                        color: Colors.black,
+                        color: AppColors.black,
                         size: 20.r,
                       ),
                     ),
@@ -211,7 +241,7 @@ class ServiceDetailView extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.white,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(30.r),
                         topRight: Radius.circular(30.r),
@@ -532,7 +562,7 @@ class ServiceDetailView extends StatelessWidget {
                                     margin: EdgeInsets.only(bottom: 16.h),
                                     padding: EdgeInsets.all(20.r),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: AppColors.white,
                                       borderRadius: BorderRadius.circular(20.r),
                                       border: Border.all(
                                         color: isSelected
@@ -542,7 +572,9 @@ class ServiceDetailView extends StatelessWidget {
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.05),
+                                          color: AppColors.black.withOpacity(
+                                            0.05,
+                                          ),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -585,7 +617,7 @@ class ServiceDetailView extends StatelessWidget {
                                                   ? Icon(
                                                       Icons.check,
                                                       size: 16.r,
-                                                      color: Colors.white,
+                                                      color: AppColors.white,
                                                     )
                                                   : null,
                                             ),
@@ -696,17 +728,20 @@ class ServiceDetailView extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.white,
                               padding: EdgeInsets.symmetric(vertical: 16.h),
+                              side: const BorderSide(
+                                color: AppColors.lightGrey,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.r),
                               ),
                               elevation: 0,
                             ),
                             child: Text(
-                              'Reject',
+                              'reject'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black,
+                                color: AppColors.black,
                               ),
                             ),
                           ),
@@ -714,8 +749,11 @@ class ServiceDetailView extends StatelessWidget {
                         SizedBox(width: 16.w),
                         Expanded(
                           child: PrimaryTextButton(
-                            onPressed: () => _showAcceptDialog(context),
-                            text: 'Accept',
+                            onPressed: () {
+                              // TODO: Integrate backend for accepting request
+                              _showAcceptDialog(context);
+                            },
+                            text: 'accept'.tr,
                           ),
                         ),
                       ],

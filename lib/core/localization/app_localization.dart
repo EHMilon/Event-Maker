@@ -168,6 +168,24 @@ class AppLocalization extends Translations {
     'fromLastMonth': 'from last month',
     'noActiveOrdersFound': 'No active orders found',
     'retry': 'Retry',
+
+    // Service Provider Requests
+    'requests': 'Requests',
+    'noRequestsYet': 'No requests yet',
+    'accept': 'Accept',
+    'reject': 'Reject',
+    'cancel': 'Cancel',
+    'done': 'Done',
+    'requestDetails': 'Request Details',
+    'confirmAcceptTitle': 'Confirm Request Acceptance',
+    'confirmAcceptSubtitle': 'Are you sure you want to accept this request?',
+    'confirmRejectTitle': 'Confirm Request Rejection',
+    'confirmRejectSubtitle': 'Are you sure you want to reject this request?',
+    'acceptSuccessTitle': 'Request Accepted Successfully',
+    'acceptSuccessSubtitle':
+        'You have successfully accepted the request. The client will be notified shortly.',
+    'rejectSuccessTitle': 'Request Rejected Successfully',
+    'rejectSuccessSubtitle': 'You have successfully rejected the request.',
   };
 
   // Arabic translations
@@ -314,5 +332,22 @@ class AppLocalization extends Translations {
     'fromLastMonth': 'منذ الشهر الماضي',
     'noActiveOrdersFound': 'لم يتم العثور على طلبات نشطة',
     'retry': 'إعادة المحاولة',
+
+    // Service Provider Requests
+    'requests': 'الطلبات',
+    'noRequestsYet': 'لا توجد طلبات بعد',
+    'accept': 'قبول',
+    'reject': 'رفض',
+    'cancel': 'إلغاء',
+    'done': 'تم',
+    'requestDetails': 'تفاصيل الطلب',
+    'confirmAcceptTitle': 'تأكيد قبول الطلب',
+    'confirmAcceptSubtitle': 'هل أنت متأكد أنك تريد قبول هذا الطلب؟',
+    'confirmRejectTitle': 'تأكيد رفض الطلب',
+    'confirmRejectSubtitle': 'هل أنت متأكد أنك تريد رفض هذا الطلب؟',
+    'acceptSuccessTitle': 'تم قبول الطلب بنجاح',
+    'acceptSuccessSubtitle': 'لقد قبلت الطلب بنجاح. سيتم إخطار العميل قريباً.',
+    'rejectSuccessTitle': 'تم رفض الطلب بنجاح',
+    'rejectSuccessSubtitle': 'لقد رفضت الطلب بنجاح.',
   };
 }
