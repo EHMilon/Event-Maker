@@ -84,8 +84,8 @@ class SPServicesController extends GetxController {
     isLoading.value = false;
   }
 
-  void refreshServices() {
-    loadMockData();
+  Future<void> refreshServices() async {
+    await loadMockData();
   }
 
   /// Add a new service to the list
