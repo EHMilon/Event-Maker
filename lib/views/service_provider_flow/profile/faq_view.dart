@@ -11,16 +11,16 @@ class FAQView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'FAQ',
+          'faq'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -34,7 +34,10 @@ class FAQView extends GetView<ProfileController> {
           child: ListView.separated(
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
             itemCount: controller.faqs.length,
-            separatorBuilder: (context, index) => SizedBox(height: 16.h),
+            separatorBuilder: (context, index) => Divider(
+              color: AppColors.lightGrey.withOpacity(0.5),
+              height: 32.h,
+            ),
             itemBuilder: (context, index) {
               final faq = controller.faqs[index];
               return Column(
@@ -49,13 +52,13 @@ class FAQView extends GetView<ProfileController> {
                           faq['isExpanded'].value
                               ? Icons.remove_circle_outline
                               : Icons.add_circle_outline,
-                          color: Colors.grey,
+                          color: AppColors.primary,
                           size: 20.sp,
                         ),
                         SizedBox(width: 12.w),
                         Expanded(
                           child: Text(
-                            faq['question'],
+                            faq['question'].toString().tr,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
@@ -69,27 +72,24 @@ class FAQView extends GetView<ProfileController> {
                   Obx(
                     () => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      height: faq['isExpanded'].value ? 100.h : 0,
-                      child: SingleChildScrollView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        child: faq['isExpanded'].value
-                            ? Padding(
-                                padding: EdgeInsets.only(
-                                  left: 32.w,
-                                  top: 8.h,
-                                  bottom: 8.h,
+                      height: faq['isExpanded'].value ? null : 0,
+                      child: faq['isExpanded'].value
+                          ? Padding(
+                              padding: EdgeInsets.only(
+                                left: 32.w,
+                                top: 12.h,
+                                bottom: 8.h,
+                              ),
+                              child: Text(
+                                faq['answer'].toString().tr,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: AppColors.textSecondary,
+                                  height: 1.5,
                                 ),
-                                child: Text(
-                                  faq['answer'],
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey[600],
-                                    height: 1.5,
-                                  ),
-                                ),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                   ),
                 ],

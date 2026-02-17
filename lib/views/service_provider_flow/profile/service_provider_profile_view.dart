@@ -16,13 +16,12 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.backgroundLight,
           elevation: 0,
-
           title: Text(
-            'My Profile',
+            'myProfile'.tr,
             style: GoogleFonts.inter(
               fontSize: 24.sp,
               fontWeight: FontWeight.w600,
@@ -38,7 +37,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'settings', child: Text('Settings')),
+                PopupMenuItem(value: 'settings', child: Text('settings'.tr)),
               ],
             ),
           ],
@@ -56,18 +55,20 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                 ),
                 child: CircleAvatar(
                   radius: 50.r,
-                  backgroundImage: const AssetImage('assets/images/person.jpg'),
+                  backgroundImage: AssetImage(controller.profileImage.value),
                 ),
               ),
             ),
             SizedBox(height: 16.h),
             // Name
-            Text(
-              'Fresh Food L.L.C',
-              style: GoogleFonts.inter(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+            Obx(
+              () => Text(
+                controller.userName.value,
+                style: GoogleFonts.inter(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             SizedBox(height: 8.h),
@@ -114,9 +115,9 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w400,
                   ),
-                  tabs: const [
-                    Tab(text: '     ABOUT'),
-                    Tab(text: 'REVIEWS'),
+                  tabs: [
+                    Tab(text: 'about'.tr.toUpperCase()),
+                    Tab(text: 'reviews'.tr.toUpperCase()),
                   ],
                 ),
               ),
@@ -140,7 +141,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Certifications
-          _buildSectionTitle('Certifications'),
+          _buildSectionTitle('certifications'.tr),
           SizedBox(height: 16.h),
           _buildCertificationItem(
             'Professional Chef',
@@ -156,7 +157,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           SizedBox(height: 32.h),
 
           // Bio
-          _buildSectionTitle('Bio'),
+          _buildSectionTitle('bio'.tr),
           SizedBox(height: 12.h),
           Text(
             'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
@@ -169,7 +170,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           SizedBox(height: 32.h),
 
           // Services
-          _buildSectionTitle('Services'),
+          _buildSectionTitle('myServices'.tr),
           SizedBox(height: 16.h),
           SizedBox(
             height: 250.h,

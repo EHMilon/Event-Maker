@@ -13,16 +13,16 @@ class ChangePasswordView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Change Password',
+          'changePassword'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -40,7 +40,7 @@ class ChangePasswordView extends GetView<ProfileController> {
               children: [
                 SizedBox(height: 20.h),
                 Text(
-                  'Current Password',
+                  'currentPassword'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -64,7 +64,7 @@ class ChangePasswordView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 20.h),
                 Text(
-                  'New Password',
+                  'newPassword'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -88,7 +88,7 @@ class ChangePasswordView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 20.h),
                 Text(
-                  'Confirm New Password',
+                  'confirmPassword'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -113,7 +113,7 @@ class ChangePasswordView extends GetView<ProfileController> {
                 SizedBox(height: 200.h),
                 PrimaryTextButton(
                   onPressed: () => controller.changePassword(),
-                  text: 'Update',
+                  text: 'update'.tr,
                 ),
                 SizedBox(height: 24.h),
               ],

@@ -70,33 +70,61 @@ class CertificationController extends GetxController {
   }
 
   void addCertification() {
-    if (titleController.text.isNotEmpty &&
-        instituteController.text.isNotEmpty) {
+    if (titleController.text.isEmpty || instituteController.text.isEmpty) {
+      Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
+      return;
+    }
+
+    isLoading.value = true;
+    Future.delayed(const Duration(seconds: 1), () {
       final newCert = CertificationModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         title: titleController.text,
         school: instituteController.text,
         date: dateController.text,
-        imageUrl: selectedImage.value?.path ?? 'assets/images/certificate.png',
+        imageUrl: selectedImage.value?.path ?? 'assets/icons/scroll-text.svg',
       );
-      certifications.add(newCert);
+      certifications.insert(0, newCert);
+      isLoading.value = false;
       Get.back();
+      Get.snackbar(
+        'success'.tr,
+        'certAddedSuccess'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+      );
       clearFields();
-    }
+    });
   }
 
   void updateCertification(String id) {
+    if (titleController.text.isEmpty || instituteController.text.isEmpty) {
+      Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
+      return;
+    }
+
     final index = certifications.indexWhere((c) => c.id == id);
     if (index != -1) {
-      certifications[index] = certifications[index].copyWith(
-        title: titleController.text,
-        school: instituteController.text,
-        date: dateController.text,
-        imageUrl: selectedImage.value?.path ?? imageUrl.value,
-      );
-      Get.back(); // Back to view
-      Get.back(); // Back to list (or update the view)
-      clearFields();
+      isLoading.value = true;
+      Future.delayed(const Duration(seconds: 1), () {
+        certifications[index] = certifications[index].copyWith(
+          title: titleController.text,
+          school: instituteController.text,
+          date: dateController.text,
+          imageUrl: selectedImage.value?.path ?? imageUrl.value,
+        );
+        isLoading.value = false;
+        Get.back(); // Back to list view
+        Get.snackbar(
+          'success'.tr,
+          'certUpdatedSuccess'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withOpacity(0.8),
+          colorText: Colors.white,
+        );
+        clearFields();
+      });
     }
   }
 

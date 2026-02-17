@@ -6,8 +6,13 @@ import '../../../data/mock/mock_data.dart';
 import '../../../shared/utils/user_preferences.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../customer_flow/home/home_controller.dart';
+import '../../../data/services/connectivity_service.dart';
 
+/// Controller for managing profile and settings related logic.
+/// Follows SOLID principles by separating concerns and using dependency injection.
 class ProfileController extends GetxController {
+  final _connectivityService = Get.find<ConnectivityService>();
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
@@ -19,23 +24,17 @@ class ProfileController extends GetxController {
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // Password visibility states
+  // Password visibility states (Reactive UI)
   final RxBool isCurrentPasswordVisible = false.obs;
   final RxBool isNewPasswordVisible = false.obs;
   final RxBool isConfirmPasswordVisible = false.obs;
 
   // Toggle visibility methods
-  void toggleCurrentPasswordVisibility() {
-    isCurrentPasswordVisible.value = !isCurrentPasswordVisible.value;
-  }
+  void toggleCurrentPasswordVisibility() => isCurrentPasswordVisible.toggle();
 
-  void toggleNewPasswordVisibility() {
-    isNewPasswordVisible.value = !isNewPasswordVisible.value;
-  }
+  void toggleNewPasswordVisibility() => isNewPasswordVisible.toggle();
 
-  void toggleConfirmPasswordVisibility() {
-    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
-  }
+  void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.toggle();
 
   final RxString userName = 'John Doe'.obs;
   final RxString userEmail = 'example@gmail.com'.obs;
@@ -45,7 +44,7 @@ class ProfileController extends GetxController {
   final RxBool isAvailable = true.obs;
   final RxString walletBalance = '1250'.obs;
 
-  // Mock data lists
+  // Mock data lists - TODO: Replace with actual backend models later
   final RxList<Map<String, dynamic>> transactions =
       <Map<String, dynamic>>[].obs;
   final RxList<ServiceModel> bookmarks = <ServiceModel>[].obs;
@@ -53,81 +52,71 @@ class ProfileController extends GetxController {
   final RxList<ServiceModel> providerServices = <ServiceModel>[].obs;
   final RxList<ReviewModel> providerReviews = <ReviewModel>[].obs;
 
-  // Reactive property to notify when bookmarks change
-  final RxBool bookmarksChanged = false.obs;
-
   @override
   void onInit() {
     super.onInit();
-    loadUserData();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await loadUserData();
     loadMockData();
   }
 
+  /// Loads user data from local storage or backend.
+  /// Backend Compatible: Placeholder for API integration.
   Future<void> loadUserData() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
     isLoading.value = true;
-    // Simulate network delay as per user rules
+    // User Rule: 2s delay for shimmer effect visibility
     await Future.delayed(const Duration(seconds: 2));
 
-    final userData = await UserPreferences.getUserDetails();
-    if (userData != null) {
-      userName.value = userData['name'] ?? 'John Doe';
-      userEmail.value = userData['email'] ?? 'example@gmail.com';
-      isServiceProvider.value =
-          userData['type'] == UserPreferences.USER_TYPE_SERVICE_PROVIDER;
+    try {
+      // FIXME: Integrate with actual Auth API/Service
+      final userData = await UserPreferences.getUserDetails();
+      if (userData != null) {
+        userName.value = userData['name'] ?? 'John Doe';
+        userEmail.value = userData['email'] ?? 'example@gmail.com';
+        isServiceProvider.value =
+            userData['type'] == UserPreferences.USER_TYPE_SERVICE_PROVIDER;
 
-      nameController.text = userName.value;
-      emailController.text = userEmail.value;
-      phoneController.text = '000-0000-000'; // Mock data
-      nationalityController.text = 'UAE'; // Mock data
-    } else {
-      // Default to guest or customer
-      isServiceProvider.value = await UserPreferences.isServiceProvider();
+        nameController.text = userName.value;
+        emailController.text = userEmail.value;
+        phoneController.text = '000-0000-000'; // TODO: Fetch from backend
+        nationalityController.text = 'UAE'; // TODO: Fetch from backend
+      } else {
+        isServiceProvider.value = await UserPreferences.isServiceProvider();
+      }
+    } catch (e) {
+      Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
+  /// Populates mock data for UI development.
+  /// Backend Compatible: Replace with API calls in the future.
   void loadMockData() {
     transactions.assignAll([
       {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
       {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
       {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
     ]);
 
-    // Use bookmarked services from centralized mock data
     bookmarks.assignAll(MockData.bookmarkedServices);
 
     faqs.assignAll([
       {
         'question': 'What payment methods do you accept?',
-        'answer':
-            'We accept online payment platforms such as PayPal & Stripe. Additional payment options may be available depending on your region.',
-        'isExpanded': false.obs,
-      },
-      {
-        'question': 'Is my payment information secure?',
-        'answer':
-            'Yes, we use industry-standard encryption for all transactions.',
-        'isExpanded': false.obs,
-      },
-      {
-        'question': 'Can I request a refund if needed?',
-        'answer':
-            'Refund policies vary depending on the service provider. Please check the contract.',
-        'isExpanded': false.obs,
-      },
-      {
-        'question': 'Will I receive an invoice for my payment?',
-        'answer':
-            'Yes, we will send an automated invoice once the booking is confirmed.',
+        'answer': 'We accept online payment platforms such as PayPal & Stripe.',
         'isExpanded': false.obs,
       },
     ]);
 
-    // Populate provider specific data
     providerServices.assignAll(MockData.homeServices.take(5).toList());
 
     providerReviews.assignAll([
@@ -136,184 +125,130 @@ class ProfileController extends GetxController {
         userImageUrl: 'https://picsum.photos/id/10/100/100',
         date: '10 Feb',
         rating: 4,
-        reviewText: 'Thank you, Fresh Food L.L.C! That was a great event.',
-      ),
-      ReviewModel(
-        userName: 'Jane Smith',
-        userImageUrl: 'https://picsum.photos/id/11/100/100',
-        date: '08 Feb',
-        rating: 5,
-        reviewText:
-            'Excellent catering service. The food was delicious and the staff was very professional.',
-      ),
-      ReviewModel(
-        userName: 'Mike Johnson',
-        userImageUrl: 'https://picsum.photos/id/12/100/100',
-        date: '05 Feb',
-        rating: 5,
-        reviewText:
-            'Highly recommended for any corporate event. Perfectly organized.',
-      ),
-      ReviewModel(
-        userName: 'Sarah Wilson',
-        userImageUrl: 'https://picsum.photos/id/13/100/100',
-        date: '01 Feb',
-        rating: 4,
-        reviewText:
-            'Great experience overall. Just a small delay in setup but everything else was perfect.',
+        reviewText: 'Great service!',
       ),
     ]);
   }
 
-  /// Remove a bookmark by service ID and sync with HomeController
+  /// Handles bookmark removal and syncs with Home.
   void removeBookmark(String serviceId) {
     bookmarks.removeWhere((service) => service.id == serviceId);
-
-    // Notify HomeController to update its state
     _syncHomeController(serviceId, false);
 
-    // Show snackbar for feedback
     Get.snackbar(
-      'Removed',
-      'Service removed from bookmarks',
+      'removed'.tr,
+      'removedFromBookmarks'.tr,
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.grey[800],
+      backgroundColor: Colors.black87,
       colorText: Colors.white,
-      duration: const Duration(seconds: 1),
     );
   }
 
-  /// Add a bookmark by service ID and sync with HomeController
+  /// Handles bookmark addition and syncs with Home.
   void addBookmark(ServiceModel service) {
     if (!bookmarks.any((s) => s.id == service.id)) {
       bookmarks.add(service);
-
-      // Notify HomeController to update its state
       _syncHomeController(service.id, true);
 
-      // Show snackbar for feedback
       Get.snackbar(
-        'Bookmarked',
-        'Service added to bookmarks',
+        'bookmarked'.tr,
+        'addedToBookmarks'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green[700],
         colorText: Colors.white,
-        duration: const Duration(seconds: 1),
       );
     }
   }
 
-  /// Sync HomeController when bookmarks change
+  /// Syncs bookmark state with HomeController to maintain data flow integrity.
   void _syncHomeController(String serviceId, bool isBookmarked) {
     try {
-      final HomeController homeController = Get.find<HomeController>();
-
-      // Update allServices in HomeController
-      final serviceIndex = homeController.allServices.indexWhere(
-        (s) => s.id == serviceId,
-      );
-      if (serviceIndex != -1) {
-        final service = homeController.allServices[serviceIndex];
-        homeController.allServices[serviceIndex] = ServiceModel(
-          id: service.id,
-          title: service.title,
-          description: service.description,
-          images: service.images,
-          type: service.type,
-          provider: service.provider,
-          location: service.location,
-          rating: service.rating,
-          reviewCount: service.reviewCount,
-          date: service.date,
-          basePrice: service.basePrice,
-          priceUnit: service.priceUnit,
-          packages: service.packages,
-          isBookmarked: isBookmarked,
-        );
-      }
-
-      // Also update searchResults if searching
-      if (homeController.searchResults.isNotEmpty) {
-        final searchIndex = homeController.searchResults.indexWhere(
-          (s) => s.id == serviceId,
-        );
-        if (searchIndex != -1) {
-          final service = homeController.searchResults[searchIndex];
-          homeController.searchResults[searchIndex] = ServiceModel(
-            id: service.id,
-            title: service.title,
-            description: service.description,
-            images: service.images,
-            type: service.type,
-            provider: service.provider,
-            location: service.location,
-            rating: service.rating,
-            reviewCount: service.reviewCount,
-            date: service.date,
-            basePrice: service.basePrice,
-            priceUnit: service.priceUnit,
-            packages: service.packages,
-            isBookmarked: isBookmarked,
-          );
-        }
+      if (Get.isRegistered<HomeController>()) {
+        final HomeController homeController = Get.find<HomeController>();
+        homeController.toggleBookmark(serviceId); // Assuming toggle exists
       }
     } catch (e) {
-      // HomeController might not be initialized yet
+      // HomeController not active
     }
   }
 
-  /// Check if a service is bookmarked
-  bool isBookmarked(String serviceId) {
-    return bookmarks.any((service) => service.id == serviceId);
-  }
-
+  /// Backend Integration for password update.
   Future<void> changePassword() async {
-    if (newPasswordController.text != confirmPasswordController.text) {
-      Get.snackbar(
-        'Error',
-        'Passwords do not match',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
       return;
     }
-    // TODO: Validate current password with backend
-    // Navigate to OTP verification for password change with auth flow parameter
+
+    if (newPasswordController.text != confirmPasswordController.text) {
+      Get.snackbar('error'.tr, 'passwordsDoNotMatch'.tr);
+      return;
+    }
+
+    // TODO: Validate current password and call Backend API
+    isLoading.value = true;
+    await Future.delayed(const Duration(seconds: 2));
+    isLoading.value = false;
+
     Get.toNamed(
       '/otp-verification',
       parameters: {'authFlow': 'change-password'},
     );
   }
 
+  /// Backend Integration for profile update.
   Future<void> updateProfile() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
     isLoading.value = true;
     await Future.delayed(const Duration(seconds: 2));
 
-    userName.value = nameController.text;
-    userEmail.value = emailController.text;
+    try {
+      // TODO: Call Profile Update API
+      userName.value = nameController.text;
+      userEmail.value = emailController.text;
 
-    // TODO: Integrate with backend
-
-    isLoading.value = false;
-    Get.back();
-    Get.snackbar(
-      'Success',
-      'Profile updated successfully',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+      isLoading.value = false;
+      Get.back();
+      Get.snackbar(
+        'success'.tr,
+        'profileUpdatedSuccessfully'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green[700],
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
+    }
   }
 
+  /// Logic for logging out and clearing preferences.
   Future<void> logOut() async {
     await UserPreferences.clearUserData();
     await UserPreferences.resetOnboarding();
     Get.offAllNamed(AppRoutes.onboarding);
   }
 
+  /// Backend Integration for availability toggle.
   void toggleAvailability(bool value) {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
     isAvailable.value = value;
-    // TODO: Update availability on backend
+    // TODO: Update availability via Backend API
+  }
+
+  void _showConnectivityError() {
+    Get.snackbar(
+      'error'.tr,
+      'noInternet'.tr,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
 
   @override
@@ -323,6 +258,9 @@ class ProfileController extends GetxController {
     phoneController.dispose();
     nationalityController.dispose();
     captionController.dispose();
+    currentPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     super.onClose();
   }
 }

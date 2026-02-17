@@ -16,16 +16,16 @@ class ViewCertificateView extends GetView<CertificationController> {
     final CertificationModel cert = Get.arguments;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'View Certificate',
+          'viewCertification'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -44,7 +44,7 @@ class ViewCertificateView extends GetView<CertificationController> {
               height: 250.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: AppColors.lightGrey),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12.r),
@@ -52,21 +52,21 @@ class ViewCertificateView extends GetView<CertificationController> {
                     ? cert.imageUrl!.startsWith('assets/')
                           ? Image.asset(cert.imageUrl!, fit: BoxFit.cover)
                           : Image.file(File(cert.imageUrl!), fit: BoxFit.cover)
-                    : const Icon(
+                    : Icon(
                         Icons.description,
-                        size: 50,
-                        color: Colors.grey,
+                        size: 50.sp,
+                        color: AppColors.lightGrey,
                       ),
               ),
             ),
             SizedBox(height: 32.h),
 
             // Details
-            _buildDetailField('Document Title', cert.title),
+            _buildDetailField('certName'.tr, cert.title),
             SizedBox(height: 16.h),
-            _buildDetailField('Institute', cert.school),
+            _buildDetailField('issuedBy'.tr, cert.school),
             SizedBox(height: 16.h),
-            _buildDetailField('Passing Year', cert.date),
+            _buildDetailField('issueDate'.tr, cert.date),
 
             SizedBox(height: 100.h),
             // Edit Button
@@ -89,7 +89,7 @@ class ViewCertificateView extends GetView<CertificationController> {
                   ),
                 ),
                 child: Text(
-                  'Edit',
+                  'edit'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -121,9 +121,9 @@ class ViewCertificateView extends GetView<CertificationController> {
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.white,
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(color: AppColors.lightGrey.withOpacity(0.5)),
           ),
           child: Text(
             value,

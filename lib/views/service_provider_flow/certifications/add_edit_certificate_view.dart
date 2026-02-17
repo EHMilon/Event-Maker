@@ -18,16 +18,16 @@ class AddEditCertificateView extends GetView<CertificationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          isEdit ? 'Edit Certificate' : 'Add Certificate',
+          isEdit ? 'editCertification'.tr : 'addCertification'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -48,10 +48,10 @@ class AddEditCertificateView extends GetView<CertificationController> {
                   width: double.infinity,
                   height: 180.h,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: Colors.grey.shade300,
+                      color: AppColors.lightGrey,
                       style: BorderStyle.solid,
                     ),
                   ),
@@ -78,11 +78,11 @@ class AddEditCertificateView extends GetView<CertificationController> {
                             Icon(
                               Icons.cloud_upload_outlined,
                               size: 40.sp,
-                              color: Colors.grey,
+                              color: AppColors.textSecondary.withOpacity(0.5),
                             ),
                             SizedBox(height: 8.h),
                             Text(
-                              'Upload',
+                              'upload'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w500,
@@ -93,7 +93,7 @@ class AddEditCertificateView extends GetView<CertificationController> {
                               'PDF, JPG or PNG',
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
-                                color: Colors.grey.shade400,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -105,19 +105,19 @@ class AddEditCertificateView extends GetView<CertificationController> {
 
             // Form Fields
             _buildInputField(
-              'Document Title',
+              'certName'.tr,
               'Your title goes here...',
               controller.titleController,
             ),
             SizedBox(height: 16.h),
             _buildInputField(
-              'Institute',
+              'issuedBy'.tr,
               'Institute Name',
               controller.instituteController,
             ),
             SizedBox(height: 16.h),
             _buildInputField(
-              'Passing Year',
+              'issueDate'.tr,
               'dd/mm/yyyy',
               controller.dateController,
               isDate: true,
@@ -144,7 +144,7 @@ class AddEditCertificateView extends GetView<CertificationController> {
                   ),
                 ),
                 child: Text(
-                  isEdit ? 'Update' : 'Upload',
+                  isEdit ? 'update'.tr : 'upload'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -180,6 +180,10 @@ class AddEditCertificateView extends GetView<CertificationController> {
         TextField(
           controller: textController,
           readOnly: isDate,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: AppColors.textPrimary,
+          ),
           onTap: isDate
               ? () async {
                   final date = await showDatePicker(
@@ -198,7 +202,7 @@ class AddEditCertificateView extends GetView<CertificationController> {
             hintText: hint,
             hintStyle: GoogleFonts.inter(
               fontSize: 14.sp,
-              color: Colors.grey.shade400,
+              color: AppColors.textSecondary.withOpacity(0.4),
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
@@ -206,11 +210,11 @@ class AddEditCertificateView extends GetView<CertificationController> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: AppColors.lightGrey),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: AppColors.lightGrey),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),

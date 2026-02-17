@@ -14,16 +14,16 @@ class ProfileSettingsView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Profile Settings',
+          'profileSettings'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -67,9 +67,16 @@ class ProfileSettingsView extends GetView<ProfileController> {
                           onTap: () => Get.toNamed(AppRoutes.addImage),
                           child: Container(
                             padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
                               shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: Icon(
                               Icons.camera_alt_outlined,
@@ -85,7 +92,7 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 32.h),
 
                 Text(
-                  'Full Name',
+                  'fullName'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -95,12 +102,12 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.nameController,
-                  hintText: 'Full Name',
+                  hintText: 'fullNamePlaceholder'.tr,
                 ),
 
                 SizedBox(height: 20.h),
                 Text(
-                  'Email',
+                  'email'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -110,13 +117,13 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.emailController,
-                  hintText: 'Email',
+                  hintText: 'emailPlaceholder'.tr,
                   keyboardType: TextInputType.emailAddress,
                 ),
 
                 SizedBox(height: 20.h),
                 Text(
-                  'Phone',
+                  'phone'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -126,13 +133,13 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.phoneController,
-                  hintText: 'Phone',
+                  hintText: 'phoneNumber'.tr,
                   keyboardType: TextInputType.phone,
                 ),
 
                 SizedBox(height: 20.h),
                 Text(
-                  'Nationality',
+                  'nationality'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -142,13 +149,13 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.nationalityController,
-                  hintText: 'Nationality',
+                  hintText: 'selectNationality'.tr,
                 ),
 
                 SizedBox(height: 48.h),
                 PrimaryTextButton(
                   onPressed: () => controller.updateProfile(),
-                  text: 'Update',
+                  text: 'update'.tr,
                 ),
                 SizedBox(height: 24.h),
               ],

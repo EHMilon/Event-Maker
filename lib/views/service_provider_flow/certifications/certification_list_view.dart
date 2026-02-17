@@ -13,16 +13,16 @@ class CertificationListView extends GetView<CertificationController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Certification',
+          'certifications'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -50,7 +50,7 @@ class CertificationListView extends GetView<CertificationController> {
                   Icon(Icons.add, size: 18.sp, color: Colors.white),
                   SizedBox(width: 4.w),
                   Text(
-                    'Add',
+                    'add'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
