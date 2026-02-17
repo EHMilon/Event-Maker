@@ -87,7 +87,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                     ),
                   ],
                 ),
-                label: 'Notifications',
+                label: 'Requests',
               ),
               _buildBottomNavItem(
                 iconPath: 'assets/icons/service.svg',

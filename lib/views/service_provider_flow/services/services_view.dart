@@ -1,6 +1,6 @@
-import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
-import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
-import 'package:event_maker/shared/widgets/services_card.dart';
+import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/shared/widgets/add_options_bottom_sheet.dart';
 import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/services_controller.dart';
 import 'package:flutter/material.dart';
@@ -13,96 +13,207 @@ class ServicesView extends GetView<ServicesController> {
 
   @override
   Widget build(BuildContext context) {
-    // If controller is not registered (e.g. reused in another tab), ensure it exists.
-    // However, usually Binding handles this.
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          'Services',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
+      backgroundColor: AppColors.backgroundLight,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => AddOptionsBottomSheet.show(context),
+        backgroundColor: AppColors.primary,
+        child: Icon(Icons.add, size: 28.r),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              SizedBox(height: 20.h),
+              _buildSearchRow(),
+              SizedBox(height: 20.h),
+              Expanded(child: _buildContent()),
+            ],
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.map_outlined, color: Colors.black),
-            onPressed: () => Get.to(
-              () => const MapResultsView(),
-              binding: MapResultsBinding(),
-              transition: Transition.fadeIn,
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Text(
+      'Services',
+      style: TextStyle(
+        fontSize: 22.sp,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildSearchRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller.searchController,
+            onChanged: controller.search,
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              hintText: 'Search...',
+              hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+              prefixIcon: Icon(Icons.search, color: AppColors.primary, size: 24.r),
+              filled: true,
+              fillColor: AppColors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16.r),
+                borderSide: BorderSide(color: AppColors.borderLight),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16.r),
+                borderSide: BorderSide(color: AppColors.borderLight),
+              ),
             ),
           ),
-          SizedBox(width: 8.w),
-        ],
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-        child: Obx(() {
-          if (controller.isLoading.value) {
+        ),
+        
+      ],
+    );
+  }
+
+  Widget _buildContent() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return ListView.separated(
+          itemCount: 4,
+          separatorBuilder: (context, index) => SizedBox(height: 12.h),
+          itemBuilder: (context, index) {
             return Skeletonizer(
               enabled: true,
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 16.w,
-                  mainAxisSpacing: 16.h,
+              child: Container(
+                height: 100.h,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(16.r),
                 ),
-                itemCount: 6,
-                itemBuilder: (context, index) {
-                  return ServicesCard(
-                    imagePath:
-                        'assets/images/cooking.png', // Placeholder for skeleton
-                    title: 'Service Title',
-                    location: 'Location',
-                    price: '100',
-                    rating: '4.5',
-                    isBookmarked: false,
-                    onTap: () {},
-                  );
-                },
               ),
             );
-          }
+          },
+        );
+      }
 
-          return GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16.w,
-              mainAxisSpacing: 16.h,
+      final services = controller.filteredServices;
+      if (services.isEmpty) {
+        return Center(
+          child: Text(
+            'No services found',
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: AppColors.textSecondary,
             ),
-            itemCount: controller.services.length,
-            itemBuilder: (context, index) {
-              final service = controller.services[index];
-              return ServicesCard(
-                imagePath: service.images.isNotEmpty
-                    ? service.images.first
-                    : '',
-                title: service.title,
-                location: service.location,
-                price:
-                    '${service.basePrice?.toInt() ?? 0} ${service.priceUnit}',
-                rating: service.rating?.toString() ?? 'N/A',
-                isBookmarked: service.isBookmarked,
-                onTap: () {
-                  Get.to(() => ServiceDetailView(service: service));
-                },
-              );
-            },
+          ),
+        );
+      }
+
+      return ListView.separated(
+        itemCount: services.length,
+        separatorBuilder: (context, index) => SizedBox(height: 12.h),
+        itemBuilder: (context, index) {
+          final service = services[index];
+          return ServiceProviderServiceTile(
+            service: service,
+            onTap: () => Get.to(() => ServiceDetailView(service: service)),
           );
-        }),
+        },
+      );
+    });
+  }
+}
+
+class ServiceProviderServiceTile extends StatelessWidget {
+  final ServiceModel service;
+  final VoidCallback onTap;
+
+  const ServiceProviderServiceTile({
+    super.key,
+    required this.service,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final imagePath = service.images.isNotEmpty ? service.images.first : '';
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20.r),
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14.r),
+                child: imagePath.isNotEmpty
+                    ? Image.asset(
+                        imagePath,
+                        width: 80.w,
+                        height: 80.w,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        width: 80.w,
+                        height: 80.w,
+                        color: AppColors.lightGrey,
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: AppColors.grey,
+                          size: 28.r,
+                        ),
+                      ),
+              ),
+              SizedBox(width: 16.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      service.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      service.location,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
