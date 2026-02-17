@@ -7,7 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:event_maker/views/service_provider_flow/profile/service_provider_profile_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/services_view.dart';
-import 'package:event_maker/views/service_provider_flow/notifications/notification_view.dart';
+import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ServiceProviderScaffold extends GetView<ServiceProviderController> {
@@ -17,8 +17,8 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const SPHomeView(),
-        NotificationView(),
-        const ServicesView(),
+        const SPRequestsView(),
+      const ServicesView(),
       const ServiceProviderProfileView(),
     ];
 
@@ -87,7 +87,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                     ),
                   ],
                 ),
-                label: 'Notifications',
+                label: 'Requests',
               ),
               _buildBottomNavItem(
                 iconPath: 'assets/icons/service.svg',
