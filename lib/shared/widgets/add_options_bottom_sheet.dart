@@ -14,9 +14,7 @@ class AddOptionsBottomSheet extends StatelessWidget {
   const AddOptionsBottomSheet({super.key});
 
   static void show(BuildContext context) {
-    Get.bottomSheet(
-      _buildBottomSheetContent(),
-    );
+    Get.bottomSheet(_buildBottomSheetContent());
   }
 
   static Widget _buildBottomSheetContent() {
@@ -31,7 +29,7 @@ class AddOptionsBottomSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select Category',
+            'selectCategory'.tr,
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -41,7 +39,7 @@ class AddOptionsBottomSheet extends StatelessWidget {
           SizedBox(height: 20.h),
           _buildOptionItem(
             icon: Icons.miscellaneous_services,
-            title: 'Services',
+            title: 'services'.tr,
             onTap: () {
               Get.back();
               Get.to(
@@ -52,18 +50,15 @@ class AddOptionsBottomSheet extends StatelessWidget {
           ),
           _buildOptionItem(
             icon: Icons.event,
-            title: 'Events',
+            title: 'events'.tr,
             onTap: () {
               Get.back();
-              Get.to(
-                () => const AddEventView(),
-                binding: AddScreensBinding(),
-              );
+              Get.to(() => const AddEventView(), binding: AddScreensBinding());
             },
           ),
           _buildOptionItem(
             icon: Icons.school,
-            title: 'Trainings',
+            title: 'trainings'.tr,
             onTap: () {
               Get.back();
               Get.to(

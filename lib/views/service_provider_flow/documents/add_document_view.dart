@@ -22,7 +22,7 @@ class AddDocumentView extends GetView<DocumentsController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Add Document',
+          'addDocumentTitle'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -68,7 +68,7 @@ class AddDocumentView extends GetView<DocumentsController> {
                             ),
                             SizedBox(height: 12.h),
                             Text(
-                              'Upload',
+                              'upload'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
@@ -77,7 +77,7 @@ class AddDocumentView extends GetView<DocumentsController> {
                             ),
                             SizedBox(height: 4.h),
                             Text(
-                              'Upload images showcasing your service',
+                              'uploadDocumentSubtitle'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w400,
@@ -115,7 +115,7 @@ class AddDocumentView extends GetView<DocumentsController> {
                             TextButton(
                               onPressed: () => controller.pickDocument(),
                               child: Text(
-                                'Change File',
+                                'changeFile'.tr,
                                 style: TextStyle(color: AppColors.primary),
                               ),
                             ),
@@ -126,7 +126,7 @@ class AddDocumentView extends GetView<DocumentsController> {
             ),
             SizedBox(height: 30.h),
             Text(
-              'Document Title',
+              'documentTitleLabel'.tr,
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
@@ -137,7 +137,7 @@ class AddDocumentView extends GetView<DocumentsController> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: 'Your title goes here...',
+                hintText: 'serviceTitleHint'.tr,
                 hintStyle: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary.withOpacity(0.5),
@@ -176,7 +176,7 @@ class AddDocumentView extends GetView<DocumentsController> {
                       side: const BorderSide(color: Color(0xFFE5E7EB)),
                     ),
                     child: Text(
-                      'Cancel',
+                      'cancel'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -199,7 +199,7 @@ class AddDocumentView extends GetView<DocumentsController> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Add',
+                      'add'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,

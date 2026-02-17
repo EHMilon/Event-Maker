@@ -58,30 +58,50 @@ class AddServiceController extends GetxController {
     }
   }
 
-  Future<bool> saveService({bool isEdit = false, ServiceModel? existingService}) async {
+  Future<bool> saveService({
+    bool isEdit = false,
+    ServiceModel? existingService,
+  }) async {
     isLoading.value = true;
+    // Network Rules: 2s delay for shimmer/loading state visibility
     await Future.delayed(const Duration(seconds: 2));
 
-    // Create the service model from form data
+    // TODO: Validate required fields (title, description, location)
+    // TODO: Call Backend API to save/update service
+    // Example:
+    // try {
+    //   final response = await _apiService.post('/services', data: newService.toJson());
+    //   if (response.statusCode == 200) { ... }
+    // } catch (e) { ... }
+
+    // Create the service model from form data (Placeholder until Backend)
     final newService = ServiceModel(
-      id: existingService?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          existingService?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       title: titleController.text,
       description: descriptionController.text,
       location: locationController.text,
       images: existingService?.images ?? [],
       type: existingService?.type ?? ServiceType.photography,
-      provider: existingService?.provider ?? ServiceProvider(
-        name: 'Current User',
-        role: 'Service Provider',
-        imageUrl: 'https://i.pravatar.cc/150?u=user',
-      ),
+      provider:
+          existingService?.provider ??
+          ServiceProvider(
+            name: 'Current User',
+            role: 'Service Provider',
+            imageUrl: 'https://i.pravatar.cc/150?u=user',
+          ),
       basePrice: 0,
       priceUnit: 'AED',
-      packages: packages.map((p) => ServicePackage(
-        name: p.nameController.text,
-        price: double.tryParse(p.priceController.text) ?? 0,
-        features: p.features.where((f) => f.isNotEmpty).toList(),
-      )).toList(),
+      packages: packages
+          .map(
+            (p) => ServicePackage(
+              name: p.nameController.text,
+              price: double.tryParse(p.priceController.text) ?? 0,
+              features: p.features.where((f) => f.isNotEmpty).toList(),
+            ),
+          )
+          .toList(),
     );
 
     // Update the services list
@@ -94,7 +114,10 @@ class AddServiceController extends GetxController {
 
     isLoading.value = false;
     Get.back(result: true);
-    Get.snackbar('Success', isEdit ? 'Service updated successfully' : 'Service added successfully');
+    Get.snackbar(
+      'Success',
+      isEdit ? 'Service updated successfully' : 'Service added successfully',
+    );
     return true;
   }
 

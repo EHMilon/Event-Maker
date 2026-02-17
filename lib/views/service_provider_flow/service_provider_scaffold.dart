@@ -17,7 +17,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const SPHomeView(),
-        const SPRequestsView(),
+      const SPRequestsView(),
       const ServicesView(),
       const ServiceProviderProfileView(),
     ];
@@ -57,10 +57,10 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
             items: [
               _buildBottomNavItem(
                 iconPath: 'assets/icons/home.svg',
-                label: 'Home',
+                label: 'home'.tr,
                 index: 0,
               ),
-        BottomNavigationBarItem(
+              BottomNavigationBarItem(
                 icon: Stack(
                   children: [
                     SvgPicture.asset(
@@ -87,16 +87,16 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                     ),
                   ],
                 ),
-                label: 'Requests',
+                label: 'requests'.tr,
               ),
               _buildBottomNavItem(
                 iconPath: 'assets/icons/service.svg',
-                label: 'Services',
+                label: 'myServices'.tr,
                 index: 2,
               ),
               _buildBottomNavItem(
                 iconPath: 'assets/icons/profile.svg',
-                label: 'Profile',
+                label: 'profile'.tr,
                 index: 3,
               ),
             ],

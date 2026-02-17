@@ -15,6 +15,7 @@ class DocumentsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // TODO: Fetch documents from backend API
     _loadMockDocuments();
   }
 

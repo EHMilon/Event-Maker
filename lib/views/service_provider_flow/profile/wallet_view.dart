@@ -87,7 +87,7 @@ class WalletView extends GetView<ProfileController> {
                     onPressed: () {
                       // TODO: Implement Withdraw flow with Backend API
                       if (controller.walletBalance.value == "0") {
-                        Get.snackbar('error'.tr, 'Insufficient Funds');
+                        Get.snackbar('error'.tr, 'insufficientFunds'.tr);
                       }
                     },
                     style: ElevatedButton.styleFrom(

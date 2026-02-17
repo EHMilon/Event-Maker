@@ -22,7 +22,7 @@ class DocumentsView extends GetView<DocumentsController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Documents',
+          'documents'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -36,7 +36,7 @@ class DocumentsView extends GetView<DocumentsController> {
               onPressed: () => Get.toNamed(AppRoutes.spAddDocument),
               icon: const Icon(Icons.add, size: 18, color: Colors.white),
               label: Text(
-                'Add',
+                'add'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,

@@ -50,7 +50,7 @@ class _AddServiceViewState extends State<AddServiceView> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          widget.isEdit ? 'Edit Service' : 'Add New Service',
+          widget.isEdit ? 'editService'.tr : 'addNewService'.tr,
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -70,21 +70,21 @@ class _AddServiceViewState extends State<AddServiceView> {
                 SizedBox(height: 24.h),
                 CustomTextField(
                   controller: controller.titleController,
-                  labelText: 'Service Title',
-                  hintText: 'Your title goes here...',
+                  labelText: 'serviceTitle'.tr,
+                  hintText: 'serviceTitleHint'.tr,
                 ),
                 SizedBox(height: 16.h),
                 CustomTextField(
                   controller: controller.descriptionController,
-                  labelText: 'Description',
-                  hintText: 'Your description goes here...',
+                  labelText: 'description'.tr,
+                  hintText: 'descriptionHint'.tr,
                   keyboardType: TextInputType.multiline,
                 ),
                 SizedBox(height: 16.h),
                 CustomTextField(
                   controller: controller.locationController,
-                  labelText: 'Select location',
-                  hintText: 'Select address',
+                  labelText: 'selectLocation'.tr,
+                  hintText: 'selectAddressHint'.tr,
                   prefixIcon: Icon(
                     Icons.location_on_outlined,
                     color: AppColors.primary,
@@ -96,7 +96,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Can\'t go outside the location',
+                      'cannotGoOutsideLocation'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -117,7 +117,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Availability',
+                      'availability'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -127,7 +127,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     TextButton(
                       onPressed: () => _openAvailability(context),
                       child: Text(
-                        'Edit',
+                        'edit'.tr,
                         style: TextStyle(color: AppColors.primary),
                       ),
                     ),
@@ -140,7 +140,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Packages & Pricings',
+                      'packagesPricings'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -155,7 +155,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                         color: AppColors.primary,
                       ),
                       label: Text(
-                        'Add Package',
+                        'addPackage'.tr,
                         style: TextStyle(color: AppColors.primary),
                       ),
                     ),
@@ -163,8 +163,9 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ),
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
-                  text: widget.isEdit ? 'Update Service' : 'Add Service',
+                  text: widget.isEdit ? 'updateService'.tr : 'addService'.tr,
                   onPressed: () async {
+                    // TODO: Implement field validation before saving
                     await controller.saveService(
                       isEdit: widget.isEdit,
                       existingService: widget.service,
@@ -181,12 +182,20 @@ class _AddServiceViewState extends State<AddServiceView> {
   }
 
   Widget _buildAvailabilityPreview() {
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final days = [
+      {'key': 'Mon', 'label': 'mon'.tr},
+      {'key': 'Tue', 'label': 'tue'.tr},
+      {'key': 'Wed', 'label': 'wed'.tr},
+      {'key': 'Thu', 'label': 'thu'.tr},
+      {'key': 'Fri', 'label': 'fri'.tr},
+      {'key': 'Sat', 'label': 'sat'.tr},
+      {'key': 'Sun', 'label': 'sun'.tr},
+    ];
     return Obx(
       () => Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: days.map((day) {
-          final isSelected = controller.availability.contains(day);
+          final isSelected = controller.availability.contains(day['key']);
           return Container(
             width: 40.w,
             height: 40.w,
@@ -201,9 +210,10 @@ class _AddServiceViewState extends State<AddServiceView> {
             ),
             alignment: Alignment.center,
             child: Text(
-              day,
+              day['label']!,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize:
+                    10.sp, // Slightly smaller to fit localized Arabic text
                 color: isSelected ? AppColors.primary : Colors.grey[400],
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

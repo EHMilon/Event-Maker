@@ -22,7 +22,7 @@ class ScheduleView extends GetView<ScheduleController> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Schedule',
+          'schedule'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -40,7 +40,8 @@ class ScheduleView extends GetView<ScheduleController> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Text(
-              'Services',
+              'myServices'
+                  .tr, // Using myServices.tr which is 'Services' or 'My Services'
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,

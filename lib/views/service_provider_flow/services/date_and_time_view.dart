@@ -16,9 +16,7 @@ class DateAndTimeView extends StatefulWidget {
 
 class _DateAndTimeViewState extends State<DateAndTimeView> {
   final AddServiceController controller = Get.find<AddServiceController>();
-  
-  final List<String> _allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
+
   // Time slots for each day
   final Map<String, TimeOfDay> _startTimes = {};
   final Map<String, TimeOfDay> _endTimes = {};
@@ -74,11 +72,13 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
   void _updateTimings(String day) {
     final startTime = _startTimes[day];
     final endTime = _endTimes[day];
-    
+
     if (startTime != null && endTime != null) {
       controller.timings[day] = {
-        'start': '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
-        'end': '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
+        'start':
+            '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
+        'end':
+            '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
       };
     }
   }
@@ -102,7 +102,7 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Availability',
+          'availability'.tr,
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -117,7 +117,7 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Select Available Days',
+                'selectAvailableDays'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -125,33 +125,48 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
                 ),
               ),
               SizedBox(height: 16.h),
-              
+
               // Day selection chips
               Wrap(
                 spacing: 8.w,
                 runSpacing: 8.h,
-                children: _allDays.map((day) {
-                  final isSelected = controller.availability.contains(day);
-                  return FilterChip(
-                    selected: isSelected,
-                    label: Text(day),
-                    onSelected: (_) => _toggleDay(day),
-                    selectedColor: AppColors.primary.withOpacity(0.2),
-                    checkmarkColor: AppColors.primary,
-                    labelStyle: GoogleFonts.inter(
-                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  );
-                }).toList(),
+                children:
+                    [
+                      {'key': 'Mon', 'label': 'mon'.tr},
+                      {'key': 'Tue', 'label': 'tue'.tr},
+                      {'key': 'Wed', 'label': 'wed'.tr},
+                      {'key': 'Thu', 'label': 'thu'.tr},
+                      {'key': 'Fri', 'label': 'fri'.tr},
+                      {'key': 'Sat', 'label': 'sat'.tr},
+                      {'key': 'Sun', 'label': 'sun'.tr},
+                    ].map((day) {
+                      final isSelected = controller.availability.contains(
+                        day['key'],
+                      );
+                      return FilterChip(
+                        selected: isSelected,
+                        label: Text(day['label']!),
+                        onSelected: (_) => _toggleDay(day['key']!),
+                        selectedColor: AppColors.primary.withOpacity(0.2),
+                        checkmarkColor: AppColors.primary,
+                        labelStyle: GoogleFonts.inter(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      );
+                    }).toList(),
               ),
-              
+
               SizedBox(height: 32.h),
-              
+
               // Time slots for selected days
               if (controller.availability.isNotEmpty) ...[
                 Text(
-                  'Set Time Slots',
+                  'setTimeSlots'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -159,19 +174,19 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
                   ),
                 ),
                 SizedBox(height: 16.h),
-                
+
                 ...controller.availability.map((day) => _buildTimeSlotRow(day)),
               ],
-              
+
               SizedBox(height: 40.h),
-              
+
               PrimaryTextButton(
-                text: 'Save',
+                text: 'save'.tr,
                 onPressed: () {
                   Get.back(result: true);
                   Get.snackbar(
-                    'Success',
-                    'Availability saved successfully',
+                    'success'.tr,
+                    'availabilitySaved'.tr,
                     snackPosition: SnackPosition.BOTTOM,
                     backgroundColor: AppColors.primary,
                     colorText: Colors.white,
@@ -201,7 +216,19 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
           SizedBox(
             width: 50.w,
             child: Text(
-              day,
+              day == 'Mon'
+                  ? 'mon'.tr
+                  : day == 'Tue'
+                  ? 'tue'.tr
+                  : day == 'Wed'
+                  ? 'wed'.tr
+                  : day == 'Thu'
+                  ? 'thu'.tr
+                  : day == 'Fri'
+                  ? 'fri'.tr
+                  : day == 'Sat'
+                  ? 'sat'.tr
+                  : 'sun'.tr,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -209,7 +236,7 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
               ),
             ),
           ),
-          
+
           // Start time
           Expanded(
             child: InkWell(
@@ -224,7 +251,11 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.access_time, size: 16.r, color: AppColors.primary),
+                    Icon(
+                      Icons.access_time,
+                      size: 16.r,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 8.w),
                     Text(
                       _formatTime(_startTimes[day]),
@@ -238,19 +269,19 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
               ),
             ),
           ),
-          
+
           SizedBox(width: 12.w),
-          
+
           Text(
-            'to',
+            'to'.tr,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               color: AppColors.textSecondary,
             ),
           ),
-          
+
           SizedBox(width: 12.w),
-          
+
           // End time
           Expanded(
             child: InkWell(
@@ -265,7 +296,11 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.access_time, size: 16.r, color: AppColors.primary),
+                    Icon(
+                      Icons.access_time,
+                      size: 16.r,
+                      color: AppColors.primary,
+                    ),
                     SizedBox(width: 8.w),
                     Text(
                       _formatTime(_endTimes[day]),

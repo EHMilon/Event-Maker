@@ -15,6 +15,7 @@ class ScheduleController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // TODO: Fetch schedule from backend API
     _loadMockServices();
   }
 

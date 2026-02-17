@@ -30,7 +30,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Packages & Pricings',
+          'packagesPricings'.tr,
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -42,7 +42,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
             onPressed: controller.addPackage,
             icon: Icon(Icons.add, color: AppColors.primary, size: 20.r),
             label: Text(
-              'Add',
+              'add'.tr,
               style: GoogleFonts.inter(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -59,20 +59,20 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
             children: [
               // Instructions
               Text(
-                'Create packages with different pricing tiers for your service',
+                'packagesInstructions'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
               SizedBox(height: 24.h),
-              
+
               // Package list
               ...List.generate(
                 controller.packages.length,
                 (index) => _buildPackageCard(index),
               ),
-              
+
               // Add package button if no packages
               if (controller.packages.isEmpty)
                 Center(
@@ -85,7 +85,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                       ),
                       SizedBox(height: 16.h),
                       Text(
-                        'No packages added yet',
+                        'noPackagesAdded'.tr,
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           color: AppColors.textSecondary,
@@ -96,23 +96,23 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                         onPressed: controller.addPackage,
                         icon: Icon(Icons.add, color: AppColors.primary),
                         label: Text(
-                          'Add your first package',
+                          'addFirstPackage'.tr,
                           style: GoogleFonts.inter(color: AppColors.primary),
                         ),
                       ),
                     ],
                   ),
                 ),
-              
+
               SizedBox(height: 40.h),
-              
+
               PrimaryTextButton(
-                text: 'Save Packages',
+                text: 'savePackages'.tr,
                 onPressed: () {
                   Get.back(result: true);
                   Get.snackbar(
-                    'Success',
-                    'Packages saved successfully',
+                    'success'.tr,
+                    'packagesSaved'.tr,
                     snackPosition: SnackPosition.BOTTOM,
                     backgroundColor: AppColors.primary,
                     colorText: Colors.white,
@@ -129,7 +129,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
 
   Widget _buildPackageCard(int index) {
     final package = controller.packages[index];
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.r),
@@ -153,7 +153,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Package ${index + 1}',
+                'packageLabel'.trParams({'index': '${index + 1}'}),
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -172,19 +172,19 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
             ],
           ),
           SizedBox(height: 16.h),
-          
+
           // Package name
           CustomTextField(
             controller: package.nameController,
-            labelText: 'Package Name',
-            hintText: 'e.g., Basic, Premium, Enterprise',
+            labelText: 'packageName'.tr,
+            hintText: 'packageHint'.tr,
           ),
           SizedBox(height: 12.h),
-          
+
           // Package price
           CustomTextField(
             controller: package.priceController,
-            labelText: 'Price (AED)',
+            labelText: 'priceAED'.tr,
             hintText: '0.00',
             keyboardType: TextInputType.number,
             prefixIcon: Padding(
@@ -200,13 +200,13 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
             ),
           ),
           SizedBox(height: 16.h),
-          
+
           // Features section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Features',
+                'features'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -217,14 +217,14 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                 onPressed: () => package.features.add(''),
                 icon: Icon(Icons.add, size: 18.r, color: AppColors.primary),
                 label: Text(
-                  'Add Feature',
+                  'addFeature'.tr,
                   style: GoogleFonts.inter(color: AppColors.primary),
                 ),
               ),
             ],
           ),
           SizedBox(height: 8.h),
-          
+
           // Features list
           ...List.generate(package.features.length, (featureIndex) {
             return Padding(
@@ -250,7 +250,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                         color: AppColors.textPrimary,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Enter feature',
+                        hintText: 'enterFeatureHint'.tr,
                         hintStyle: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
@@ -290,11 +290,11 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
               ),
             );
           }),
-          
+
           // Empty features placeholder
           if (package.features.isEmpty)
             Text(
-              'No features added. Click "Add Feature" to add features.',
+              'noFeaturesAdded'.tr,
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 color: AppColors.textSecondary,
