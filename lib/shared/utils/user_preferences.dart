@@ -6,9 +6,15 @@ class UserPreferences {
   static const String _userNameKey = 'user_name';
   static const String _userEmailKey = 'user_email';
   static const String _isLoggedInKey = 'is_logged_in';
+  static const String _isFirstTimeKey = 'is_first_time';
+  static const String _languageCodeKey = 'language_code';
+  static const String _hasSeenOnboardingKey = 'has_seen_onboarding';
   
   static const String USER_TYPE_CUSTOMER = 'customer';
   static const String USER_TYPE_SERVICE_PROVIDER = 'provider';
+  
+  // Default language is English
+  static const String DEFAULT_LANGUAGE = 'en';
   
   // ===== Synchronous Getters (for immediate access) =====
   
@@ -32,6 +38,49 @@ class UserPreferences {
   static Future<String> getUserType() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userTypeKey) ?? USER_TYPE_CUSTOMER;
+  }
+  
+  /// Check if this is the user's first time opening the app
+  static Future<bool> isFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_isFirstTimeKey) ?? true;
+  }
+  
+  /// Mark that the user has opened the app
+  static Future<bool> setFirstTimeComplete() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(_isFirstTimeKey, false);
+  }
+  
+  /// Check if onboarding has been completed
+  static Future<bool> hasCompletedOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_hasSeenOnboardingKey) ?? false;
+  }
+  
+  /// Mark onboarding as complete
+  static Future<bool> setOnboardingComplete() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(_hasSeenOnboardingKey, true);
+  }
+
+  /// Reset onboarding flag (used when logging out)
+  static Future<bool> resetOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(_hasSeenOnboardingKey, false);
+  }
+  
+  /// Get the saved language code
+  /// Returns 'en' (English) by default
+  static Future<String> getLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_languageCodeKey) ?? DEFAULT_LANGUAGE;
+  }
+  
+  /// Save the selected language code
+  static Future<bool> setLanguageCode(String languageCode) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setString(_languageCodeKey, languageCode);
   }
   
   /// Check if user type is already selected
@@ -117,9 +166,12 @@ class UserPreferences {
   
   // ===== Cleanup =====
   
-  /// Clear all user data (for logout)
+  /// Clear all user data (for logout) but keep language preference
   static Future<bool> clearUserData() async {
     final prefs = await SharedPreferences.getInstance();
+    // Save language preference before clearing
+    final languageCode = prefs.getString(_languageCodeKey) ?? DEFAULT_LANGUAGE;
+    
     final results = await Future.wait([
       prefs.remove(_userTypeKey),
       prefs.remove(_userIdKey),
@@ -127,6 +179,12 @@ class UserPreferences {
       prefs.remove(_userEmailKey),
       prefs.remove(_isLoggedInKey),
     ]);
+    
+    // Restore language preference
+    await prefs.setString(_languageCodeKey, languageCode);
+    await prefs.setBool(_isFirstTimeKey, true);
+    await prefs.setBool(_hasSeenOnboardingKey, false);
+    
     return results.every((result) => result);
   }
 }

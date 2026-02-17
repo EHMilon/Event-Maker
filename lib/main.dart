@@ -3,14 +3,20 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/routes/app_routes.dart';
 import 'core/themes/app_themes.dart';
+import 'shared/utils/user_preferences.dart';
+import 'core/localization/app_localization.dart';
+import 'core/localization/app_localization.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  final savedLanguageCode = await UserPreferences.getLanguageCode();
+  runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Locale initialLocale;
+
+  const MyApp({super.key, required this.initialLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +31,17 @@ class MyApp extends StatelessWidget {
           theme: AppThemes.lightTheme,
           // darkTheme: AppThemes.darkTheme,
           themeMode: ThemeMode.light,
+          translations: AppLocalization(),
+          locale: initialLocale,
+          fallbackLocale: const Locale(AppLocalization.fallbackLanguage),
           initialRoute: AppRoutes.splash,
           getPages: AppRoutes.routes,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: child!,
+            );
+          },
         );
       },
     );

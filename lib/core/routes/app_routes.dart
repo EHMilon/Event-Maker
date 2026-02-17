@@ -14,6 +14,8 @@ import 'package:event_maker/views/auth/congratulations_view.dart';
 import 'package:event_maker/views/auth/signup_step_two_view.dart';
 import 'package:event_maker/views/auth/provider_details_view.dart';
 import 'package:event_maker/views/auth/get_started_view.dart';
+import 'package:event_maker/views/auth/language_selection_view.dart';
+import 'package:event_maker/views/auth/language_selection_controller.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_settings_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/add_image_view.dart';
@@ -72,6 +74,7 @@ import 'package:event_maker/views/service_provider_flow/active_orders/sp_active_
 class AppRoutes {
   static const String splash = '/';
   static const String onboarding = '/onboarding';
+  static const String languageSelection = '/language-selection';
   static const String userType = '/user-type';
   static const String login = '/login';
   static const String signup = '/signup';
@@ -160,6 +163,13 @@ class AppRoutes {
       name: onboarding,
       page: () => const OnboardingView(),
       binding: OnboardingBinding(),
+    ),
+    GetPage(
+      name: languageSelection,
+      page: () => const LanguageSelectionView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<LanguageSelectionController>(() => LanguageSelectionController());
+      }),
     ),
     GetPage(
       name: userType,

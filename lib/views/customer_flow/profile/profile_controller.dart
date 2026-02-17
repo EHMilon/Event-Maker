@@ -4,6 +4,7 @@ import '../../../data/models/service_model.dart';
 import '../../../data/models/review_model.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../../shared/utils/user_preferences.dart';
+import '../../../core/routes/app_routes.dart';
 import '../../../views/customer_flow/home/home_controller.dart';
 
 class ProfileController extends GetxController {
@@ -306,7 +307,8 @@ class ProfileController extends GetxController {
 
   Future<void> logOut() async {
     await UserPreferences.clearUserData();
-    Get.offAllNamed('/login');
+    await UserPreferences.resetOnboarding();
+    Get.offAllNamed(AppRoutes.onboarding);
   }
 
   void toggleAvailability(bool value) {

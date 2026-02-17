@@ -5,7 +5,7 @@ import '../../core/themes/app_colors.dart';
 /// A reusable primary text button widget.
 class PrimaryTextButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Widget? icon;
   final Color? backgroundColor;
 

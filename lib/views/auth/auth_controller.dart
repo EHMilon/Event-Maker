@@ -1,4 +1,6 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
+import '../../shared/utils/logger.dart';
 import '../../shared/utils/user_preferences.dart';
 import '../../core/routes/app_routes.dart';
 
@@ -28,6 +30,7 @@ class AuthController extends GetxController {
 
   // Auth state
   final RxString currentAuthFlow = ''.obs;
+  final RxBool isLoading = false.obs;
 
   // ===== User Type Methods =====
 
@@ -39,11 +42,11 @@ class AuthController extends GetxController {
     if (selectedType.value.isNotEmpty) {
       // Save user type to shared preferences
       await UserPreferences.setUserType(selectedType.value);
-      Get.toNamed('/login');
+      Get.toNamed(AppRoutes.login);
     } else {
       Get.snackbar(
-        "Error",
-        "Please select a user type",
+        'error'.tr,
+        'pleaseSelectUserType'.tr,
         snackPosition: SnackPosition.BOTTOM,
       );
     }
@@ -59,16 +62,32 @@ class AuthController extends GetxController {
     obscurePassword.value = !obscurePassword.value;
   }
 
-  void onLogin() async {
-    // TODO: Implement actual login logic
-    // In a real app, you would:
-    // 1. Call backend API to authenticate
-    // 2. Get user type from backend response
-    // 3. Save user details to SharedPreferences
+  Future<void> onLogin() async {
+    if (!await _checkConnectivity()) {
+      Get.snackbar(
+        'error'.tr,
+        'noInternet'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
-    // For now, we simulate login and navigate based on saved user type
-    await UserPreferences.setLoggedIn(true);
-    Get.offAllNamed(AppRoutes.getStarted);
+    isLoading.value = true;
+    try {
+      // TODO: Replace with actual login REST API call
+      await Future.delayed(const Duration(seconds: 2));
+      await UserPreferences.setLoggedIn(true);
+      Get.offAllNamed(AppRoutes.getStarted);
+    } catch (e) {
+      Log.e('Login failed', e);
+      Get.snackbar(
+        'error'.tr,
+        'loginFailed'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void onForgotPassword() {
@@ -119,7 +138,7 @@ class AuthController extends GetxController {
   void onContinueSignup() async {
     // Stage 2: Additional Info
     if (phoneNumber.value.isEmpty) {
-      Get.snackbar("Error", "Please enter your phone number");
+      Get.snackbar('error'.tr, 'pleaseEnterPhone'.tr);
       return;
     }
 
@@ -140,7 +159,7 @@ class AuthController extends GetxController {
     if (selectedServiceType.value.isEmpty ||
         selectedRole.value.isEmpty ||
         selectedServiceCategory.value.isEmpty) {
-      Get.snackbar("Error", "Please select all fields");
+      Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
       return;
     }
 
@@ -149,6 +168,11 @@ class AuthController extends GetxController {
 
     // TODO: Implement actual registration logic for provider
     Get.offAllNamed(AppRoutes.getStarted);
+  }
+
+  Future<bool> _checkConnectivity() async {
+    final status = await Connectivity().checkConnectivity();
+    return status != ConnectivityResult.none;
   }
 
   void onLoginFromSignup() {

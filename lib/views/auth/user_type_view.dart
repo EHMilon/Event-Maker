@@ -20,7 +20,7 @@ class UserTypeView extends GetView<AuthController> {
             Image.asset('assets/images/icon.png', height: 40.h),
             SizedBox(height: 20.h),
             Text(
-              AppStrings.selectUserType,
+              'selectUserType'.tr,
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
@@ -29,7 +29,7 @@ class UserTypeView extends GetView<AuthController> {
             ),
             SizedBox(height: 8.h),
             Text(
-              AppStrings.joinNowToStreamline,
+              'joinNowToStreamline'.tr,
               style: TextStyle(fontSize: 14.sp, color: const Color(0xFF414141)),
             ),
 
@@ -58,8 +58,8 @@ class UserTypeView extends GetView<AuthController> {
             // Continue Button
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-              child: PrimaryTextButton(
-                text: AppStrings.continueText,
+                child: PrimaryTextButton(
+                  text: 'continueText'.tr,
                 onPressed: controller.onContinueUserType,
               ),
             ),

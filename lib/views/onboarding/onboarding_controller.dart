@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/constants/app_strings.dart';
 import '../../shared/utils/logger.dart';
+import '../../shared/utils/user_preferences.dart';
 
 class OnboardingController extends GetxController {
   final PageController pageController = PageController();
@@ -31,7 +32,7 @@ class OnboardingController extends GetxController {
     Log.d("Onboarding page changed to: $index");
   }
 
-  void nextPage() {
+  Future<void> nextPage() async {
     if (currentPage.value < onboardingData.length - 1) {
       Log.i("Moving to next onboarding page");
       pageController.nextPage(
@@ -39,13 +40,15 @@ class OnboardingController extends GetxController {
         curve: Curves.easeIn,
       );
     } else {
-      Log.i("Onboarding completed, navigating to UserType");
-      Get.offAllNamed(AppRoutes.userType);
+      Log.i("Onboarding completed, navigating to Language Selection");
+      await UserPreferences.setOnboardingComplete();
+      Get.offAllNamed(AppRoutes.languageSelection);
     }
   }
 
-  void skip() {
+  Future<void> skip() async {
     Log.i("Onboarding skipped");
-    Get.offAllNamed(AppRoutes.userType);
+    await UserPreferences.setOnboardingComplete();
+    Get.offAllNamed(AppRoutes.languageSelection);
   }
 }

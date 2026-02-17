@@ -31,7 +31,7 @@ class LoginView extends GetView<AuthController> {
                       Image.asset('assets/images/icon.png', height: 40.h),
                       SizedBox(height: 20.h),
                       Text(
-                        AppStrings.login,
+                        'login'.tr,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -40,7 +40,7 @@ class LoginView extends GetView<AuthController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        AppStrings.welcomeBack,
+                        'welcomeBack'.tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
@@ -51,8 +51,8 @@ class LoginView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 40.h),
                 CustomTextField(
-                  labelText: AppStrings.email,
-                  hintText: AppStrings.emailPlaceholder,
+                  labelText: 'email'.tr,
+                  hintText: 'emailPlaceholder'.tr,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -67,8 +67,8 @@ class LoginView extends GetView<AuthController> {
                 SizedBox(height: 20.h),
                 Obx(
                   () => CustomTextField(
-                    labelText: AppStrings.password,
-                    hintText: AppStrings.passwordPlaceholder,
+                      labelText: 'password'.tr,
+                      hintText: 'passwordPlaceholder'.tr,
                     obscureText: controller.obscurePassword.value,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -104,18 +104,18 @@ class LoginView extends GetView<AuthController> {
                         ),
                       ),
                     ),
-                    Text(
-                      AppStrings.rememberMe,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColors.textPrimary,
+                      Text(
+                        'rememberMe'.tr,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
                     const Spacer(),
                     TextButton(
                       onPressed: controller.onForgotPassword,
-                      child: Text(
-                        AppStrings.forgotPassword,
+                      child:                      Text(
+                        'forgotPassword'.tr,
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: AppColors.textPrimary,
