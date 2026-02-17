@@ -403,7 +403,7 @@ class ServiceDetailView extends StatelessWidget {
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
-                                          '${service.rating} (${service.reviewCount} reviews)',
+                                          '${service.rating} (${'reviewsCount'.trParams({'count': service.reviewCount.toString()})})',
                                           style: GoogleFonts.inter(
                                             fontSize: 12.sp,
                                             color: AppColors.textSecondary,
@@ -428,7 +428,7 @@ class ServiceDetailView extends StatelessWidget {
 
                         // Description
                         Text(
-                          'Description',
+                          'description'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -477,7 +477,7 @@ class ServiceDetailView extends StatelessWidget {
 
                         // Location Header and Map
                         Text(
-                          'Location',
+                          'location'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -539,7 +539,7 @@ class ServiceDetailView extends StatelessWidget {
                         if (service.packages != null &&
                             service.packages!.isNotEmpty) ...[
                           Text(
-                            'Packages & Pricings',
+                            'packagesPricings'.tr,
                             style: GoogleFonts.inter(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
@@ -671,7 +671,7 @@ class ServiceDetailView extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                'Pricing',
+                                'pricing'.tr,
                                 style: GoogleFonts.inter(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w600,
@@ -784,7 +784,7 @@ class ServiceDetailView extends StatelessWidget {
                           );
                         }
                       },
-                      text: 'Book Now',
+                      text: 'bookNow'.tr,
                     ),
             ),
         ],

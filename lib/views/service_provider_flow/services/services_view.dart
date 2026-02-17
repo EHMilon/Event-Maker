@@ -18,12 +18,6 @@ class ServicesView extends GetView<SPServicesController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => AddOptionsBottomSheet.show(context),
-        backgroundColor: AppColors.primary,
-        child: Icon(Icons.add, size: 28.r),
-      ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -31,6 +25,8 @@ class ServicesView extends GetView<SPServicesController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(context),
+              SizedBox(height: 16.h),
+              _buildSearchAndAddBar(context),
               SizedBox(height: 20.h),
               Expanded(child: _buildContent()),
             ],
@@ -45,20 +41,105 @@ class ServicesView extends GetView<SPServicesController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'My Services',
+          'myServices'.tr,
           style: GoogleFonts.inter(
             fontSize: 24.sp,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),
         ),
-        Obx(() => Text(
-          '${controller.services.length} services',
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: AppColors.textSecondary,
+        Obx(
+          () => Text(
+            'servicesCount'.trParams({
+              'count': controller.services.length.toString(),
+            }),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
-        )),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchAndAddBar(BuildContext context) {
+    return Row(
+      children: [
+        // Search TextField
+        Expanded(
+          child: Container(
+            height: 50.h,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: controller.searchTextController,
+              onChanged: controller.onSearchChanged,
+              decoration: InputDecoration(
+                hintText: 'searchServices'.tr,
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary.withOpacity(0.6),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: AppColors.primary,
+                  size: 20.r,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 12.h,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 12.w),
+        // Add Button (Icon + Text)
+        InkWell(
+          onTap: () => AddOptionsBottomSheet.show(context),
+          borderRadius: BorderRadius.circular(12.r),
+          child: Container(
+            height: 50.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.add, color: AppColors.white, size: 20.r),
+                SizedBox(width: 4.w),
+                Text(
+                  'add'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -66,33 +147,19 @@ class ServicesView extends GetView<SPServicesController> {
   Widget _buildContent() {
     return Obx(() {
       if (controller.isLoading.value) {
-        return ListView.separated(
-          itemCount: 4,
-          separatorBuilder: (context, index) => SizedBox(height: 12.h),
-          itemBuilder: (context, index) {
-            return Skeletonizer(
-              enabled: true,
-              child: Container(
-                height: 100.h,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-              ),
-            );
-          },
-        );
+        return _buildShimmerLoading();
       }
 
-      final services = controller.services;
+      final services = controller.filteredServices;
       if (services.isEmpty) {
         return _buildEmptyState();
       }
 
       return RefreshIndicator(
         onRefresh: controller.refreshServices,
+        color: AppColors.primary,
         child: ListView.separated(
+          padding: EdgeInsets.only(bottom: 20.h),
           itemCount: services.length,
           separatorBuilder: (context, index) => SizedBox(height: 12.h),
           itemBuilder: (context, index) {
@@ -112,19 +179,61 @@ class ServicesView extends GetView<SPServicesController> {
     });
   }
 
+  Widget _buildShimmerLoading() {
+    return ListView.separated(
+      itemCount: 4,
+      padding: EdgeInsets.zero,
+      separatorBuilder: (context, index) => SizedBox(height: 12.h),
+      itemBuilder: (context, index) {
+        return Skeletonizer(
+          enabled: true,
+          child: Container(
+            height: 110.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: ListTile(
+              leading: Container(
+                width: 80.w,
+                height: 80.w,
+                decoration: BoxDecoration(
+                  color: AppColors.lightGrey,
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+              ),
+              title: Container(
+                height: 16.h,
+                width: 100.w,
+                color: AppColors.lightGrey,
+              ),
+              subtitle: Container(
+                height: 12.h,
+                width: 150.w,
+                color: AppColors.lightGrey,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildEmptyState() {
+    final isSearching = controller.searchQuery.isNotEmpty;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.inventory_2_outlined,
+            isSearching ? Icons.search_off : Icons.inventory_2_outlined,
             size: 64.r,
-            color: AppColors.grey,
+            color: AppColors.grey.withOpacity(0.5),
           ),
           SizedBox(height: 16.h),
           Text(
-            'No services yet',
+            isSearching ? 'noServicesFound'.tr : 'noServicesYet'.tr,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -133,7 +242,8 @@ class ServicesView extends GetView<SPServicesController> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Tap the + button to add your first service',
+            isSearching ? '' : 'tapToAddService'.tr,
+            textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
@@ -159,49 +269,52 @@ class ServiceProviderServiceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final imagePath = service.images.isNotEmpty ? service.images.first : '';
     final isNetworkImage = imagePath.startsWith('http');
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(20.r),
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+          padding: EdgeInsets.all(12.r),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Row(
             children: [
-              // Service image - handles both network and asset images
-              ClipRRect(
-                borderRadius: BorderRadius.circular(14.r),
-                child: imagePath.isNotEmpty
-                    ? (isNetworkImage
-                        ? Image.network(
-                            imagePath,
-                            width: 80.w,
-                            height: 80.w,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildPlaceholderImage(),
-                          )
-                        : Image.asset(
-                            imagePath,
-                            width: 80.w,
-                            height: 80.w,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildPlaceholderImage(),
-                          ))
-                    : _buildPlaceholderImage(),
+              // Service image
+              Hero(
+                tag: 'service_${service.id}',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14.r),
+                  child: imagePath.isNotEmpty
+                      ? (isNetworkImage
+                            ? Image.network(
+                                imagePath,
+                                width: 85.w,
+                                height: 85.w,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildPlaceholderImage(),
+                              )
+                            : Image.asset(
+                                imagePath,
+                                width: 85.w,
+                                height: 85.w,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildPlaceholderImage(),
+                              ))
+                      : _buildPlaceholderImage(),
+                ),
               ),
               SizedBox(width: 16.w),
               Expanded(
@@ -211,69 +324,63 @@ class ServiceProviderServiceTile extends StatelessWidget {
                     // Service title
                     Text(
                       service.title,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     // Service type badge
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getServiceTypeColor(service.type).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4.r),
+                        color: _getServiceTypeColor(
+                          service.type,
+                        ).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6.r),
                       ),
                       child: Text(
                         _getServiceTypeLabel(service.type),
                         style: GoogleFonts.inter(
                           fontSize: 10.sp,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: _getServiceTypeColor(service.type),
                         ),
                       ),
                     ),
-                    SizedBox(height: 6.h),
-                    // Location
+                    SizedBox(height: 8.h),
+                    // Location and Price Row
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 14.r,
-                          color: AppColors.textSecondary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Expanded(
-                          child: Text(
-                            service.location,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              color: AppColors.textSecondary,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 14.r,
+                              color: AppColors.textSecondary.withOpacity(0.7),
                             ),
-                          ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              service.location,
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                            ).maxWidth,
+                          ],
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 4.h),
-                    // Price
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.payments_outlined,
-                          size: 14.r,
-                          color: AppColors.primary,
-                        ),
-                        SizedBox(width: 4.w),
                         Text(
                           '${service.basePrice?.toInt() ?? 0} ${service.priceUnit}',
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
                         ),
@@ -282,11 +389,11 @@ class ServiceProviderServiceTile extends StatelessWidget {
                   ],
                 ),
               ),
-              // Arrow indicator
+              SizedBox(width: 8.w),
               Icon(
                 Icons.arrow_forward_ios,
-                size: 16.r,
-                color: AppColors.grey,
+                size: 14.r,
+                color: AppColors.grey.withOpacity(0.5),
               ),
             ],
           ),
@@ -300,11 +407,7 @@ class ServiceProviderServiceTile extends StatelessWidget {
       width: 80.w,
       height: 80.w,
       color: AppColors.lightGrey,
-      child: Icon(
-        Icons.image_not_supported,
-        color: AppColors.grey,
-        size: 28.r,
-      ),
+      child: Icon(Icons.image_not_supported, color: AppColors.grey, size: 28.r),
     );
   }
 
@@ -330,19 +433,26 @@ class ServiceProviderServiceTile extends StatelessWidget {
   String _getServiceTypeLabel(ServiceType type) {
     switch (type) {
       case ServiceType.event:
-        return 'Event';
+        return 'event'.tr;
       case ServiceType.photography:
-        return 'Photography';
+        return 'photography'.tr;
       case ServiceType.training:
-        return 'Training';
+        return 'training'.tr;
       case ServiceType.catering:
-        return 'Catering';
+        return 'catering'.tr;
       case ServiceType.cleaning:
-        return 'Cleaning';
+        return 'cleaning'.tr;
       case ServiceType.music:
-        return 'Music';
+        return 'music'.tr;
       case ServiceType.filming:
-        return 'Filming';
+        return 'filming'.tr;
     }
   }
+}
+
+extension on Text {
+  Widget get maxWidth => Container(
+    constraints: BoxConstraints(maxWidth: 80.w),
+    child: this,
+  );
 }

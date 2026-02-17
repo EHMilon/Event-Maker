@@ -138,6 +138,14 @@ class AppLocalization extends Translations {
     'passwordResetSuccess': 'Password reset successful',
     'passwordResetFailed': 'Failed to reset password',
 
+    // Service Details
+    'description': 'Description',
+    'location': 'Location',
+    'packagesPricings': 'Packages & Pricings',
+    'pricing': 'Pricing',
+    'bookNow': 'Book Now',
+    'reviewsCount': '@count reviews',
+
     // Profile & Settings
     'profile': 'Profile',
     'settings': 'Settings',
@@ -186,6 +194,24 @@ class AppLocalization extends Translations {
         'You have successfully accepted the request. The client will be notified shortly.',
     'rejectSuccessTitle': 'Request Rejected Successfully',
     'rejectSuccessSubtitle': 'You have successfully rejected the request.',
+
+    // Service Provider My Services
+    'myServices': 'My Services',
+    'searchServices': 'Search services...',
+    'add': 'Add',
+    'noServicesYet': 'No services yet',
+    'noServicesFound': 'No services found',
+    'tapToAddService': 'Tap the + button to add your first service',
+    'servicesCount': '@count services',
+
+    // Service Types
+    'event': 'Event',
+    'photography': 'Photography',
+    'training': 'Training',
+    'catering': 'Catering',
+    'cleaning': 'Cleaning',
+    'music': 'Music',
+    'filming': 'Filming',
   };
 
   // Arabic translations
@@ -302,6 +328,14 @@ class AppLocalization extends Translations {
     'passwordResetSuccess': 'تم إعادة تعيين كلمة المرور بنجاح',
     'passwordResetFailed': 'فشل إعادة تعيين كلمة المرور',
 
+    // Service Details
+    'description': 'الوصف',
+    'location': 'الموقع',
+    'packagesPricings': 'الباقات والأسعار',
+    'pricing': 'التسعير',
+    'bookNow': 'احجز الآن',
+    'reviewsCount': '@count تقييم',
+
     // Profile & Settings
     'profile': 'الملف الشخصي',
     'settings': 'الإعدادات',
@@ -349,5 +383,23 @@ class AppLocalization extends Translations {
     'acceptSuccessSubtitle': 'لقد قبلت الطلب بنجاح. سيتم إخطار العميل قريباً.',
     'rejectSuccessTitle': 'تم رفض الطلب بنجاح',
     'rejectSuccessSubtitle': 'لقد رفضت الطلب بنجاح.',
+
+    // Service Provider My Services
+    'myServices': 'خدماتي',
+    'searchServices': 'البحث في الخدمات...',
+    'add': 'إضافة',
+    'noServicesYet': 'لا توجد خدمات بعد',
+    'noServicesFound': 'لم يتم العثور على خدمات',
+    'tapToAddService': 'اضغط على زر + لإضافة خدمتك الأولى',
+    'servicesCount': '@count خدمة',
+
+    // Service Types
+    'event': 'فعالية',
+    'photography': 'تصوير فوتوغرافي',
+    'training': 'تدريب',
+    'catering': 'تموين',
+    'cleaning': 'تنظيف',
+    'music': 'موسيقى',
+    'filming': 'تصوير سينمائي',
   };
 }
