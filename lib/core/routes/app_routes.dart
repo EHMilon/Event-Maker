@@ -38,7 +38,6 @@ import 'package:event_maker/views/service_provider_flow/profile/profile_controll
 import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
-import 'package:event_maker/views/service_provider_flow/notifications/notification_binding.dart';
 import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:event_maker/views/customer_flow/notifications/notification_view.dart';
 import 'package:event_maker/views/customer_flow/notifications/notification_binding.dart';
@@ -97,7 +96,8 @@ class AppRoutes {
   static const String serviceProviderHome = '/service-provider-home';
   static const String notifications = '/notifications';
   static const String customerNotifications = '/customer-notifications';
-  static const String serviceProviderNotifications = '/service-provider-notifications';
+  static const String serviceProviderNotifications =
+      '/service-provider-notifications';
   static const String mapResults = '/map-results';
   static const String vendorProfile = '/vendor-profile';
   static const String bookServiceDate = '/book-service-date';
@@ -172,7 +172,9 @@ class AppRoutes {
       name: languageSelection,
       page: () => const LanguageSelectionView(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<LanguageSelectionController>(() => LanguageSelectionController());
+        Get.lazyPut<LanguageSelectionController>(
+          () => LanguageSelectionController(),
+        );
       }),
     ),
     GetPage(
@@ -360,9 +362,6 @@ class AppRoutes {
         return AddEditCertificateView(isEdit: true, certificateId: certId);
       },
     ),
-    GetPage(
-      name: spActiveOrders,
-      page: () => const SPActiveOrdersView(),
-    ),
+    GetPage(name: spActiveOrders, page: () => const SPActiveOrdersView()),
   ];
 }

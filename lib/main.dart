@@ -5,7 +5,7 @@ import 'core/routes/app_routes.dart';
 import 'core/themes/app_themes.dart';
 import 'shared/utils/user_preferences.dart';
 import 'core/localization/app_localization.dart';
-import 'core/localization/app_localization.dart';
+import 'core/bindings/initial_binding.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
           translations: AppLocalization(),
           locale: initialLocale,
           fallbackLocale: const Locale(AppLocalization.fallbackLanguage),
+          initialBinding: InitialBinding(),
           initialRoute: AppRoutes.splash,
           getPages: AppRoutes.routes,
           builder: (context, child) {

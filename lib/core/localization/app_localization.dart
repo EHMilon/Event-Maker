@@ -13,7 +13,7 @@ enum SupportedLanguage {
 }
 
 /// Application localization class extending GetX Translations
-/// 
+///
 /// Provides translations for all supported languages (English and Arabic)
 /// English is the default and fallback language
 class AppLocalization extends Translations {
@@ -22,10 +22,7 @@ class AppLocalization extends Translations {
   static const String fallbackLanguage = 'en';
 
   @override
-  Map<String, Map<String, String>> get keys => {
-        'en': english,
-        'ar': arabic,
-      };
+  Map<String, Map<String, String>> get keys => {'en': english, 'ar': arabic};
 
   // English translations
   static const Map<String, String> english = {
@@ -152,6 +149,25 @@ class AppLocalization extends Translations {
     'bookings': 'Bookings',
     'notifications': 'Notifications',
     'messages': 'Messages',
+
+    // Service Provider Home
+    'goodMorning': 'Good Morning',
+    'analytics': 'Analytics',
+    'basedOnLast30Days': 'Based on last 30 days',
+    'totalEarnings': 'Total Earnings',
+    'totalRequests': 'Total Requests',
+    'completed': 'Completed',
+    'pending': 'Pending',
+    'totalBalance': 'Total Balance',
+    'addService': 'Add Service',
+    'schedule': 'Schedule',
+    'earnings': 'Earnings',
+    'documents': 'Documents',
+    'activeOrders': 'Active Orders',
+    'seeAll': 'See All',
+    'fromLastMonth': 'from last month',
+    'noActiveOrdersFound': 'No active orders found',
+    'retry': 'Retry',
   };
 
   // Arabic translations
@@ -279,5 +295,24 @@ class AppLocalization extends Translations {
     'bookings': 'الحجوزات',
     'notifications': 'الإشعارات',
     'messages': 'الرسائل',
+
+    // Service Provider Home
+    'goodMorning': 'صباح الخير',
+    'analytics': 'التحليلات',
+    'basedOnLast30Days': 'بناءً على آخر 30 يومًا',
+    'totalEarnings': 'إجمالي الأرباح',
+    'totalRequests': 'إجمالي الطلبات',
+    'completed': 'مكتمل',
+    'pending': 'قيد الانتظار',
+    'totalBalance': 'إجمالي الرصيد',
+    'addService': 'إضافة خدمة',
+    'schedule': 'الجدول الزمني',
+    'earnings': 'الأرباح',
+    'documents': 'المستندات',
+    'activeOrders': 'الطلبات النشطة',
+    'seeAll': 'عرض الكل',
+    'fromLastMonth': 'منذ الشهر الماضي',
+    'noActiveOrdersFound': 'لم يتم العثور على طلبات نشطة',
+    'retry': 'إعادة المحاولة',
   };
 }

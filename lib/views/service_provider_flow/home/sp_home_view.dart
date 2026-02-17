@@ -17,8 +17,11 @@ class SPHomeView extends GetView<SPHomeController> {
     return Scaffold(
       backgroundColor: const Color(0xFFFBFBFE),
       body: SafeArea(
-        child: Obx(
-          () => Skeletonizer(
+        child: Obx(() {
+          if (controller.hasError.value) {
+            return _buildErrorView();
+          }
+          return Skeletonizer(
             enabled: controller.isLoading.value,
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
@@ -37,8 +40,33 @@ class SPHomeView extends GetView<SPHomeController> {
                 ],
               ),
             ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
+          SizedBox(height: 16.h),
+          Text(
+            'somethingWentWrong'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
-        ),
+          SizedBox(height: 24.h),
+          ElevatedButton(
+            onPressed: () => controller.retry(),
+            child: Text('retry'.tr),
+          ),
+        ],
       ),
     );
   }
@@ -59,7 +87,7 @@ class SPHomeView extends GetView<SPHomeController> {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  'Good Morning',
+                  'goodMorning'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     color: AppColors.textSecondary,
@@ -152,7 +180,7 @@ class SPHomeView extends GetView<SPHomeController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Analytics',
+            'analytics'.tr,
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
@@ -161,7 +189,7 @@ class SPHomeView extends GetView<SPHomeController> {
           ),
           SizedBox(height: 4.h),
           Text(
-            'Based on last 30 days',
+            'basedOnLast30Days'.tr,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
@@ -184,37 +212,37 @@ class SPHomeView extends GetView<SPHomeController> {
                 return _buildStatCard(
                   icon: Icons.currency_exchange,
                   iconColor: const Color(0xFF3B82F6),
-                  label: 'Total Earnings',
-                  value: controller.totalEarnings.value,
-                  change: controller.earningsChange.value,
-                  isUp: true,
+                  label: 'totalEarnings'.tr,
+                  value: controller.stats.value.totalEarnings,
+                  change: controller.stats.value.earningsChange,
+                  isUp: controller.stats.value.isEarningsUp,
                 );
               } else if (index == 1) {
                 return _buildStatCard(
                   icon: Icons.inventory_2_outlined,
                   iconColor: const Color(0xFFA855F7),
-                  label: 'Total Requests',
-                  value: '${controller.totalRequests.value}',
-                  change: controller.requestsChange.value,
-                  isUp: true,
+                  label: 'totalRequests'.tr,
+                  value: '${controller.stats.value.totalRequests}',
+                  change: controller.stats.value.requestsChange,
+                  isUp: controller.stats.value.isRequestsUp,
                 );
               } else if (index == 2) {
                 return _buildStatCard(
                   icon: Icons.check_circle_outline,
                   iconColor: const Color(0xFF10B981),
-                  label: 'Completed',
-                  value: '${controller.completedOrders.value}',
-                  change: controller.completedChange.value,
-                  isUp: false,
+                  label: 'completed'.tr,
+                  value: '${controller.stats.value.completedOrders}',
+                  change: controller.stats.value.completedChange,
+                  isUp: controller.stats.value.isCompletedUp,
                 );
               } else {
                 return _buildStatCard(
                   icon: Icons.schedule_outlined,
                   iconColor: const Color(0xFFF59E0B),
-                  label: 'Pending',
-                  value: '${controller.pendingOrders.value}',
-                  change: controller.pendingChange.value,
-                  isUp: true,
+                  label: 'pending'.tr,
+                  value: '${controller.stats.value.pendingOrders}',
+                  change: controller.stats.value.pendingChange,
+                  isUp: controller.stats.value.isPendingUp,
                 );
               }
             },
@@ -311,7 +339,7 @@ class SPHomeView extends GetView<SPHomeController> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const TextSpan(text: 'from last month'),
+                      TextSpan(text: 'fromLastMonth'.tr),
                     ],
                   ),
                 ),
@@ -356,26 +384,30 @@ class SPHomeView extends GetView<SPHomeController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Balance',
+                    'totalBalance'.tr,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
-                  Text(
-                    controller.totalBalance.value,
-                    style: GoogleFonts.inter(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
+                  _buildBalanceText(),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBalanceText() {
+    return Text(
+      controller.stats.value.totalBalance,
+      style: GoogleFonts.inter(
+        fontSize: 24.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -386,25 +418,25 @@ class SPHomeView extends GetView<SPHomeController> {
       children: [
         _buildActionItem(
           Icons.add_circle,
-          'Add Service',
+          'addService'.tr,
           const Color(0xFF22C55E),
           onTap: () => AddOptionsBottomSheet.show(context),
         ),
         _buildActionItem(
           Icons.calendar_today,
-          'Schedule',
+          'schedule'.tr,
           const Color(0xFF3B82F6),
           onTap: () => Get.toNamed(AppRoutes.spSchedule),
         ),
         _buildActionItem(
           Icons.account_balance_wallet,
-          'Earnings',
+          'earnings'.tr,
           const Color(0xFFF59E0B),
           onTap: () => Get.toNamed(AppRoutes.spWallet),
         ),
         _buildActionItem(
           Icons.description,
-          'Documents',
+          'documents'.tr,
           const Color(0xFF14B8A6),
           onTap: () => Get.toNamed(AppRoutes.spDocuments),
         ),
@@ -457,7 +489,7 @@ class SPHomeView extends GetView<SPHomeController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Active Orders',
+          'activeOrders'.tr,
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -469,7 +501,7 @@ class SPHomeView extends GetView<SPHomeController> {
           child: Row(
             children: [
               Text(
-                'See All',
+                'seeAll'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary,
@@ -490,9 +522,24 @@ class SPHomeView extends GetView<SPHomeController> {
   }
 
   Widget _buildActiveOrdersList() {
+    if (controller.activeOrders.isEmpty && !controller.isLoading.value) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 20.h),
+          child: Text(
+            'noActiveOrdersFound'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: List.generate(
-        4,
+        controller.isLoading.value ? 4 : controller.activeOrders.length,
         (index) => Padding(
           padding: EdgeInsets.only(bottom: 16.h),
           child: _buildOrderCard(index),
@@ -502,13 +549,11 @@ class SPHomeView extends GetView<SPHomeController> {
   }
 
   Widget _buildOrderCard(int index) {
-    final List<String> titles = [
-      'Catering services for home event',
-      'Catering services for home event',
-      'Outdoor party catering services',
-      'Corporate inhouse event managment',
-    ];
-    final List<int> badges = [2, 2, 5, 1];
+    if (controller.isLoading.value) {
+      return _buildSkeletonCard();
+    }
+
+    final order = controller.activeOrders[index];
 
     return Container(
       padding: EdgeInsets.all(12.w),
@@ -528,16 +573,22 @@ class SPHomeView extends GetView<SPHomeController> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
             child: Image.network(
-              'https://picsum.photos/id/${index + 40}/120/120',
+              order.imageUrl,
               width: 64.w,
               height: 64.h,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 64.w,
+                height: 64.h,
+                color: Colors.grey[200],
+                child: const Icon(Icons.image_not_supported),
+              ),
             ),
           ),
           SizedBox(width: 16.w),
           Expanded(
             child: Text(
-              titles[index % titles.length],
+              order.title,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -546,21 +597,57 @@ class SPHomeView extends GetView<SPHomeController> {
               ),
             ),
           ),
+          if (order.badgeCount > 0)
+            Container(
+              height: 24.h,
+              width: 24.h,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: Color(0xFFB485FF),
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '${order.badgeCount}',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSkeletonCard() {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 64.w,
+            height: 64.h,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Container(height: 14.h, color: Colors.grey[300]),
+          ),
+          SizedBox(width: 16.w),
           Container(
             height: 24.h,
             width: 24.h,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFB485FF),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
               shape: BoxShape.circle,
-            ),
-            child: Text(
-              '${badges[index % badges.length]}',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-              ),
             ),
           ),
         ],

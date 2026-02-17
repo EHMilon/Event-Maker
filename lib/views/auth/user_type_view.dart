@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'auth_controller.dart';
 import '../../core/themes/app_colors.dart';
-import '../../core/constants/app_strings.dart';
 import '../../shared/widgets/primary_text_button.dart';
 
 class UserTypeView extends GetView<AuthController> {
@@ -58,8 +57,8 @@ class UserTypeView extends GetView<AuthController> {
             // Continue Button
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-                child: PrimaryTextButton(
-                  text: 'continueText'.tr,
+              child: PrimaryTextButton(
+                text: 'continueText'.tr,
                 onPressed: controller.onContinueUserType,
               ),
             ),
