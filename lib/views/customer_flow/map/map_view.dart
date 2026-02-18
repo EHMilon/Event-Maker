@@ -141,34 +141,24 @@ class MapView extends GetView<MapController> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.h),
-                      // Sub Categories Grid
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          mainAxisSpacing: 16.h,
-                          crossAxisSpacing: 16.w,
-                          childAspectRatio: 0.65, // Increased height
-                        ),
-                        itemCount: controller.subCategories.length,
-                        itemBuilder: (context, index) {
-                          final sub = controller.subCategories[index];
-                          final name = sub['name'] as String;
-                          final icon = sub['icon'] as String;
-                          return Obx(() {
+                      // Sub Categories Wrap
+                      Obx(
+                        () => Wrap(
+                          spacing: 8.w,
+                          runSpacing: 8.h,
+                          children: controller.subCategories.map((sub) {
+                            final name = sub['name'] as String;
                             final isSelected = controller.selectedSubCategories
                                 .contains(name);
                             return SubCategoryCard(
                               name: name,
-                              icon: icon,
                               isSelected: isSelected,
                               onTap: () => controller.toggleSubCategory(name),
                             );
-                          });
-                        },
+                          }).toList(),
+                        ),
                       ),
+
                       SizedBox(height: 20.h),
                     ],
                   ),

@@ -85,7 +85,8 @@ class _HomeViewState extends State<HomeView> {
                         ],
                       ),
                       GestureDetector(
-                        onTap: () => Get.toNamed(AppRoutes.customerNotifications),
+                        onTap: () =>
+                            Get.toNamed(AppRoutes.customerNotifications),
                         child: Container(
                           padding: EdgeInsets.all(10.r),
                           decoration: BoxDecoration(
@@ -131,7 +132,11 @@ class _HomeViewState extends State<HomeView> {
                               // Clear button when text is entered
                               suffixIcon: controller.searchQuery.isNotEmpty
                                   ? IconButton(
-                                      icon: Icon(Icons.clear, size: 20.r, color: AppColors.grey),
+                                      icon: Icon(
+                                        Icons.clear,
+                                        size: 20.r,
+                                        color: AppColors.grey,
+                                      ),
                                       onPressed: () {
                                         _searchController.clear();
                                         controller.clearSearch();
@@ -139,7 +144,8 @@ class _HomeViewState extends State<HomeView> {
                                     )
                                   : null,
                             ),
-                            onChanged: (value) => controller.searchServices(value),
+                            onChanged: (value) =>
+                                controller.searchServices(value),
                           ),
                         ),
                       ],
@@ -152,28 +158,44 @@ class _HomeViewState extends State<HomeView> {
                     if (controller.isSearching) {
                       return _buildSearchResults(controller);
                     }
-                    
+
                     // Show default home content
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Service Categories
-                        _buildSectionHeader('Service Categories', 'all', 'All Categories'),
+                        _buildSectionHeader(
+                          'Service Categories',
+                          'all',
+                          'All Categories',
+                        ),
                         SizedBox(height: 16.h),
                         _buildCategories(),
                         SizedBox(height: 24.h),
                         // Catering Services
-                        _buildSectionHeader('Catering Services', 'catering', 'Catering Services'),
+                        _buildSectionHeader(
+                          'Catering Services',
+                          'catering',
+                          'Catering Services',
+                        ),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('catering'),
                         SizedBox(height: 24.h),
                         // Filming Events
-                        _buildSectionHeader('Filming Events', 'filming', 'Filming Events'),
+                        _buildSectionHeader(
+                          'Filming Events',
+                          'filming',
+                          'Filming Events',
+                        ),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('filming'),
                         SizedBox(height: 24.h),
                         // Cleaning Services
-                        _buildSectionHeader('Cleaning Services', 'cleaning', 'Cleaning Services'),
+                        _buildSectionHeader(
+                          'Cleaning Services',
+                          'cleaning',
+                          'Cleaning Services',
+                        ),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('cleaning'),
                         SizedBox(height: 80.h), // Extra space for bottom nav
@@ -198,11 +220,7 @@ class _HomeViewState extends State<HomeView> {
           padding: EdgeInsets.only(top: 60.h),
           child: Column(
             children: [
-              Icon(
-                Icons.search_off,
-                size: 64.r,
-                color: AppColors.grey,
-              ),
+              Icon(Icons.search_off, size: 64.r, color: AppColors.grey),
               SizedBox(height: 16.h),
               Text(
                 'No services found',
@@ -234,10 +252,7 @@ class _HomeViewState extends State<HomeView> {
           padding: EdgeInsets.only(bottom: 16.h),
           child: Text(
             '${controller.searchResults.length} results found',
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.grey,
-            ),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grey),
           ),
         ),
         ListView.builder(
@@ -253,14 +268,13 @@ class _HomeViewState extends State<HomeView> {
                 imagePath: service.images.isNotEmpty ? service.images[0] : '',
                 title: service.title,
                 location: service.location,
-                price: '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.priceUnit}',
+                price:
+                    '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.priceUnit}',
                 rating: service.rating?.toString() ?? 'N/A',
                 isBookmarked: service.isBookmarked,
                 useFullWidth: true,
                 onTap: () {
-                  Get.to(
-                    () => ServiceDetailView(service: service),
-                  );
+                  Get.to(() => ServiceDetailView(service: service));
                 },
                 onBookmarkTap: () {
                   controller.toggleBookmark(service.id);
@@ -279,29 +293,13 @@ class _HomeViewState extends State<HomeView> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          CategoryItem(
-            icon: 'assets/icons/event.png',
-            label: 'Event',
-            onTap: () {},
-          ),
-          SizedBox(width: 20.w),
-          CategoryItem(
-            icon: 'assets/icons/filming.png',
-            label: 'Filming',
-            onTap: () {},
-          ),
-          SizedBox(width: 20.w),
-          CategoryItem(
-            icon: 'assets/icons/photography.png',
-            label: 'Photography',
-            onTap: () {},
-          ),
-          SizedBox(width: 20.w),
-          CategoryItem(
-            icon: 'assets/icons/catering.png',
-            label: 'Catering',
-            onTap: () {},
-          ),
+          CategoryItem(label: 'Lighting', onTap: () {}),
+          SizedBox(width: 8.w),
+          CategoryItem(label: 'Caterer', onTap: () {}),
+          SizedBox(width: 8.w),
+          CategoryItem(label: 'Musical', onTap: () {}),
+          SizedBox(width: 8.w),
+          CategoryItem(label: 'Photographer', onTap: () {}),
         ],
       ),
     );
@@ -311,7 +309,11 @@ class _HomeViewState extends State<HomeView> {
   /// [title] - The section title
   /// [categoryType] - The category type for filtering services
   /// [categoryName] - The display name for the app bar in the next screen
-  Widget _buildSectionHeader(String title, String categoryType, String categoryName) {
+  Widget _buildSectionHeader(
+    String title,
+    String categoryType,
+    String categoryName,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -353,14 +355,18 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildHorizontalList(String type) {
     final HomeController controller = Get.find<HomeController>();
-    
+
     // Filter services by type from controller's allServices
     final List<ServiceModel> services = controller.allServices.where((service) {
       switch (type) {
-        case 'catering': return service.type == ServiceType.catering;
-        case 'cleaning': return service.type == ServiceType.cleaning;
-        case 'filming': return service.type == ServiceType.filming;
-        default: return false;
+        case 'catering':
+          return service.type == ServiceType.catering;
+        case 'cleaning':
+          return service.type == ServiceType.cleaning;
+        case 'filming':
+          return service.type == ServiceType.filming;
+        default:
+          return false;
       }
     }).toList();
 
@@ -380,13 +386,12 @@ class _HomeViewState extends State<HomeView> {
               imagePath: service.images.isNotEmpty ? service.images[0] : '',
               title: service.title,
               location: service.location,
-              price: '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.priceUnit}',
+              price:
+                  '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.priceUnit}',
               rating: service.rating?.toString() ?? 'N/A',
               isBookmarked: service.isBookmarked,
               onTap: () {
-                Get.to(
-                  () => ServiceDetailView(service: service),
-                );
+                Get.to(() => ServiceDetailView(service: service));
               },
               onBookmarkTap: () {
                 controller.toggleBookmark(service.id);
