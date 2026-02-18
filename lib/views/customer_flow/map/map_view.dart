@@ -16,13 +16,8 @@ class MapView extends GetView<MapController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
-        // elevation: 0,
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back, color: AppColors.black, size: 24.r),
-        //   onPressed: () => Get.back(),
-        // ),
         title: Text(
-          'My Location',
+          'myLocation'.tr,
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -44,7 +39,7 @@ class MapView extends GetView<MapController> {
                     children: [
                       SizedBox(height: 20.h),
                       // Search Location
-                      _buildLabel('Search Location'),
+                      _buildLabel('searchLocation'.tr),
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -67,7 +62,7 @@ class MapView extends GetView<MapController> {
                                 onChanged: (value) =>
                                     controller.locationSearch.value = value,
                                 decoration: InputDecoration(
-                                  hintText: 'UAE',
+                                  hintText: 'uae'.tr,
                                   hintStyle: GoogleFonts.inter(
                                     color: AppColors.black,
                                     fontSize: 14.sp,
@@ -81,7 +76,7 @@ class MapView extends GetView<MapController> {
                       ),
                       SizedBox(height: 24.h),
                       // Select Main Category
-                      _buildLabel('Categories'),
+                      _buildLabel('categories'.tr),
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -105,7 +100,7 @@ class MapView extends GetView<MapController> {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(
-                                  value,
+                                  value.toLowerCase().tr,
                                   style: GoogleFonts.inter(
                                     color: AppColors.black,
                                     fontSize: 14.sp,
@@ -127,11 +122,11 @@ class MapView extends GetView<MapController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildLabel('Sub Categories'),
+                          _buildLabel('subCategoriesLabel'.tr),
                           TextButton(
                             onPressed: () => controller.selectAll(),
                             child: Text(
-                              'Select All',
+                              'selectAll'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 color: AppColors.grey,
@@ -151,7 +146,7 @@ class MapView extends GetView<MapController> {
                             final isSelected = controller.selectedSubCategories
                                 .contains(name);
                             return SubCategoryCard(
-                              name: name,
+                              name: name.toLowerCase().tr,
                               isSelected: isSelected,
                               onTap: () => controller.toggleSubCategory(name),
                             );
@@ -180,7 +175,7 @@ class MapView extends GetView<MapController> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Search',
+                      'search'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,

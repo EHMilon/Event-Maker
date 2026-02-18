@@ -15,12 +15,12 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
-          'Requests',
+          'requests'.tr,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -110,11 +110,11 @@ class _RequestCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(bottom: 16.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppColors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -185,7 +185,7 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.event_available, size: 48.r, color: AppColors.grey),
           SizedBox(height: 12.h),
           Text(
-            'No requests found',
+            'noRequestsYet'.tr,
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               color: AppColors.textSecondary,

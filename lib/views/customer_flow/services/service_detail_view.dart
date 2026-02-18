@@ -33,10 +33,9 @@ class ServiceDetailView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: 'Confirm Request Rejection',
-        subtitle:
-            'Are you sure you want to reject this request? Please note the client will be notified.',
-        mainButtonText: 'Reject',
+        title: 'confirmRejectTitle'.tr,
+        subtitle: 'confirmRejectSubtitle'.tr,
+        mainButtonText: 'reject'.tr,
         mainButtonColor: AppColors.error,
         onMainButtonPressed: () {
           final controller = Get.find<RequestsController>();
@@ -44,8 +43,8 @@ class ServiceDetailView extends StatelessWidget {
           Get.back(); // Close dialog
           Get.back(); // Go back to list
           Get.snackbar(
-            'Success',
-            'Request rejected',
+            'success'.tr,
+            'rejectSuccessSubtitle'.tr,
             backgroundColor: AppColors.error.withOpacity(0.1),
             colorText: AppColors.error,
           );
@@ -84,10 +83,9 @@ class ServiceDetailView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => ConfirmationDialog(
-        title: 'Request Accepted Successfully',
-        subtitle:
-            'You have successfully accepted the request. The client will be notified shortly.',
-        mainButtonText: 'Done',
+        title: 'acceptSuccessTitle'.tr,
+        subtitle: 'acceptSuccessSubtitle'.tr,
+        mainButtonText: 'done'.tr,
         mainButtonColor: AppColors.primary,
         onMainButtonPressed: () {
           final controller = Get.find<RequestsController>();
@@ -95,7 +93,7 @@ class ServiceDetailView extends StatelessWidget {
           Get.back(); // Close dialog
           Get.back(); // Go back to list
         },
-        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
+        icon: _buildDialogIcon(Icons.check, AppColors.success),
       ),
     );
   }
@@ -373,7 +371,10 @@ class ServiceDetailView extends StatelessWidget {
                                         ),
                                         SizedBox(width: 4.w),
                                         Text(
-                                          '${service.rating} (${service.reviewCount} reviews)',
+                                          '${service.rating} (${'reviewsCount'.trParams({
+                                                'count': service.reviewCount
+                                                    .toString(),
+                                              })})',
                                           style: GoogleFonts.inter(
                                             fontSize: 12.sp,
                                             color: AppColors.textSecondary,
@@ -398,7 +399,7 @@ class ServiceDetailView extends StatelessWidget {
 
                         // Description
                         Text(
-                          'Description',
+                          'description'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -447,7 +448,7 @@ class ServiceDetailView extends StatelessWidget {
 
                         // Location Header and Map
                         Text(
-                          'Location',
+                          'location'.tr,
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -509,7 +510,7 @@ class ServiceDetailView extends StatelessWidget {
                         if (service.packages != null &&
                             service.packages!.isNotEmpty) ...[
                           Text(
-                            'Packages & Pricings',
+                            'packagesPricings'.tr,
                             style: GoogleFonts.inter(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
@@ -639,7 +640,7 @@ class ServiceDetailView extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                'Pricing',
+                                'pricing'.tr,
                                 style: GoogleFonts.inter(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w600,
@@ -661,7 +662,7 @@ class ServiceDetailView extends StatelessWidget {
                                   service.type == ServiceType.filming ||
                                   service.type == ServiceType.catering)
                                 Text(
-                                  '/hr',
+                                  'perHr'.tr,
                                   style: GoogleFonts.inter(
                                     fontSize: 12.sp,
                                     color: AppColors.textSecondary,
@@ -745,7 +746,7 @@ class ServiceDetailView extends StatelessWidget {
                           );
                         }
                       },
-                      text: 'Book Now',
+                      text: 'bookNow'.tr,
                     ),
             ),
         ],

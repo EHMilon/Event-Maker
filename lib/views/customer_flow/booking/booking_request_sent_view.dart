@@ -12,7 +12,7 @@ class BookingRequestSentView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: SizedBox(
@@ -38,7 +38,7 @@ class BookingRequestSentView extends StatelessWidget {
               ),
               SizedBox(height: 40.h),
               Text(
-                'Request Sent Successfully!',
+                'requestSentSuccessfully'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
@@ -48,7 +48,7 @@ class BookingRequestSentView extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Your booking request has been sent to the service provider. You will be notified once they accept it.',
+                'requestSentSubtitle'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary,
@@ -61,7 +61,7 @@ class BookingRequestSentView extends StatelessWidget {
                 onPressed: () {
                   Get.offAllNamed(AppRoutes.customerHome);
                 },
-                text: 'Back to Home',
+                text: 'backToHome'.tr,
               ),
               SizedBox(height: 40.h),
             ],

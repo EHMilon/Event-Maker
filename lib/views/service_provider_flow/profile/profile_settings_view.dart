@@ -123,7 +123,7 @@ class ProfileSettingsView extends GetView<ProfileController> {
 
                 SizedBox(height: 20.h),
                 Text(
-                  'phone'.tr,
+                  'phoneNumber'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,

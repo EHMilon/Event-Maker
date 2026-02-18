@@ -19,7 +19,7 @@ class ProfileView extends GetView<ProfileController> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Text(
-          'Settings',
+          'settings'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 24.sp,
@@ -64,9 +64,12 @@ class ProfileView extends GetView<ProfileController> {
                           controller.userName.value,
                           style: TextStyle(
                             fontSize: 20.sp,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
+                            height: 1.2.h,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -76,23 +79,23 @@ class ProfileView extends GetView<ProfileController> {
                 // Menu Items
                 _buildMenuItem(
                   icon: 'assets/icons/profile_outline.svg',
-                  title: 'Profile Settings',
+                  title: 'profileSettings'.tr,
                   onTap: () => Get.toNamed(AppRoutes.profileSettings),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/shield-check.svg',
-                  title: 'Security',
+                  title: 'security'.tr,
                   onTap: () => Get.toNamed(AppRoutes.changePassword),
                 ),
                 if (controller.isServiceProvider.value) ...[
                   _buildMenuItem(
                     icon: 'assets/icons/scroll-text.svg',
-                    title: 'Certifications',
+                    title: 'certifications'.tr,
                     onTap: () => Get.toNamed(AppRoutes.spCertifications),
                   ),
                   _buildMenuItem(
                     icon: 'assets/icons/calendar-check-2.svg',
-                    title: 'My Availability',
+                    title: 'myAvailability'.tr,
                     onTap: () {},
                     trailing: Switch(
                       value: controller.isAvailable.value,
@@ -103,21 +106,21 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                   _buildMenuItem(
                     icon: 'assets/icons/wallet.svg',
-                    title: 'My Wallet',
+                    title: 'myWallet'.tr,
                     onTap: () => Get.toNamed(AppRoutes.spWallet),
                     trailing: Text(
                       '${controller.walletBalance.value} AED',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF9747FF),
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
                 ] else ...[
                   _buildMenuItem(
                     icon: 'assets/icons/wallet.svg',
-                    title: 'My Transactions',
+                    title: 'myTransactions'.tr,
                     onTap: () => Get.toNamed(AppRoutes.transactions),
                   ),
                   _buildMenuItem(
@@ -129,29 +132,22 @@ class ProfileView extends GetView<ProfileController> {
                 _buildMenuItem(
                   icon: 'assets/icons/languages.svg',
                   title: 'language'.tr,
-                  // trailing: Text(
-                  //   controller.selectedLanguage.value.name,
-                  //   style: TextStyle(
-                  //     fontSize: 14.sp,
-                  //     color: AppColors.textSecondary,
-                  //   ),
-                  // ),
                   onTap: () => _showLanguageBottomSheet(context),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/mail.svg',
-                  title: 'Contact Us',
+                  title: 'contactUs'.tr,
                   onTap: () => Get.toNamed(AppRoutes.contactUs),
                 ),
                 _buildMenuItem(
                   icon: 'assets/icons/question-mark.svg',
-                  title: 'FAQ',
+                  title: 'faq'.tr,
                   onTap: () => Get.toNamed(AppRoutes.faq),
                 ),
                 SizedBox(height: 16.h),
                 _buildMenuItem(
                   icon: 'assets/icons/logout.svg',
-                  title: 'Log Out',
+                  title: 'logout'.tr,
                   titleColor: AppColors.error,
                   onTap: () => _showLogoutDialog(context),
                 ),
@@ -189,8 +185,14 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
-      // trailing: trailing,
-      // contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
+      trailing:
+          trailing ??
+          Icon(
+            Icons.chevron_right,
+            size: 20.sp,
+            color: AppColors.textSecondary,
+          ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }
 

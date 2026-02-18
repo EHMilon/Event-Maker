@@ -226,7 +226,6 @@ class AppLocalization extends Translations {
     'language': 'Language',
     'update': 'Update',
     'saveChanges': 'Save Changes',
-    'passwordsDoNotMatch': 'Passwords do not match',
     'profileUpdatedSuccessfully': 'Profile updated successfully',
     'removedFromBookmarks': 'Service removed from bookmarks',
     'addedToBookmarks': 'Service added to bookmarks',
@@ -309,6 +308,80 @@ class AppLocalization extends Translations {
     'services': 'Services',
     'events': 'Events',
     'trainings': 'Trainings',
+    'map': 'Map',
+    'myLocation': 'My Location',
+    'searchLocation': 'Search Location',
+    'categories': 'Categories',
+    'subCategoriesLabel': 'Sub Categories',
+    'uae': 'UAE',
+    'hospitality': 'Hospitality',
+    'professionalTrainer': 'Professional Trainer',
+    'professional trainer': 'Professional Trainer',
+    'barista': 'Barista',
+    'search': 'Search',
+    'selectAll': 'Select All',
+    'standard': 'Standard Package',
+
+    // Customer Notifications
+    'today': 'Today',
+    'clearAll': 'Clear All',
+    'noNotifications': 'No notifications yet',
+    'acceptedBookingBody': 'Your booking request has been accepted',
+    'rejectedBookingBody': 'Your booking request has been rejected',
+    'confirmedBookingBody': 'Your booking is confirmed for tomorrow',
+    'paymentReceivedBody': 'We have received your payment',
+    'newServiceAvailableBody': 'New services are now available in your area',
+
+    // Payment
+    'payment': 'Payment',
+    'bookingSummary': 'Booking Summary',
+    'additionalFee': 'Additional Fee',
+    'total': 'Total',
+    'paymentMethod': 'Payment Method',
+    'payNow': 'Pay now',
+    'paymentDisclaimer':
+        'Your payment information is secure and encrypted. By confirming, you agree to our Terms of Service.',
+    'stripe': 'Stripe',
+    'paypal': 'Paypal',
+
+    // Payment Confirmation
+    'paymentSuccessful': 'Payment Successful!',
+    'bookingConfirmedSubtitle':
+        'Your booking has been confirmed. Thank you for using our service!',
+    'backToHome': 'Back to Home',
+    // Customer Home
+    'serviceCategories': 'Service Categories',
+    'allCategories': 'All Categories',
+    'cateringServices': 'Catering Services',
+    'filmingEvents': 'Filming Events',
+    'cleaningServices': 'Cleaning Services',
+    'tryDifferentKeywords': 'Try different keywords',
+    'resultsFound': 'results found',
+    'lighting': 'Lighting',
+    'caterer': 'Caterer',
+    'musical': 'Musical',
+    'photographer': 'Photographer',
+    'locationLabel': 'Location',
+
+    // Common
+    'perHr': '/hr',
+    'resultsFoundCount': '@count results found',
+    // Booking Details
+    'bookService': 'Book Service',
+    'selectDateTime': 'Select Date & Time',
+    'availableTimes': 'Available Times',
+    'serviceDuration': 'Service Duration',
+    'selectMonth': 'Select Month',
+    'selectYear': 'Select Year',
+    'selectDuration': 'Select Duration',
+    'selectLocationTitle': 'Select Location',
+    'additionalRequest': 'Additional Request',
+    'specialRequests': 'Special Requests (Optional)',
+    'specialRequestsHint':
+        'Any special requirements or notes for the service provider...',
+    'requestSentSuccessfully': 'Request Sent Successfully!',
+    'requestSentSubtitle':
+        'Your booking request has been sent to the service provider. You will be notified once they accept it.',
   };
 
   // Arabic translations
@@ -593,5 +666,79 @@ class AppLocalization extends Translations {
     'services': 'الخدمات',
     'events': 'الفعاليات',
     'trainings': 'التدريبات',
+    'map': 'الخريطة',
+    'myLocation': 'موقعي',
+    'searchLocation': 'البحث عن الموقع',
+    'categories': 'الفئات',
+    'subCategoriesLabel': 'الفئات الفرعية',
+    'uae': 'الإمارات',
+    'hospitality': 'ضيافة',
+    'professionalTrainer': 'مدرب محترف',
+    'professional trainer': 'مدرب محترف',
+    'barista': 'باريستا',
+    'search': 'بحث',
+    'selectAll': 'تحديد الكل',
+    'standard': 'الباقة الأساسية',
+
+    // Customer Notifications
+    'today': 'اليوم',
+    'clearAll': 'مسح الكل',
+    'noNotifications': 'لا توجد إشعارات بعد',
+    'acceptedBookingBody': 'تم قبول طلب الحجز الخاص بك',
+    'rejectedBookingBody': 'تم رفض طلب الحجز الخاص بك',
+    'confirmedBookingBody': 'تم تأكيد حجزك ليوم غد',
+    'paymentReceivedBody': 'لقد استلمنا دفعتك',
+    'newServiceAvailableBody': 'خدمات جديدة متاحة الآن في منطقتك',
+
+    // Payment
+    'payment': 'الدفع',
+    'bookingSummary': 'ملخص الحجز',
+    'additionalFee': 'رسوم إضافية',
+    'total': 'الإجمالي',
+    'paymentMethod': 'طريقة الدفع',
+    'payNow': 'ادفع الآن',
+    'paymentDisclaimer':
+        'معلومات الدفع الخاصة بك آمنة ومشفرة. من خلال التأكيد، فإنك توافق على شروط الخدمة الخاصة بنا.',
+    'stripe': 'سترايب',
+    'paypal': 'بايبال',
+
+    // Payment Confirmation
+    'paymentSuccessful': 'تم الدفع بنجاح!',
+    'bookingConfirmedSubtitle': 'تم تأكيد حجزك. شكراً لاستخدامكم خدمتنا!',
+    'backToHome': 'العودة للرئيسية',
+
+    // Customer Home
+    'serviceCategories': 'فئات الخدمة',
+    'allCategories': 'جميع الفئات',
+    'cateringServices': 'خدمات التموين',
+    'filmingEvents': 'فعاليات التصوير',
+    'cleaningServices': 'خدمات التنظيف',
+    'tryDifferentKeywords': 'جرب كلمات رئيسية مختلفة',
+    'resultsFound': 'نتائج وجدت',
+    'lighting': 'إضاءة',
+    'caterer': 'متعهد طعام',
+    'musical': 'موسيقي',
+    'photographer': 'مصور',
+    'locationLabel': 'الموقع',
+
+    // Common
+    'perHr': '/ساعة',
+    'resultsFoundCount': '@count نتائج وجدت',
+
+    // Booking Details
+    'bookService': 'حجز الخدمة',
+    'selectDateTime': 'اختر التاريخ والوقت',
+    'availableTimes': 'الأوقات المتاحة',
+    'serviceDuration': 'مدة الخدمة',
+    'selectMonth': 'اختر الشهر',
+    'selectYear': 'اختر السنة',
+    'selectDuration': 'اختر المدة',
+    'selectLocationTitle': 'اختر الموقع',
+    'additionalRequest': 'طلب إضافي',
+    'specialRequests': 'طلبات خاصة (اختياري)',
+    'specialRequestsHint': 'أي متطلبات خاصة أو ملاحظات لمقدم الخدمة...',
+    'requestSentSuccessfully': 'تم إرسال الطلب بنجاح!',
+    'requestSentSubtitle':
+        'تم إرسال طلب الحجز الخاص بك إلى مقدم الخدمة. سيتم إخطارك بمجرد قبوله.',
   };
 }

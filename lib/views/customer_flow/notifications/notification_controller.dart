@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../../core/routes/app_routes.dart';
-import 'package:collection/collection.dart';
 
 class CustomerNotificationController extends GetxController {
   final RxList<CustomerNotificationModel> notifications =
@@ -23,8 +22,8 @@ class CustomerNotificationController extends GetxController {
     notifications.addAll([
       CustomerNotificationModel(
         id: '1',
-        title: 'Photography Service',
-        body: 'Your booking request has been accepted',
+        title: 'photography',
+        body: 'acceptedBookingBody',
         timeAgo: '2 hr ago',
         isRead: false,
         type: NotificationType.booking,
@@ -32,8 +31,8 @@ class CustomerNotificationController extends GetxController {
       ),
       CustomerNotificationModel(
         id: '2',
-        title: 'Catering Service',
-        body: 'Your booking request has been accepted',
+        title: 'catering',
+        body: 'acceptedBookingBody',
         timeAgo: '4 hr ago',
         isRead: false,
         type: NotificationType.booking,
@@ -41,32 +40,32 @@ class CustomerNotificationController extends GetxController {
       ),
       CustomerNotificationModel(
         id: '3',
-        title: 'Music Band',
-        body: 'Your booking request has been rejected',
+        title: 'music',
+        body: 'rejectedBookingBody',
         timeAgo: '1 day ago',
         isRead: true,
         type: NotificationType.booking,
       ),
       CustomerNotificationModel(
         id: '4',
-        title: 'Venue Booking',
-        body: 'Your booking is confirmed for tomorrow',
+        title: 'event',
+        body: 'confirmedBookingBody',
         timeAgo: '2 days ago',
         isRead: true,
         type: NotificationType.reminder,
       ),
       CustomerNotificationModel(
         id: '5',
-        title: 'Payment Received',
-        body: 'We have received your payment',
+        title: 'payment',
+        body: 'paymentReceivedBody',
         timeAgo: '3 days ago',
         isRead: true,
         type: NotificationType.payment,
       ),
       CustomerNotificationModel(
         id: '6',
-        title: 'New Service Available',
-        body: 'Photography services are now available in your area',
+        title: 'photography',
+        body: 'newServiceAvailableBody',
         timeAgo: '1 week ago',
         isRead: true,
         type: NotificationType.promotion,
@@ -85,6 +84,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: notifications[index].timeAgo,
         isRead: true,
         type: notifications[index].type,
+        serviceId: notifications[index].serviceId,
       );
     }
   }
@@ -96,8 +96,9 @@ class CustomerNotificationController extends GetxController {
   void handleNotificationClick(CustomerNotificationModel notification) {
     markAsRead(notification.id);
 
-    if (notification.body.contains('accepted') &&
-        notification.serviceId != null) {
+    if (notification.serviceId != null &&
+        (notification.body == 'acceptedBookingBody' ||
+            notification.body.tr.contains('accepted'.tr))) {
       // Find service in HomeController or MockData
       final service = MockData.homeServices.firstWhereOrNull(
         (s) => s.id == notification.serviceId,
@@ -116,7 +117,7 @@ class CustomerNotificationController extends GetxController {
 class CustomerNotificationModel {
   final String id;
   final String title;
-  final String body;
+  final String body; // This will hold the localization key or the actual text
   final String timeAgo;
   final bool isRead;
   final NotificationType type;

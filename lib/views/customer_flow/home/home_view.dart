@@ -1,7 +1,7 @@
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
+import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/home/home_controller.dart';
 import 'package:event_maker/views/customer_flow/home/widgets/category_item.dart';
@@ -66,7 +66,7 @@ class _HomeViewState extends State<HomeView> {
                               ),
                               SizedBox(width: 4.w),
                               Text(
-                                'Location',
+                                'locationLabel'.tr,
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   color: AppColors.grey,
@@ -75,7 +75,7 @@ class _HomeViewState extends State<HomeView> {
                             ],
                           ),
                           Text(
-                            'New York, USA',
+                            'New York, USA', // TODO: Fetch from location service
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -123,7 +123,7 @@ class _HomeViewState extends State<HomeView> {
                           child: TextField(
                             controller: _searchController,
                             decoration: InputDecoration(
-                              hintText: 'Search services...',
+                              hintText: 'searchServices'.tr,
                               hintStyle: GoogleFonts.inter(
                                 color: AppColors.grey,
                                 fontSize: 14.sp,
@@ -165,36 +165,36 @@ class _HomeViewState extends State<HomeView> {
                       children: [
                         // Service Categories
                         _buildSectionHeader(
-                          'Service Categories',
+                          'serviceCategories'.tr,
                           'all',
-                          'All Categories',
+                          'allCategories'.tr,
                         ),
                         SizedBox(height: 16.h),
                         _buildCategories(),
                         SizedBox(height: 24.h),
                         // Catering Services
                         _buildSectionHeader(
-                          'Catering Services',
+                          'cateringServices'.tr,
                           'catering',
-                          'Catering Services',
+                          'cateringServices'.tr,
                         ),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('catering'),
                         SizedBox(height: 24.h),
                         // Filming Events
                         _buildSectionHeader(
-                          'Filming Events',
+                          'filmingEvents'.tr,
                           'filming',
-                          'Filming Events',
+                          'filmingEvents'.tr,
                         ),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('filming'),
                         SizedBox(height: 24.h),
                         // Cleaning Services
                         _buildSectionHeader(
-                          'Cleaning Services',
+                          'cleaningServices'.tr,
                           'cleaning',
-                          'Cleaning Services',
+                          'cleaningServices'.tr,
                         ),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('cleaning'),
@@ -223,7 +223,7 @@ class _HomeViewState extends State<HomeView> {
               Icon(Icons.search_off, size: 64.r, color: AppColors.grey),
               SizedBox(height: 16.h),
               Text(
-                'No services found',
+                'noServicesFound'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -232,7 +232,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Try different keywords',
+                'tryDifferentKeywords'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.grey,
@@ -251,7 +251,9 @@ class _HomeViewState extends State<HomeView> {
         Padding(
           padding: EdgeInsets.only(bottom: 16.h),
           child: Text(
-            '${controller.searchResults.length} results found',
+            'resultsFoundCount'.trParams({
+              'count': controller.searchResults.length.toString(),
+            }),
             style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grey),
           ),
         ),
@@ -293,13 +295,13 @@ class _HomeViewState extends State<HomeView> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          CategoryItem(label: 'Lighting', onTap: () {}),
+          CategoryItem(label: 'lighting'.tr, onTap: () {}),
           SizedBox(width: 8.w),
-          CategoryItem(label: 'Caterer', onTap: () {}),
+          CategoryItem(label: 'caterer'.tr, onTap: () {}),
           SizedBox(width: 8.w),
-          CategoryItem(label: 'Musical', onTap: () {}),
+          CategoryItem(label: 'musical'.tr, onTap: () {}),
           SizedBox(width: 8.w),
-          CategoryItem(label: 'Photographer', onTap: () {}),
+          CategoryItem(label: 'photographer'.tr, onTap: () {}),
         ],
       ),
     );
@@ -339,7 +341,7 @@ class _HomeViewState extends State<HomeView> {
           child: Row(
             children: [
               Text(
-                'See All',
+                'seeAll'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   color: AppColors.grey,

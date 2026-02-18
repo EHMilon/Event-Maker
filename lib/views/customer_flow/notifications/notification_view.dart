@@ -18,7 +18,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
         title: Text(
-          'Notifications',
+          'notifications'.tr,
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -30,7 +30,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
           TextButton(
             onPressed: controller.clearAllNotifications,
             child: Text(
-              'Clear All',
+              'clearAll'.tr,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -47,7 +47,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
           children: [
             SizedBox(height: 16.h),
             Text(
-              'Today',
+              'today'.tr,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -130,7 +130,7 @@ class NotificationCard extends StatelessWidget {
           child: Center(child: _getNotificationIcon(notification.type)),
         ),
         title: Text(
-          notification.title,
+          notification.title.tr,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
@@ -140,7 +140,7 @@ class NotificationCard extends StatelessWidget {
         subtitle: Padding(
           padding: EdgeInsets.only(top: 4.h),
           child: Text(
-            notification.body,
+            notification.body.tr,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               fontWeight: FontWeight.w400,

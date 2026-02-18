@@ -24,7 +24,10 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
 
     return Scaffold(
       body: Obx(
-        () => IndexedStack(index: controller.selectedIndex.value, children: pages),
+        () => IndexedStack(
+          index: controller.selectedIndex.value,
+          children: pages,
+        ),
       ),
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
@@ -55,7 +58,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Home',
+              label: 'home'.tr,
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
@@ -68,7 +71,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Map',
+              label: 'map'.tr,
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
@@ -81,7 +84,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Bookings',
+              label: 'bookings'.tr,
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
@@ -94,7 +97,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Profile',
+              label: 'profile'.tr,
             ),
           ],
         ),

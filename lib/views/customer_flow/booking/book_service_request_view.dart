@@ -12,21 +12,21 @@ class BookServiceRequestView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: Text(
-          'Book Service',
+          'bookService'.tr,
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: AppColors.black,
           ),
         ),
         centerTitle: false,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () => Get.back(),
         ),
       ),
@@ -36,7 +36,7 @@ class BookServiceRequestView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Additional Request',
+              'additionalRequest'.tr,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w500,
@@ -46,7 +46,7 @@ class BookServiceRequestView extends StatelessWidget {
             SizedBox(height: 16.h),
 
             Text(
-              'Special Requests (Optional)',
+              'specialRequests'.tr,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
@@ -65,8 +65,7 @@ class BookServiceRequestView extends StatelessWidget {
               child: TextField(
                 maxLines: null,
                 decoration: InputDecoration.collapsed(
-                  hintText:
-                      'Any special requirements or notes for the service provider...',
+                  hintText: 'specialRequestsHint'.tr,
                   hintStyle: GoogleFonts.inter(
                     fontSize: 14.sp,
                     color: AppColors.textSecondary.withOpacity(0.5),
@@ -84,7 +83,7 @@ class BookServiceRequestView extends StatelessWidget {
                   arguments: Get.arguments,
                 );
               },
-              text: 'Continue',
+              text: 'continueText'.tr,
             ),
             SizedBox(height: 20.h),
           ],

@@ -107,7 +107,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                       () => Switch(
                         value: controller.outsideLocation.value,
                         onChanged: (v) => controller.outsideLocation.value = v,
-                        activeColor: AppColors.primary,
+                        activeThumbColor: AppColors.primary,
                       ),
                     ),
                   ],

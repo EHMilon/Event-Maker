@@ -8,7 +8,7 @@ import 'package:event_maker/core/routes/app_routes.dart';
 
 /// Payment confirmation screen shown after successful payment.
 /// Displays a confirmation illustration and a button to return to home.
-/// 
+///
 /// Used when user clicks on the payment screen to confirm their booking.
 class PaymentConfirmationView extends StatelessWidget {
   const PaymentConfirmationView({super.key});
@@ -16,14 +16,14 @@ class PaymentConfirmationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            
+
             // Booking confirmation illustration
             Image.asset(
               'assets/images/booking_confirm.png',
@@ -40,12 +40,12 @@ class PaymentConfirmationView extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             SizedBox(height: 40.h),
-            
+
             // Success message
             Text(
-              'Payment Successful!',
+              'paymentSuccessful'.tr,
               style: GoogleFonts.inter(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w700,
@@ -53,12 +53,12 @@ class PaymentConfirmationView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             SizedBox(height: 16.h),
-            
+
             // Subtitle
             Text(
-              'Your booking has been confirmed. Thank you for using our service!',
+              'bookingConfirmedSubtitle'.tr,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
@@ -66,18 +66,18 @@ class PaymentConfirmationView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             const Spacer(),
-            
+
             // Back to Home button
             PrimaryTextButton(
               onPressed: () {
                 // Navigate back to home screen
                 Get.offAllNamed(AppRoutes.customerHome);
               },
-              text: 'Back to Home',
+              text: 'backToHome'.tr,
             ),
-            
+
             SizedBox(height: 40.h),
           ],
         ),
