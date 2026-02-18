@@ -2,20 +2,27 @@ import 'package:event_maker/views/customer_flow/requests/customer_requests_model
 import 'package:get/get.dart';
 
 class CustomerRequestsController extends GetxController {
-  final selectedTab = 0.obs;
+  final isLoading = true.obs;
   final upcomingRequests = <CustomerRequestModel>[].obs;
   final pastRequests = <CustomerRequestModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadMockData();
+    _loadData();
   }
 
-  void changeTab(int index) => selectedTab.value = index;
+  Future<void> _loadData() async {
+    isLoading.value = true;
+    _loadMockData();
+    await Future.delayed(const Duration(seconds: 2));
+    isLoading.value = false;
+  }
 
-  List<CustomerRequestModel> get currentRequests =>
-      selectedTab.value == 0 ? upcomingRequests : pastRequests;
+  List<CustomerRequestModel> get currentRequests => [
+    ...upcomingRequests,
+    ...pastRequests,
+  ];
 
   void _loadMockData() {
     upcomingRequests.assignAll([
