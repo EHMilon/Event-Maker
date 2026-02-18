@@ -6,6 +6,7 @@ import '../../../data/mock/mock_data.dart';
 import '../../../shared/utils/user_preferences.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../views/customer_flow/home/home_controller.dart';
+import '../../../core/localization/app_localization.dart';
 
 class ProfileController extends GetxController {
   final nameController = TextEditingController();
@@ -56,11 +57,34 @@ class ProfileController extends GetxController {
   // Reactive property to notify when bookmarks change
   final RxBool bookmarksChanged = false.obs;
 
+  // Language selection
+  final Rx<SupportedLanguage> selectedLanguage = SupportedLanguage.english.obs;
+
   @override
   void onInit() {
     super.onInit();
     loadUserData();
     loadMockData();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final langCode = await UserPreferences.getLanguageCode();
+    selectedLanguage.value = SupportedLanguage.values.firstWhere(
+      (e) => e.code == langCode,
+      orElse: () => SupportedLanguage.english,
+    );
+  }
+
+  /// Updates the application language and saves preference.
+  /// Backend Compatible: TODO - Sync language preference with backend API.
+  void changeLanguage(SupportedLanguage language) async {
+    selectedLanguage.value = language;
+    await UserPreferences.setLanguageCode(language.code);
+    Get.updateLocale(Locale(language.code));
+
+    // TODO: Implement backend sync here
+    // if (isConnected) { ... }
   }
 
   Future<void> loadUserData() async {

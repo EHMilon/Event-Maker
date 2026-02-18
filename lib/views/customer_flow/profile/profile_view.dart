@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import '../../../shared/widgets/language_bottom_sheet.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import 'profile_controller.dart';
@@ -121,10 +122,22 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                   _buildMenuItem(
                     icon: 'assets/icons/saved.svg',
-                    title: 'My Bookmarks',
+                    title: 'myBookmarks'.tr,
                     onTap: () => Get.toNamed(AppRoutes.bookmarks),
                   ),
                 ],
+                _buildMenuItem(
+                  icon: 'assets/icons/languages.svg',
+                  title: 'language'.tr,
+                  // trailing: Text(
+                  //   controller.selectedLanguage.value.name,
+                  //   style: TextStyle(
+                  //     fontSize: 14.sp,
+                  //     color: AppColors.textSecondary,
+                  //   ),
+                  // ),
+                  onTap: () => _showLanguageBottomSheet(context),
+                ),
                 _buildMenuItem(
                   icon: 'assets/icons/mail.svg',
                   title: 'Contact Us',
@@ -176,8 +189,8 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
-      trailing: trailing,
-      contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
+      // trailing: trailing,
+      // contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }
 
@@ -197,6 +210,16 @@ class ProfileView extends GetView<ProfileController> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      LanguageBottomSheet(
+        selectedLanguage: controller.selectedLanguage.value,
+        onLanguageSelected: (language) => controller.changeLanguage(language),
+      ),
+      isScrollControlled: true,
     );
   }
 }

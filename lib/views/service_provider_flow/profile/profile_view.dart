@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import '../../../shared/widgets/language_bottom_sheet.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
 import 'profile_controller.dart';
@@ -63,8 +64,9 @@ class ProfileView extends GetView<ProfileController> {
                           controller.userName.value,
                           style: TextStyle(
                             fontSize: 20.sp,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
+                            height: 1.2.h,
                           ),
                         ),
                       ],
@@ -127,6 +129,11 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ],
                 _buildMenuItem(
+                  icon: 'assets/icons/languages.svg',
+                  title: 'language'.tr,
+                  onTap: () => _showLanguageBottomSheet(context),
+                ),
+                _buildMenuItem(
                   icon: 'assets/icons/mail.svg',
                   title: 'contactUs'.tr,
                   onTap: () => Get.toNamed(AppRoutes.contactUs),
@@ -177,13 +184,13 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
-      trailing:
-          trailing ??
-          Icon(
-            Icons.chevron_right,
-            size: 20.sp,
-            color: AppColors.textSecondary,
-          ),
+      // trailing:
+      //     trailing ??
+      //     Icon(
+      //       Icons.chevron_right,
+      //       size: 20.sp,
+      //       color: AppColors.textSecondary,
+      //     ),
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }
@@ -211,6 +218,16 @@ class ProfileView extends GetView<ProfileController> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguageBottomSheet(BuildContext context) {
+    Get.bottomSheet(
+      LanguageBottomSheet(
+        selectedLanguage: controller.selectedLanguage.value,
+        onLanguageSelected: (language) => controller.changeLanguage(language),
+      ),
+      isScrollControlled: true,
     );
   }
 }

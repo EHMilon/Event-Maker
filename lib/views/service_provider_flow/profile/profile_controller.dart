@@ -7,6 +7,7 @@ import '../../../shared/utils/user_preferences.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../customer_flow/home/home_controller.dart';
 import '../../../data/services/connectivity_service.dart';
+import '../../../core/localization/app_localization.dart';
 
 /// Controller for managing profile and settings related logic.
 /// Follows SOLID principles by separating concerns and using dependency injection.
@@ -52,10 +53,33 @@ class ProfileController extends GetxController {
   final RxList<ServiceModel> providerServices = <ServiceModel>[].obs;
   final RxList<ReviewModel> providerReviews = <ReviewModel>[].obs;
 
+  // Language selection
+  final Rx<SupportedLanguage> selectedLanguage = SupportedLanguage.english.obs;
+
   @override
   void onInit() {
     super.onInit();
     _initialize();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final langCode = await UserPreferences.getLanguageCode();
+    selectedLanguage.value = SupportedLanguage.values.firstWhere(
+      (e) => e.code == langCode,
+      orElse: () => SupportedLanguage.english,
+    );
+  }
+
+  /// Updates the application language and saves preference.
+  /// Backend Compatible: TODO - Sync language preference with backend API.
+  void changeLanguage(SupportedLanguage language) async {
+    selectedLanguage.value = language;
+    await UserPreferences.setLanguageCode(language.code);
+    Get.updateLocale(Locale(language.code));
+
+    // TODO: Implement backend sync here
+    // if (_connectivityService.isConnected.value) { ... }
   }
 
   Future<void> _initialize() async {
