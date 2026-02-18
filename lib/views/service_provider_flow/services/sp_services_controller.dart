@@ -83,27 +83,6 @@ class SPServicesController extends GetxController {
           rating: 4.7,
           reviewCount: 50,
         ),
-        ServiceModel(
-          id: '4',
-          title: 'Live Music for Anniversary',
-          description:
-              'Soulful live music performances to make your anniversary unforgettable.',
-          images: [
-            'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=2070',
-          ],
-          type: ServiceType.music,
-          provider: ServiceProvider(
-            name: 'Emily Davis',
-            role: 'Musician',
-            imageUrl: 'https://i.pravatar.cc/150?u=emily',
-          ),
-          location: 'Silicon Oasis, Dubai',
-          basePrice: 800,
-          priceUnit: 'AED',
-          date: DateTime(2026, 1, 10, 16, 0),
-          rating: 4.9,
-          reviewCount: 200,
-        ),
       ];
 
       services.value = mockServices;

@@ -6,7 +6,6 @@ enum ServiceType {
   training,
   catering,
   cleaning,
-  music,
   filming,
 }
 

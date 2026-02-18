@@ -72,7 +72,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
-                'assets/icons/notification.svg',
+                'assets/icons/booking.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
                   controller.selectedIndex.value == 2
@@ -81,7 +81,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Notifications',
+              label: 'Bookings',
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(

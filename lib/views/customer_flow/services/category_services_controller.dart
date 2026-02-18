@@ -50,7 +50,6 @@ class CategoryServicesController extends GetxController {
       'catering': ServiceType.catering,
       'filming': ServiceType.filming,
       'cleaning': ServiceType.cleaning,
-      'music': ServiceType.music,
       'photography': ServiceType.photography,
       'event': ServiceType.event,
     };

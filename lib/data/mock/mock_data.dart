@@ -259,67 +259,6 @@ class MockData {
       isBookmarked: false,
     ),
 
-    // Music Services
-    ServiceModel(
-      id: 'music-1',
-      title: 'Jazz Band Performance',
-      description:
-          'Live jazz band performances for events, weddings, and parties.',
-      images: [imgMusic],
-      type: ServiceType.music,
-      provider: ServiceProvider(
-        name: 'Jazz Ensemble Abu Dhabi',
-        role: 'Live Music Band',
-        imageUrl: imgPerson,
-        isVerified: true,
-      ),
-      location: 'Emirates Palace, Abu Dhabi',
-      rating: 4.9,
-      reviewCount: 456,
-      basePrice: 500,
-      priceUnit: 'AED/hr',
-      isBookmarked: false,
-    ),
-    ServiceModel(
-      id: 'music-2',
-      title: 'Professional DJ Set',
-      description:
-          'Experienced DJ for parties, weddings, and corporate events.',
-      images: [imgMusic],
-      type: ServiceType.music,
-      provider: ServiceProvider(
-        name: 'DJ Pulse',
-        role: 'Professional DJ',
-        imageUrl: imgPerson,
-        isVerified: true,
-      ),
-      location: 'White Club, Abu Dhabi',
-      rating: 4.7,
-      reviewCount: 323,
-      basePrice: 300,
-      priceUnit: 'AED/hr',
-      isBookmarked: true,
-    ),
-    ServiceModel(
-      id: 'music-3',
-      title: 'Classical Quartet',
-      description: 'Elegant classical music performances by trained musicians.',
-      images: [imgMusic],
-      type: ServiceType.music,
-      provider: ServiceProvider(
-        name: 'Symphony Quartet',
-        role: 'Classical Musicians',
-        imageUrl: imgPerson,
-        isVerified: true,
-      ),
-      location: 'Louvre Museum, Abu Dhabi',
-      rating: 4.8,
-      reviewCount: 198,
-      basePrice: 450,
-      priceUnit: 'AED/hr',
-      isBookmarked: false,
-    ),
-
     // Photography Services
     ServiceModel(
       id: 'photo-1',
@@ -530,7 +469,6 @@ class MockData {
       'catering': ServiceType.catering,
       'filming': ServiceType.filming,
       'cleaning': ServiceType.cleaning,
-      'music': ServiceType.music,
       'photography': ServiceType.photography,
     };
     final type = typeMap[section] ?? ServiceType.event;

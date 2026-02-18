@@ -690,7 +690,6 @@ class ServiceDetailView extends StatelessWidget {
                               if (service.type == ServiceType.event ||
                                   service.type == ServiceType.training ||
                                   service.type == ServiceType.cleaning ||
-                                  service.type == ServiceType.music ||
                                   service.type == ServiceType.filming ||
                                   service.type == ServiceType.catering)
                                 Text(

@@ -176,11 +176,6 @@ class _HomeViewState extends State<HomeView> {
                         _buildSectionHeader('Cleaning Services', 'cleaning', 'Cleaning Services'),
                         SizedBox(height: 16.h),
                         _buildHorizontalList('cleaning'),
-                        SizedBox(height: 24.h),
-                        // Music Events
-                        _buildSectionHeader('Music Events', 'music', 'Music Events'),
-                        SizedBox(height: 16.h),
-                        _buildHorizontalList('music'),
                         SizedBox(height: 80.h), // Extra space for bottom nav
                       ],
                     );
@@ -291,12 +286,6 @@ class _HomeViewState extends State<HomeView> {
           ),
           SizedBox(width: 20.w),
           CategoryItem(
-            icon: 'assets/icons/musical.png',
-            label: 'Musical',
-            onTap: () {},
-          ),
-          SizedBox(width: 20.w),
-          CategoryItem(
             icon: 'assets/icons/filming.png',
             label: 'Filming',
             onTap: () {},
@@ -368,10 +357,8 @@ class _HomeViewState extends State<HomeView> {
     // Filter services by type from controller's allServices
     final List<ServiceModel> services = controller.allServices.where((service) {
       switch (type) {
-        case 'photography': return service.type == ServiceType.photography;
         case 'catering': return service.type == ServiceType.catering;
         case 'cleaning': return service.type == ServiceType.cleaning;
-        case 'music': return service.type == ServiceType.music;
         case 'filming': return service.type == ServiceType.filming;
         default: return false;
       }

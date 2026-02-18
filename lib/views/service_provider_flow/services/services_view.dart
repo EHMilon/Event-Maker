@@ -423,8 +423,6 @@ class ServiceProviderServiceTile extends StatelessWidget {
         return const Color(0xFFFF9800);
       case ServiceType.cleaning:
         return const Color(0xFF4CAF50);
-      case ServiceType.music:
-        return const Color(0xFFE91E63);
       case ServiceType.filming:
         return const Color(0xFF607D8B);
     }
@@ -442,8 +440,6 @@ class ServiceProviderServiceTile extends StatelessWidget {
         return 'catering'.tr;
       case ServiceType.cleaning:
         return 'cleaning'.tr;
-      case ServiceType.music:
-        return 'music'.tr;
       case ServiceType.filming:
         return 'filming'.tr;
     }
