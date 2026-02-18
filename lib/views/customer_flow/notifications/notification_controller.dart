@@ -1,7 +1,12 @@
 import 'package:get/get.dart';
+import '../../../data/mock/mock_data.dart';
+import '../../../core/routes/app_routes.dart';
+import 'package:collection/collection.dart';
 
 class CustomerNotificationController extends GetxController {
-  final RxList<CustomerNotificationModel> notifications = <CustomerNotificationModel>[].obs;
+  final RxList<CustomerNotificationModel> notifications =
+      <CustomerNotificationModel>[].obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
@@ -9,7 +14,11 @@ class CustomerNotificationController extends GetxController {
     _loadNotifications();
   }
 
-  void _loadNotifications() {
+  Future<void> _loadNotifications() async {
+    isLoading.value = true;
+    // Simulate 2s delay for shimmer effect as per user rules
+    await Future.delayed(const Duration(seconds: 2));
+
     // TODO: Replace with actual API call
     notifications.addAll([
       CustomerNotificationModel(
@@ -19,6 +28,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: '2 hr ago',
         isRead: false,
         type: NotificationType.booking,
+        serviceId: 'photo-1',
       ),
       CustomerNotificationModel(
         id: '2',
@@ -27,6 +37,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: '4 hr ago',
         isRead: false,
         type: NotificationType.booking,
+        serviceId: 'cat-1',
       ),
       CustomerNotificationModel(
         id: '3',
@@ -61,6 +72,7 @@ class CustomerNotificationController extends GetxController {
         type: NotificationType.promotion,
       ),
     ]);
+    isLoading.value = false;
   }
 
   void markAsRead(String id) {
@@ -80,6 +92,25 @@ class CustomerNotificationController extends GetxController {
   void clearAllNotifications() {
     notifications.clear();
   }
+
+  void handleNotificationClick(CustomerNotificationModel notification) {
+    markAsRead(notification.id);
+
+    if (notification.body.contains('accepted') &&
+        notification.serviceId != null) {
+      // Find service in HomeController or MockData
+      final service = MockData.homeServices.firstWhereOrNull(
+        (s) => s.id == notification.serviceId,
+      );
+
+      if (service != null) {
+        Get.toNamed(
+          AppRoutes.payment,
+          arguments: {'service': service, 'package': service.packages?.first},
+        );
+      }
+    }
+  }
 }
 
 class CustomerNotificationModel {
@@ -89,6 +120,7 @@ class CustomerNotificationModel {
   final String timeAgo;
   final bool isRead;
   final NotificationType type;
+  final String? serviceId;
 
   CustomerNotificationModel({
     required this.id,
@@ -97,6 +129,7 @@ class CustomerNotificationModel {
     required this.timeAgo,
     this.isRead = false,
     required this.type,
+    this.serviceId,
   });
 }
 

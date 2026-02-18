@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/themes/app_colors.dart';
 import 'notification_controller.dart';
 
@@ -56,15 +57,33 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
             SizedBox(height: 8.h),
             Expanded(
               child: Obx(
-                () => ListView.builder(
-                  itemCount: controller.notifications.length,
-                  itemBuilder: (context, index) {
-                    final notification = controller.notifications[index];
-                    return NotificationCard(
-                      notification: notification,
-                      onTap: () => controller.markAsRead(notification.id),
-                    );
-                  },
+                () => Skeletonizer(
+                  enabled: controller.isLoading.value,
+                  child: ListView.builder(
+                    itemCount: controller.isLoading.value
+                        ? 5
+                        : controller.notifications.length,
+                    itemBuilder: (context, index) {
+                      if (controller.isLoading.value) {
+                        return NotificationCard(
+                          notification: CustomerNotificationModel(
+                            id: '',
+                            title: 'Skeleton Title',
+                            body: 'Skeleton body for loading state',
+                            timeAgo: '2 hr ago',
+                            type: NotificationType.booking,
+                          ),
+                          onTap: () {},
+                        );
+                      }
+                      final notification = controller.notifications[index];
+                      return NotificationCard(
+                        notification: notification,
+                        onTap: () =>
+                            controller.handleNotificationClick(notification),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -108,9 +127,7 @@ class NotificationCard extends StatelessWidget {
             color: _getNotificationColor(notification.type),
             borderRadius: BorderRadius.circular(12.r),
           ),
-          child: Center(
-            child: _getNotificationIcon(notification.type),
-          ),
+          child: Center(child: _getNotificationIcon(notification.type)),
         ),
         title: Text(
           notification.title,
@@ -175,29 +192,13 @@ class NotificationCard extends StatelessWidget {
   Widget _getNotificationIcon(NotificationType type) {
     switch (type) {
       case NotificationType.booking:
-        return Icon(
-          Icons.check_circle,
-          color: AppColors.primary,
-          size: 20.h,
-        );
+        return Icon(Icons.check_circle, color: AppColors.primary, size: 20.h);
       case NotificationType.reminder:
-        return Icon(
-          Icons.alarm,
-          color: const Color(0xFFFB7171),
-          size: 20.h,
-        );
+        return Icon(Icons.alarm, color: const Color(0xFFFB7171), size: 20.h);
       case NotificationType.payment:
-        return Icon(
-          Icons.payment,
-          color: const Color(0xFF10B981),
-          size: 20.h,
-        );
+        return Icon(Icons.payment, color: const Color(0xFF10B981), size: 20.h);
       case NotificationType.promotion:
-        return Icon(
-          Icons.discount,
-          color: const Color(0xFF3B82F6),
-          size: 20.h,
-        );
+        return Icon(Icons.discount, color: const Color(0xFF3B82F6), size: 20.h);
     }
   }
 }
