@@ -56,6 +56,13 @@ class ProfileController extends GetxController {
   // Language selection
   final Rx<SupportedLanguage> selectedLanguage = SupportedLanguage.english.obs;
 
+  final RxString bio = ''.obs;
+  final RxList<Map<String, String>> certifications =
+      <Map<String, String>>[].obs;
+
+  final RxDouble rating = 4.9.obs;
+  final RxInt reviewCount = 3657.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -151,6 +158,22 @@ class ProfileController extends GetxController {
         rating: 4,
         reviewText: 'Great service!',
       ),
+    ]);
+
+    bio.value =
+        'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.';
+
+    certifications.assignAll([
+      {
+        'title': 'Professional Chef',
+        'date': 'July, 2025',
+        'school': 'Sonargaon Cooking School',
+      },
+      {
+        'title': 'Pizza Artisan',
+        'date': 'August, 2025',
+        'school': 'Lorenzo\'s Pizza',
+      },
     ]);
   }
 

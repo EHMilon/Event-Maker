@@ -22,7 +22,7 @@ class ProfileView extends GetView<ProfileController> {
           'settings'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 24.sp,
+            fontSize: 22.sp,
             fontWeight: FontWeight.w600,
           ),
         ),

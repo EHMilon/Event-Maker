@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 
 class VendorProfileView extends StatelessWidget {
   const VendorProfileView({super.key});
@@ -207,10 +208,8 @@ class VendorProfileView extends StatelessWidget {
                               rating: service.rating?.toString() ?? '0',
                               isBookmarked: service.isBookmarked,
                               onTap: () {
-                                // Navigate back to detail or show another detail
-                                Get.snackbar(
-                                  'Service',
-                                  'Navigating to ${service.title}',
+                                Get.to(
+                                  () => ServiceDetailView(service: service),
                                 );
                               },
                             );

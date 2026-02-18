@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
+
 class ServiceProviderProfileView extends GetView<ProfileController> {
   const ServiceProviderProfileView({super.key});
 
@@ -53,9 +55,15 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.primary, width: 2.w),
                 ),
-                child: CircleAvatar(
-                  radius: 50.r,
-                  backgroundImage: AssetImage(controller.profileImage.value),
+                child: Obx(
+                  () => CircleAvatar(
+                    radius: 50.r,
+                    backgroundImage:
+                        controller.profileImage.value.startsWith('http')
+                        ? NetworkImage(controller.profileImage.value)
+                        : AssetImage(controller.profileImage.value)
+                              as ImageProvider,
+                  ),
                 ),
               ),
             ),
@@ -78,20 +86,24 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
               children: [
                 Icon(Icons.star, color: Colors.amber, size: 20.r),
                 SizedBox(width: 4.w),
-                Text(
-                  '4.9',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                Obx(
+                  () => Text(
+                    controller.rating.value.toString(),
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 SizedBox(width: 4.w),
-                Text(
-                  '(3,657)',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    color: AppColors.textSecondary,
+                Obx(
+                  () => Text(
+                    '(${controller.reviewCount.value})',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -143,28 +155,32 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           // Certifications
           _buildSectionTitle('certifications'.tr),
           SizedBox(height: 16.h),
-          _buildCertificationItem(
-            'Professional Chef',
-            'July, 2025',
-            'Sonargaon Cooking School',
-          ),
-          SizedBox(height: 16.h),
-          _buildCertificationItem(
-            'Pizza Artisan',
-            'August, 2025',
-            'Lorenzo\'s Pizza',
+          Obx(
+            () => Column(
+              children: controller.certifications
+                  .map(
+                    (cert) => _buildCertificationItem(
+                      cert['title'] ?? '',
+                      cert['date'] ?? '',
+                      cert['school'] ?? '',
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
           SizedBox(height: 32.h),
 
           // Bio
           _buildSectionTitle('bio'.tr),
           SizedBox(height: 12.h),
-          Text(
-            'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-              height: 1.5,
+          Obx(
+            () => Text(
+              controller.bio.value,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
             ),
           ),
           SizedBox(height: 32.h),
@@ -187,7 +203,9 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     price: service.basePrice?.toString() ?? '0',
                     rating: service.rating?.toString() ?? '0',
                     isBookmarked: service.isBookmarked,
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(() => ServiceDetailView(service: service));
+                    },
                   );
                 },
               ),
