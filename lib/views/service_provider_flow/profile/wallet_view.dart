@@ -35,7 +35,7 @@ class WalletView extends GetView<ProfileController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 32.h),
+              SizedBox(height: 18.h),
               // Earnings Section
               Center(
                 child: Column(
@@ -57,7 +57,7 @@ class WalletView extends GetView<ProfileController> {
                         Text(
                           controller.walletBalance.value,
                           style: GoogleFonts.inter(
-                            fontSize: 72.sp,
+                            fontSize: 64.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.primary,
                           ),
@@ -76,7 +76,7 @@ class WalletView extends GetView<ProfileController> {
                   ],
                 ),
               ),
-              SizedBox(height: 32.h),
+              SizedBox(height: 18.h),
               // Withdraw Button
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -108,7 +108,7 @@ class WalletView extends GetView<ProfileController> {
                   ),
                 ),
               ),
-              SizedBox(height: 48.h),
+              SizedBox(height: 18.h),
               // Transactions Header
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -154,7 +154,7 @@ class WalletView extends GetView<ProfileController> {
 
   Widget _buildTransactionItem(Map<String, dynamic> tx) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 20.h),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

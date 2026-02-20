@@ -158,16 +158,20 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           _buildSectionTitle('certifications'.tr),
           SizedBox(height: 16.h),
           Obx(
-            () => Column(
-              children: controller.certifications
-                  .map(
-                    (cert) => _buildCertificationItem(
-                      cert['title'] ?? '',
-                      cert['date'] ?? '',
-                      cert['school'] ?? '',
-                    ),
-                  )
-                  .toList(),
+            () => SizedBox(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: controller.certifications
+                    .map(
+                      (cert) => _buildCertificationItem(
+                        cert['title'] ?? '',
+                        cert['date'] ?? '',
+                        cert['school'] ?? '',
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
           SizedBox(height: 32.h),

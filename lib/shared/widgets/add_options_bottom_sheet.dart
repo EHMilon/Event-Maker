@@ -39,7 +39,7 @@ class AddOptionsBottomSheet extends StatelessWidget {
           SizedBox(height: 20.h),
           _buildOptionItem(
             icon: Icons.miscellaneous_services,
-            title: 'services'.tr,
+            title: 'hospitality'.tr,
             onTap: () {
               Get.back();
               Get.to(

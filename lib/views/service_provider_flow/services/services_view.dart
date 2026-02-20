@@ -17,15 +17,25 @@ class ServicesView extends GetView<SPServicesController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        title: Text(
+          'myServices'.tr,
+          style: GoogleFonts.inter(
+            fontSize: 24.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
-              SizedBox(height: 16.h),
               _buildSearchAndAddBar(context),
               SizedBox(height: 20.h),
               Expanded(child: _buildContent()),
@@ -33,33 +43,6 @@ class ServicesView extends GetView<SPServicesController> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'myServices'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        Obx(
-          () => Text(
-            'servicesCount'.trParams({
-              'count': controller.services.length.toString(),
-            }),
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
