@@ -25,39 +25,37 @@ class CustomerRequestsController extends GetxController {
   ];
 
   void _loadMockData() {
+    final now = DateTime.now();
+    
+    // Upcoming events (future dates)
     upcomingRequests.assignAll([
       CustomerRequestModel(
         image: 'assets/images/catering.jpg',
-        date: '10th Jan - Fri - 4:00 PM',
+        date: '15th Mar - Sun - 4:00 PM',
         title: 'Wedding Catering Services',
         subtitle: 'Grand Hyatt, Dubai',
       ),
       CustomerRequestModel(
         image: 'assets/images/event.png',
-        date: '15th Feb - Thu - 11:00 AM',
+        date: '20th Mar - Fri - 11:00 AM',
         title: 'Corporate Event Planning',
         subtitle: 'Business Bay, Dubai',
       ),
-      CustomerRequestModel(
-        image: 'assets/images/cake.png',
-        date: '5th Jan - Sun - 6:00 PM',
-        title: 'Birthday Party Décor',
-        subtitle: 'Palm Jumeirah, Dubai',
-      ),
-      CustomerRequestModel(
-        image: 'assets/images/concert.png',
-        date: '20th Jan - Sat - 8:00 PM',
-        title: 'Live Music for Anniversary',
-        subtitle: 'Abu Dhabi Corniche',
-      ),
     ]);
 
+    // Past events (history - past dates)
     pastRequests.assignAll([
       CustomerRequestModel(
         image: 'assets/images/filming.jpg',
         date: '12th Dec - Tue - 3:00 PM',
         title: 'Product Launch Event',
         subtitle: 'Expo City, Dubai',
+      ),
+      CustomerRequestModel(
+        image: 'assets/images/cake.png',
+        date: '5th Jan - Sun - 6:00 PM',
+        title: 'Birthday Party Décor',
+        subtitle: 'Palm Jumeirah, Dubai',
       ),
     ]);
   }

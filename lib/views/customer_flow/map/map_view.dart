@@ -19,7 +19,7 @@ class MapView extends GetView<MapController> {
         title: Text(
           'myLocation'.tr,
           style: GoogleFonts.inter(
-            fontSize: 18.sp,
+            fontSize: 22.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),

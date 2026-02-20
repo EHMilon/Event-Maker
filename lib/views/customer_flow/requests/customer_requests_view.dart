@@ -14,62 +14,131 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
         backgroundColor: AppColors.white,
-        elevation: 0,
-        title: Text(
-          'requests'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+        appBar: AppBar(
+          backgroundColor: AppColors.white,
+          elevation: 0,
+          title: Text(
+            'bookings'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          bottom: TabBar(
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.textSecondary,
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+            labelStyle: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+            tabs: [
+              Tab(text: 'upcoming'.tr),
+              Tab(text: 'history'.tr),
+            ],
           ),
         ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: TabBarView(
           children: [
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return Skeletonizer(
-                    enabled: true,
-                    child: ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return _RequestCard(
-                          request: CustomerRequestModel(
-                            image: 'assets/images/catering.jpg',
-                            date: '10th Jan - Fri - 4:00 PM',
-                            title: 'Skeleton Title Loading...',
-                            subtitle: 'Loading Location...',
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-
-                final list = controller.currentRequests;
-                if (list.isEmpty) {
-                  return const _EmptyState();
-                }
-                return ListView.builder(
-                  itemCount: list.length,
-                  itemBuilder: (context, index) {
-                    final item = list[index];
-                    return _RequestCard(request: item);
-                  },
-                );
-              }),
-            ),
+            _UpcomingRequestsTab(),
+            _HistoryRequestsTab(),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Upcoming requests tab widget
+class _UpcomingRequestsTab extends GetView<CustomerRequestsController> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return Skeletonizer(
+            enabled: true,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return _RequestCard(
+                  request: CustomerRequestModel(
+                    image: 'assets/images/catering.jpg',
+                    date: '10th Jan - Fri - 4:00 PM',
+                    title: 'Skeleton Title Loading...',
+                    subtitle: 'Loading Location...',
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        final list = controller.upcomingRequests;
+        if (list.isEmpty) {
+          return const _EmptyState(message: 'noUpcomingRequests');
+        }
+        return ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (context, index) {
+            final item = list[index];
+            return _RequestCard(request: item);
+          },
+        );
+      }),
+    );
+  }
+}
+
+/// History requests tab widget
+class _HistoryRequestsTab extends GetView<CustomerRequestsController> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      child: Obx(() {
+        if (controller.isLoading.value) {
+          return Skeletonizer(
+            enabled: true,
+            child: ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return _RequestCard(
+                  request: CustomerRequestModel(
+                    image: 'assets/images/catering.jpg',
+                    date: '10th Jan - Fri - 4:00 PM',
+                    title: 'Skeleton Title Loading...',
+                    subtitle: 'Loading Location...',
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        final list = controller.pastRequests;
+        if (list.isEmpty) {
+          return const _EmptyState(message: 'noHistoryRequests');
+        }
+        return ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (context, index) {
+            final item = list[index];
+            return _RequestCard(request: item);
+          },
+        );
+      }),
     );
   }
 }
@@ -174,7 +243,9 @@ class _RequestCard extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +256,7 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.event_available, size: 48.r, color: AppColors.grey),
           SizedBox(height: 12.h),
           Text(
-            'noRequestsYet'.tr,
+            message.tr,
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               color: AppColors.textSecondary,

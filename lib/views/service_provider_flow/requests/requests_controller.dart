@@ -8,6 +8,8 @@ class RequestsController extends GetxController {
   final hasError = false.obs;
   final errorMessage = ''.obs;
   final requests = <ServiceModel>[].obs;
+  final upcomingRequests = <ServiceModel>[].obs;
+  final pastRequests = <ServiceModel>[].obs;
 
   @override
   void onInit() {
@@ -36,7 +38,19 @@ class RequestsController extends GetxController {
       // Simulate potential server error (commented out for now)
       // throw Exception('Server Error');
 
-      requests.assignAll(MockData.requests);
+      final allRequests = MockData.requests;
+      
+      // Split requests into upcoming and past based on current date
+      final now = DateTime.now();
+      upcomingRequests.assignAll(
+        allRequests.where((r) => r.date != null && r.date!.isAfter(now)).toList(),
+      );
+      pastRequests.assignAll(
+        allRequests.where((r) => r.date == null || r.date!.isBefore(now)).toList(),
+      );
+      
+      // Combine for backward compatibility
+      requests.assignAll(allRequests);
     } catch (e) {
       hasError.value = true;
       errorMessage.value = 'serverError'.tr;
@@ -48,10 +62,14 @@ class RequestsController extends GetxController {
   void acceptRequest(ServiceModel request) {
     // Logic to accept request
     requests.remove(request);
+    upcomingRequests.remove(request);
+    pastRequests.remove(request);
   }
 
   void rejectRequest(ServiceModel request) {
     // Logic to reject request
     requests.remove(request);
+    upcomingRequests.remove(request);
+    pastRequests.remove(request);
   }
 }

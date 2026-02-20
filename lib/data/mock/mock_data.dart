@@ -390,8 +390,9 @@ class MockData {
 
   // Requests mock data for SP
   static final List<ServiceModel> requests = [
+    // Upcoming requests (future dates)
     ServiceModel(
-      id: 'req-1',
+      id: 'req-upcoming-1',
       title: 'Wedding Catering Services',
       description:
           'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
@@ -407,7 +408,7 @@ class MockData {
       ),
       location:
           'Airport Rd - Al Manhal - W14 02 - Abu Dhabi - United Arab Emirates',
-      date: DateTime(2026, 1, 10, 16, 0),
+      date: DateTime(2026, 3, 15, 16, 0), // Future date - March 15, 2026
       basePrice: 120,
       priceUnit: 'AED',
       packages: [
@@ -423,8 +424,9 @@ class MockData {
         ),
       ],
     ),
+    // Past requests (past dates - before current date Feb 20, 2026)
     ServiceModel(
-      id: 'req-2',
+      id: 'req-past-1',
       title: 'Corporate Event Planning',
       description: 'Professional event planning for corporate needs.',
       images: [
@@ -438,12 +440,12 @@ class MockData {
         isVerified: true,
       ),
       location: 'Business Bay, Dubai',
-      date: DateTime(2026, 1, 10, 16, 0),
+      date: DateTime(2026, 1, 10, 16, 0), // Past date - Jan 10, 2026
       basePrice: 200,
       priceUnit: 'AED',
     ),
     ServiceModel(
-      id: 'req-3',
+      id: 'req-past-2',
       title: 'Birthday Party Décor',
       description: 'Stunning decorations for birthday parties.',
       images: [
@@ -457,7 +459,7 @@ class MockData {
         isVerified: true,
       ),
       location: 'Corniche, Abu Dhabi',
-      date: DateTime(2026, 1, 10, 16, 0),
+      date: DateTime(2025, 12, 5, 16, 0), // Past date - Dec 5, 2025
       basePrice: 150,
       priceUnit: 'AED',
     ),
