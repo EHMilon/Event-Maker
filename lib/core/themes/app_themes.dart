@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
@@ -13,6 +14,9 @@ class AppThemes {
       secondary: AppColors.secondary,
       brightness: Brightness.light,
     ),
+    appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle.dark,
+    ),
     useMaterial3: true,
   );
 
@@ -25,6 +29,9 @@ class AppThemes {
       seedColor: AppColors.primary,
       secondary: AppColors.secondary,
       brightness: Brightness.dark,
+    ),
+    appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle.light,
     ),
     useMaterial3: true,
   );

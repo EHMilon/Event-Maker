@@ -9,6 +9,7 @@ import 'package:event_maker/views/service_provider_flow/profile/service_provider
 import 'package:event_maker/views/service_provider_flow/services/services_view.dart';
 import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:event_maker/views/chats/chat_view.dart';
 
 class ServiceProviderScaffold extends GetView<ServiceProviderController> {
   const ServiceProviderScaffold({super.key});
@@ -18,6 +19,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
     final List<Widget> pages = [
       const SPHomeView(),
       const SPRequestsView(),
+      const ChatView(isServiceProvider: true),
       const ServicesView(),
       const ServiceProviderProfileView(),
     ];
@@ -31,7 +33,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, -5),
               ),
@@ -90,14 +92,19 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                 label: 'requests'.tr,
               ),
               _buildBottomNavItem(
+                iconPath: 'assets/icons/chat.svg',
+                label: 'chats'.tr,
+                index: 2,
+              ),
+              _buildBottomNavItem(
                 iconPath: 'assets/icons/service.svg',
                 label: 'myServices'.tr,
-                index: 2,
+                index: 3,
               ),
               _buildBottomNavItem(
                 iconPath: 'assets/icons/profile.svg',
                 label: 'profile'.tr,
-                index: 3,
+                index: 4,
               ),
             ],
           ),

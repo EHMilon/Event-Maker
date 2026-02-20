@@ -157,6 +157,15 @@ class AppLocalization extends Translations {
     'bookings': 'Bookings',
     'notifications': 'Notifications',
     'messages': 'Messages',
+    'chats': 'Chats',
+    'customer': 'Customer',
+    'admin': 'Admin',
+    'postVibeFirstChat': 'Post a vibe to start your first chat.',
+    'typeYourMessage': 'Type your message',
+    'adminChatWelcome': 'Now you can easily contact with the admin.',
+    'recommendedTopics': 'Recommended Topics',
+    'howCanIImproveMyServices': 'How can I improve my Services?',
+    'howCanIImprovedSleep': 'How can I improve my sleep?',
 
     // Service Provider Home
     'goodMorning': 'Good Morning',
@@ -234,7 +243,8 @@ class AppLocalization extends Translations {
     'accountDeletionTitle': 'Account Deletion',
     'accountDeletionSubtitle':
         'Are you sure you want to delete the account? Once you delete the account you cannot get it back again.',
-    'accountDeletionSuccess': 'Account deleted successfully. Hope to see you again soon.',
+    'accountDeletionSuccess':
+        'Account deleted successfully. Hope to see you again soon.',
     'update': 'Update',
     'saveChanges': 'Save Changes',
     'profileUpdatedSuccessfully': 'Profile updated successfully',
@@ -528,6 +538,15 @@ class AppLocalization extends Translations {
     'bookings': 'الحجوزات',
     'notifications': 'الإشعارات',
     'messages': 'الرسائل',
+    'chats': 'الدردشات',
+    'customer': 'العميل',
+    'admin': 'المسؤول',
+    'postVibeFirstChat': 'انشر حالة للبدء في الدردشة الأولى.',
+    'typeYourMessage': 'اكتب رسالتك',
+    'adminChatWelcome': 'الآن يمكنك التواصل بسهولة مع المسؤول.',
+    'recommendedTopics': 'المواضيع الموصى بها',
+    'howCanIImproveMyServices': 'كيف يمكنني تحسين خدماتي؟',
+    'howCanIImprovedSleep': 'كيف يمكنني تحسين نومي؟',
 
     // Service Provider Home
     'goodMorning': 'صباح الخير',
@@ -604,7 +623,8 @@ class AppLocalization extends Translations {
     'accountDeletionTitle': 'حذف الحساب',
     'accountDeletionSubtitle':
         'هل أنت متأكد أنك تريد حذف الحساب؟ بمجرد الحذف لن تتمكن من استعادته مرة أخرى.',
-    'accountDeletionSuccess': 'تم حذف الحساب بنجاح. نأمل أن نراك مرة أخرى قريباً.',
+    'accountDeletionSuccess':
+        'تم حذف الحساب بنجاح. نأمل أن نراك مرة أخرى قريباً.',
     'update': 'تحديث',
     'saveChanges': 'حفظ التغييرات',
     'passwordsDoNotMatch': 'كلمات المرور غير متطابقة',

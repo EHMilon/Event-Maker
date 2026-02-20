@@ -69,6 +69,8 @@ import 'package:event_maker/views/service_provider_flow/certifications/view_cert
 import 'package:event_maker/views/service_provider_flow/certifications/add_edit_certificate_view.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
 import 'package:event_maker/views/service_provider_flow/active_orders/sp_active_orders_view.dart';
+import 'package:event_maker/views/chats/chat_detail_view.dart';
+import 'package:event_maker/views/chats/chat_detail_controller.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -122,6 +124,7 @@ class AppRoutes {
   static const String spAddCertification = '/sp-add-certification';
   static const String spEditCertification = '/sp-edit-certification';
   static const String spActiveOrders = '/sp-active-orders';
+  static const String chatDetail = '/chat-detail';
 
   static final routes = [
     GetPage(
@@ -363,5 +366,12 @@ class AppRoutes {
       },
     ),
     GetPage(name: spActiveOrders, page: () => const SPActiveOrdersView()),
+    GetPage(
+      name: chatDetail,
+      page: () => const ChatDetailView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ChatDetailController>(() => ChatDetailController());
+      }),
+    ),
   ];
 }

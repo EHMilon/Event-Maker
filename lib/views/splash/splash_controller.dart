@@ -15,17 +15,20 @@ class SplashController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
 
     final isFirstTime = await UserPreferences.isFirstTime();
+    final hasCompletedOnboarding = await UserPreferences.hasCompletedOnboarding();
     final isLoggedIn = await UserPreferences.isLoggedIn();
 
-    Log.i("First time: $isFirstTime, Logged in: $isLoggedIn");
+    Log.i(
+      "Splash navigation state -> firstTime: $isFirstTime, onboardingDone: $hasCompletedOnboarding, loggedIn: $isLoggedIn",
+    );
 
-    if (!await UserPreferences.hasCompletedOnboarding()) {
+    if (!hasCompletedOnboarding) {
       Log.i("Navigating to Onboarding");
       Get.offAllNamed(AppRoutes.onboarding);
       return;
     }
-    final shouldShowLanguageSelection = isFirstTime || !await UserPreferences.hasCompletedOnboarding();
-    if (shouldShowLanguageSelection) {
+
+    if (isFirstTime) {
       Log.i("Navigating to Language Selection");
       Get.offAllNamed(AppRoutes.languageSelection);
       return;
@@ -43,7 +46,15 @@ class SplashController extends GetxController {
       return;
     }
 
-    Log.i("Navigating to Onboarding");
-    Get.offAllNamed(AppRoutes.onboarding);
+    final hasUserType = await UserPreferences.hasUserType();
+
+    if (hasUserType) {
+      Log.i("User type already selected; navigating to Login");
+      Get.offAllNamed(AppRoutes.login);
+      return;
+    }
+
+    Log.i("Navigating to User Type selection");
+    Get.offAllNamed(AppRoutes.userType);
   }
 }

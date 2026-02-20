@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 
 import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
 import 'package:event_maker/views/customer_flow/requests/customer_requests_view.dart';
+import 'package:event_maker/views/chats/chat_view.dart';
 
 class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   const CustomerFlowScaffold({super.key});
@@ -18,6 +19,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
     final List<Widget> pages = [
       const HomeView(),
       const MapView(),
+      const ChatView(isServiceProvider: false),
       const CustomerRequestsView(),
       const ProfileView(),
     ];
@@ -75,10 +77,23 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
-                'assets/icons/booking.svg',
+                'assets/icons/chat.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
                   controller.selectedIndex.value == 2
+                      ? AppColors.primary
+                      : AppColors.grey,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: 'chats'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'assets/icons/booking.svg',
+                height: 24.h,
+                colorFilter: ColorFilter.mode(
+                  controller.selectedIndex.value == 3
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
@@ -91,7 +106,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                 'assets/icons/profile.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex.value == 3
+                  controller.selectedIndex.value == 4
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
