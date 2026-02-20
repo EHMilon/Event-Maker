@@ -2,6 +2,7 @@ import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ConfirmationDialog extends StatelessWidget {
@@ -61,7 +62,7 @@ class ConfirmationDialog extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancel',
+                'cancel'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary,

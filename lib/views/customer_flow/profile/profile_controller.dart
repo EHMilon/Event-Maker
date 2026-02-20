@@ -5,10 +5,14 @@ import '../../../data/models/review_model.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../../shared/utils/user_preferences.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/themes/app_colors.dart';
+import '../../../data/services/connectivity_service.dart';
 import '../../../views/customer_flow/home/home_controller.dart';
 import '../../../core/localization/app_localization.dart';
 
 class ProfileController extends GetxController {
+  final _connectivityService = Get.find<ConnectivityService>();
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
@@ -333,6 +337,34 @@ class ProfileController extends GetxController {
     await UserPreferences.clearUserData();
     await UserPreferences.resetOnboarding();
     Get.offAllNamed(AppRoutes.onboarding);
+  }
+
+  /// Handles the delete account flow with backend reminder and cleanup.
+  Future<void> deleteAccount() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+    // TODO: create backend API call for deleting account
+    Get.snackbar(
+      'success'.tr,
+      'accountDeletionSuccess'.tr,
+      backgroundColor: AppColors.success,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    await UserPreferences.clearUserData();
+    await UserPreferences.resetOnboarding();
+    Get.offAllNamed(AppRoutes.onboarding);
+  }
+
+  void _showConnectivityError() {
+    Get.snackbar(
+      'error'.tr,
+      'noInternet'.tr,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
 
   void toggleAvailability(bool value) {

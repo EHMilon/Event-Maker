@@ -5,6 +5,7 @@ import '../../../data/models/review_model.dart';
 import '../../../data/mock/mock_data.dart';
 import '../../../shared/utils/user_preferences.dart';
 import '../../../core/routes/app_routes.dart';
+import '../../../core/themes/app_colors.dart';
 import '../../customer_flow/home/home_controller.dart';
 import '../../../data/services/connectivity_service.dart';
 import '../../../core/localization/app_localization.dart';
@@ -274,6 +275,26 @@ class ProfileController extends GetxController {
 
   /// Logic for logging out and clearing preferences.
   Future<void> logOut() async {
+    await UserPreferences.clearUserData();
+    await UserPreferences.resetOnboarding();
+    Get.offAllNamed(AppRoutes.onboarding);
+  }
+
+  /// Handles account deletion confirmation and backend request if needed.
+  Future<void> deleteAccount() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    // TODO: Integrate delete account API
+    Get.snackbar(
+      'success'.tr,
+      'accountDeletionSuccess'.tr,
+      backgroundColor: AppColors.success,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
     await UserPreferences.clearUserData();
     await UserPreferences.resetOnboarding();
     Get.offAllNamed(AppRoutes.onboarding);

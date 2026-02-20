@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import '../../../shared/widgets/confirmation_dialog.dart';
 import '../../../shared/widgets/language_bottom_sheet.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -143,7 +144,13 @@ class ProfileView extends GetView<ProfileController> {
                   title: 'faq'.tr,
                   onTap: () => Get.toNamed(AppRoutes.faq),
                 ),
-                SizedBox(height: 16.h),
+                _buildMenuItem(
+                  icon: 'assets/icons/question-mark.svg',
+                  title: 'deleteAccount'.tr,
+                  titleColor: AppColors.error,
+                  onTap: () => _showDeleteAccountDialog(context),
+                ),
+                SizedBox(height: 8.h),
                 _buildMenuItem(
                   icon: 'assets/icons/logout.svg',
                   title: 'logout'.tr,
@@ -184,13 +191,13 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
-      trailing:
-          trailing ??
-          Icon(
-            Icons.chevron_right,
-            size: 20.sp,
-            color: AppColors.textSecondary,
-          ),
+      // trailing:
+      //     trailing ??
+      //     Icon(
+      //       Icons.chevron_right,
+      //       size: 20.sp,
+      //       color: AppColors.textSecondary,
+      //     ),
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }
@@ -228,6 +235,27 @@ class ProfileView extends GetView<ProfileController> {
         onLanguageSelected: (language) => controller.changeLanguage(language),
       ),
       isScrollControlled: true,
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    Get.dialog(
+      ConfirmationDialog(
+        title: 'accountDeletionTitle'.tr,
+        subtitle: 'accountDeletionSubtitle'.tr,
+        mainButtonText: 'deleteAccount'.tr,
+        mainButtonColor: AppColors.error,
+        icon: SvgPicture.asset(
+          'assets/icons/security.svg',
+          width: 64.w,
+          height: 64.h,
+          colorFilter: ColorFilter.mode(AppColors.error, BlendMode.srcIn),
+        ),
+        onMainButtonPressed: () {
+          Get.back();
+          controller.deleteAccount();
+        },
+      ),
     );
   }
 }

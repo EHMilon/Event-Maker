@@ -224,6 +224,11 @@ class AppLocalization extends Translations {
     'contactUs': 'Contact Us',
     'faq': 'FAQ',
     'language': 'Language',
+    'deleteAccount': 'Delete Account',
+    'accountDeletionTitle': 'Account Deletion',
+    'accountDeletionSubtitle':
+        'Are you sure you want to delete the account? Once you delete the account you cannot get it back again.',
+    'accountDeletionSuccess': 'Account deleted successfully. Hope to see you again soon.',
     'update': 'Update',
     'saveChanges': 'Save Changes',
     'profileUpdatedSuccessfully': 'Profile updated successfully',
@@ -583,6 +588,11 @@ class AppLocalization extends Translations {
     'contactUs': 'اتصل بنا',
     'faq': 'الأسئلة الشائعة',
     'language': 'اللغة',
+    'deleteAccount': 'حذف الحساب',
+    'accountDeletionTitle': 'حذف الحساب',
+    'accountDeletionSubtitle':
+        'هل أنت متأكد أنك تريد حذف الحساب؟ بمجرد الحذف لن تتمكن من استعادته مرة أخرى.',
+    'accountDeletionSuccess': 'تم حذف الحساب بنجاح. نأمل أن نراك مرة أخرى قريباً.',
     'update': 'تحديث',
     'saveChanges': 'حفظ التغييرات',
     'passwordsDoNotMatch': 'كلمات المرور غير متطابقة',
