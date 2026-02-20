@@ -29,6 +29,8 @@ class SPHomeView extends GetView<SPHomeController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(),
+                  SizedBox(height: 20.h),
+                  _buildPromoImage(),
                   SizedBox(height: 25.h),
                   _buildAnalyticsSection(),
                   SizedBox(height: 30.h),
@@ -161,6 +163,17 @@ class SPHomeView extends GetView<SPHomeController> {
     );
   }
 
+  Widget _buildPromoImage() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.r),
+      child: Image.asset(
+        'assets/images/promo.png',
+        width: double.infinity,
+        fit: BoxFit.fill,
+      ),
+    );
+  }
+
   Widget _buildAnalyticsSection() {
     return Container(
       width: double.infinity,
@@ -210,8 +223,8 @@ class SPHomeView extends GetView<SPHomeController> {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return _buildStatCard(
-                  icon: Icons.currency_exchange,
-                  iconColor: const Color(0xFF3B82F6),
+                  icon: 'assets/icons/doller.svg',
+                  backgroundColor: const Color(0xFFE2EDFF),
                   label: 'totalEarnings'.tr,
                   value: controller.stats.value.totalEarnings,
                   change: controller.stats.value.earningsChange,
@@ -219,8 +232,8 @@ class SPHomeView extends GetView<SPHomeController> {
                 );
               } else if (index == 1) {
                 return _buildStatCard(
-                  icon: Icons.inventory_2_outlined,
-                  iconColor: const Color(0xFFA855F7),
+                  icon: 'assets/icons/fl_box.svg',
+                  backgroundColor: const Color(0xFFF5E8FF),
                   label: 'totalRequests'.tr,
                   value: '${controller.stats.value.totalRequests}',
                   change: controller.stats.value.requestsChange,
@@ -228,8 +241,8 @@ class SPHomeView extends GetView<SPHomeController> {
                 );
               } else if (index == 2) {
                 return _buildStatCard(
-                  icon: Icons.check_circle_outline,
-                  iconColor: const Color(0xFF10B981),
+                  icon: 'assets/icons/completed_outline.svg',
+                  backgroundColor: const Color(0xFFD9FFF2),
                   label: 'completed'.tr,
                   value: '${controller.stats.value.completedOrders}',
                   change: controller.stats.value.completedChange,
@@ -237,8 +250,8 @@ class SPHomeView extends GetView<SPHomeController> {
                 );
               } else {
                 return _buildStatCard(
-                  icon: Icons.schedule_outlined,
-                  iconColor: const Color(0xFFF59E0B),
+                  icon: 'assets/icons/time.svg',
+                  backgroundColor: const Color(0xFFFFEFD3),
                   label: 'pending'.tr,
                   value: '${controller.stats.value.pendingOrders}',
                   change: controller.stats.value.pendingChange,
@@ -255,8 +268,8 @@ class SPHomeView extends GetView<SPHomeController> {
   }
 
   Widget _buildStatCard({
-    required IconData icon,
-    required Color iconColor,
+    required String icon,
+    required Color backgroundColor,
     required String label,
     required String value,
     required String change,
@@ -265,9 +278,8 @@ class SPHomeView extends GetView<SPHomeController> {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFF1F1F5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,12 +288,16 @@ class SPHomeView extends GetView<SPHomeController> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(6.w),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
+                  color: Colors.white.withOpacity(0.7),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: iconColor, size: 14),
+                child: SvgPicture.asset(
+                  icon,
+                  height: 16.h,
+                  width: 16.w,
+                ),
               ),
               SizedBox(width: 8.w),
               Expanded(
@@ -357,7 +373,7 @@ class SPHomeView extends GetView<SPHomeController> {
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: const Color.fromARGB(63, 128, 137, 48),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: const Color(0xFFF1F1F5)),
         ),
@@ -417,37 +433,37 @@ class SPHomeView extends GetView<SPHomeController> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _buildActionItem(
-          Icons.add_circle,
-          'addService'.tr,
-          const Color(0xFF22C55E),
+          icon: 'assets/icons/add.svg',
+          label: 'addService'.tr,
+          backgroundColor: const Color(0xFFE9FBF4),
           onTap: () => AddOptionsBottomSheet.show(context),
         ),
         _buildActionItem(
-          Icons.calendar_today,
-          'schedule'.tr,
-          const Color(0xFF3B82F6),
+          icon: 'assets/icons/calender.svg',
+          label: 'schedule'.tr,
+          backgroundColor: const Color(0xFFF0FBFE),
           onTap: () => Get.toNamed(AppRoutes.spSchedule),
         ),
         _buildActionItem(
-          Icons.account_balance_wallet,
-          'earnings'.tr,
-          const Color(0xFFF59E0B),
+          icon: 'assets/icons/earning.svg',
+          label: 'earnings'.tr,
+          backgroundColor: const Color(0xFFEFF1FF),
           onTap: () => Get.toNamed(AppRoutes.spWallet),
         ),
         _buildActionItem(
-          Icons.description,
-          'documents'.tr,
-          const Color(0xFF14B8A6),
+          icon: 'assets/icons/document.svg',
+          label: 'documents'.tr,
+          backgroundColor: const Color(0xFFE9FBF4),
           onTap: () => Get.toNamed(AppRoutes.spDocuments),
         ),
       ],
     );
   }
 
-  Widget _buildActionItem(
-    IconData icon,
-    String label,
-    Color color, {
+  Widget _buildActionItem({
+    required String icon,
+    required String label,
+    required Color backgroundColor,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -458,7 +474,7 @@ class SPHomeView extends GetView<SPHomeController> {
             height: 64.h,
             width: 64.h,
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: backgroundColor,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
@@ -468,7 +484,13 @@ class SPHomeView extends GetView<SPHomeController> {
                 ),
               ],
             ),
-            child: Icon(icon, color: color, size: 28),
+            child: Center(
+              child: SvgPicture.asset(
+                icon,
+                height: 28.h,
+                width: 28.w,
+              ),
+            ),
           ),
           SizedBox(height: 10.h),
           Text(
