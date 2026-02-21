@@ -4,14 +4,11 @@ import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
 import 'package:event_maker/data/models/review_model.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_event_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_training_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:event_maker/shared/widgets/confirmation_dialog.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
@@ -54,30 +51,30 @@ class ServiceDetailView extends StatelessWidget {
     );
   }
 
-  void _onEditPressed() {
-    // Navigate to the appropriate edit screen based on service type
-    switch (service.type) {
-      case ServiceType.event:
-        Get.to(
-          () => AddEventView(service: service, isEdit: true),
-          binding: AddScreensBinding(),
-        );
-        break;
-      case ServiceType.training:
-        Get.to(
-          () => AddTrainingView(service: service, isEdit: true),
-          binding: AddScreensBinding(),
-        );
-        break;
-      default:
-        // For service types: photography, catering, cleaning, music, filming
-        Get.to(
-          () => AddServiceView(service: service, isEdit: true),
-          binding: AddScreensBinding(),
-        );
-        break;
-    }
-  }
+  // void _onEditPressed() {
+  //   // Navigate to the appropriate edit screen based on service type
+  //   switch (service.type) {
+  //     case ServiceType.event:
+  //       Get.to(
+  //         () => AddEventView(service: service, isEdit: true),
+  //         binding: AddScreensBinding(),
+  //       );
+  //       break;
+  //     case ServiceType.training:
+  //       Get.to(
+  //         () => AddTrainingView(service: service, isEdit: true),
+  //         binding: AddScreensBinding(),
+  //       );
+  //       break;
+  //     default:
+  //       // For service types: photography, catering, cleaning, music, filming
+  //       Get.to(
+  //         () => AddServiceView(service: service, isEdit: true),
+  //         binding: AddScreensBinding(),
+  //       );
+  //       break;
+  //   }
+  // }
 
   void _showAcceptDialog(BuildContext context) {
     showDialog(
@@ -236,164 +233,211 @@ class ServiceDetailView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            if (showEditButton)
-                              IconButton(
-                                onPressed: _onEditPressed,
-                                icon: Icon(
-                                  Icons.edit_outlined,
-                                  color: AppColors.primary,
-                                  size: 24.r,
-                                ),
-                              ),
+                            // if (showEditButton)
+                            //   IconButton(
+                            //     onPressed: _onEditPressed,
+                            //     icon: Icon(
+                            //       Icons.edit_outlined,
+                            //       color: AppColors.primary,
+                            //       size: 24.r,
+                            //     ),
+                            //   ),
                           ],
                         ),
                         SizedBox(height: 16.h),
 
                         // Provider Info
-                        GestureDetector(
-                          onTap: () {
-                            // Update provider with mock data for the profile screen
-                            final enhancedProvider = ServiceProvider(
-                              name: service.provider.name,
-                              role: service.provider.role,
-                              imageUrl: service.provider.imageUrl,
-                              isVerified: service.provider.isVerified,
-                              bannerUrl:
-                                  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
-                              certifications: [
-                                'Professional Chef',
-                                'Pizza Artisan',
-                              ],
-                              bio:
-                                  'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
-                              services: [
-                                ServiceModel(
-                                  id: '1',
-                                  title: 'Rose garden wedding',
-                                  description:
-                                      'Rose garden wedding description',
-                                  images: [
-                                    'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop',
-                                  ],
-                                  type: ServiceType.event,
-                                  provider: service.provider,
-                                  location: 'AD, Louver Museum',
-                                  rating: 4.5,
-                                  basePrice: 120,
-                                ),
-                                ServiceModel(
-                                  id: '2',
-                                  title: 'Rose garden wedding',
-                                  description:
-                                      'Rose garden wedding description',
-                                  images: [
-                                    'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop',
-                                  ],
-                                  type: ServiceType.event,
-                                  provider: service.provider,
-                                  location: 'AD, Louver Museum',
-                                  rating: 4.5,
-                                  basePrice: 120,
-                                ),
-                              ],
-                              reviews: [
-                                ReviewModel(
-                                  userName: 'John Doe',
-                                  userImageUrl:
-                                      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
-                                  date: '10 Feb',
-                                  rating: 4,
-                                  reviewText:
-                                      'Thank you, Fresh Food L.L.C! That was a great event.',
-                                ),
-                                ReviewModel(
-                                  userName: 'John Doe',
-                                  userImageUrl:
-                                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
-                                  date: '10 Feb',
-                                  rating: 5,
-                                  reviewText:
-                                      'Thank you, Fresh Food L.L.C! That was a great event.',
-                                ),
-                              ],
-                            );
-                            Get.to(
-                              () => const VendorProfileView(),
-                              arguments: enhancedProvider,
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 45.w,
-                                height: 45.w,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      service.provider.imageUrl,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        service.provider.name,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      if (service.provider.isVerified) ...[
-                                        SizedBox(width: 4.w),
-                                        Icon(
-                                          Icons.verified,
-                                          color: Colors.orange,
-                                          size: 16.r,
-                                        ),
-                                      ],
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  // Update provider with mock data for the profile screen
+                                  final enhancedProvider = ServiceProvider(
+                                    name: service.provider.name,
+                                    role: service.provider.role,
+                                    imageUrl: service.provider.imageUrl,
+                                    isVerified: service.provider.isVerified,
+                                    bannerUrl:
+                                        'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
+                                    certifications: [
+                                      'Professional Chef',
+                                      'Pizza Artisan',
                                     ],
-                                  ),
-                                  if (service.rating != null)
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 14.r,
-                                        ),
-                                        SizedBox(width: 4.w),
-                                        Text(
-                                          '${service.rating} (${'reviewsCount'.trParams({
-                                                'count': service.reviewCount
-                                                    .toString(),
-                                              })})',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            color: AppColors.textSecondary,
+                                    bio:
+                                        'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
+                                    services: [
+                                      ServiceModel(
+                                        id: '1',
+                                        title: 'Rose garden wedding',
+                                        description:
+                                            'Rose garden wedding description',
+                                        images: [
+                                          'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop',
+                                        ],
+                                        type: ServiceType.event,
+                                        provider: service.provider,
+                                        location: 'AD, Louver Museum',
+                                        rating: 4.5,
+                                        basePrice: 120,
+                                      ),
+                                      ServiceModel(
+                                        id: '2',
+                                        title: 'Rose garden wedding',
+                                        description:
+                                            'Rose garden wedding description',
+                                        images: [
+                                          'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop',
+                                        ],
+                                        type: ServiceType.event,
+                                        provider: service.provider,
+                                        location: 'AD, Louver Museum',
+                                        rating: 4.5,
+                                        basePrice: 120,
+                                      ),
+                                    ],
+                                    reviews: [
+                                      ReviewModel(
+                                        userName: 'John Doe',
+                                        userImageUrl:
+                                            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
+                                        date: '10 Feb',
+                                        rating: 4,
+                                        reviewText:
+                                            'Thank you, Fresh Food L.L.C! That was a great event.',
+                                      ),
+                                      ReviewModel(
+                                        userName: 'John Doe',
+                                        userImageUrl:
+                                            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+                                        date: '10 Feb',
+                                        rating: 5,
+                                        reviewText:
+                                            'Thank you, Fresh Food L.L.C! That was a great event.',
+                                      ),
+                                    ],
+                                  );
+                                  Get.to(
+                                    () => const VendorProfileView(),
+                                    arguments: enhancedProvider,
+                                  );
+                                },
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 45.w,
+                                      height: 45.w,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                            service.provider.imageUrl,
                                           ),
+                                          fit: BoxFit.cover,
                                         ),
-                                      ],
-                                    )
-                                  else
-                                    Text(
-                                      service.provider.role,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        color: AppColors.textSecondary,
                                       ),
                                     ),
-                                ],
+                                    SizedBox(width: 12.w),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              service.provider.name,
+                                              style: GoogleFonts.inter(
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            if (service.provider.isVerified) ...[
+                                              SizedBox(width: 4.w),
+                                              Icon(
+                                                Icons.verified,
+                                                color: Colors.orange,
+                                                size: 16.r,
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                        if (service.rating != null)
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 14.r,
+                                              ),
+                                              SizedBox(width: 4.w),
+                                              Text(
+                                                '${service.rating} (${'reviewsCount'.trParams({
+                                                      'count': service.reviewCount
+                                                          .toString(),
+                                                    })})',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 12.sp,
+                                                  color: AppColors.textSecondary,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        else
+                                          Text(
+                                            service.provider.role,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(width: 12.w),
+                            InkWell(
+                              onTap: () {
+                                // TODO: use real chat thread id when backend chat API is available
+                                Get.toNamed(
+                                  AppRoutes.chatDetail,
+                                  arguments: {
+                                    'id': service.id,
+                                    'name': service.provider.name,
+                                    'image': service.provider.imageUrl,
+                                    'isAdmin': false,
+                                  },
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(14.r),
+                              child: Container(
+                                width: 42.w,
+                                height: 42.w,
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFE6E8FF),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                padding: EdgeInsets.all(10.r),
+                                child: SvgPicture.asset(
+                                  'assets/icons/chat.svg',
+                                  colorFilter: const ColorFilter.mode(
+                                    AppColors.primary,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 24.h),
 

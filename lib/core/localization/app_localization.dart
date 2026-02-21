@@ -314,6 +314,11 @@ class AppLocalization extends Translations {
     'serviceAddedSuccess': 'Service added successfully',
     'serviceUpdatedSuccess': 'Service updated successfully',
     'insufficientFunds': 'Insufficient Funds',
+    'availability': 'Availability',
+    'additionalAvailability': 'Additional Availability',
+    'startTime': 'Start Time',
+    'endTime': 'End Time',
+    'select': 'Select',
 
     // Days
     'mon': 'Mon',
@@ -693,6 +698,11 @@ class AppLocalization extends Translations {
     'serviceAddedSuccess': 'تم إضافة الخدمة بنجاح',
     'serviceUpdatedSuccess': 'تم تحديث الخدمة بنجاح',
     'insufficientFunds': 'رصيد غير كافٍ',
+    'availability': 'التوفر',
+    'additionalAvailability': 'التوفر الإضافي',
+    'startTime': 'وقت البدء',
+    'endTime': 'وقت الانتهاء',
+    'select': 'اختر',
 
     // Days
     'mon': 'الاثنين',

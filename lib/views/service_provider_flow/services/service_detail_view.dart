@@ -4,9 +4,7 @@ import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
 import 'package:event_maker/data/models/review_model.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_event_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_training_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
@@ -68,28 +66,10 @@ class ServiceDetailView extends StatelessWidget {
   }
 
   void _onEditPressed() {
-    // Navigate to the appropriate edit screen based on service type
-    switch (service.type) {
-      case ServiceType.event:
-        Get.to(
-          () => AddEventView(service: service, isEdit: true),
-          binding: AddScreensBinding(),
-        );
-        break;
-      case ServiceType.training:
-        Get.to(
-          () => AddTrainingView(service: service, isEdit: true),
-          binding: AddScreensBinding(),
-        );
-        break;
-      default:
-        // For service types: photography, catering, cleaning, music, filming
-        Get.to(
-          () => AddServiceView(service: service, isEdit: true),
-          binding: AddScreensBinding(),
-        );
-        break;
-    }
+    Get.to(
+      () => AddServiceView(service: service, isEdit: true),
+      binding: AddScreensBinding(),
+    );
   }
 
   void _showAcceptDialog(BuildContext context) {

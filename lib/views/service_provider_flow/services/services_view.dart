@@ -1,6 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/shared/widgets/add_options_bottom_sheet.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +91,10 @@ class ServicesView extends GetView<SPServicesController> {
         SizedBox(width: 12.w),
         // Add Button (Icon + Text)
         InkWell(
-          onTap: () => AddOptionsBottomSheet.show(context),
+          onTap: () => Get.to(
+            () => const AddServiceView(),
+            binding: AddScreensBinding(),
+          ),
           borderRadius: BorderRadius.circular(12.r),
           child: Container(
             height: 50.h,

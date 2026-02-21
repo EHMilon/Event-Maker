@@ -60,8 +60,6 @@ import 'package:event_maker/views/service_provider_flow/documents/documents_bind
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_view.dart';
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_event_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_training_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_list_view.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/view_certificate_view.dart'
@@ -331,16 +329,6 @@ class AppRoutes {
     GetPage(
       name: addService,
       page: () => const AddServiceView(),
-      binding: AddScreensBinding(),
-    ),
-    GetPage(
-      name: addEvent,
-      page: () => const AddEventView(),
-      binding: AddScreensBinding(),
-    ),
-    GetPage(
-      name: addTraining,
-      page: () => const AddTrainingView(),
       binding: AddScreensBinding(),
     ),
     GetPage(

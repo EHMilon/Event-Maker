@@ -60,18 +60,20 @@ class ChatDetailView extends StatelessWidget {
       titleSpacing: 0,
       title: Row(
         children: [
-          CircleAvatar(
-            radius: 20.r,
-            backgroundImage: AssetImage(controller.chatImage),
-            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-          ),
+      CircleAvatar(
+        radius: 20.r,
+        backgroundImage: controller.chatImage.startsWith('http')
+            ? NetworkImage(controller.chatImage)
+            : AssetImage(controller.chatImage) as ImageProvider,
+        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+      ),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
               displayName,
               style: GoogleFonts.roboto(
                 color: AppColors.textPrimary,
-                fontSize: 20.sp,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,

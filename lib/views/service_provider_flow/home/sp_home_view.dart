@@ -1,7 +1,8 @@
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/shared/widgets/add_options_bottom_sheet.dart';
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -112,11 +113,12 @@ class SPHomeView extends GetView<SPHomeController> {
                 SizedBox(width: 8.w),
                 Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    color: Colors.amber,
-                    shape: BoxShape.circle,
+                
+                  child: Image.asset(
+                    'assets/icons/completed.png',
+                    height: 18.h,
+                    width: 18.w,
                   ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 14),
                 ),
               ],
             ),
@@ -137,7 +139,7 @@ class SPHomeView extends GetView<SPHomeController> {
               children: [
                 SvgPicture.asset(
                   'assets/icons/notification.svg',
-                  height: 22.h,
+                  height: 20.h,
                   colorFilter: const ColorFilter.mode(
                     AppColors.primary,
                     BlendMode.srcIn,
@@ -432,12 +434,15 @@ class SPHomeView extends GetView<SPHomeController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildActionItem(
-          icon: 'assets/icons/add.svg',
-          label: 'addService'.tr,
-          backgroundColor: const Color(0xFFE9FBF4),
-          onTap: () => AddOptionsBottomSheet.show(context),
-        ),
+          _buildActionItem(
+            icon: 'assets/icons/add.svg',
+            label: 'addService'.tr,
+            backgroundColor: const Color(0xFFE9FBF4),
+            onTap: () => Get.to(
+              () => const AddServiceView(),
+              binding: AddScreensBinding(),
+            ),
+          ),
         _buildActionItem(
           icon: 'assets/icons/calender.svg',
           label: 'schedule'.tr,
