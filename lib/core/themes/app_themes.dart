@@ -15,10 +15,10 @@ class AppThemes {
       brightness: Brightness.light,
     ),
     appBarTheme: const AppBarTheme(
-      color: AppColors.backgroundLight,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: AppColors.backgroundLight,
+        statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
       ),
@@ -37,10 +37,10 @@ class AppThemes {
       brightness: Brightness.dark,
     ),
     appBarTheme: const AppBarTheme(
-      color: AppColors.backgroundDark,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: AppColors.backgroundDark,
+        statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),

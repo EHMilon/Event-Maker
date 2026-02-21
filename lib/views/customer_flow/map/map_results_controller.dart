@@ -81,28 +81,6 @@ class MapResultsController extends GetxController {
       priceUnit: 'AED / hr',
       date: DateTime.now(),
     ),
-    ServiceModel(
-      id: '4',
-      title: 'Spark Clean',
-      description: 'Professional cleaning for venues.',
-      images: [
-        'https://images.unsplash.com/photo-1581578731548-c64695ce6958?q=80&w=400&auto=format&fit=crop',
-      ],
-      type: ServiceType.cleaning,
-      provider: ServiceProvider(
-        name: 'Clean Team',
-        role: 'Agency',
-        imageUrl:
-            'https://images.unsplash.com/photo-1556911220-e15021db87a7?q=80&w=1000&auto=format&fit=crop',
-        isVerified: true,
-      ),
-      location: 'AD, Yas Island',
-      rating: 4.7,
-      reviewCount: 340,
-      basePrice: 80,
-      priceUnit: 'AED / hr',
-      date: DateTime.now(),
-    ),
   ];
 
   // Coordinates for services
@@ -110,7 +88,6 @@ class MapResultsController extends GetxController {
     '1': const LatLng(24.4539, 54.3773),
     '2': const LatLng(24.4600, 54.3900),
     '3': const LatLng(24.4400, 54.3600), // Food Catering
-    '4': const LatLng(24.4300, 54.3500), // Spark Clean
   };
 
   @override

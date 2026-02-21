@@ -31,67 +31,80 @@ class TransactionsView extends GetView<ProfileController> {
       body: Obx(
         () => Skeletonizer(
           enabled: controller.isLoading.value,
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          child: ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
             itemCount: controller.transactions.length,
-            separatorBuilder: (context, index) => Divider(
-              height: 32.h,
-              color: AppColors.lightGrey.withOpacity(0.5),
-            ),
             itemBuilder: (context, index) {
               final tx = controller.transactions[index];
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              return Container(
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withOpacity(0.05),
+                      blurRadius: 8.r,
+                      offset: Offset(0, 4.h),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        tx['title'],
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        tx['time'],
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            tx['amount'],
+                            tx['title'],
                             style: TextStyle(
                               fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                          SizedBox(width: 4.w),
+                          SizedBox(height: 4.h),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
                           Text(
-                            'AED',
+                            tx['time'],
                             style: TextStyle(
                               fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primary,
+                              color: AppColors.textSecondary,
                             ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Row(
+                            children: [
+                              Text(
+                                tx['amount'],
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'AED',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ],
                   ),
-                ],
+                ),
               );
             },
           ),

@@ -191,13 +191,7 @@ class ProfileView extends GetView<ProfileController> {
           color: titleColor ?? AppColors.textPrimary,
         ),
       ),
-      // trailing:
-      //     trailing ??
-      //     Icon(
-      //       Icons.chevron_right,
-      //       size: 20.sp,
-      //       color: AppColors.textSecondary,
-      //     ),
+      trailing: trailing,
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }

@@ -41,17 +41,13 @@ class MyApp extends StatelessWidget {
           getPages: AppRoutes.routes,
           builder: (context, child) {
             final brightness = Theme.of(context).brightness;
-            final overlayStyle = brightness == Brightness.dark
-                ? SystemUiOverlayStyle.light.copyWith(
-                    statusBarColor: AppColors.backgroundDark,
-                    statusBarIconBrightness: Brightness.light,
-                    statusBarBrightness: Brightness.dark,
-                  )
-                : SystemUiOverlayStyle.dark.copyWith(
-                    statusBarColor: AppColors.backgroundLight,
-                    statusBarIconBrightness: Brightness.dark,
-                    statusBarBrightness: Brightness.light,
-                  );
+            final overlayStyle = SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness:
+                  brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+              statusBarBrightness:
+                  brightness == Brightness.dark ? Brightness.dark : Brightness.light,
+            );
 
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: overlayStyle,
