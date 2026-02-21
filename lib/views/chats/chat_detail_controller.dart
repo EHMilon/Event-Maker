@@ -30,25 +30,30 @@ class ChatDetailController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
 
     if (isAdminChat) {
-      // Admin chat – show welcome state
       messages.value = [
         {
           'id': '1',
-          'text': 'Hello !',
-          'isMe': false,
-          'time': '9:41 AM',
-          'type': 'header', // Special type for bold welcome
+          'text': 'How can I improve my sleep?',
+          'isMe': true,
+          'time': '9:40 AM',
+          'type': 'text',
         },
         {
           'id': '2',
-          'text': 'Now you can easily contact with the admin.',
+          'text': 'Here are some tips that might help you rest better.',
           'isMe': false,
           'time': '9:41 AM',
-          'type': 'subtitle',
+          'type': 'text',
+        },
+        {
+          'id': '3',
+          'text': 'How can I improve my Services?',
+          'isMe': true,
+          'time': '9:42 AM',
+          'type': 'text',
         },
       ];
     } else {
-      // Customer chat – normal conversation
       messages.value = [
         {
           'id': '1',
@@ -70,18 +75,36 @@ class ChatDetailController extends GetxController {
 
   /// Send a new message.
   /// TODO: Integrate with backend to send message via API.
-  void sendMessage() {
-    if (messageText.value.trim().isEmpty) return;
+  void sendMessage({String? overrideText}) {
+    final composed = (overrideText ?? messageText.value).trim();
+    if (composed.isEmpty) return;
 
-    // Insert at beginning (index 0) so newest messages appear at bottom
     messages.insert(0, {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'text': messageText.value.trim(),
+      'text': composed,
       'isMe': true,
       'time': _formatCurrentTime(),
       'type': 'text',
     });
+
     messageText.value = '';
+
+    _scheduleDemoReply();
+  }
+
+  void _scheduleDemoReply() {
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (isClosed) return;
+      final replyText =
+          isAdminChat ? 'autoReplyAdmin'.tr : 'autoReplyCustomer'.tr;
+      messages.insert(0, {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'text': replyText,
+        'isMe': false,
+        'time': _formatCurrentTime(),
+        'type': 'text',
+      });
+    });
   }
 
   /// Helper to format current time for display.
@@ -95,7 +118,7 @@ class ChatDetailController extends GetxController {
 
   /// Recommended topics for admin chat (from the mockup).
   List<Map<String, dynamic>> get recommendedTopics => [
-    {'emoji': '😊', 'text': 'howCanIImproveMyServices'.tr},
-    {'emoji': '👋', 'text': 'howCanIImproveMyServices'.tr},
-  ];
+        {'emoji': '😴', 'text': 'howCanIImprovedSleep'.tr},
+        {'emoji': '🧘', 'text': 'howCanIImproveMyServices'.tr},
+      ];
 }

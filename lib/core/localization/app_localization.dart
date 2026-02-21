@@ -166,6 +166,8 @@ class AppLocalization extends Translations {
     'recommendedTopics': 'Recommended Topics',
     'howCanIImproveMyServices': 'How can I improve my Services?',
     'howCanIImprovedSleep': 'How can I improve my sleep?',
+    'autoReplyAdmin': 'Thanks for reaching out! An admin will respond shortly.',
+    'autoReplyCustomer': 'Thanks for your message! We will get back soon.',
 
     // Service Provider Home
     'goodMorning': 'Good Morning',

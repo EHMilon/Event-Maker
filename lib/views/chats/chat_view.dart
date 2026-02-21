@@ -102,9 +102,7 @@ class ChatView extends StatelessWidget {
     return Tab(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r)),
         child: Align(
           alignment: Alignment.center,
           child: Text(
@@ -234,7 +232,7 @@ class ChatView extends StatelessWidget {
   Widget _buildChatTile(Map<String, dynamic> chat, {bool isAdminChat = false}) {
     return InkWell(
       onTap: () {
-        // Navigate to chat detail screen with chat data
+        // Navigate to chat detail screen with admin/customer context
         Get.toNamed(
           AppRoutes.chatDetail,
           arguments: {

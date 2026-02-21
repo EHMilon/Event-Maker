@@ -30,7 +30,19 @@ class ChatViewController extends GetxController {
         'unread': 0,
       },
     ];
-    adminChats.value = []; // empty state
+
+    // TODO: Replace mock admin chat with real admin thread list from API
+    adminChats.value = [
+      {
+        'id': 'admin-1',
+        'name': 'EventMaker Admin',
+        'lastMessage': 'Hello, how can we assist you today?',
+        'image': 'assets/images/person.jpg',
+        'time': '10:15 AM',
+        'unread': 1,
+      },
+    ];
+
     isLoading.value = false;
   }
 

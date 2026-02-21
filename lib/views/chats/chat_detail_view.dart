@@ -21,21 +21,21 @@ class ChatDetailView extends StatelessWidget {
       appBar: _buildAppBar(controller),
       body: Column(
         children: [
-          // Messages list
+          // Messages container with gradient background per design
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return Skeletonizer(
-                  enabled: true,
-                  child: _buildShimmerMessages(),
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return Skeletonizer(
+                    enabled: true,
+                    child: _buildShimmerMessages(),
+                  );
+                }
+                return _buildMessagesList(
+                  controller,
+                  isAdminView: controller.isAdminChat,
                 );
-              }
-              if (controller.isAdminChat) {
-                return _buildAdminChatBody(controller);
-              }
-              return _buildMessagesList(controller);
-            }),
-          ),
+              }),
+            ),
           // Message input
           _buildMessageInput(controller),
         ],
@@ -176,9 +176,11 @@ class ChatDetailView extends StatelessWidget {
   }
 
   /// Regular messages list for customer chats.
-  Widget _buildMessagesList(ChatDetailController controller) {
+  Widget _buildMessagesList(
+    ChatDetailController controller, {
+    bool isAdminView = false,
+  }) {
     return ListView.builder(
-      
       padding: EdgeInsets.only(
         left: 22.w,
         right: 22.w,
@@ -189,14 +191,21 @@ class ChatDetailView extends StatelessWidget {
       reverse: true,
       itemBuilder: (context, index) {
         final message = controller.messages[index];
-        return _buildMessageBubble(message);
+        return _buildMessageBubble(message, isAdminView: isAdminView);
       },
     );
   }
 
   /// Individual message bubble widget.
-  Widget _buildMessageBubble(Map<String, dynamic> message) {
+  Widget _buildMessageBubble(
+    Map<String, dynamic> message, {
+    bool isAdminView = false,
+  }) {
     final isMe = message['isMe'] ?? false;
+    final messageType = message['type'] as String? ?? 'text';
+    final isAdminWelcome = isAdminView && !isMe && messageType == 'header';
+    final isAdminSubtitle =
+        isAdminView && !isMe && messageType == 'subtitle';
 
     return Padding(
       padding: EdgeInsets.only(bottom: 20.h),
@@ -204,34 +213,68 @@ class ChatDetailView extends StatelessWidget {
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
           constraints: BoxConstraints(maxWidth: 280.w),
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: isAdminWelcome
+                ? Colors.transparent
+                : isMe
+                    ? const Color(0xFFE8F2FF)
+                    : AppColors.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(isMe ? 12.r : 0.r),
               topRight: Radius.circular(isMe ? 0.r : 12.r),
               bottomLeft: Radius.circular(12.r),
               bottomRight: Radius.circular(12.r),
             ),
-            border: Border.all(color: Color(0xFFF2F2F2)), // #F2F2F2
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x334BA44B), // 75, 164, 75 with 20% opacity
-                blurRadius: 10,
-                offset: Offset(0, 0),
-              ),
-            ],
+            border: isAdminWelcome
+                ? null
+                : Border.all(color: const Color(0xFFF2F2F2)),
+            boxShadow: isAdminWelcome
+                ? null
+                : [
+                    BoxShadow(
+                      color: const Color(0x334BA44B),
+                      blurRadius: 10,
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
           ),
-
-          child: Text(
-            message['text'] ?? '',
-            style: GoogleFonts.roboto(
-              color: Color(0xFF5E5F60), // #5E5F60
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-              height: 1.5,
-            ),
-          ),
+          child: isAdminWelcome
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message['text'] ?? '',
+                      style: GoogleFonts.inter(
+                        color: AppColors.textPrimary,
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    Text(
+                      'adminChatWelcome'.tr,
+                      style: GoogleFonts.inter(
+                        color: AppColors.textSecondary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  message['text'] ?? '',
+                  style: GoogleFonts.roboto(
+                    color: isAdminSubtitle
+                        ? AppColors.textSecondary
+                        : const Color(0xFF5E5F60),
+                    fontSize: 14.sp,
+                    fontWeight: isAdminSubtitle
+                        ? FontWeight.w500
+                        : FontWeight.w400,
+                    height: 1.5,
+                  ),
+                ),
         ),
       ),
     );
@@ -326,7 +369,12 @@ class ChatDetailView extends StatelessWidget {
                   color: Colors.grey[100],
                   shape: BoxShape.circle,
                 ),
-                child: SvgPicture.asset('assets/icons/send.svg', height: 40.h, width: 40.w, fit: BoxFit.none,),
+                child: SvgPicture.asset(
+                  'assets/icons/send.svg',
+                  height: 40.h,
+                  width: 40.w,
+                  fit: BoxFit.none,
+                ),
               ),
             ),
           ],
