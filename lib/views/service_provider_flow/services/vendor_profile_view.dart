@@ -76,7 +76,9 @@ class VendorProfileView extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 4),
                             image: DecorationImage(
-                              image: vendor.imageUrl.startsWith('http')
+                              image:
+                                  vendor.imageUrl.startsWith('http://') ||
+                                      vendor.imageUrl.startsWith('https://')
                                   ? NetworkImage(vendor.imageUrl)
                                   : AssetImage(vendor.imageUrl)
                                         as ImageProvider,

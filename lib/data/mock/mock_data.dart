@@ -5,11 +5,10 @@ import 'package:event_maker/data/models/service_model.dart';
 
 class MockData {
   // Available local images
-  static const String imgPerson = 'assets/images/person.jpg';
+  static const String imgPerson = 'https://i.pravatar.cc/150?u=user123';
   static const String imgCatering = 'assets/images/catering.jpg';
   static const String imgCleaning = 'assets/images/cleaning.jpg';
   static const String imgFilming = 'assets/images/filming.jpg';
-  static const String imgMusic = 'assets/images/music.jpg';
   static const String imgPhotography = 'assets/images/photography.jpg';
   static const String imgCongress = 'assets/images/congress.png';
 

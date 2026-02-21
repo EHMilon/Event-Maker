@@ -167,7 +167,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
-
+ 
   Widget _buildMenuItem({
     required String icon,
     required String title,

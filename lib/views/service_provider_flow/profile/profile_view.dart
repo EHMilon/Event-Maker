@@ -145,7 +145,7 @@ class ProfileView extends GetView<ProfileController> {
                   onTap: () => Get.toNamed(AppRoutes.faq),
                 ),
                 _buildMenuItem(
-                  icon: 'assets/icons/question-mark.svg',
+                  icon: 'assets/icons/trash.svg',
                   title: 'deleteAccount'.tr,
                   titleColor: AppColors.error,
                   onTap: () => _showDeleteAccountDialog(context),
