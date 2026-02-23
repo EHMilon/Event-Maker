@@ -39,8 +39,7 @@ class SPHomeView extends GetView<SPHomeController> {
                   SizedBox(height: 30.h),
                   _buildActiveOrdersHeader(),
                   SizedBox(height: 15.h),
-                  _buildActiveOrdersList(),
-                ],
+                  _buildActiveOrdersList(),                ],
               ),
             ),
           );
@@ -212,58 +211,64 @@ class SPHomeView extends GetView<SPHomeController> {
             ),
           ),
           SizedBox(height: 24.h),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16.w,
-              mainAxisSpacing: 16.h,
-              childAspectRatio: 0.95,
-            ),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return _buildStatCard(
-                  icon: 'assets/icons/doller.svg',
-                  backgroundColor: const Color(0xFFE2EDFF),
-                  label: 'totalEarnings'.tr,
-                  value: controller.stats.value.totalEarnings,
-                  change: controller.stats.value.earningsChange,
-                  isUp: controller.stats.value.isEarningsUp,
-                );
-              } else if (index == 1) {
-                return _buildStatCard(
-                  icon: 'assets/icons/fl_box.svg',
-                  backgroundColor: const Color(0xFFF5E8FF),
-                  label: 'totalRequests'.tr,
-                  value: '${controller.stats.value.totalRequests}',
-                  change: controller.stats.value.requestsChange,
-                  isUp: controller.stats.value.isRequestsUp,
-                );
-              } else if (index == 2) {
-                return _buildStatCard(
-                  icon: 'assets/icons/completed_outline.svg',
-                  backgroundColor: const Color(0xFFD9FFF2),
-                  label: 'completed'.tr,
-                  value: '${controller.stats.value.completedOrders}',
-                  change: controller.stats.value.completedChange,
-                  isUp: controller.stats.value.isCompletedUp,
-                );
-              } else {
-                return _buildStatCard(
-                  icon: 'assets/icons/time.svg',
-                  backgroundColor: const Color(0xFFFFEFD3),
-                  label: 'pending'.tr,
-                  value: '${controller.stats.value.pendingOrders}',
-                  change: controller.stats.value.pendingChange,
-                  isUp: controller.stats.value.isPendingUp,
-                );
-              }
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final spacing = 16.w;
+              final itemWidth = (constraints.maxWidth - spacing) / 2;
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 16.h,
+                children: List.generate(4, (index) {
+                  Widget child;
+                  if (index == 0) {
+                    child = _buildStatCard(
+                      icon: 'assets/icons/doller.svg',
+                      backgroundColor: const Color(0xFFE2EDFF),
+                      label: 'totalEarnings'.tr,
+                      value: controller.stats.value.totalEarnings,
+                      change: controller.stats.value.earningsChange,
+                      isUp: controller.stats.value.isEarningsUp,
+                    );
+                  } else if (index == 1) {
+                    child = _buildStatCard(
+                      icon: 'assets/icons/fl_box.svg',
+                      backgroundColor: const Color(0xFFF5E8FF),
+                      label: 'totalRequests'.tr,
+                      value: '${controller.stats.value.totalRequests}',
+                      change: controller.stats.value.requestsChange,
+                      isUp: controller.stats.value.isRequestsUp,
+                    );
+                  } else if (index == 2) {
+                    child = _buildStatCard(
+                      icon: 'assets/icons/completed_outline.svg',
+                      backgroundColor: const Color(0xFFD9FFF2),
+                      label: 'completed'.tr,
+                      value: '${controller.stats.value.completedOrders}',
+                      change: controller.stats.value.completedChange,
+                      isUp: controller.stats.value.isCompletedUp,
+                    );
+                  } else {
+                    child = _buildStatCard(
+                      icon: 'assets/icons/time.svg',
+                      backgroundColor: const Color(0xFFFFEFD3),
+                      label: 'pending'.tr,
+                      value: '${controller.stats.value.pendingOrders}',
+                      change: controller.stats.value.pendingChange,
+                      isUp: controller.stats.value.isPendingUp,
+                    );
+                  }
+
+                  return SizedBox(
+                    width: itemWidth,
+                    child: child,
+                  );
+                }),
+              );
             },
           ),
           SizedBox(height: 24.h),
           _buildTotalBalanceCard(),
+
         ],
       ),
     );
