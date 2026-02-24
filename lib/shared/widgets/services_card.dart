@@ -41,6 +41,7 @@ class ServicesCard extends StatelessWidget {
         width: cardWidth,
         margin: cardMargin,
         decoration: BoxDecoration(
+          border: Border.all(color: AppColors.lightGrey),
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [

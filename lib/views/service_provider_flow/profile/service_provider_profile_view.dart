@@ -6,6 +6,7 @@ import 'package:event_maker/views/service_provider_flow/profile/profile_controll
 import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -31,7 +32,15 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           ),
           actions: [
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: AppColors.textPrimary),
+              icon: SvgPicture.asset(
+                'assets/images/setting_fill.svg',
+                width: 24.r,
+                height: 24.r,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
+                ),
+              ),
               onSelected: (value) {
                 if (value == 'settings') {
                   Get.toNamed(AppRoutes.profile);

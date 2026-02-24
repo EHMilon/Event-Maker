@@ -20,20 +20,6 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  late final TextEditingController _searchController;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
@@ -50,158 +36,205 @@ class _HomeViewState extends State<HomeView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 20.h),
-                  // Location Header
+                  // Home Screen Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.location_on_outlined,
-                                size: 16.r,
-                                color: AppColors.grey,
+                          // Avatar
+                          Container(
+                            width: 40.w,
+                            height: 40.h,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.3),
+                                width: 2.w,
                               ),
-                              SizedBox(width: 4.w),
+                              image: DecorationImage(
+                                image: AssetImage('assets/images/person.jpg'),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          // Location and greeting section
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                'locationLabel'.tr,
+                                'Hi, Shareena!',
                                 style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: AppColors.grey,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.black,
                                 ),
+                              ),
+                              // SizedBox(height: 4.h),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    size: 16.r,
+                                    color: AppColors.grey,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    'New York, USA', // TODO: Fetch from location service
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: AppColors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          Text(
-                            'New York, USA', // TODO: Fetch from location service
-                            style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.black,
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          // Search Icon
+                          GestureDetector(
+                            onTap: () {
+                              try {
+                                Get.toNamed(AppRoutes.search);
+                              } catch (e) {
+                                debugPrint('Navigation error: $e');
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(10.r),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: SvgPicture.asset(
+                                'assets/icons/search.svg',
+                                height: 20.h,
+                                colorFilter: const ColorFilter.mode(
+                                  AppColors.primary,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          // Notification Icon
+                          GestureDetector(
+                            onTap: () =>
+                                Get.toNamed(AppRoutes.customerNotifications),
+                            child: Container(
+                              padding: EdgeInsets.all(10.r),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: SvgPicture.asset(
+                                'assets/icons/notification.svg',
+                                height: 20.h,
+                                colorFilter: const ColorFilter.mode(
+                                  AppColors.primary,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      GestureDetector(
-                        onTap: () =>
-                            Get.toNamed(AppRoutes.customerNotifications),
-                        child: Container(
-                          padding: EdgeInsets.all(10.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: SvgPicture.asset(
-                            'assets/icons/notification.svg',
-                            height: 20.h,
-                            colorFilter: const ColorFilter.mode(
-                              AppColors.primary,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
-                  SizedBox(height: 20.h),
-                  // Search Bar
+                  SizedBox(height: 16.h),
+                  // Banner Image
+                  Container(
+                    width: double.infinity,
+                    height: 140.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/customer_banner.png'),
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  // Select Main Category
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    height: 50.h,
+                    height: 56.h,
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(color: AppColors.lightGrey),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.search, color: AppColors.grey, size: 24.r),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: 'searchServices'.tr,
-                              hintStyle: GoogleFonts.inter(
-                                color: AppColors.grey,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: controller.selectedMainCategory.value,
+                        isExpanded: true,
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: AppColors.grey,
+                        ),
+                        items: controller.mainCategories.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: GoogleFonts.inter(
+                                color: AppColors.black,
                                 fontSize: 14.sp,
                               ),
-                              border: InputBorder.none,
-                              // Clear button when text is entered
-                              suffixIcon: controller.searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      icon: Icon(
-                                        Icons.clear,
-                                        size: 20.r,
-                                        color: AppColors.grey,
-                                      ),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        controller.clearSearch();
-                                      },
-                                    )
-                                  : null,
                             ),
-                            onChanged: (value) =>
-                                controller.searchServices(value),
-                          ),
-                        ),
-                      ],
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            controller.selectedMainCategory.value = newValue;
+                          }
+                        },
+                      ),
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  // Search Results or Categories/Services
-                  Obx(() {
-                    // Show search results if searching
-                    if (controller.isSearching) {
-                      return _buildSearchResults(controller);
-                    }
 
-                    // Show default home content
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Service Categories
-                        _buildSectionHeader(
-                          'serviceCategories'.tr,
-                          'all',
-                          'allCategories'.tr,
-                        ),
-                        SizedBox(height: 16.h),
-                        _buildCategories(),
-                        SizedBox(height: 24.h),
-                        // Catering Services
-                        _buildSectionHeader(
-                          'cateringServices'.tr,
-                          'catering',
-                          'cateringServices'.tr,
-                        ),
-                        SizedBox(height: 16.h),
-                        _buildHorizontalList('catering'),
-                        SizedBox(height: 24.h),
-                        // Filming Events
-                        _buildSectionHeader(
-                          'filmingEvents'.tr,
-                          'filming',
-                          'filmingEvents'.tr,
-                        ),
-                        SizedBox(height: 16.h),
-                        _buildHorizontalList('filming'),
-                        SizedBox(height: 24.h),
-                        // Cleaning Services
-                        _buildSectionHeader(
-                          'cleaningServices'.tr,
-                          'cleaning',
-                          'cleaningServices'.tr,
-                        ),
-                        SizedBox(height: 16.h),
-                        _buildHorizontalList('cleaning'),
-                        SizedBox(height: 80.h), // Extra space for bottom nav
-                      ],
-                    );
-                  }),
+                  // Service Categories
+                  _buildSectionHeader(
+                    'subCategoriesLabel'.tr,
+                    'all',
+                    'allCategories'.tr,
+                    navigateToCategories: true,
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildCategories(),
+                  SizedBox(height: 24.h),
+                  // Catering Services
+                  _buildSectionHeader(
+                    'cateringServices'.tr,
+                    'catering',
+                    'cateringServices'.tr,
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildHorizontalList('catering'),
+                  SizedBox(height: 24.h),
+                  // Filming Events
+                  _buildSectionHeader(
+                    'filmingEvents'.tr,
+                    'filming',
+                    'filmingEvents'.tr,
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildHorizontalList('filming'),
+                  SizedBox(height: 24.h),
+                  // Cleaning Services
+                  _buildSectionHeader(
+                    'cleaningServices'.tr,
+                    'cleaning',
+                    'cleaningServices'.tr,
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildHorizontalList('cleaning'),
+                  SizedBox(height: 80.h), // Extra space for bottom nav
                 ],
               ),
             ),
@@ -211,111 +244,36 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  /// Build search results section
-  Widget _buildSearchResults(HomeController controller) {
-    if (controller.searchResults.isEmpty && controller.searchQuery.isNotEmpty) {
-      // No results found
-      return Center(
-        child: Padding(
-          padding: EdgeInsets.only(top: 60.h),
-          child: Column(
-            children: [
-              Icon(Icons.search_off, size: 64.r, color: AppColors.grey),
-              SizedBox(height: 16.h),
-              Text(
-                'noServicesFound'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                'tryDifferentKeywords'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.grey,
-                ),
-              ),
-            ],
-          ),
+  /// Build service categories horizontally based on selected main category
+  Widget _buildCategories() {
+    final HomeController controller = Get.find<HomeController>();
+    return Obx(() {
+      final subCategories = controller.currentSubCategories;
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: subCategories.map((category) {
+            return Padding(
+              padding: EdgeInsets.only(right: 8.w),
+              child: CategoryItem(label: category, onTap: () {}),
+            );
+          }).toList(),
         ),
       );
-    }
-
-    // Show search results as a full-width list
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: 16.h),
-          child: Text(
-            'resultsFoundCount'.trParams({
-              'count': controller.searchResults.length.toString(),
-            }),
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.grey),
-          ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.only(bottom: 80.h),
-          itemCount: controller.searchResults.length,
-          itemBuilder: (context, index) {
-            final service = controller.searchResults[index];
-            return Padding(
-              padding: EdgeInsets.only(bottom: 16.h),
-              child: ServicesCard(
-                imagePath: service.images.isNotEmpty ? service.images[0] : '',
-                title: service.title,
-                location: service.location,
-                price:
-                    '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.priceUnit}',
-                rating: service.rating?.toString() ?? 'N/A',
-                isBookmarked: service.isBookmarked,
-                useFullWidth: true,
-                onTap: () {
-                  Get.to(() => ServiceDetailView(service: service));
-                },
-                onBookmarkTap: () {
-                  controller.toggleBookmark(service.id);
-                },
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  /// Build service categories horizontally
-  Widget _buildCategories() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          CategoryItem(label: 'lighting'.tr, onTap: () {}),
-          SizedBox(width: 8.w),
-          CategoryItem(label: 'caterer'.tr, onTap: () {}),
-          SizedBox(width: 8.w),
-          CategoryItem(label: 'musical'.tr, onTap: () {}),
-          SizedBox(width: 8.w),
-          CategoryItem(label: 'photographer'.tr, onTap: () {}),
-        ],
-      ),
-    );
+    });
   }
 
   /// Build section header with "See All" button
   /// [title] - The section title
   /// [categoryType] - The category type for filtering services
   /// [categoryName] - The display name for the app bar in the next screen
+  /// [navigateToCategories] - Whether to navigate to Categories screen or category services
   Widget _buildSectionHeader(
     String title,
     String categoryType,
-    String categoryName,
-  ) {
+    String categoryName, {
+    bool navigateToCategories = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -329,14 +287,19 @@ class _HomeViewState extends State<HomeView> {
         ),
         TextButton(
           onPressed: () {
-            // Navigate to CategoryServicesView with the category type and name
-            Get.toNamed(
-              AppRoutes.categoryServices,
-              arguments: {
-                'categoryType': categoryType,
-                'categoryName': categoryName,
-              },
-            );
+            if (navigateToCategories) {
+              // Navigate to Categories screen
+              Get.toNamed(AppRoutes.categories);
+            } else {
+              // Navigate to CategoryServicesView with the category type and name
+              Get.toNamed(
+                AppRoutes.categoryServices,
+                arguments: {
+                  'categoryType': categoryType,
+                  'categoryName': categoryName,
+                },
+              );
+            }
           },
           child: Row(
             children: [

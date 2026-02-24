@@ -8,6 +8,20 @@ class HomeController extends GetxController {
   final searchQuery = ''.obs;
   final searchResults = <ServiceModel>[].obs;
   final allServices = <ServiceModel>[].obs;
+  
+  // For main category selection
+  final selectedMainCategory = 'Event'.obs;
+  final List<String> mainCategories = ['Hospitality', 'Event', 'Professional trainer'];
+  
+  // Sub-categories map based on main category
+  final Map<String, List<String>> subCategoriesMap = {
+    'Hospitality': ['Catering', 'Barista', 'Bakery', 'Waitstaff', 'Host/Hostess'],
+    'Event': ['Lighting', 'Sound', 'Decoration', 'Venue', 'Planner'],
+    'Professional trainer': ['Photographer', 'Videographer', 'Musician', 'DJ', 'MC'],
+  };
+  
+  // Get current sub-categories based on selected main category
+  List<String> get currentSubCategories => subCategoriesMap[selectedMainCategory.value] ?? [];
 
   // Get ProfileController to sync bookmarks
   final ProfileController profileController = Get.find<ProfileController>();

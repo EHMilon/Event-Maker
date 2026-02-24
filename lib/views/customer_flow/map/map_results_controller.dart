@@ -47,7 +47,7 @@ class MapResultsController extends GetxController {
       type: ServiceType.filming,
       provider: ServiceProvider(
         name: 'Dan Smith',
-        role: 'Pro',
+        role: 'Business',
         imageUrl:
             'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
         isVerified: true,
@@ -69,7 +69,7 @@ class MapResultsController extends GetxController {
       type: ServiceType.catering,
       provider: ServiceProvider(
         name: 'Chef Maria',
-        role: 'Pro',
+        role: 'Productive Family',
         imageUrl:
             'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1000&auto=format&fit=crop',
         isVerified: true,

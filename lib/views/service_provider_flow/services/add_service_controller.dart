@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/service_model.dart';
 import '../../../views/service_provider_flow/services/sp_services_controller.dart';
+import '../../../shared/widgets/availability_widget_card.dart';
 
 enum ServiceCategory { hospitality, event, trainer }
 
 class AddServiceController extends GetxController {
   static const int primaryDayLimit = 7;
+
   // Step 1: Details
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final locationController = TextEditingController();
   var outsideLocation = false.obs;
-  var availability = <String>[].obs; // Days like 'Mon', 'Tue'
-  var additionalAvailability = <String>[].obs;
-  var showAdditionalAvailability = false.obs;
-  final additionalLocationController = TextEditingController();
-  final startTime = Rxn<TimeOfDay>();
-  final endTime = Rxn<TimeOfDay>();
+
+  // Primary availability card
+  late AvailabilityCardModel primaryAvailabilityCard;
+
+  // Additional availability cards list
+  var additionalAvailabilityCards = <AvailabilityCardModel>[].obs;
+
   final selectedCategory = ServiceCategory.hospitality.obs;
   final selectedServiceType = ServiceType.catering.obs;
 
@@ -54,6 +57,9 @@ class AddServiceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Initialize primary availability card
+    primaryAvailabilityCard = AvailabilityCardModel(id: 'primary');
+
     // Initialize with one empty package
     if (packages.isEmpty) {
       addPackage();
@@ -61,6 +67,103 @@ class AddServiceController extends GetxController {
     // Ensures category selection is initialized for new entries
     selectedCategory.value = ServiceCategory.hospitality;
     selectedServiceType.value = ServiceType.catering;
+  }
+
+  /// Add a new additional availability card
+  void addAdditionalAvailabilityCard() {
+    final card = AvailabilityCardModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    );
+    additionalAvailabilityCards.add(card);
+  }
+
+  /// Remove an additional availability card
+  void removeAdditionalAvailabilityCard(String id) {
+    final index = additionalAvailabilityCards.indexWhere(
+      (card) => card.id == id,
+    );
+    if (index != -1) {
+      additionalAvailabilityCards[index].dispose();
+      additionalAvailabilityCards.removeAt(index);
+    }
+  }
+
+  /// Check if additional availability is disabled (when primary card has "cannot go outside" enabled)
+  bool get isAdditionalAvailabilityDisabled {
+    return primaryAvailabilityCard.cannotGoOutside.value;
+  }
+
+  /// Toggle day selection for primary availability
+  void togglePrimaryDay(String day) {
+    // If day is already selected in primary, just deselect it
+    if (primaryAvailabilityCard.selectedDays.contains(day)) {
+      primaryAvailabilityCard.selectedDays.remove(day);
+      return;
+    }
+
+    // Check day limit
+    if (primaryAvailabilityCard.selectedDays.length >= primaryDayLimit) {
+      return;
+    }
+
+    // Add day to primary
+    primaryAvailabilityCard.selectedDays.add(day);
+  }
+
+  /// Toggle day selection for additional availability card
+  void toggleAdditionalDay(String cardId, String day) {
+    final cardIndex = additionalAvailabilityCards.indexWhere(
+      (card) => card.id == cardId,
+    );
+    if (cardIndex == -1) return;
+
+    final card = additionalAvailabilityCards[cardIndex];
+
+    // If day is already selected in this card, just deselect it
+    if (card.selectedDays.contains(day)) {
+      card.selectedDays.remove(day);
+      return;
+    }
+
+    // Add day to this card
+    card.selectedDays.add(day);
+  }
+
+  /// Check if a day can be selected for additional availability
+  /// Days already selected in primary or other additional cards are blocked
+  bool canSelectAdditionalDay(AvailabilityCardModel card, String day) {
+    // Can always deselect if already selected in this card
+    if (card.selectedDays.contains(day)) {
+      return true;
+    }
+    // Cannot select days that are already in primary availability
+    if (primaryAvailabilityCard.selectedDays.contains(day)) {
+      return false;
+    }
+    // Cannot select days that are in other additional cards
+    for (var otherCard in additionalAvailabilityCards) {
+      if (otherCard.id != card.id && otherCard.selectedDays.contains(day)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Check if a day can be selected for primary availability
+  /// Days already selected in additional cards are blocked
+  bool canSelectPrimaryDay(String day) {
+    // Can always deselect if already selected in primary
+    if (primaryAvailabilityCard.selectedDays.contains(day)) {
+      return true;
+    }
+    // Cannot select if day is in any additional card
+    for (var card in additionalAvailabilityCards) {
+      if (card.selectedDays.contains(day)) {
+        return false;
+      }
+    }
+    // Check day limit
+    return primaryAvailabilityCard.selectedDays.length < primaryDayLimit;
   }
 
   void addPackage() {
@@ -149,54 +252,11 @@ class AddServiceController extends GetxController {
     titleController.dispose();
     descriptionController.dispose();
     locationController.dispose();
-    additionalLocationController.dispose();
+    primaryAvailabilityCard.dispose();
+    for (var card in additionalAvailabilityCards) {
+      card.dispose();
+    }
     super.onClose();
-  }
-
-  void togglePrimaryDay(String day) {
-    if (availability.contains(day)) {
-      availability.remove(day);
-      return;
-    }
-    if (availability.length >= primaryDayLimit) {
-      return;
-    }
-    availability.add(day);
-    if (additionalAvailability.contains(day)) {
-      additionalAvailability.remove(day);
-    }
-  }
-
-  void toggleAdditionalDay(String day) {
-    if (!canSelectAdditionalDay(day)) {
-      return;
-    }
-    if (additionalAvailability.contains(day)) {
-      additionalAvailability.remove(day);
-      return;
-    }
-    additionalAvailability.add(day);
-  }
-
-  void toggleAdditionalSection() {
-    showAdditionalAvailability.value = !showAdditionalAvailability.value;
-  }
-
-  bool canSelectAdditionalDay(String day) {
-    if (additionalAvailability.contains(day)) {
-      return true;
-    }
-    if (availability.contains(day)) {
-      return false;
-    }
-    return true;
-  }
-
-  bool canSelectPrimaryDay(String day) {
-    if (availability.contains(day)) {
-      return true;
-    }
-    return availability.length < primaryDayLimit;
   }
 
   ServiceCategory _categoryFromServiceType(ServiceType type) {

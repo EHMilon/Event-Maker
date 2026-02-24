@@ -23,6 +23,8 @@ import 'package:event_maker/views/service_provider_flow/profile/change_password_
 import 'package:event_maker/views/service_provider_flow/profile/transactions_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/wallet_view.dart';
 import 'package:event_maker/views/customer_flow/bookmarks/bookmarks_view.dart';
+import 'package:event_maker/views/customer_flow/categories/categories_view.dart';
+import 'package:event_maker/views/customer_flow/categories/categories_binding.dart';
 import 'package:event_maker/views/service_provider_flow/profile/faq_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/contact_us_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_binding.dart';
@@ -43,6 +45,8 @@ import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
 import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:event_maker/views/customer_flow/notifications/notification_view.dart';
 import 'package:event_maker/views/customer_flow/notifications/notification_binding.dart';
+import 'package:event_maker/views/customer_flow/search/search_view.dart';
+import 'package:event_maker/views/customer_flow/search/search_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/category_services_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/category_services_controller.dart';
@@ -125,6 +129,8 @@ class AppRoutes {
   static const String spEditCertification = '/sp-edit-certification';
   static const String spActiveOrders = '/sp-active-orders';
   static const String chatDetail = '/chat-detail';
+  static const String search = '/search';
+  static const String categories = '/categories';
 
   static final routes = [
     GetPage(
@@ -358,6 +364,16 @@ class AppRoutes {
       binding: BindingsBuilder(() {
         Get.lazyPut<ChatDetailController>(() => ChatDetailController());
       }),
+    ),
+    GetPage(
+      name: search,
+      page: () => const SearchView(),
+      binding: SearchBinding(),
+    ),
+    GetPage(
+      name: categories,
+      page: () => const CategoriesView(),
+      binding: CategoriesBinding(),
     ),
   ];
 }

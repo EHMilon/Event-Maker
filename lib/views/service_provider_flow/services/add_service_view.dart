@@ -8,6 +8,7 @@ import '../../../data/models/service_model.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../shared/widgets/primary_text_button.dart';
 import '../../../shared/widgets/upload_widget.dart';
+import '../../../shared/widgets/availability_widget_card.dart';
 import 'add_service_controller.dart';
 
 import 'packages_pricings_view.dart';
@@ -143,39 +144,21 @@ class _AddServiceViewState extends State<AddServiceView> {
                   ),
                 ),
 
-                SizedBox(height: 16.h),
-                // Text(
-                //   'setTimeSlots'.tr,
-                //   style: GoogleFonts.inter(
-                //     fontSize: 16.sp,
-                //     fontWeight: FontWeight.w600,
-                //     color: AppColors.textPrimary,
-                //   ),
-                // ),
-                _buildTimeRow(),
-                SizedBox(height: 16.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'cannotGoOutsideLocation'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    Obx(
-                      () => Switch(
-                        value: controller.outsideLocation.value,
-                        onChanged: (v) => controller.outsideLocation.value = v,
-                        activeThumbColor: AppColors.primary,
-                      ),
-                    ),
-                  ],
+                SizedBox(height: 24.h),
+                
+                // Primary Availability Card
+                AvailabilityWidgetCard(
+                  card: controller.primaryAvailabilityCard,
+                  days: _days,
+                  canSelectDay: controller.canSelectPrimaryDay,
+                  onDayTap: controller.togglePrimaryDay,
+                  isPrimary: true,
+                  isEnabled: true,
                 ),
-                SizedBox(height: 16.h),
-                _buildAvailabilitySection(),
+
+                // Additional Availability Section
+                _buildAdditionalAvailabilitySection(),
+                
                 SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -237,246 +220,96 @@ class _AddServiceViewState extends State<AddServiceView> {
     Get.to(() => const PackagesPricingsView());
   }
 
-  Widget _buildAvailabilitySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'availability'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        SizedBox(height: 10.h),
-        _buildDayChips(
-          selectedDays: controller.availability,
-          onTap: controller.togglePrimaryDay,
-          canSelect: controller.canSelectPrimaryDay,
-        ),
-        SizedBox(height: 12.h),
-        _buildAdditionalToggle(),
-        Obx(
-          () => controller.showAdditionalAvailability.value
-              ? _buildAdditionalSection()
-              : const SizedBox(),
-        ),
-        // SizedBox(height: 16.h),
-      ],
-    );
-  }
-
-  Widget _buildDayChips({
-    required RxList<String> selectedDays,
-    required void Function(String) onTap,
-    required bool Function(String) canSelect,
-    bool isSecondary = false,
-  }) {
-    return Obx(
-      () => Wrap(
-        spacing: 8.w,
-        runSpacing: 8.h,
-        children: _days.map((day) {
-          final key = day['key']!;
-          final isSelected = selectedDays.contains(key);
-          final enabled = isSelected || canSelect(key);
-          final backgroundColor = isSelected
-              ? AppColors.primary.withOpacity(0.15)
-              : enabled
-              ? Colors.white
-              : AppColors.lightGrey;
-          final borderColor = isSelected
-              ? AppColors.primary
-              : enabled
-              ? AppColors.borderLight
-              : AppColors.lightGrey;
-          final textColor = isSelected
-              ? AppColors.primary
-              : enabled
-              ? AppColors.textSecondary
-              : AppColors.grey;
-          return GestureDetector(
-            onTap: enabled ? () => onTap(key) : null,
-            child: Container(
-              width: 48.w,
-              height: 40.h,
-              alignment: Alignment.center,
+  Widget _buildAdditionalAvailabilitySection() {
+    return Obx(() {
+      final isDisabled = controller.isAdditionalAvailabilityDisabled;
+      
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Disabled message when "cannot go outside location" is enabled
+          if (isDisabled)
+            Container(
+              padding: EdgeInsets.all(16.w),
+              margin: EdgeInsets.only(top: 8.h),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.r),
-                color: backgroundColor,
-                border: Border.all(color: borderColor),
+                color: AppColors.lightGrey.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.borderLight),
               ),
-              child: Text(
-                day['label']!,
-                style: GoogleFonts.inter(color: textColor, fontSize: 12.sp),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildAdditionalToggle() {
-    return Obx(
-      () => GestureDetector(
-        onTap: controller.toggleAdditionalSection,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'additionalAvailability'.tr,
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Row(
-              children: [
-                Text(
-                  '+ ${'add'.tr}',
-                  style: GoogleFonts.inter(
-                    color: AppColors.primary,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppColors.textSecondary,
+                    size: 20.r,
                   ),
-                ),
-                SizedBox(width: 6.w),
-                Icon(
-                  controller.showAdditionalAvailability.value
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: AppColors.textSecondary,
-                ),
-              ],
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      'additionalAvailabilityDisabledMsg'.tr,
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdditionalSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 12.h),
-        _buildDayChips(
-          selectedDays: controller.additionalAvailability,
-          onTap: controller.toggleAdditionalDay,
-          canSelect: controller.canSelectAdditionalDay,
-          isSecondary: true,
-        ),
-        SizedBox(height: 12.h),
-        Text(
-          'location'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        CustomTextField(
-          controller: controller.additionalLocationController,
-          hintText: 'Dubai',
-          prefixIcon: Icon(
-            Icons.location_on_outlined,
-            color: AppColors.primary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'startTime'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+          
+          // List of additional availability cards
+          ...controller.additionalAvailabilityCards.map((card) {
+            return AvailabilityWidgetCard(
+              key: ValueKey(card.id),
+              card: card,
+              days: _days,
+              canSelectDay: (day) => controller.canSelectAdditionalDay(card, day),
+              onDayTap: (day) => controller.toggleAdditionalDay(card.id, day),
+              showRemoveButton: true,
+              onRemove: () => controller.removeAdditionalAvailabilityCard(card.id),
+              isPrimary: false,
+              isEnabled: !isDisabled,
+            );
+          }),
+          
+          // Add Additional Availability Button (at the bottom)
+          if (!isDisabled)
+            GestureDetector(
+              onTap: controller.addAdditionalAvailabilityCard,
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.3),
+                    style: BorderStyle.solid,
+                  ),
+                  borderRadius: BorderRadius.circular(12.r),
+                  color: AppColors.primary.withOpacity(0.05),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_circle_outline,
+                      color: AppColors.primary,
+                      size: 20.r,
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'addAdditionalAvailability'.tr,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 8.h),
-              _buildTimeInput(controller.startTime),
-            ],
-          ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'endTime'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              _buildTimeInput(controller.endTime),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimeInput(Rxn<TimeOfDay> value) {
-    return Obx(
-      () => GestureDetector(
-        onTap: () => _pickTime(value),
-        child: Container(
-          height: 52.h,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.borderLight),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.access_time, color: AppColors.primary, size: 20.h),
-              SizedBox(width: 10.w),
-              Text(
-                value.value == null ? 'select'.tr : _formatTime(value.value),
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: value.value == null
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickTime(Rxn<TimeOfDay> target) async {
-    final initial = target.value ?? const TimeOfDay(hour: 9, minute: 0);
-    final picked = await showTimePicker(context: context, initialTime: initial);
-    if (picked != null) {
-      target.value = picked;
-    }
-  }
-
-  String _formatTime(TimeOfDay? time) {
-    if (time == null) return 'select'.tr;
-    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
-    final minute = time.minute.toString().padLeft(2, '0');
-    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
-    return '$hour:$minute $period';
+            ),
+        ],
+      );
+    });
   }
 }

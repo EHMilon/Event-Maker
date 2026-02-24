@@ -25,19 +25,19 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
   void initState() {
     super.initState();
     // Initialize default times for available days
-    for (var day in controller.availability) {
+    for (var day in controller.primaryAvailabilityCard.selectedDays) {
       _startTimes[day] = const TimeOfDay(hour: 9, minute: 0);
       _endTimes[day] = const TimeOfDay(hour: 17, minute: 0);
     }
   }
 
   void _toggleDay(String day) {
-    if (controller.availability.contains(day)) {
-      controller.availability.remove(day);
+    if (controller.primaryAvailabilityCard.selectedDays.contains(day)) {
+      controller.primaryAvailabilityCard.selectedDays.remove(day);
       _startTimes.remove(day);
       _endTimes.remove(day);
     } else {
-      controller.availability.add(day);
+      controller.primaryAvailabilityCard.selectedDays.add(day);
       _startTimes[day] = const TimeOfDay(hour: 9, minute: 0);
       _endTimes[day] = const TimeOfDay(hour: 17, minute: 0);
     }
@@ -140,9 +140,10 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
                       {'key': 'Sat', 'label': 'sat'.tr},
                       {'key': 'Sun', 'label': 'sun'.tr},
                     ].map((day) {
-                      final isSelected = controller.availability.contains(
-                        day['key'],
-                      );
+                      final isSelected = controller
+                          .primaryAvailabilityCard
+                          .selectedDays
+                          .contains(day['key']);
                       return FilterChip(
                         selected: isSelected,
                         label: Text(day['label']!),
@@ -164,7 +165,7 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
               SizedBox(height: 32.h),
 
               // Time slots for selected days
-              if (controller.availability.isNotEmpty) ...[
+              if (controller.primaryAvailabilityCard.selectedDays.isNotEmpty) ...[
                 Text(
                   'setTimeSlots'.tr,
                   style: GoogleFonts.inter(
@@ -175,7 +176,7 @@ class _DateAndTimeViewState extends State<DateAndTimeView> {
                 ),
                 SizedBox(height: 16.h),
 
-                ...controller.availability.map((day) => _buildTimeSlotRow(day)),
+                ...controller.primaryAvailabilityCard.selectedDays.map((day) => _buildTimeSlotRow(day)),
               ],
 
               SizedBox(height: 40.h),
