@@ -32,6 +32,9 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Flutter doesn't allow obscureText with multiline fields
+    final int effectiveMaxLines = obscureText ? 1 : (maxLines ?? 1);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -50,12 +53,12 @@ class CustomTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
-          textInputAction: maxLines != null && maxLines! > 1 
+          textInputAction: effectiveMaxLines > 1 
               ? TextInputAction.newline 
               : textInputAction,
           validator: validator,
           onChanged: onChanged,
-          maxLines: maxLines,
+          maxLines: effectiveMaxLines,
           style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
           decoration: InputDecoration(
             hintText: hintText,

@@ -64,6 +64,7 @@ class ServicesView extends GetView<SPServicesController> {
                   offset: const Offset(0, 4),
                 ),
               ],
+              border: Border.all(color: AppColors.lightGrey),
             ),
             child: TextField(
               controller: controller.searchTextController,
@@ -267,6 +268,7 @@ class ServiceProviderServiceTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: AppColors.lightGrey),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.03),

@@ -25,6 +25,7 @@ class ReviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.lightGrey),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),

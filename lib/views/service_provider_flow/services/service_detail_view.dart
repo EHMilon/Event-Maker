@@ -20,12 +20,7 @@ class ServiceDetailView extends StatelessWidget {
   final bool showEditButton;
   final bool isRequest;
 
-  const ServiceDetailView({
-    super.key,
-    required this.service,
-    this.showEditButton = false,
-    this.isRequest = false,
-  });
+  const ServiceDetailView({super.key, required this.service, this.showEditButton = false, this.isRequest = false});
 
   void _showRejectDialog(BuildContext context) {
     showDialog(
@@ -66,10 +61,7 @@ class ServiceDetailView extends StatelessWidget {
   }
 
   void _onEditPressed() {
-    Get.to(
-      () => AddServiceView(service: service, isEdit: true),
-      binding: AddScreensBinding(),
-    );
+    Get.to(() => AddServiceView(service: service, isEdit: true), binding: AddScreensBinding());
   }
 
   void _showAcceptDialog(BuildContext context) {
@@ -131,10 +123,7 @@ class ServiceDetailView extends StatelessWidget {
             margin: EdgeInsets.only(top: 65.h),
             width: 100.w,
             height: 6.h,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(3.r),
-            ),
+            decoration: BoxDecoration(color: color.withOpacity(0.3), borderRadius: BorderRadius.circular(3.r)),
           ),
           // Centered Icon
           Positioned(
@@ -144,13 +133,7 @@ class ServiceDetailView extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: Icon(iconData, color: AppColors.white, size: 32.r),
             ),
@@ -164,9 +147,7 @@ class ServiceDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Local state for package selection
     final RxInt selectedPackageIndex = 0.obs;
-    final isHospitality =
-        service.type == ServiceType.cleaning ||
-        service.type == ServiceType.catering;
+    final isHospitality = service.type == ServiceType.cleaning || service.type == ServiceType.catering;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -195,11 +176,7 @@ class ServiceDetailView extends StatelessWidget {
                   leading: IconButton(
                     icon: CircleAvatar(
                       backgroundColor: AppColors.white,
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: AppColors.black,
-                        size: 20.r,
-                      ),
+                      child: Icon(Icons.arrow_back, color: AppColors.black, size: 20.r),
                     ),
                     onPressed: () => Get.back(),
                   ),
@@ -209,10 +186,7 @@ class ServiceDetailView extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.3),
-                            Colors.transparent,
-                          ],
+                          colors: [Colors.black.withOpacity(0.3), Colors.transparent],
                         ),
                       ),
                     ),
@@ -222,15 +196,9 @@ class ServiceDetailView extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: AppColors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30.r),
-                        topRight: Radius.circular(30.r),
-                      ),
+                      borderRadius: BorderRadius.only(topLeft: Radius.circular(30.r), topRight: Radius.circular(30.r)),
                     ),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 24.w,
-                      vertical: 24.h,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -240,22 +208,13 @@ class ServiceDetailView extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 service.title,
-                                style: GoogleFonts.inter(
-                                  fontSize: 24.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                  height: 1.2,
-                                ),
+                                style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.2),
                               ),
                             ),
                             if (showEditButton)
                               IconButton(
                                 onPressed: _onEditPressed,
-                                icon: Icon(
-                                  Icons.edit_outlined,
-                                  color: AppColors.primary,
-                                  size: 24.r,
-                                ),
+                                icon: Icon(Icons.edit_outlined, color: AppColors.primary, size: 24.r),
                               ),
                           ],
                         ),
@@ -270,23 +229,16 @@ class ServiceDetailView extends StatelessWidget {
                               role: service.provider.role,
                               imageUrl: service.provider.imageUrl,
                               isVerified: service.provider.isVerified,
-                              bannerUrl:
-                                  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
-                              certifications: [
-                                'Professional Chef',
-                                'Pizza Artisan',
-                              ],
+                              bannerUrl: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
+                              certifications: ['Professional Chef', 'Pizza Artisan'],
                               bio:
                                   'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
                               services: [
                                 ServiceModel(
                                   id: '1',
                                   title: 'Rose garden wedding',
-                                  description:
-                                      'Rose garden wedding description',
-                                  images: [
-                                    'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop',
-                                  ],
+                                  description: 'Rose garden wedding description',
+                                  images: ['https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop'],
                                   type: ServiceType.event,
                                   provider: service.provider,
                                   location: 'AD, Louver Museum',
@@ -296,11 +248,8 @@ class ServiceDetailView extends StatelessWidget {
                                 ServiceModel(
                                   id: '2',
                                   title: 'Rose garden wedding',
-                                  description:
-                                      'Rose garden wedding description',
-                                  images: [
-                                    'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop',
-                                  ],
+                                  description: 'Rose garden wedding description',
+                                  images: ['https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop'],
                                   type: ServiceType.event,
                                   provider: service.provider,
                                   location: 'AD, Louver Museum',
@@ -311,28 +260,21 @@ class ServiceDetailView extends StatelessWidget {
                               reviews: [
                                 ReviewModel(
                                   userName: 'John Doe',
-                                  userImageUrl:
-                                      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
+                                  userImageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
                                   date: '10 Feb',
                                   rating: 4,
-                                  reviewText:
-                                      'Thank you, Fresh Food L.L.C! That was a great event.',
+                                  reviewText: 'Thank you, Fresh Food L.L.C! That was a great event.',
                                 ),
                                 ReviewModel(
                                   userName: 'John Doe',
-                                  userImageUrl:
-                                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
+                                  userImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
                                   date: '10 Feb',
                                   rating: 5,
-                                  reviewText:
-                                      'Thank you, Fresh Food L.L.C! That was a great event.',
+                                  reviewText: 'Thank you, Fresh Food L.L.C! That was a great event.',
                                 ),
                               ],
                             );
-                            Get.to(
-                              () => const VendorProfileView(),
-                              arguments: enhancedProvider,
-                            );
+                            Get.to(() => const VendorProfileView(), arguments: enhancedProvider);
                           },
                           child: Row(
                             children: [
@@ -341,12 +283,7 @@ class ServiceDetailView extends StatelessWidget {
                                 height: 45.w,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12.r),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      service.provider.imageUrl,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  image: DecorationImage(image: NetworkImage(service.provider.imageUrl), fit: BoxFit.cover),
                                 ),
                               ),
                               SizedBox(width: 12.w),
@@ -357,47 +294,26 @@ class ServiceDetailView extends StatelessWidget {
                                     children: [
                                       Text(
                                         service.provider.name,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.textPrimary,
-                                        ),
+                                        style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                                       ),
-                                      if (service.provider.isVerified) ...[
-                                        SizedBox(width: 4.w),
-                                        Icon(
-                                          Icons.verified,
-                                          color: Colors.orange,
-                                          size: 16.r,
-                                        ),
-                                      ],
+                                      if (service.provider.isVerified) ...[SizedBox(width: 4.w), Icon(Icons.verified, color: Colors.orange, size: 16.r)],
                                     ],
                                   ),
                                   if (service.rating != null)
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: Colors.amber,
-                                          size: 14.r,
-                                        ),
+                                        Icon(Icons.star, color: Colors.amber, size: 14.r),
                                         SizedBox(width: 4.w),
                                         Text(
                                           '${service.rating} (${'reviewsCount'.trParams({'count': service.reviewCount.toString()})})',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            color: AppColors.textSecondary,
-                                          ),
+                                          style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
                                         ),
                                       ],
                                     )
                                   else
                                     Text(
                                       service.provider.role,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        color: AppColors.textSecondary,
-                                      ),
+                                      style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
                                     ),
                                 ],
                               ),
@@ -409,48 +325,24 @@ class ServiceDetailView extends StatelessWidget {
                         // Description
                         Text(
                           'description'.tr,
-                          style: GoogleFonts.inter(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                         ),
                         SizedBox(height: 10.h),
                         Text(
                           service.description,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                            height: 1.5,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, height: 1.5),
                         ),
                         SizedBox(height: 24.h),
 
                         // Date & Time + Location (If applicable)
-                        if (service.date != null) ...[
-                          _buildInfoRow(
-                            Icons.calendar_today_outlined,
-                            _formatDate(service.date!),
-                          ),
-                          SizedBox(height: 12.h),
-                        ],
-                        _buildInfoRow(
-                          Icons.location_on_outlined,
-                          service.location,
-                        ),
+                        if (service.date != null) ...[_buildInfoRow(Icons.calendar_today_outlined, _formatDate(service.date!)), SizedBox(height: 12.h)],
+                        _buildInfoRow(Icons.location_on_outlined, service.location),
 
-                        if (service.type == ServiceType.event ||
-                            service.type == ServiceType.training) ...[
+                        if (service.type == ServiceType.event || service.type == ServiceType.training) ...[
                           SizedBox(height: 12.h),
                           if (service.type == ServiceType.event)
-                            _buildInfoRow(
-                              Icons.music_note,
-                              'Mia lachetti + Atlanta\'s best',
-                            ), // Static for now based on image
-                          if (service.type == ServiceType.event) ...[
-                            SizedBox(height: 12.h),
-                            _buildInfoRow(Icons.people_outline, '250'),
-                          ],
+                            _buildInfoRow(Icons.music_note, 'Mia lachetti + Atlanta\'s best'), // Static for now based on image
+                          if (service.type == ServiceType.event) ...[SizedBox(height: 12.h), _buildInfoRow(Icons.people_outline, '250')],
                         ],
 
                         SizedBox(height: 24.h),
@@ -458,19 +350,12 @@ class ServiceDetailView extends StatelessWidget {
                         // Location Header and Map
                         Text(
                           'location'.tr,
-                          style: GoogleFonts.inter(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                         ),
                         SizedBox(height: 10.h),
                         Text(
                           service.location, // Or more detailed address
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
                         ),
                         SizedBox(height: 16.h),
                         GestureDetector(
@@ -485,26 +370,18 @@ class ServiceDetailView extends StatelessWidget {
                                 options: MapOptions(
                                   initialCenter: const LatLng(24.4539, 54.3773),
                                   initialZoom: 13.0,
-                                  interactionOptions: const InteractionOptions(
-                                    flags: InteractiveFlag.none,
-                                  ),
+                                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
                                 ),
                                 children: [
                                   TileLayer(
-                                    urlTemplate:
-                                        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                                    userAgentPackageName:
-                                        'com.example.event_maker',
+                                    urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+                                    userAgentPackageName: 'com.example.event_maker',
                                   ),
                                   MarkerLayer(
                                     markers: [
                                       const Marker(
                                         point: LatLng(24.4539, 54.3773),
-                                        child: Icon(
-                                          Icons.location_on,
-                                          color: AppColors.error,
-                                          size: 30,
-                                        ),
+                                        child: Icon(Icons.location_on, color: AppColors.error, size: 30),
                                       ),
                                     ],
                                   ),
@@ -516,125 +393,71 @@ class ServiceDetailView extends StatelessWidget {
                         SizedBox(height: 24.h),
 
                         // Pricing / Packages
-                        if (service.packages != null &&
-                            service.packages!.isNotEmpty) ...[
+                        if (service.packages != null && service.packages!.isNotEmpty) ...[
                           Text(
                             'packagesPricings'.tr,
-                            style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
+                            style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                           ),
                           SizedBox(height: 16.h),
                           Obx(
                             () => Column(
-                              children: List.generate(service.packages!.length, (
-                                index,
-                              ) {
+                              children: List.generate(service.packages!.length, (index) {
                                 final package = service.packages![index];
-                                final isSelected =
-                                    selectedPackageIndex.value == index;
+                                final isSelected = selectedPackageIndex.value == index;
                                 return GestureDetector(
-                                  onTap: () =>
-                                      selectedPackageIndex.value = index,
+                                  onTap: () => selectedPackageIndex.value = index,
                                   child: Container(
                                     margin: EdgeInsets.only(bottom: 16.h),
                                     padding: EdgeInsets.all(20.r),
                                     decoration: BoxDecoration(
                                       color: AppColors.white,
                                       borderRadius: BorderRadius.circular(20.r),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.primary
-                                            : AppColors.lightGrey,
-                                        width: isSelected ? 2 : 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.black.withOpacity(
-                                            0.05,
-                                          ),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
+                                      border: Border.all(color: isSelected ? AppColors.primary : AppColors.lightGrey, width: isSelected ? 2 : 1),
+                                      boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               package.name,
-                                              style: GoogleFonts.inter(
-                                                fontSize: 18.sp,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColors.textPrimary,
-                                              ),
+                                              style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                                             ),
                                             Container(
                                               width: 24.r,
                                               height: 24.r,
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color: isSelected
-                                                    ? AppColors.primary
-                                                    : Colors.transparent,
-                                                border: Border.all(
-                                                  color: isSelected
-                                                      ? AppColors.primary
-                                                      : AppColors.grey,
-                                                  width: 1.5,
-                                                ),
+                                                color: isSelected ? AppColors.primary : Colors.transparent,
+                                                border: Border.all(color: isSelected ? AppColors.primary : AppColors.grey, width: 1.5),
                                               ),
-                                              child: isSelected
-                                                  ? Icon(
-                                                      Icons.check,
-                                                      size: 16.r,
-                                                      color: AppColors.white,
-                                                    )
-                                                  : null,
+                                              child: isSelected ? Icon(Icons.check, size: 16.r, color: AppColors.white) : null,
                                             ),
                                           ],
                                         ),
                                         SizedBox(height: 4.h),
                                         Text(
                                           '${package.price.toInt()} ${service.priceUnit}',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 22.sp,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.primary,
-                                          ),
+                                          style: GoogleFonts.inter(fontSize: 22.sp, fontWeight: FontWeight.w700, color: AppColors.primary),
                                         ),
                                         SizedBox(height: 20.h),
                                         ...package.features.map(
                                           (feature) => Padding(
-                                            padding: EdgeInsets.only(
-                                              bottom: 12.h,
-                                            ),
+                                            padding: EdgeInsets.only(bottom: 12.h),
                                             child: Row(
                                               children: [
                                                 Icon(
                                                   Icons.check,
                                                   size: 18.r,
-                                                  color: const Color(
-                                                    0xFF00C566,
-                                                  ), // Green check
+                                                  color: const Color(0xFF00C566), // Green check
                                                 ),
                                                 SizedBox(width: 12.w),
                                                 Text(
                                                   feature,
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 14.sp,
-                                                    color:
-                                                        AppColors.textSecondary,
-                                                  ),
+                                                  style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
                                                 ),
                                               ],
                                             ),
@@ -652,20 +475,12 @@ class ServiceDetailView extends StatelessWidget {
                             children: [
                               Text(
                                 'pricing'.tr,
-                                style: GoogleFonts.inter(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
+                                style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                               ),
                               Spacer(),
                               Text(
                                 '${service.basePrice?.toInt()} ${service.priceUnit}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
-                                ),
+                                style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w700, color: AppColors.primary),
                               ),
                               if (service.type == ServiceType.event ||
                                   service.type == ServiceType.training ||
@@ -674,10 +489,7 @@ class ServiceDetailView extends StatelessWidget {
                                   service.type == ServiceType.catering)
                                 Text(
                                   '/hr',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12.sp,
-                                    color: AppColors.textSecondary,
-                                  ),
+                                  style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
                                 ),
                             ],
                           ),
@@ -707,21 +519,13 @@ class ServiceDetailView extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.white,
                               padding: EdgeInsets.symmetric(vertical: 16.h),
-                              side: const BorderSide(
-                                color: AppColors.lightGrey,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
+                              side: const BorderSide(color: AppColors.lightGrey),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                               elevation: 0,
                             ),
                             child: Text(
                               'reject'.tr,
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.black,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.black),
                             ),
                           ),
                         ),
@@ -742,24 +546,12 @@ class ServiceDetailView extends StatelessWidget {
                         if (isHospitality) {
                           Get.toNamed(
                             AppRoutes.bookServiceDate,
-                            arguments: {
-                              'service': service,
-                              'package': service.packages != null
-                                  ? service.packages![selectedPackageIndex
-                                        .value]
-                                  : null,
-                            },
+                            arguments: {'service': service, 'package': service.packages != null ? service.packages![selectedPackageIndex.value] : null},
                           );
                         } else {
                           Get.toNamed(
                             AppRoutes.payment,
-                            arguments: {
-                              'service': service,
-                              'package': service.packages != null
-                                  ? service.packages![selectedPackageIndex
-                                        .value]
-                                  : null,
-                            },
+                            arguments: {'service': service, 'package': service.packages != null ? service.packages![selectedPackageIndex.value] : null},
                           );
                         }
                       },
@@ -779,11 +571,7 @@ class ServiceDetailView extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
           ),
         ),
       ],
@@ -791,38 +579,15 @@ class ServiceDetailView extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     final dayName = days[date.weekday - 1];
     final day = date.day;
     final monthName = months[date.month - 1];
     final year = date.year;
 
-    final hour = date.hour > 12
-        ? date.hour - 12
-        : (date.hour == 0 ? 12 : date.hour);
+    final hour = date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
     final minute = date.minute.toString().padLeft(2, '0');
     final period = date.hour >= 12 ? 'PM' : 'AM';
 

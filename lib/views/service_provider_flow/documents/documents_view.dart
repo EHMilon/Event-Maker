@@ -77,11 +77,12 @@ class DocumentsView extends GetView<DocumentsController> {
 
   Widget _buildDocumentCard(Map<String, dynamic> doc) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.lightGrey),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),

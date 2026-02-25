@@ -24,31 +24,17 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           elevation: 0,
           title: Text(
             'myProfile'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
           actions: [
             PopupMenuButton<String>(
-              icon: SvgPicture.asset(
-                'assets/images/setting_fill.svg',
-                width: 24.r,
-                height: 24.r,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.textPrimary,
-                  BlendMode.srcIn,
-                ),
-              ),
+              icon: SvgPicture.asset('assets/images/setting_fill.svg', width: 24.r, height: 24.r, colorFilter: const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
               onSelected: (value) {
                 if (value == 'settings') {
                   Get.toNamed(AppRoutes.profile);
                 }
               },
-              itemBuilder: (context) => [
-                PopupMenuItem(value: 'settings', child: Text('settings'.tr)),
-              ],
+              itemBuilder: (context) => [PopupMenuItem(value: 'settings', child: Text('settings'.tr))],
             ),
           ],
         ),
@@ -72,11 +58,9 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                           child: Obx(
                             () => CircleAvatar(
                               radius: 50.r,
-                              backgroundImage:
-                                  controller.profileImage.value.startsWith('http')
-                                      ? NetworkImage(controller.profileImage.value)
-                                      : AssetImage(controller.profileImage.value)
-                                          as ImageProvider,
+                              backgroundImage: controller.profileImage.value.startsWith('http')
+                                  ? NetworkImage(controller.profileImage.value)
+                                  : AssetImage(controller.profileImage.value) as ImageProvider,
                             ),
                           ),
                         ),
@@ -85,11 +69,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                       Obx(
                         () => Text(
                           controller.userName.value,
-                          style: GoogleFonts.inter(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                         ),
                       ),
                       SizedBox(height: 8.h),
@@ -101,21 +81,14 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                           Obx(
                             () => Text(
                               controller.rating.value.toString(),
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                             ),
                           ),
                           SizedBox(width: 4.w),
                           Obx(
                             () => Text(
                               '(${controller.reviewCount.value})',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
                             ),
                           ),
                         ],
@@ -140,14 +113,8 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                         indicatorSize: TabBarIndicatorSize.label,
                         labelColor: AppColors.primary,
                         unselectedLabelColor: AppColors.textSecondary,
-                        labelStyle: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        unselectedLabelStyle: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
+                        labelStyle: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                        unselectedLabelStyle: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w400),
                         tabs: [
                           Tab(text: 'about'.tr.toUpperCase()),
                           Tab(text: 'reviews'.tr.toUpperCase()),
@@ -159,9 +126,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
               ),
             ];
           },
-          body: TabBarView(
-            children: [_buildAboutTab(), _buildReviewsTab()],
-          ),
+          body: TabBarView(children: [_buildAboutTab(), _buildReviewsTab()]),
         ),
       ),
     );
@@ -179,11 +144,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
               .map(
                 (cert) => Padding(
                   padding: EdgeInsets.only(bottom: 16.h),
-                  child: _buildCertificationItem(
-                    cert['title'] ?? '',
-                    cert['date'] ?? '',
-                    cert['school'] ?? '',
-                  ),
+                  child: _buildCertificationItem(cert['title'] ?? '', cert['date'] ?? '', cert['school'] ?? ''),
                 ),
               )
               .toList(),
@@ -192,11 +153,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           SizedBox(height: 12.h),
           Text(
             controller.bio.value,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-              height: 1.5,
-            ),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, height: 1.5),
           ),
           SizedBox(height: 32.h),
           _buildSectionTitle('myServices'.tr),
@@ -217,7 +174,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     rating: service.rating?.toString() ?? '0',
                     isBookmarked: service.isBookmarked,
                     onTap: () {
-                      Get.to(() => ServiceDetailView(service: service));
+                      Get.to(() => ServiceDetailView(service: service, showEditButton: true));
                     },
                   );
                 },
@@ -249,11 +206,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.inter(
-        fontSize: 18.sp,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
-      ),
+      style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
     );
   }
 
@@ -263,26 +216,16 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
         SizedBox(height: 4.h),
         Text(
           date,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: AppColors.textSecondary,
-          ),
+          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
         ),
         Text(
           school,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: AppColors.textSecondary,
-          ),
+          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
         ),
       ],
     );

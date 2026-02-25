@@ -180,7 +180,7 @@ class SPHomeView extends GetView<SPHomeController> {
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: const Color.fromARGB(38, 24, 35, 190),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
@@ -592,6 +592,7 @@ class SPHomeView extends GetView<SPHomeController> {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.lightGrey),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),

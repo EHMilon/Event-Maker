@@ -72,7 +72,7 @@ class BookmarksView extends GetView<ProfileController> {
                             ),
                           ],
                           border: Border.all(
-                            color: AppColors.lightGrey.withOpacity(0.5),
+                            color: AppColors.lightGrey,
                           ),
                         ),
                         child: Row(
