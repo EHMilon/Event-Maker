@@ -1,4 +1,4 @@
-import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
+import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

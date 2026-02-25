@@ -75,7 +75,11 @@ class _AddServiceViewState extends State<AddServiceView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UploadWidget(onTap: () {}),
+                UploadWidget(
+                  imagePath: controller.selectedImagePath.value,
+                  onImageSelected: (path) =>
+                      controller.selectedImagePath.value = path,
+                ),
                 SizedBox(height: 16.h),
                 Obx(
                   () => DropdownButtonFormField<ServiceCategory>(
@@ -131,21 +135,22 @@ class _AddServiceViewState extends State<AddServiceView> {
                   labelText: 'description'.tr,
                   hintText: 'descriptionHint'.tr,
                   keyboardType: TextInputType.multiline,
-                ),
-                SizedBox(height: 16.h),
-                CustomTextField(
-                  controller: controller.locationController,
-                  labelText: 'selectLocation'.tr,
-                  hintText: 'selectAddressHint'.tr,
-                  prefixIcon: Icon(
-                    Icons.location_on_outlined,
-                    color: AppColors.primary,
-                    size: 20.r,
-                  ),
+                  maxLines: 5,
                 ),
 
+                // SizedBox(height: 16.h),
+                // CustomTextField(
+                //   controller: controller.locationController,
+                //   labelText: 'selectLocation'.tr,
+                //   hintText: 'selectAddressHint'.tr,
+                //   prefixIcon: Icon(
+                //     Icons.location_on_outlined,
+                //     color: AppColors.primary,
+                //     size: 20.r,
+                //   ),
+                // ),
                 SizedBox(height: 24.h),
-                
+
                 // Primary Availability Card
                 AvailabilityWidgetCard(
                   card: controller.primaryAvailabilityCard,
@@ -154,11 +159,12 @@ class _AddServiceViewState extends State<AddServiceView> {
                   onDayTap: controller.togglePrimaryDay,
                   isPrimary: true,
                   isEnabled: true,
+                  showCannotGoOutside: true,
                 ),
 
                 // Additional Availability Section
                 _buildAdditionalAvailabilitySection(),
-                
+
                 SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -185,6 +191,33 @@ class _AddServiceViewState extends State<AddServiceView> {
                     ),
                   ],
                 ),
+
+                // Display added packages
+                Obx(() {
+                  if (controller.packages.isEmpty) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(vertical: 24.h),
+                      child: Center(
+                        child: Text(
+                          'noPackagesAdded'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
+                    children: controller.packages.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final package = entry.value;
+                      return _buildPackageSummaryCard(index, package);
+                    }).toList(),
+                  );
+                }),
+
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
                   text: widget.isEdit ? 'updateService'.tr : 'addService'.tr,
@@ -223,7 +256,7 @@ class _AddServiceViewState extends State<AddServiceView> {
   Widget _buildAdditionalAvailabilitySection() {
     return Obx(() {
       final isDisabled = controller.isAdditionalAvailabilityDisabled;
-      
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -257,22 +290,25 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ],
               ),
             ),
-          
+
           // List of additional availability cards
           ...controller.additionalAvailabilityCards.map((card) {
             return AvailabilityWidgetCard(
               key: ValueKey(card.id),
               card: card,
               days: _days,
-              canSelectDay: (day) => controller.canSelectAdditionalDay(card, day),
+              canSelectDay: (day) =>
+                  controller.canSelectAdditionalDay(card, day),
               onDayTap: (day) => controller.toggleAdditionalDay(card.id, day),
               showRemoveButton: true,
-              onRemove: () => controller.removeAdditionalAvailabilityCard(card.id),
+              onRemove: () =>
+                  controller.removeAdditionalAvailabilityCard(card.id),
               isPrimary: false,
               isEnabled: !isDisabled,
+              showCannotGoOutside: false,
             );
           }),
-          
+
           // Add Additional Availability Button (at the bottom)
           if (!isDisabled)
             GestureDetector(
@@ -311,5 +347,122 @@ class _AddServiceViewState extends State<AddServiceView> {
         ],
       );
     });
+  }
+
+  Widget _buildPackageSummaryCard(int index, PackageFormData package) {
+    return GestureDetector(
+      onTap: () => _openPackages(context),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: AppColors.borderLight),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    package.nameController.text.isEmpty
+                        ? 'packageLabel'.trParams({'index': '${index + 1}'})
+                        : package.nameController.text,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      package.priceController.text.isEmpty
+                          ? '0.00'
+                          : '${package.priceController.text} AED',
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () => controller.removePackage(index),
+                      child: Container(
+                        padding: EdgeInsets.all(4.r),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close,
+                          size: 16.r,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (package.features.isNotEmpty &&
+                package.features.any((f) => f.isNotEmpty)) ...[
+              SizedBox(height: 8.h),
+              Column(
+                spacing: 8.w,
+                // runSpacing: 4.h,
+                children: package.features
+                    .where((f) => f.isNotEmpty)
+                    .take(3)
+                    .map(
+                      (feature) => Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check,
+                              size: 12.r,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              feature,
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

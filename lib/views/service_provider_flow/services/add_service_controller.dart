@@ -14,6 +14,7 @@ class AddServiceController extends GetxController {
   final descriptionController = TextEditingController();
   final locationController = TextEditingController();
   var outsideLocation = false.obs;
+  var selectedImagePath = Rxn<String>();
 
   // Primary availability card
   late AvailabilityCardModel primaryAvailabilityCard;
@@ -39,6 +40,9 @@ class AddServiceController extends GetxController {
     titleController.text = service.title;
     descriptionController.text = service.description;
     locationController.text = service.location;
+    if (service.images.isNotEmpty) {
+      selectedImagePath.value = service.images.first;
+    }
     selectedServiceType.value = service.type;
     selectedCategory.value = _categoryFromServiceType(service.type);
     if (service.packages != null) {
@@ -208,7 +212,9 @@ class AddServiceController extends GetxController {
       title: titleController.text,
       description: descriptionController.text,
       location: locationController.text,
-      images: existingService?.images ?? [],
+      images: selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty
+          ? [selectedImagePath.value!]
+          : existingService?.images ?? [],
       type: selectedServiceType.value,
       provider:
           existingService?.provider ??

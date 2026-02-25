@@ -40,6 +40,7 @@ class AvailabilityWidgetCard extends StatefulWidget {
   final bool showRemoveButton;
   final bool isPrimary;
   final bool isEnabled;
+  final bool showCannotGoOutside;
 
   const AvailabilityWidgetCard({
     super.key,
@@ -51,6 +52,7 @@ class AvailabilityWidgetCard extends StatefulWidget {
     this.showRemoveButton = false,
     this.isPrimary = false,
     this.isEnabled = true,
+    this.showCannotGoOutside = true,
   });
 
   @override
@@ -146,31 +148,32 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
             ),
             SizedBox(height: 16.h),
 
-            // Cannot go outside location toggle
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'cannotGoOutsideLocation'.tr,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
+            // Cannot go outside location toggle (only for primary card)
+            if (widget.showCannotGoOutside)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'cannotGoOutsideLocation'.tr,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
-                ),
-                Obx(
-                  () => Switch(
-                    value: widget.card.cannotGoOutside.value,
-                    onChanged: widget.isEnabled
-                        ? (v) => widget.card.cannotGoOutside.value = v
-                        : null,
-                    activeThumbColor: AppColors.primary,
+                  Obx(
+                    () => Switch(
+                      value: widget.card.cannotGoOutside.value,
+                      onChanged: widget.isEnabled
+                          ? (v) => widget.card.cannotGoOutside.value = v
+                          : null,
+                      activeThumbColor: AppColors.primary,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
       ),
