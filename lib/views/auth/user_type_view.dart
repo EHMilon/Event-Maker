@@ -86,7 +86,7 @@ class UserTypeView extends GetView<AuthController> {
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Image.asset(imagePath, height: 150),
+            child: Image.asset(imagePath, height: 100.h),
           ),
         );
       }),

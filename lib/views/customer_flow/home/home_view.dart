@@ -252,10 +252,16 @@ class _HomeViewState extends State<HomeView> {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: subCategories.map((category) {
+          children: subCategories.asMap().entries.map((entry) {
+            final index = entry.key;
+            final category = entry.value;
             return Padding(
               padding: EdgeInsets.only(right: 8.w),
-              child: CategoryItem(label: category, onTap: () {}),
+              child: CategoryItem(
+                label: category,
+                onTap: () {},
+                index: index,
+              ),
             );
           }).toList(),
         ),

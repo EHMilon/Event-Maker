@@ -99,12 +99,15 @@ class CategoriesView extends GetView<HomeController> {
               return SingleChildScrollView(
                 scrollDirection: Axis.vertical,
                 child: Wrap(
-                  children: subCategories.map((category) {
+                  children: subCategories.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final category = entry.value;
                     return Padding(
                       padding: EdgeInsets.all(6.w),
                       child: CategoryItem(
                         label: category,
                         onTap: () {},
+                        index: index,
                       ),
                     );
                   }).toList(),
