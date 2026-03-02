@@ -93,8 +93,14 @@ class AddServiceController extends GetxController {
   }
 
   /// Check if additional availability is disabled (when primary card has "cannot go outside" enabled)
+  /// Additional availability is enabled when "can go outside" is selected
   bool get isAdditionalAvailabilityDisabled {
     return primaryAvailabilityCard.cannotGoOutside.value;
+  }
+
+  /// Check if overlapping days are allowed (when primary card has "can go outside" enabled)
+  bool get isOverlappingDaysAllowed {
+    return primaryAvailabilityCard.canGoOutside.value;
   }
 
   /// Toggle day selection for primary availability
@@ -135,11 +141,18 @@ class AddServiceController extends GetxController {
 
   /// Check if a day can be selected for additional availability
   /// Days already selected in primary or other additional cards are blocked
+  /// unless the primary card has "can go outside" enabled
   bool canSelectAdditionalDay(AvailabilityCardModel card, String day) {
     // Can always deselect if already selected in this card
     if (card.selectedDays.contains(day)) {
       return true;
     }
+
+    // If primary card has "can go outside" enabled, allow overlapping days
+    if (primaryAvailabilityCard.canGoOutside.value) {
+      return true;
+    }
+
     // Cannot select days that are already in primary availability
     if (primaryAvailabilityCard.selectedDays.contains(day)) {
       return false;
@@ -155,11 +168,18 @@ class AddServiceController extends GetxController {
 
   /// Check if a day can be selected for primary availability
   /// Days already selected in additional cards are blocked
+  /// unless "can go outside" is enabled
   bool canSelectPrimaryDay(String day) {
     // Can always deselect if already selected in primary
     if (primaryAvailabilityCard.selectedDays.contains(day)) {
       return true;
     }
+
+    // If "can go outside" is enabled, allow overlapping days
+    if (primaryAvailabilityCard.canGoOutside.value) {
+      return primaryAvailabilityCard.selectedDays.length < primaryDayLimit;
+    }
+
     // Cannot select if day is in any additional card
     for (var card in additionalAvailabilityCards) {
       if (card.selectedDays.contains(day)) {

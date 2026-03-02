@@ -12,6 +12,7 @@ class AvailabilityCardModel {
   final Rxn<TimeOfDay> startTime;
   final Rxn<TimeOfDay> endTime;
   final RxBool cannotGoOutside;
+  final RxBool canGoOutside;
 
   AvailabilityCardModel({
     required this.id,
@@ -20,11 +21,13 @@ class AvailabilityCardModel {
     TimeOfDay? startTimeVal,
     TimeOfDay? endTimeVal,
     bool cannotGoOutsideVal = false,
+    bool canGoOutsideVal = false,
   }) : selectedDays = RxList<String>(days ?? []),
        locationController = TextEditingController(text: location),
        startTime = Rxn<TimeOfDay>(startTimeVal),
        endTime = Rxn<TimeOfDay>(endTimeVal),
-       cannotGoOutside = RxBool(cannotGoOutsideVal);
+       cannotGoOutside = RxBool(cannotGoOutsideVal),
+       canGoOutside = RxBool(canGoOutsideVal);
 
   void dispose() {
     locationController.dispose();
@@ -150,30 +153,74 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
 
             // Cannot go outside location toggle (only for primary card)
             if (widget.showCannotGoOutside)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
                 children: [
-                  Expanded(
-                    child: Text(
-                      'cannotGoOutsideLocation'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                  // Can't go outside option
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'cannotGoOutsideLocation'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                       ),
-                    ),
+                      Obx(
+                        () => Switch(
+                          value: widget.card.cannotGoOutside.value,
+                          onChanged: widget.isEnabled
+                              ? (v) {
+                                  widget.card.cannotGoOutside.value = v;
+                                  // If enabling cannot go outside, disable can go outside
+                                  if (v) {
+                                    widget.card.canGoOutside.value = false;
+                                  }
+                                }
+                              : null,
+                          activeThumbColor: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                  Obx(
-                    () => Switch(
-                      value: widget.card.cannotGoOutside.value,
-                      onChanged: widget.isEnabled
-                          ? (v) => widget.card.cannotGoOutside.value = v
-                          : null,
-                      activeThumbColor: AppColors.primary,
-                    ),
+                  SizedBox(height: 8.h),
+                  // Can go outside option
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'canGoOutsideLocation'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Obx(
+                        () => Switch(
+                          value: widget.card.canGoOutside.value,
+                          onChanged: widget.isEnabled
+                              ? (v) {
+                                  widget.card.canGoOutside.value = v;
+                                  // If enabling can go outside, disable cannot go outside
+                                  if (v) {
+                                    widget.card.cannotGoOutside.value = false;
+                                  }
+                                }
+                              : null,
+                          activeThumbColor: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+              
           ],
         ),
       ),

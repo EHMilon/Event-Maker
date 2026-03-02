@@ -29,28 +29,20 @@ class ServicesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = useFullWidth ? double.infinity : 180.w;
-    final cardMargin = useFullWidth 
-        ? EdgeInsets.only(bottom: 16.h) 
-        : EdgeInsets.only(right: 16.w);
-    final imageHeight = useFullWidth ? 180.h : 120.h;
-    
+    final cardWidth = useFullWidth ? double.infinity : 200.w;
+    final cardMargin = useFullWidth ? EdgeInsets.only(bottom: 16.h) : EdgeInsets.only(right: 16.w);
+    final imageHeight = useFullWidth ? 200.h : 120.h;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: cardWidth,
-        margin: cardMargin,
+        // margin: cardMargin,
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.lightGrey),
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,9 +51,7 @@ class ServicesCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(16.r),
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
                   child: imagePath.startsWith('http')
                       ? Image.network(
                           imagePath,
@@ -69,11 +59,7 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                height: imageHeight,
-                                color: AppColors.lightGrey,
-                                child: const Icon(Icons.broken_image),
-                              ),
+                              Container(height: imageHeight, color: AppColors.lightGrey, child: const Icon(Icons.broken_image)),
                         )
                       : Image.asset(
                           imagePath,
@@ -81,11 +67,7 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                height: imageHeight,
-                                color: AppColors.lightGrey,
-                                child: const Icon(Icons.broken_image),
-                              ),
+                              Container(height: imageHeight, color: AppColors.lightGrey, child: const Icon(Icons.broken_image)),
                         ),
                 ),
                 Positioned(
@@ -95,15 +77,8 @@ class ServicesCard extends StatelessWidget {
                     onTap: onBookmarkTap,
                     child: Container(
                       padding: EdgeInsets.all(6.r),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Icon(
-                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                        size: 18.r,
-                        color: Colors.white,
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(8.r)),
+                      child: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border, size: 18.r, color: Colors.white),
                     ),
                   ),
                 ),
@@ -119,30 +94,19 @@ class ServicesCard extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                    ),
+                    style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.black),
                   ),
                   SizedBox(height: 4.h),
                   Row(
                     children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 12.r,
-                        color: AppColors.grey,
-                      ),
+                      Icon(Icons.location_on, size: 12.r, color: AppColors.grey),
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
                           location,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: AppColors.grey,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.grey),
                         ),
                       ),
                     ],
@@ -156,18 +120,11 @@ class ServicesCard extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: price,
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.black,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.black),
                             ),
                             TextSpan(
                               text: '/hr',
-                              style: GoogleFonts.inter(
-                                fontSize: 10.sp,
-                                color: AppColors.grey,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 10.sp, color: AppColors.grey),
                             ),
                           ],
                         ),
@@ -178,11 +135,7 @@ class ServicesCard extends StatelessWidget {
                           SizedBox(width: 4.w),
                           Text(
                             rating,
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.grey,
-                            ),
+                            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w500, color: AppColors.grey),
                           ),
                         ],
                       ),
