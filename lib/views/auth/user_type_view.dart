@@ -86,7 +86,20 @@ class UserTypeView extends GetView<AuthController> {
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Image.asset(imagePath, height: 100.h),
+            child: Column(
+              children: [
+                Image.asset(imagePath, height: 100.h),
+                SizedBox(height: 12.h),
+                Text(
+                  type == 'customer' ? 'asCustomer'.tr : 'asServiceProvider'.tr,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }),
