@@ -60,11 +60,7 @@ class _AddServiceViewState extends State<AddServiceView> {
         ),
         title: Text(
           widget.isEdit ? 'editService'.tr : 'addNewService'.tr,
-          style: GoogleFonts.inter(
-            color: AppColors.textPrimary,
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w600),
         ),
       ),
       body: Obx(
@@ -75,11 +71,7 @@ class _AddServiceViewState extends State<AddServiceView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UploadWidget(
-                  imagePath: controller.selectedImagePath.value,
-                  onImageSelected: (path) =>
-                      controller.selectedImagePath.value = path,
-                ),
+                UploadWidget(imagePath: controller.selectedImagePath.value, onImageSelected: (path) => controller.selectedImagePath.value = path),
                 SizedBox(height: 16.h),
                 Obx(
                   () => DropdownButtonFormField<ServiceCategory>(
@@ -99,36 +91,57 @@ class _AddServiceViewState extends State<AddServiceView> {
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: BorderSide(color: AppColors.primary),
                       ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 4.h,
-                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
                     ),
                     items: ServiceCategory.values.map((category) {
                       return DropdownMenuItem(
                         value: category,
                         child: Text(
                           _categoryLabel(category),
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textPrimary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
                         ),
                       );
                     }).toList(),
                     dropdownColor: Colors.white,
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.textSecondary,
+                    icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Obx(
+                  () => DropdownButtonFormField<ProviderRole>(
+                    value: controller.selectedRole.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.selectedRole.value = value;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'whatIsYourRole'.tr,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.borderLight),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
                     ),
+                    items: ProviderRole.values.map((role) {
+                      return DropdownMenuItem(
+                        value: role,
+                        child: Text(
+                          _roleLabel(role),
+                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
+                        ),
+                      );
+                    }).toList(),
+                    dropdownColor: Colors.white,
+                    icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
                   ),
                 ),
                 SizedBox(height: 24.h),
-                CustomTextField(
-                  controller: controller.titleController,
-                  labelText: 'serviceTitle'.tr,
-                  hintText: 'serviceTitleHint'.tr,
-                ),
+                CustomTextField(controller: controller.titleController, labelText: 'serviceTitle'.tr, hintText: 'serviceTitleHint'.tr),
                 SizedBox(height: 16.h),
                 CustomTextField(
                   controller: controller.descriptionController,
@@ -171,23 +184,12 @@ class _AddServiceViewState extends State<AddServiceView> {
                   children: [
                     Text(
                       'packagesPricings'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     ),
                     TextButton.icon(
                       onPressed: () => _openPackages(context),
-                      icon: Icon(
-                        Icons.add,
-                        size: 18.sp,
-                        color: AppColors.primary,
-                      ),
-                      label: Text(
-                        'addPackage'.tr,
-                        style: TextStyle(color: AppColors.primary),
-                      ),
+                      icon: Icon(Icons.add, size: 18.sp, color: AppColors.primary),
+                      label: Text('addPackage'.tr, style: TextStyle(color: AppColors.primary)),
                     ),
                   ],
                 ),
@@ -200,10 +202,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                       child: Center(
                         child: Text(
                           'noPackagesAdded'.tr,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
                         ),
                       ),
                     );
@@ -223,10 +222,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                   text: widget.isEdit ? 'updateService'.tr : 'addService'.tr,
                   onPressed: () async {
                     // TODO: Implement field validation before saving
-                    await controller.saveService(
-                      isEdit: widget.isEdit,
-                      existingService: widget.service,
-                    );
+                    await controller.saveService(isEdit: widget.isEdit, existingService: widget.service);
                   },
                 ),
                 SizedBox(height: 20.h),
@@ -246,6 +242,17 @@ class _AddServiceViewState extends State<AddServiceView> {
         return 'event'.tr;
       case ServiceCategory.trainer:
         return 'professionalTrainer'.tr;
+    }
+  }
+
+  String _roleLabel(ProviderRole role) {
+    switch (role) {
+      case ProviderRole.freelancer:
+        return 'freelancer'.tr;
+      case ProviderRole.business:
+        return 'business'.tr;
+      case ProviderRole.productiveFamily:
+        return 'productiveFamily'.tr;
     }
   }
 
@@ -272,19 +279,12 @@ class _AddServiceViewState extends State<AddServiceView> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: AppColors.textSecondary,
-                    size: 20.r,
-                  ),
+                  Icon(Icons.info_outline, color: AppColors.textSecondary, size: 20.r),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       'additionalAvailabilityDisabledMsg'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 13.sp,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.textSecondary),
                     ),
                   ),
                 ],
@@ -297,12 +297,10 @@ class _AddServiceViewState extends State<AddServiceView> {
               key: ValueKey(card.id),
               card: card,
               days: _days,
-              canSelectDay: (day) =>
-                  controller.canSelectAdditionalDay(card, day),
+              canSelectDay: (day) => controller.canSelectAdditionalDay(card, day),
               onDayTap: (day) => controller.toggleAdditionalDay(card.id, day),
               showRemoveButton: true,
-              onRemove: () =>
-                  controller.removeAdditionalAvailabilityCard(card.id),
+              onRemove: () => controller.removeAdditionalAvailabilityCard(card.id),
               isPrimary: false,
               isEnabled: !isDisabled,
               showCannotGoOutside: false,
@@ -316,29 +314,18 @@ class _AddServiceViewState extends State<AddServiceView> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
-                    style: BorderStyle.solid,
-                  ),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3), style: BorderStyle.solid),
                   borderRadius: BorderRadius.circular(12.r),
                   color: AppColors.primary.withOpacity(0.05),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.add_circle_outline,
-                      color: AppColors.primary,
-                      size: 20.r,
-                    ),
+                    Icon(Icons.add_circle_outline, color: AppColors.primary, size: 20.r),
                     SizedBox(width: 8.w),
                     Text(
                       'addAdditionalAvailability'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.primary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.primary),
                     ),
                   ],
                 ),
@@ -359,13 +346,7 @@ class _AddServiceViewState extends State<AddServiceView> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: AppColors.borderLight),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,51 +356,31 @@ class _AddServiceViewState extends State<AddServiceView> {
               children: [
                 Expanded(
                   child: Text(
-                    package.nameController.text.isEmpty
-                        ? 'packageLabel'.trParams({'index': '${index + 1}'})
-                        : package.nameController.text,
-                    style: GoogleFonts.inter(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
+                    package.nameController.text.isEmpty ? 'packageLabel'.trParams({'index': '${index + 1}'}) : package.nameController.text,
+                    style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   ),
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      package.priceController.text.isEmpty
-                          ? '0.00'
-                          : '${package.priceController.text} AED',
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+                      package.priceController.text.isEmpty ? '0.00' : '${package.priceController.text} AED',
+                      style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
                       onTap: () => controller.removePackage(index),
                       child: Container(
                         padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close,
-                          size: 16.r,
-                          color: AppColors.error,
-                        ),
+                        decoration: BoxDecoration(color: AppColors.error.withOpacity(0.1), shape: BoxShape.circle),
+                        child: Icon(Icons.close, size: 16.r, color: AppColors.error),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            if (package.features.isNotEmpty &&
-                package.features.any((f) => f.isNotEmpty)) ...[
+            if (package.features.isNotEmpty && package.features.any((f) => f.isNotEmpty)) ...[
               SizedBox(height: 8.h),
               Column(
                 spacing: 8.w,
@@ -429,29 +390,16 @@ class _AddServiceViewState extends State<AddServiceView> {
                     .take(3)
                     .map(
                       (feature) => Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4.r)),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              Icons.check,
-                              size: 12.r,
-                              color: AppColors.primary,
-                            ),
+                            Icon(Icons.check, size: 12.r, color: AppColors.primary),
                             SizedBox(width: 4.w),
                             Text(
                               feature,
-                              style: GoogleFonts.inter(
-                                fontSize: 11.sp,
-                                color: AppColors.primary,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 11.sp, color: AppColors.primary),
                             ),
                           ],
                         ),

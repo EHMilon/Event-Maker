@@ -333,6 +333,16 @@ class ServiceDetailView extends StatelessWidget {
                           style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, height: 1.5),
                         ),
                         SizedBox(height: 24.h),
+                        Text(
+                          'serviceType'.tr,
+                          style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                        ),
+                        SizedBox(height: 10.h),
+                        Text(
+                          '${service.type.name.tr} (${service.provider.role.tr})',
+                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, height: 1.5),
+                        ),
+                        SizedBox(height: 24.h),
 
                         // Date & Time + Location (If applicable)
                         if (service.date != null) ...[_buildInfoRow(Icons.calendar_today_outlined, _formatDate(service.date!)), SizedBox(height: 12.h)],

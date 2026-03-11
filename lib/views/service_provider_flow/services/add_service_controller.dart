@@ -6,6 +6,8 @@ import '../../../shared/widgets/availability_widget_card.dart';
 
 enum ServiceCategory { hospitality, event, trainer }
 
+enum ProviderRole { freelancer, business, productiveFamily }
+
 class AddServiceController extends GetxController {
   static const int primaryDayLimit = 7;
 
@@ -24,13 +26,13 @@ class AddServiceController extends GetxController {
 
   final selectedCategory = ServiceCategory.hospitality.obs;
   final selectedServiceType = ServiceType.catering.obs;
+  final selectedRole = ProviderRole.freelancer.obs;
 
   // Step 2: Packages
   var packages = <PackageFormData>[].obs;
 
   // Step 3: Timings
-  var timings =
-      <String, Map<String, dynamic>>{}.obs; // Day: {start: '', end: ''}
+  var timings = <String, Map<String, dynamic>>{}.obs; // Day: {start: '', end: ''}
 
   var currentStep = 0.obs;
   var isLoading = false.obs;
@@ -56,6 +58,10 @@ class AddServiceController extends GetxController {
         packages.add(sp);
       }
     }
+    // Set role if available (mocking logic here)
+    if (service.provider.role.isNotEmpty) {
+      selectedRole.value = _roleFromString(service.provider.role);
+    }
   }
 
   @override
@@ -71,21 +77,18 @@ class AddServiceController extends GetxController {
     // Ensures category selection is initialized for new entries
     selectedCategory.value = ServiceCategory.hospitality;
     selectedServiceType.value = ServiceType.catering;
+    selectedRole.value = ProviderRole.freelancer;
   }
 
   /// Add a new additional availability card
   void addAdditionalAvailabilityCard() {
-    final card = AvailabilityCardModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-    );
+    final card = AvailabilityCardModel(id: DateTime.now().millisecondsSinceEpoch.toString());
     additionalAvailabilityCards.add(card);
   }
 
   /// Remove an additional availability card
   void removeAdditionalAvailabilityCard(String id) {
-    final index = additionalAvailabilityCards.indexWhere(
-      (card) => card.id == id,
-    );
+    final index = additionalAvailabilityCards.indexWhere((card) => card.id == id);
     if (index != -1) {
       additionalAvailabilityCards[index].dispose();
       additionalAvailabilityCards.removeAt(index);
@@ -122,9 +125,7 @@ class AddServiceController extends GetxController {
 
   /// Toggle day selection for additional availability card
   void toggleAdditionalDay(String cardId, String day) {
-    final cardIndex = additionalAvailabilityCards.indexWhere(
-      (card) => card.id == cardId,
-    );
+    final cardIndex = additionalAvailabilityCards.indexWhere((card) => card.id == cardId);
     if (cardIndex == -1) return;
 
     final card = additionalAvailabilityCards[cardIndex];
@@ -208,10 +209,7 @@ class AddServiceController extends GetxController {
     selectedServiceType.value = _defaultTypeForCategory(category);
   }
 
-  Future<bool> saveService({
-    bool isEdit = false,
-    ServiceModel? existingService,
-  }) async {
+  Future<bool> saveService({bool isEdit = false, ServiceModel? existingService}) async {
     isLoading.value = true;
     // Network Rules: 2s delay for shimmer/loading state visibility
     await Future.delayed(const Duration(seconds: 2));
@@ -226,23 +224,15 @@ class AddServiceController extends GetxController {
 
     // Create the service model from form data (Placeholder until Backend)
     final newService = ServiceModel(
-      id:
-          existingService?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+      id: existingService?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       title: titleController.text,
       description: descriptionController.text,
       location: locationController.text,
-      images: selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty
-          ? [selectedImagePath.value!]
-          : existingService?.images ?? [],
+      images: selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty ? [selectedImagePath.value!] : existingService?.images ?? [],
       type: selectedServiceType.value,
       provider:
           existingService?.provider ??
-          ServiceProvider(
-            name: 'Current User',
-            role: 'Service Provider',
-            imageUrl: 'https://i.pravatar.cc/150?u=user',
-          ),
+          ServiceProvider(name: 'Current User', role: _roleLabel(selectedRole.value), imageUrl: 'https://i.pravatar.cc/150?u=user'),
       basePrice: 0,
       priceUnit: 'AED',
       packages: packages
@@ -266,10 +256,7 @@ class AddServiceController extends GetxController {
 
     isLoading.value = false;
     Get.back(result: true);
-    Get.snackbar(
-      'Success',
-      isEdit ? 'Service updated successfully' : 'Service added successfully',
-    );
+    Get.snackbar('Success', isEdit ? 'Service updated successfully' : 'Service added successfully');
     return true;
   }
 
@@ -304,6 +291,30 @@ class AddServiceController extends GetxController {
         return ServiceType.training;
       case ServiceCategory.hospitality:
         return ServiceType.catering;
+    }
+  }
+
+  String _roleLabel(ProviderRole role) {
+    switch (role) {
+      case ProviderRole.freelancer:
+        return 'freelancer';
+      case ProviderRole.business:
+        return 'business';
+      case ProviderRole.productiveFamily:
+        return 'productiveFamily';
+    }
+  }
+
+  ProviderRole _roleFromString(String role) {
+    switch (role.toLowerCase()) {
+      case 'freelancer':
+        return ProviderRole.freelancer;
+      case 'business':
+        return ProviderRole.business;
+      case 'productive family':
+        return ProviderRole.productiveFamily;
+      default:
+        return ProviderRole.freelancer;
     }
   }
 }

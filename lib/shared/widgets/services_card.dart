@@ -37,7 +37,7 @@ class ServicesCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: cardWidth,
-        // margin: cardMargin,
+        margin: cardMargin,
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.lightGrey),
           color: AppColors.white,

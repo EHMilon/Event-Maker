@@ -52,7 +52,7 @@ class SPServicesController extends GetxController {
           type: ServiceType.event,
           provider: ServiceProvider(
             name: 'Sarah Smith',
-            role: 'Event Expert',
+            role: 'Expert',
             imageUrl: 'https://i.pravatar.cc/150?u=sarah',
           ),
           location: 'Business Bay, Dubai',
