@@ -58,10 +58,17 @@ class SPHomeView extends GetView<SPHomeController> {
           SizedBox(height: 16.h),
           Text(
             'somethingWentWrong'.tr,
-            style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           SizedBox(height: 24.h),
-          ElevatedButton(onPressed: () => controller.retry(), child: Text('retry'.tr)),
+          ElevatedButton(
+            onPressed: () => controller.retry(),
+            child: Text('retry'.tr),
+          ),
         ],
       ),
     );
@@ -76,11 +83,19 @@ class SPHomeView extends GetView<SPHomeController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.wb_sunny_outlined, size: 16, color: Colors.orange),
+                const Icon(
+                  Icons.wb_sunny_outlined,
+                  size: 16,
+                  color: Colors.orange,
+                ),
                 SizedBox(width: 8.w),
                 Text(
                   'goodMorning'.tr,
-                  style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ],
             ),
@@ -89,13 +104,21 @@ class SPHomeView extends GetView<SPHomeController> {
               children: [
                 Text(
                   'Fresh Food L.L.C',
-                  style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  style: GoogleFonts.inter(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 SizedBox(width: 8.w),
                 Container(
                   padding: const EdgeInsets.all(2),
 
-                  child: Image.asset('assets/icons/completed.png', height: 18.h, width: 18.w),
+                  child: Image.asset(
+                    'assets/icons/completed.png',
+                    height: 18.h,
+                    width: 18.w,
+                  ),
                 ),
               ],
             ),
@@ -107,18 +130,31 @@ class SPHomeView extends GetView<SPHomeController> {
           child: Container(
             height: 44.h,
             width: 44.h,
-            decoration: BoxDecoration(color: const Color(0xFFEEEFFF), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEFFF),
+              shape: BoxShape.circle,
+            ),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SvgPicture.asset('assets/icons/notification.svg', height: 20.h, colorFilter: const ColorFilter.mode(AppColors.primary, BlendMode.srcIn)),
+                SvgPicture.asset(
+                  'assets/icons/notification.svg',
+                  height: 20.h,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primary,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 Positioned(
                   top: 12.h,
                   right: 12.w,
                   child: Container(
                     height: 4.h,
                     width: 4.h,
-                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
               ],
@@ -132,7 +168,11 @@ class SPHomeView extends GetView<SPHomeController> {
   Widget _buildPromoImage() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.r),
-      child: Image.asset('assets/images/promo.png', width: double.infinity, fit: BoxFit.fill),
+      child: Image.asset(
+        'assets/images/promo.png',
+        width: double.infinity,
+        fit: BoxFit.fill,
+      ),
     );
   }
 
@@ -158,12 +198,20 @@ class SPHomeView extends GetView<SPHomeController> {
         children: [
           Text(
             'analytics'.tr,
-            style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
           ),
           SizedBox(height: 4.h),
           Text(
             'basedOnLast30Days'.tr,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w400,
+            ),
           ),
           SizedBox(height: 24.h),
           LayoutBuilder(
@@ -248,15 +296,22 @@ class SPHomeView extends GetView<SPHomeController> {
             children: [
               Container(
                 padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.7), shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                ),
                 child: SvgPicture.asset(icon, height: 16.h, width: 16.w),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: RichText(
                   text: TextSpan(
                     text: label,
-                    style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -264,27 +319,46 @@ class SPHomeView extends GetView<SPHomeController> {
               ),
             ],
           ),
+              SizedBox(width: 12.w),
+
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               value,
-              style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: GoogleFonts.inter(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           Row(
             children: [
-              Icon(isUp ? Icons.trending_up : Icons.trending_down, size: 14, color: isUp ? const Color(0xFF10B981) : const Color(0xFFEF4444)),
+              Icon(
+                isUp ? Icons.trending_up : Icons.trending_down,
+                size: 14,
+                color: isUp ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+              ),
               SizedBox(width: 4.w),
               Expanded(
                 child: RichText(
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
-                    style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
                     children: [
                       TextSpan(
                         text: '$change ',
-                        style: TextStyle(color: isUp ? const Color(0xFF10B981) : const Color(0xFFEF4444), fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: isUp
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFEF4444),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       TextSpan(text: 'fromLastMonth'.tr),
                     ],
@@ -312,8 +386,18 @@ class SPHomeView extends GetView<SPHomeController> {
           children: [
             Container(
               padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(color: const Color(0xFFF1F1F5), borderRadius: BorderRadius.circular(12.r)),
-              child: SvgPicture.asset('assets/icons/wallet.svg', height: 20.h, colorFilter: const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F1F5),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: SvgPicture.asset(
+                'assets/icons/wallet.svg',
+                height: 20.h,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -322,7 +406,11 @@ class SPHomeView extends GetView<SPHomeController> {
                 children: [
                   Text(
                     'totalBalance'.tr,
-                    style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   _buildBalanceText(),
                 ],
@@ -337,7 +425,11 @@ class SPHomeView extends GetView<SPHomeController> {
   Widget _buildBalanceText() {
     return Text(
       controller.stats.value.totalBalance,
-      style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      style: GoogleFonts.inter(
+        fontSize: 24.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
     );
   }
 
@@ -349,7 +441,10 @@ class SPHomeView extends GetView<SPHomeController> {
           icon: 'assets/icons/add.svg',
           label: 'addService'.tr,
           backgroundColor: const Color(0xFFE9FBF4),
-          onTap: () => Get.to(() => const AddServiceView(), binding: AddScreensBinding()),
+          onTap: () => Get.to(
+            () => const AddServiceView(),
+            binding: AddScreensBinding(),
+          ),
         ),
         _buildActionItem(
           icon: 'assets/icons/calender.svg',
@@ -373,7 +468,12 @@ class SPHomeView extends GetView<SPHomeController> {
     );
   }
 
-  Widget _buildActionItem({required String icon, required String label, required Color backgroundColor, required VoidCallback onTap}) {
+  Widget _buildActionItem({
+    required String icon,
+    required String label,
+    required Color backgroundColor,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -384,7 +484,13 @@ class SPHomeView extends GetView<SPHomeController> {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(16.r),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Center(
               child: SvgPicture.asset(icon, height: 28.h, width: 28.w),
@@ -393,7 +499,11 @@ class SPHomeView extends GetView<SPHomeController> {
           SizedBox(height: 10.h),
           Text(
             label,
-            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -406,7 +516,11 @@ class SPHomeView extends GetView<SPHomeController> {
       children: [
         Text(
           'activeOrders'.tr,
-          style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
         ),
         GestureDetector(
           onTap: () => Get.toNamed(AppRoutes.spActiveOrders),
@@ -414,10 +528,18 @@ class SPHomeView extends GetView<SPHomeController> {
             children: [
               Text(
                 'seeAll'.tr,
-                style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
               SizedBox(width: 4.w),
-              const Icon(Icons.arrow_forward_ios, size: 10, color: AppColors.textSecondary),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 10,
+                color: AppColors.textSecondary,
+              ),
             ],
           ),
         ),
@@ -432,7 +554,10 @@ class SPHomeView extends GetView<SPHomeController> {
           padding: EdgeInsets.symmetric(vertical: 20.h),
           child: Text(
             'noActiveOrdersFound'.tr,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
       );
@@ -462,7 +587,13 @@ class SPHomeView extends GetView<SPHomeController> {
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.lightGrey),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -473,15 +604,24 @@ class SPHomeView extends GetView<SPHomeController> {
               width: 64.w,
               height: 64.h,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(width: 64.w, height: 64.h, color: Colors.grey[200], child: const Icon(Icons.image_not_supported)),
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 64.w,
+                height: 64.h,
+                color: Colors.grey[200],
+                child: const Icon(Icons.image_not_supported),
+              ),
             ),
           ),
           SizedBox(width: 16.w),
           Expanded(
             child: Text(
               order.title,
-              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.4),
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+                height: 1.4,
+              ),
             ),
           ),
           if (order.badgeCount > 0)
@@ -489,10 +629,17 @@ class SPHomeView extends GetView<SPHomeController> {
               height: 24.h,
               width: 24.h,
               alignment: Alignment.center,
-              decoration: const BoxDecoration(color: Color(0xFFB485FF), shape: BoxShape.circle),
+              decoration: const BoxDecoration(
+                color: Color(0xFFB485FF),
+                shape: BoxShape.circle,
+              ),
               child: Text(
                 '${order.badgeCount}',
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.w700),
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
         ],
@@ -503,13 +650,19 @@ class SPHomeView extends GetView<SPHomeController> {
   Widget _buildSkeletonCard() {
     return Container(
       padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(16.r)),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+      ),
       child: Row(
         children: [
           Container(
             width: 64.w,
             height: 64.h,
-            decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(12.r)),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(12.r),
+            ),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -519,7 +672,10 @@ class SPHomeView extends GetView<SPHomeController> {
           Container(
             height: 24.h,
             width: 24.h,
-            decoration: BoxDecoration(color: Colors.grey[300], shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              shape: BoxShape.circle,
+            ),
           ),
         ],
       ),

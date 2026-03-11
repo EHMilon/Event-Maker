@@ -49,7 +49,7 @@ class BookmarksView extends GetView<ProfileController> {
                   itemCount: controller.isLoading.value
                       ? 5
                       : controller.bookmarks.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                  separatorBuilder: (context, index) => SizedBox(height: 8.h),
                   itemBuilder: (context, index) {
                     if (controller.isLoading.value) {
                       return _buildShimmerItem();
@@ -60,7 +60,10 @@ class BookmarksView extends GetView<ProfileController> {
                           Get.to(() => ServiceDetailView(service: item)),
                       borderRadius: BorderRadius.circular(16.r),
                       child: Container(
-                        padding: EdgeInsets.all(12.r),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.r,
+                          vertical: 8.h,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(16.r),
@@ -71,9 +74,7 @@ class BookmarksView extends GetView<ProfileController> {
                               offset: const Offset(0, 4),
                             ),
                           ],
-                          border: Border.all(
-                            color: AppColors.lightGrey,
-                          ),
+                          border: Border.all(color: AppColors.lightGrey),
                         ),
                         child: Row(
                           children: [
@@ -124,8 +125,11 @@ class BookmarksView extends GetView<ProfileController> {
                                         child: Container(
                                           padding: EdgeInsets.all(4.r),
                                           decoration: BoxDecoration(
-                                            color: AppColors.primary.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(4.r),
+                                            color: AppColors.primary
+                                                .withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              4.r,
+                                            ),
                                           ),
                                           child: Icon(
                                             Icons.bookmark,

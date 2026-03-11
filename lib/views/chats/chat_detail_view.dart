@@ -220,7 +220,7 @@ class ChatDetailView extends StatelessWidget {
             color: isAdminWelcome
                 ? Colors.transparent
                 : isMe
-                    ? const Color(0xFFE8F2FF)
+                    ? Colors.white
                     : AppColors.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(isMe ? 12.r : 0.r),
@@ -235,7 +235,7 @@ class ChatDetailView extends StatelessWidget {
                 ? null
                 : [
                     BoxShadow(
-                      color: const Color(0x334BA44B),
+                      color: const Color.fromARGB(51, 70, 70, 70),
                       blurRadius: 10,
                       offset: const Offset(0, 0),
                     ),
@@ -331,7 +331,6 @@ class ChatDetailView extends StatelessWidget {
               child: Container(
                 height: 48.h,
                 decoration: BoxDecoration(
-                  color: AppColors.lightGrey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(color: Color(0xFFEBEBEB)), // #EBEBEB
                 ),
@@ -368,8 +367,8 @@ class ChatDetailView extends StatelessWidget {
                 width: 48.w,
                 height: 48.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
                   shape: BoxShape.circle,
+                  border: Border.all(color: Color(0xFFEBEBEB)), // #EBEBEB
                 ),
                 child: SvgPicture.asset(
                   'assets/icons/send.svg',

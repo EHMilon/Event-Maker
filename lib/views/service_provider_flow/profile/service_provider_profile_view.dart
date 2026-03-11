@@ -25,7 +25,11 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           titleSpacing: 24.w,
           title: Text(
             'myProfile'.tr,
-            style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           actions: [
             PopupMenuButton<String>(
@@ -33,14 +37,19 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                 'assets/images/setting_fill.svg',
                 width: 24.r,
                 height: 24.r,
-                colorFilter: const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+                colorFilter: const ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
+                ),
               ),
               onSelected: (value) {
                 if (value == 'settings') {
                   Get.toNamed(AppRoutes.profile);
                 }
               },
-              itemBuilder: (context) => [PopupMenuItem(value: 'settings', child: Text('settings'.tr))],
+              itemBuilder: (context) => [
+                PopupMenuItem(value: 'settings', child: Text('settings'.tr)),
+              ],
             ),
           ],
         ),
@@ -59,14 +68,21 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                           padding: EdgeInsets.all(3.r),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.primary, width: 2.w),
+                            border: Border.all(
+                              color: AppColors.primary,
+                              width: 2.w,
+                            ),
                           ),
                           child: Obx(
                             () => CircleAvatar(
                               radius: 50.r,
-                              backgroundImage: controller.profileImage.value.startsWith('http')
+                              backgroundImage:
+                                  controller.profileImage.value.startsWith(
+                                    'http',
+                                  )
                                   ? NetworkImage(controller.profileImage.value)
-                                  : AssetImage(controller.profileImage.value) as ImageProvider,
+                                  : AssetImage(controller.profileImage.value)
+                                        as ImageProvider,
                             ),
                           ),
                         ),
@@ -75,7 +91,11 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                       Obx(
                         () => Text(
                           controller.userName.value,
-                          style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          style: GoogleFonts.inter(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                       SizedBox(height: 8.h),
@@ -87,14 +107,21 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                           Obx(
                             () => Text(
                               controller.rating.value.toString(),
-                              style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
                           SizedBox(width: 4.w),
                           Obx(
                             () => Text(
                               '(${controller.reviewCount.value})',
-                              style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
                         ],
@@ -113,14 +140,24 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     padding: EdgeInsets.only(bottom: 8.h),
                     child: Center(
                       child: TabBar(
+                        
+                        // dividerColor: Colors.transparent,
+                        dividerHeight: 0,
+                        splashFactory: NoSplash.splashFactory,
                         tabAlignment: TabAlignment.center,
                         isScrollable: true,
                         indicatorColor: AppColors.primary,
                         indicatorSize: TabBarIndicatorSize.label,
                         labelColor: AppColors.primary,
                         unselectedLabelColor: AppColors.textSecondary,
-                        labelStyle: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600),
-                        unselectedLabelStyle: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w400),
+                        labelStyle: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        unselectedLabelStyle: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
                         tabs: [
                           Tab(text: 'about'.tr.toUpperCase()),
                           Tab(text: 'reviews'.tr.toUpperCase()),
@@ -142,26 +179,35 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
     return Obx(
       () => ListView(
         physics: const ClampingScrollPhysics(),
-        padding: EdgeInsets.all(24.w),
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
         children: [
+          SizedBox(height: 16.h),
           _buildSectionTitle('certifications'.tr),
           SizedBox(height: 16.h),
           ...controller.certifications
               .map(
                 (cert) => Padding(
                   padding: EdgeInsets.only(bottom: 16.h),
-                  child: _buildCertificationItem(cert['title'] ?? '', cert['date'] ?? '', cert['school'] ?? ''),
+                  child: _buildCertificationItem(
+                    cert['title'] ?? '',
+                    cert['date'] ?? '',
+                    cert['school'] ?? '',
+                  ),
                 ),
               )
               .toList(),
-          SizedBox(height: 32.h),
+          SizedBox(height: 8.h),
           _buildSectionTitle('bio'.tr),
           SizedBox(height: 12.h),
           Text(
             controller.bio.value,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary, height: 1.5),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
           ),
-          SizedBox(height: 32.h),
+          SizedBox(height: 16.h),
           _buildSectionTitle('myServices'.tr),
           SizedBox(height: 16.h),
           SizedBox(
@@ -180,7 +226,12 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     rating: service.rating?.toString() ?? '0',
                     isBookmarked: service.isBookmarked,
                     onTap: () {
-                      Get.to(() => ServiceDetailView(service: service, showEditButton: true));
+                      Get.to(
+                        () => ServiceDetailView(
+                          service: service,
+                          showEditButton: true,
+                        ),
+                      );
                     },
                   );
                 },
@@ -212,7 +263,11 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      style: GoogleFonts.inter(
+        fontSize: 18.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
     );
   }
 
@@ -222,16 +277,26 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
         SizedBox(height: 4.h),
         Text(
           date,
-          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: AppColors.textSecondary,
+          ),
         ),
         Text(
           school,
-          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: AppColors.textSecondary,
+          ),
         ),
       ],
     );
@@ -251,10 +316,15 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return SizedBox.expand(child: child);
   }
 
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      false;
 }

@@ -10,6 +10,7 @@ class RequestsController extends GetxController {
   final requests = <ServiceModel>[].obs;
   final upcomingRequests = <ServiceModel>[].obs;
   final pastRequests = <ServiceModel>[].obs;
+  final selectedTabIndex = 0.obs;
 
   @override
   void onInit() {
@@ -39,16 +40,12 @@ class RequestsController extends GetxController {
       // throw Exception('Server Error');
 
       final allRequests = MockData.requests;
-      
+
       // Split requests into upcoming and past based on current date
       final now = DateTime.now();
-      upcomingRequests.assignAll(
-        allRequests.where((r) => r.date != null && r.date!.isAfter(now)).toList(),
-      );
-      pastRequests.assignAll(
-        allRequests.where((r) => r.date == null || r.date!.isBefore(now)).toList(),
-      );
-      
+      upcomingRequests.assignAll(allRequests.where((r) => r.date != null && r.date!.isAfter(now)).toList());
+      pastRequests.assignAll(allRequests.where((r) => r.date == null || r.date!.isBefore(now)).toList());
+
       // Combine for backward compatibility
       requests.assignAll(allRequests);
     } catch (e) {

@@ -194,7 +194,7 @@ class AppLocalization extends Translations {
     'noPastRequests': 'No past requests',
     'noHistoryRequests': 'No history',
     'upcoming': 'Upcoming',
-    'pastEvents': 'Past Events',
+    'pastEvents': 'Past event',
     'history': 'History',
     'accept': 'Accept',
     'reject': 'Reject',

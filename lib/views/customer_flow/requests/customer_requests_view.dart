@@ -26,22 +26,52 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
             'bookings'.tr,
             style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
-          bottom: TabBar(
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textSecondary,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            labelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600),
-            unselectedLabelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
-            tabs: [
-              Tab(text: 'upcoming'.tr),
-              Tab(text: 'history'.tr),
-            ],
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(40.h),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  dividerColor: Colors.transparent,
+                  indicator: const BoxDecoration(),
+                  splashFactory: NoSplash.splashFactory,
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  indicatorPadding: EdgeInsets.zero,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelPadding: EdgeInsets.only(right: 8.w),
+                  labelColor: AppColors.textPrimary,
+                  unselectedLabelColor: AppColors.textSecondary,
+                  labelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                  unselectedLabelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                  onTap: (index) => controller.selectedTabIndex.value = index,
+                  tabs: [_buildTab('upcoming'.tr, 0), _buildTab('pastEvents'.tr, 1)],
+                ),
+              ),
+            ),
           ),
         ),
         body: TabBarView(children: [_UpcomingRequestsTab(), _HistoryRequestsTab()]),
       ),
     );
+  }
+
+  Widget _buildTab(String text, int index) {
+    return Obx(() {
+      final isSelected = controller.selectedTabIndex.value == index;
+      return Container(
+        height: 32.h,
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.lightGrey.withOpacity(0.5), width: 1),
+        ),
+        child: Text(text),
+      );
+    });
   }
 }
 

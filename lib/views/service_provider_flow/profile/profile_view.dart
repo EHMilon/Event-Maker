@@ -17,9 +17,9 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
+        
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
-        // titleSpacing: 24.w,
         title: Text(
           'settings'.tr,
           style: TextStyle(color: AppColors.textPrimary, fontSize: 22.sp, fontWeight: FontWeight.w600),

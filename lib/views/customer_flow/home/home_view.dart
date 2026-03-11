@@ -207,7 +207,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   // SizedBox(height: 16.h),
                   _buildCategories(),
-                  // SizedBox(height: 24.h),
+                  SizedBox(height: 16.h),
                   // Catering Services
                   _buildSectionHeader(
                     'cateringServices'.tr,

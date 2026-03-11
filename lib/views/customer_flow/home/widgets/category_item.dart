@@ -64,7 +64,7 @@ class CategoryItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF5669FF) : colorScheme.backgroundColor,
           borderRadius: BorderRadius.circular(25.r),

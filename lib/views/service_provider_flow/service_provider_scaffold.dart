@@ -66,7 +66,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                 icon: Stack(
                   children: [
                     SvgPicture.asset(
-                      'assets/icons/notification.svg',
+                      'assets/icons/notification_fill.svg',
                       height: 24.h,
                       colorFilter: ColorFilter.mode(
                         controller.selectedIndex == 1
@@ -97,7 +97,7 @@ class ServiceProviderScaffold extends GetView<ServiceProviderController> {
                 index: 2,
               ),
               _buildBottomNavItem(
-                iconPath: 'assets/icons/service.svg',
+                iconPath: 'assets/icons/services.svg',
                 label: 'myServices'.tr,
                 index: 3,
               ),

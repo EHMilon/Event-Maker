@@ -21,7 +21,11 @@ class TransactionsView extends GetView<ProfileController> {
         ),
         title: Text(
           'myTransactions'.tr,
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
       body: Obx(
@@ -38,7 +42,13 @@ class TransactionsView extends GetView<ProfileController> {
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(color: AppColors.lightGrey),
-                  boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 8.r, offset: Offset(0, 4.h))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.black.withOpacity(0.05),
+                      blurRadius: 8.r,
+                      offset: Offset(0, 4.h),
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -50,7 +60,11 @@ class TransactionsView extends GetView<ProfileController> {
                         children: [
                           Text(
                             tx['title'],
-                            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                           SizedBox(height: 4.h),
                         ],
@@ -60,19 +74,30 @@ class TransactionsView extends GetView<ProfileController> {
                         children: [
                           Text(
                             tx['time'],
-                            style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                           SizedBox(height: 4.h),
                           Row(
                             children: [
                               Text(
                                 tx['amount'],
-                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
                               ),
                               SizedBox(width: 4.w),
                               Text(
                                 'AED',
-                                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500, color: AppColors.primary),
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.primary,
+                                ),
                               ),
                             ],
                           ),

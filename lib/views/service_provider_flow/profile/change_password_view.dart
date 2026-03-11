@@ -33,7 +33,7 @@ class ChangePasswordView extends GetView<ProfileController> {
       body: Obx(
         () => Skeletonizer(
           enabled: controller.isLoading.value,
-          child: SingleChildScrollView(
+          child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +110,7 @@ class ChangePasswordView extends GetView<ProfileController> {
                     onPressed: controller.toggleConfirmPasswordVisibility,
                   ),
                 ),
-                SizedBox(height: 200.h),
+                Spacer(),
                 PrimaryTextButton(
                   onPressed: () => controller.changePassword(),
                   text: 'update'.tr,
