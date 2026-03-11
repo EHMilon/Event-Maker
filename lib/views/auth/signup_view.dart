@@ -76,42 +76,56 @@ class SignupView extends GetView<AuthController> {
               ),
               SizedBox(height: 20.h),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Obx(
-                    () => Checkbox(
-                      value: controller.acceptedTerms.value,
-                      onChanged: controller.toggleTerms,
-                      activeColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4.r),
+                    () => SizedBox(
+                      width: 24.w,
+                      height: 24.w,
+                      child: Checkbox(
+                        value: controller.acceptedTerms.value,
+                        onChanged: controller.toggleTerms,
+                        activeColor: AppColors.primary,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
                       ),
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        text: "By using the Event Maker app you agree to our ",
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.textPrimary,
+                    child: GestureDetector(
+                      onTap: () => controller.toggleTerms(
+                        !controller.acceptedTerms.value,
+                      ),
+                      child: RichText(
+                        text: TextSpan(
+                          text:
+                              "By using the Event Maker app you agree to our ",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColors.textPrimary,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: "Terms of Use",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const TextSpan(text: " and "),
+                            TextSpan(
+                              text: "Privacy-Notice",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        children: [
-                          TextSpan(
-                            text: "Terms of Use",
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(text: " and "),
-                          TextSpan(
-                            text: "Privacy-Notice",
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ),

@@ -73,6 +73,7 @@ class OtpVerificationView extends GetView<AuthController> {
                 Center(
                   child: Pinput(
                     length: 4,
+                    separatorBuilder: (index) => SizedBox(width: 12.w),
                     defaultPinTheme: defaultPinTheme,
                     focusedPinTheme: defaultPinTheme.copyDecorationWith(
                       border: Border.all(color: AppColors.primary, width: 2),

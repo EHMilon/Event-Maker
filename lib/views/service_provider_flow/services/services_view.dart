@@ -1,5 +1,6 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/shared/widgets/request_card.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
@@ -120,8 +121,11 @@ class ServicesView extends GetView<SPServicesController> {
           separatorBuilder: (context, index) => SizedBox(height: 12.h),
           itemBuilder: (context, index) {
             final service = services[index];
-            return ServiceProviderServiceTile(
-              service: service,
+            return RequestCard(
+              image: service.images.isNotEmpty ? service.images.first : '',
+              date: _formatDateTime(service.date),
+              title: service.title,
+              subtitle: service.location,
               onTap: () => Get.to(
                 () => ServiceDetailView(
                   service: service,
@@ -184,160 +188,41 @@ class ServicesView extends GetView<SPServicesController> {
       ),
     );
   }
-}
 
-class ServiceProviderServiceTile extends StatelessWidget {
-  final ServiceModel service;
-  final VoidCallback onTap;
-
-  const ServiceProviderServiceTile({super.key, required this.service, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final imagePath = service.images.isNotEmpty ? service.images.first : '';
-    final isNetworkImage = imagePath.startsWith('http');
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20.r),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.all(12.r),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(color: AppColors.lightGrey),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-          ),
-          child: Row(
-            children: [
-              // Service image
-              Hero(
-                tag: 'service_${service.id}',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14.r),
-                  child: imagePath.isNotEmpty
-                      ? (isNetworkImage
-                            ? Image.network(
-                                imagePath,
-                                width: 85.w,
-                                height: 85.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
-                              )
-                            : Image.asset(
-                                imagePath,
-                                width: 85.w,
-                                height: 85.w,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
-                              ))
-                      : _buildPlaceholderImage(),
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Service title
-                    Text(
-                      service.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                    ),
-                    SizedBox(height: 4.h),
-                    // Service type badge
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                      decoration: BoxDecoration(color: _getServiceTypeColor(service.type).withOpacity(0.1), borderRadius: BorderRadius.circular(6.r)),
-                      child: Text(
-                        _getServiceTypeLabel(service.type),
-                        style: GoogleFonts.inter(fontSize: 10.sp, fontWeight: FontWeight.w600, color: _getServiceTypeColor(service.type)),
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    // Location and Price Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_outlined, size: 14.r, color: AppColors.textSecondary.withOpacity(0.7)),
-                            SizedBox(width: 4.w),
-                            Text(
-                              service.location,
-                              style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
-                            ).maxWidth,
-                          ],
-                        ),
-                        Text(
-                          '${service.basePrice?.toInt() ?? 0} ${service.priceUnit}',
-                          style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.primary),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Icon(Icons.arrow_forward_ios, size: 14.r, color: AppColors.grey.withOpacity(0.5)),
-            ],
-          ),
-        ),
-      ),
-    );
+  /// Formats DateTime to display format (e.g., "15th Mar - Mon - 2:30 PM")
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return '';
+    final day = dateTime.day;
+    final suffix = _getDaySuffix(day);
+    final month = _getMonthShort(dateTime.month);
+    final weekday = _getWeekdayShort(dateTime.weekday);
+    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    return '$day$suffix $month - $weekday - $hour:$minute $period';
   }
 
-  Widget _buildPlaceholderImage() {
-    return Container(
-      width: 80.w,
-      height: 80.w,
-      color: AppColors.lightGrey,
-      child: Icon(Icons.image_not_supported, color: AppColors.grey, size: 28.r),
-    );
-  }
-
-  Color _getServiceTypeColor(ServiceType type) {
-    switch (type) {
-      case ServiceType.event:
-        return AppColors.primary;
-      case ServiceType.photography:
-        return const Color(0xFF9C27B0);
-      case ServiceType.training:
-        return const Color(0xFF2196F3);
-      case ServiceType.catering:
-        return const Color(0xFFFF9800);
-      case ServiceType.cleaning:
-        return const Color(0xFF4CAF50);
-      case ServiceType.filming:
-        return const Color(0xFF607D8B);
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
     }
   }
 
-  String _getServiceTypeLabel(ServiceType type) {
-    switch (type) {
-      case ServiceType.event:
-        return 'event'.tr;
-      case ServiceType.photography:
-        return 'photography'.tr;
-      case ServiceType.training:
-        return 'training'.tr;
-      case ServiceType.catering:
-        return 'catering'.tr;
-      case ServiceType.cleaning:
-        return 'cleaning'.tr;
-      case ServiceType.filming:
-        return 'filming'.tr;
-    }
+  String _getMonthShort(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
   }
-}
 
-extension on Text {
-  Widget get maxWidth => Container(
-    constraints: BoxConstraints(maxWidth: 80.w),
-    child: this,
-  );
+  String _getWeekdayShort(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
+  }
 }

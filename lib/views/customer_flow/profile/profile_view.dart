@@ -60,7 +60,7 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                   ),
                 ),
-                SizedBox(height: 32.h),
+                SizedBox(height: 20.h),
                 // Menu Items
                 _buildMenuItem(icon: 'assets/icons/profile_outline.svg', title: 'profileSettings'.tr, onTap: () => Get.toNamed(AppRoutes.profileSettings)),
                 _buildMenuItem(icon: 'assets/icons/shield-check.svg', title: 'security'.tr, onTap: () => Get.toNamed(AppRoutes.changePassword)),

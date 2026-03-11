@@ -67,8 +67,8 @@ class LoginView extends GetView<AuthController> {
                 SizedBox(height: 20.h),
                 Obx(
                   () => CustomTextField(
-                      labelText: 'password'.tr,
-                      hintText: 'passwordPlaceholder'.tr,
+                    labelText: 'password'.tr,
+                    hintText: 'passwordPlaceholder'.tr,
                     obscureText: controller.obscurePassword.value,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -95,26 +95,44 @@ class LoginView extends GetView<AuthController> {
                 Row(
                   children: [
                     Obx(
-                      () => Checkbox(
-                        value: controller.rememberMe.value,
-                        onChanged: controller.toggleRememberMe,
-                        activeColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.r),
+                      () => SizedBox(
+                        width: 24.w,
+                        height: 24.w,
+                        child: Checkbox(
+                          value: controller.rememberMe.value,
+                          onChanged: controller.toggleRememberMe,
+                          activeColor: AppColors.primary,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
                         ),
                       ),
                     ),
-                      Text(
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () => controller.toggleRememberMe(
+                        !controller.rememberMe.value,
+                      ),
+                      child: Text(
                         'rememberMe'.tr,
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: AppColors.textPrimary,
                         ),
                       ),
+                    ),
                     const Spacer(),
                     TextButton(
                       onPressed: controller.onForgotPassword,
-                      child:                      Text(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
                         'forgotPassword'.tr,
                         style: TextStyle(
                           fontSize: 12.sp,

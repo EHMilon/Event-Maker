@@ -13,7 +13,27 @@ class ViewCertificateView extends GetView<CertificationController> {
 
   @override
   Widget build(BuildContext context) {
-    final CertificationModel cert = Get.arguments;
+    final dynamic args = Get.arguments;
+    final CertificationModel? cert = args is CertificationModel
+        ? args
+        : controller.certifications.firstWhereOrNull(
+            (c) => c.id == args.toString(),
+          );
+
+    if (cert == null) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundLight,
+        appBar: AppBar(
+          backgroundColor: AppColors.backgroundLight,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () => Get.back(),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -33,44 +53,56 @@ class ViewCertificateView extends GetView<CertificationController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Certificate Image
-            Container(
-              width: double.infinity,
-              height: 250.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.lightGrey),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12.r),
-                child: cert.imageUrl != null
-                    ? cert.imageUrl!.startsWith('assets/')
-                          ? Image.asset(cert.imageUrl!, fit: BoxFit.cover)
-                          : Image.file(File(cert.imageUrl!), fit: BoxFit.cover)
-                    : Icon(
-                        Icons.description,
-                        size: 50.sp,
-                        color: AppColors.lightGrey,
-                      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Certificate Image
+                  Container(
+                    width: double.infinity,
+                    height: 250.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: AppColors.lightGrey),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: cert.imageUrl != null
+                          ? cert.imageUrl!.startsWith('assets/')
+                                ? Image.asset(cert.imageUrl!, fit: BoxFit.cover)
+                                : Image.file(
+                                    File(cert.imageUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                          : Icon(
+                              Icons.description,
+                              size: 50.sp,
+                              color: AppColors.lightGrey,
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: 32.h),
+
+                  // Details
+                  _buildDetailField('certName'.tr, cert.title),
+                  SizedBox(height: 16.h),
+                  _buildDetailField('issuedBy'.tr, cert.school),
+                  SizedBox(height: 16.h),
+                  _buildDetailField('issueDate'.tr, cert.date),
+                  SizedBox(height: 24.h),
+                ],
               ),
             ),
-            SizedBox(height: 32.h),
+          ),
 
-            // Details
-            _buildDetailField('certName'.tr, cert.title),
-            SizedBox(height: 16.h),
-            _buildDetailField('issuedBy'.tr, cert.school),
-            SizedBox(height: 16.h),
-            _buildDetailField('issueDate'.tr, cert.date),
-
-            SizedBox(height: 100.h),
-            // Edit Button
-            SizedBox(
+          // Edit Button - Fixed at bottom
+          Padding(
+            padding: EdgeInsets.all(24.w),
+            child: SizedBox(
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton(
@@ -98,8 +130,8 @@ class ViewCertificateView extends GetView<CertificationController> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

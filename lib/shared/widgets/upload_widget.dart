@@ -7,7 +7,7 @@ import '../../core/themes/app_colors.dart';
 class UploadWidget extends StatefulWidget {
   final String? imagePath;
   final Function(String?) onImageSelected;
-  
+
   const UploadWidget({
     super.key,
     this.imagePath,
@@ -28,13 +28,17 @@ class _UploadWidgetState extends State<UploadWidget> {
     _selectedImagePath = widget.imagePath;
   }
 
+  bool _isPickingImage = false;
   Future<void> _pickImage() async {
+    if (_isPickingImage) return;
+    _isPickingImage = true;
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 80,
       );
-      
+
       if (image != null) {
         setState(() {
           _selectedImagePath = image.path;
@@ -43,13 +47,16 @@ class _UploadWidgetState extends State<UploadWidget> {
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
+    } finally {
+      _isPickingImage = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = _selectedImagePath != null && _selectedImagePath!.isNotEmpty;
-    
+    final hasImage =
+        _selectedImagePath != null && _selectedImagePath!.isNotEmpty;
+
     return GestureDetector(
       onTap: _pickImage,
       child: Container(
@@ -75,10 +82,7 @@ class _UploadWidgetState extends State<UploadWidget> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(11.r),
-          child: Image.file(
-            File(_selectedImagePath!),
-            fit: BoxFit.cover,
-          ),
+          child: Image.file(File(_selectedImagePath!), fit: BoxFit.cover),
         ),
         Positioned(
           top: 8.h,
@@ -89,11 +93,7 @@ class _UploadWidgetState extends State<UploadWidget> {
               color: Colors.black.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.edit,
-              color: Colors.white,
-              size: 18.r,
-            ),
+            child: Icon(Icons.edit, color: Colors.white, size: 18.r),
           ),
         ),
         Positioned(
@@ -108,11 +108,7 @@ class _UploadWidgetState extends State<UploadWidget> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.camera_alt,
-                  color: Colors.white,
-                  size: 14.r,
-                ),
+                Icon(Icons.camera_alt, color: Colors.white, size: 14.r),
                 SizedBox(width: 4.w),
                 Text(
                   'Change',
@@ -134,11 +130,7 @@ class _UploadWidgetState extends State<UploadWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.cloud_upload_outlined,
-          size: 40.sp,
-          color: Colors.grey[400],
-        ),
+        Icon(Icons.cloud_upload_outlined, size: 40.sp, color: Colors.grey[400]),
         SizedBox(height: 12.h),
         Text(
           'Upload',

@@ -44,12 +44,20 @@ class CertificationController extends GetxController {
     });
   }
 
+  bool _isPickingImage = false;
   Future<void> pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (_isPickingImage) return;
+    _isPickingImage = true;
 
-    if (image != null) {
-      selectedImage.value = File(image.path);
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        selectedImage.value = File(image.path);
+      }
+    } finally {
+      _isPickingImage = false;
     }
   }
 

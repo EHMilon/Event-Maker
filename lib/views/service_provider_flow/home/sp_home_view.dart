@@ -284,10 +284,10 @@ class SPHomeView extends GetView<SPHomeController> {
     required bool isUp,
   }) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
@@ -297,14 +297,14 @@ class SPHomeView extends GetView<SPHomeController> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
-                  shape: BoxShape.circle,
-                ),
-                child: SvgPicture.asset(icon, height: 16.h, width: 16.w),
+                // padding: EdgeInsets.all(8.w),
+                // decoration: BoxDecoration(
+                //   color: Colors.white.withOpacity(0.7),
+                //   shape: BoxShape.circle,
+                // ),
+                child: SvgPicture.asset(icon, height: 20.h, width: 20.w),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 8.w),
               Expanded(
                 child: RichText(
                   text: TextSpan(
@@ -334,6 +334,8 @@ class SPHomeView extends GetView<SPHomeController> {
               ),
             ),
           ),
+          SizedBox(width: 12.w),
+
           Row(
             children: [
               Icon(

@@ -35,97 +35,110 @@ class AddEditCertificateView extends GetView<CertificationController> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Upload Area
-            GestureDetector(
-              onTap: () => controller.pickImage(),
-              child: Obx(
-                () => Container(
-                  width: double.infinity,
-                  height: 180.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: AppColors.lightGrey,
-                      style: BorderStyle.solid,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Upload Area
+                  GestureDetector(
+                    onTap: () => controller.pickImage(),
+                    child: Obx(
+                      () => Container(
+                        width: double.infinity,
+                        height: 180.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: AppColors.lightGrey,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        child: controller.selectedImage.value != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: Image.file(
+                                  controller.selectedImage.value!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : controller.imageUrl.value != null &&
+                                  controller.imageUrl.value!.startsWith(
+                                    'assets/',
+                                  )
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: Image.asset(
+                                  controller.imageUrl.value!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cloud_upload_outlined,
+                                    size: 40.sp,
+                                    color: AppColors.textSecondary.withOpacity(
+                                      0.5,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  Text(
+                                    'upload'.tr,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  Text(
+                                    'PDF, JPG or PNG',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
                     ),
                   ),
-                  child: controller.selectedImage.value != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(12.r),
-                          child: Image.file(
-                            controller.selectedImage.value!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : controller.imageUrl.value != null &&
-                            controller.imageUrl.value!.startsWith('assets/')
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(12.r),
-                          child: Image.asset(
-                            controller.imageUrl.value!,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              size: 40.sp,
-                              color: AppColors.textSecondary.withOpacity(0.5),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'upload'.tr,
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            Text(
-                              'PDF, JPG or PNG',
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
+                  SizedBox(height: 32.h),
+
+                  // Form Fields
+                  _buildInputField(
+                    'certName'.tr,
+                    'Your title goes here...',
+                    controller.titleController,
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildInputField(
+                    'issuedBy'.tr,
+                    'Institute Name',
+                    controller.instituteController,
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildInputField(
+                    'issueDate'.tr,
+                    'dd/mm/yyyy',
+                    controller.dateController,
+                    isDate: true,
+                  ),
+                  SizedBox(height: 24.h),
+                ],
               ),
             ),
-            SizedBox(height: 32.h),
+          ),
 
-            // Form Fields
-            _buildInputField(
-              'certName'.tr,
-              'Your title goes here...',
-              controller.titleController,
-            ),
-            SizedBox(height: 16.h),
-            _buildInputField(
-              'issuedBy'.tr,
-              'Institute Name',
-              controller.instituteController,
-            ),
-            SizedBox(height: 16.h),
-            _buildInputField(
-              'issueDate'.tr,
-              'dd/mm/yyyy',
-              controller.dateController,
-              isDate: true,
-            ),
-
-            SizedBox(height: 100.h),
-            // Action Button
-            SizedBox(
+          // Action Button - Fixed at bottom
+          Padding(
+            padding: EdgeInsets.all(24.w),
+            child: SizedBox(
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton(
@@ -153,8 +166,8 @@ class AddEditCertificateView extends GetView<CertificationController> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

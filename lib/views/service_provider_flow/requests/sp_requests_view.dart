@@ -1,4 +1,5 @@
 import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/shared/widgets/request_card.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,11 @@ class SPRequestsView extends GetView<RequestsController> {
           titleSpacing: 24.w,
           title: Text(
             'requests'.tr,
-            style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(40.h),
@@ -41,17 +46,29 @@ class SPRequestsView extends GetView<RequestsController> {
                   indicatorSize: TabBarIndicatorSize.tab,
                   labelPadding: EdgeInsets.only(right: 8.w),
                   labelColor: AppColors.textPrimary,
-                  unselectedLabelColor: AppColors.textSecondary, // Use textSecondary for unselected
-                  labelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
-                  unselectedLabelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                  unselectedLabelColor: AppColors
+                      .textSecondary, // Use textSecondary for unselected
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  unselectedLabelStyle: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                   onTap: (index) => controller.selectedTabIndex.value = index,
-                  tabs: [_buildTab('upcoming'.tr, 0), _buildTab('pastEvents'.tr, 1)],
+                  tabs: [
+                    _buildTab('upcoming'.tr, 0),
+                    _buildTab('pastEvents'.tr, 1),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-        body: TabBarView(children: [_UpcomingRequestsTab(), _PastRequestsTab()]),
+        body: TabBarView(
+          children: [_UpcomingRequestsTab(), _PastRequestsTab()],
+        ),
       ),
     );
   }
@@ -65,7 +82,12 @@ class SPRequestsView extends GetView<RequestsController> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.lightGrey.withOpacity(0.5), width: 1),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary.withOpacity(0.3)
+                : AppColors.lightGrey.withOpacity(0.5),
+            width: 1,
+          ),
         ),
         child: Text(text),
       );
@@ -100,13 +122,15 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
           separatorBuilder: (_, __) => SizedBox(height: 16.h),
           itemBuilder: (_, index) {
             final service = controller.upcomingRequests[index];
-            return _RequestCard(
+            return RequestCard(
               image: service.images.isNotEmpty ? service.images.first : '',
               date: _formatDateTime(service.date),
               title: service.title,
               subtitle: service.location,
               onTap: () {
-                Get.to(() => ServiceDetailView(service: service, isRequest: true));
+                Get.to(
+                  () => ServiceDetailView(service: service, isRequest: true),
+                );
               },
             );
           },
@@ -124,7 +148,10 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
         separatorBuilder: (_, __) => SizedBox(height: 16.h),
         itemBuilder: (_, __) => Container(
           height: 90.h,
-          decoration: BoxDecoration(color: AppColors.lightGrey, borderRadius: BorderRadius.circular(20.r)),
+          decoration: BoxDecoration(
+            color: AppColors.lightGrey,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
           child: Row(
             children: [
               Container(width: 80.w, height: 80.h, color: AppColors.grey),
@@ -154,14 +181,19 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 16.h),
           Text(
             controller.errorMessage.value,
-            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: controller.fetchRequests,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
             child: Text('retry'.tr),
           ),
@@ -171,7 +203,9 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
   }
 
   Widget _buildEmptyState(String type) {
-    final message = type == 'upcoming' ? 'noUpcomingRequests' : 'noPastRequests';
+    final message = type == 'upcoming'
+        ? 'noUpcomingRequests'
+        : 'noPastRequests';
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -180,7 +214,10 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 12.h),
           Text(
             message.tr,
-            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -193,7 +230,9 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
     final suffix = _getDaySuffix(day);
     final month = _getMonthShort(dateTime.month);
     final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
     return '$day$suffix $month - $weekday - $hour:$minute $period';
@@ -214,7 +253,20 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
   }
 
   String _getMonthShort(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[month - 1];
   }
 
@@ -250,13 +302,15 @@ class _PastRequestsTab extends GetView<RequestsController> {
           separatorBuilder: (_, __) => SizedBox(height: 16.h),
           itemBuilder: (_, index) {
             final service = controller.pastRequests[index];
-            return _RequestCard(
+            return RequestCard(
               image: service.images.isNotEmpty ? service.images.first : '',
               date: _formatDateTime(service.date),
               title: service.title,
               subtitle: service.location,
               onTap: () {
-                Get.to(() => ServiceDetailView(service: service, isRequest: true));
+                Get.to(
+                  () => ServiceDetailView(service: service, isRequest: true),
+                );
               },
             );
           },
@@ -274,7 +328,10 @@ class _PastRequestsTab extends GetView<RequestsController> {
         separatorBuilder: (_, __) => SizedBox(height: 16.h),
         itemBuilder: (_, __) => Container(
           height: 90.h,
-          decoration: BoxDecoration(color: AppColors.lightGrey, borderRadius: BorderRadius.circular(20.r)),
+          decoration: BoxDecoration(
+            color: AppColors.lightGrey,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
           child: Row(
             children: [
               Container(width: 80.w, height: 80.h, color: AppColors.grey),
@@ -304,14 +361,19 @@ class _PastRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 16.h),
           Text(
             controller.errorMessage.value,
-            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: controller.fetchRequests,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
             ),
             child: Text('retry'.tr),
           ),
@@ -329,7 +391,10 @@ class _PastRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 12.h),
           Text(
             'noPastRequests'.tr,
-            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -342,7 +407,9 @@ class _PastRequestsTab extends GetView<RequestsController> {
     final suffix = _getDaySuffix(day);
     final month = _getMonthShort(dateTime.month);
     final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final hour = dateTime.hour > 12
+        ? dateTime.hour - 12
+        : (dateTime.hour == 0 ? 12 : dateTime.hour);
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
     return '$day$suffix $month - $weekday - $hour:$minute $period';
@@ -363,74 +430,25 @@ class _PastRequestsTab extends GetView<RequestsController> {
   }
 
   String _getMonthShort(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[month - 1];
   }
 
   String _getWeekdayShort(int weekday) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[weekday - 1];
-  }
-}
-
-class _RequestCard extends StatelessWidget {
-  const _RequestCard({required this.image, required this.date, required this.title, required this.subtitle, required this.onTap});
-
-  final String image;
-  final String date;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColors.lightGrey),
-          boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 4))],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.r),
-              child: image.isNotEmpty
-                  ? (image.startsWith('http')
-                        ? Image.network(image, width: 80.w, height: 80.h, fit: BoxFit.cover)
-                        : Image.asset(image, width: 80.w, height: 80.h, fit: BoxFit.cover))
-                  : Container(width: 80.w, height: 80.h, color: AppColors.lightGrey),
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      date,
-                      style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      title,
-                      style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      subtitle,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
