@@ -329,12 +329,13 @@ class ChatDetailView extends StatelessWidget {
           children: [
             Expanded(
               child: Container(
-                height: 48.h,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(color: Color(0xFFEBEBEB)), // #EBEBEB
                 ),
                 child: TextField(
+                  minLines: 1,
+                  maxLines: 5,
                   controller: textController,
                   onChanged: controller.updateMessageText,
                   style: GoogleFonts.roboto(

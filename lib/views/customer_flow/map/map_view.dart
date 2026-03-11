@@ -45,7 +45,7 @@ class MapView extends GetView<MapController> {
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        height: 56.h,
+                        height: 48.h,
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(12.r),
@@ -198,7 +198,7 @@ class MapView extends GetView<MapController> {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 16.sp,
+        fontSize: 14.sp,
         fontWeight: FontWeight.w500,
         color: AppColors.black,
       ),

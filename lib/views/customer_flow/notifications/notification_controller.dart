@@ -27,6 +27,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: '9 hr ago',
         isRead: false,
         type: NotificationType.booking,
+        serviceId: 'cat-1',
       ),
       CustomerNotificationModel(
         id: '2',
@@ -35,6 +36,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: '9 hr ago',
         isRead: false,
         type: NotificationType.booking,
+        serviceId: 'cat-2',
       ),
       CustomerNotificationModel(
         id: '3',
@@ -43,6 +45,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: '9 hr ago',
         isRead: false,
         type: NotificationType.booking,
+        serviceId: 'photo-1',
       ),
       CustomerNotificationModel(
         id: '4',
@@ -51,6 +54,7 @@ class CustomerNotificationController extends GetxController {
         timeAgo: '9 hr ago',
         isRead: false,
         type: NotificationType.booking,
+        serviceId: 'film-1',
       ),
       CustomerNotificationModel(
         id: '5',
@@ -94,9 +98,9 @@ class CustomerNotificationController extends GetxController {
   void handleNotificationClick(CustomerNotificationModel notification) {
     markAsRead(notification.id);
 
+    // Navigate to payment screen for accepted booking notifications with valid service ID
     if (notification.serviceId != null &&
-        (notification.body == 'acceptedBookingBody' ||
-            notification.body.tr.contains('accepted'.tr))) {
+        notification.body == 'acceptedBookingBody') {
       // Find service in HomeController or MockData
       final service = MockData.homeServices.firstWhereOrNull(
         (s) => s.id == notification.serviceId,

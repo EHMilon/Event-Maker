@@ -1,4 +1,5 @@
 import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/shared/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/views/customer_flow/requests/customer_requests_controller.dart';
 import 'package:event_maker/views/customer_flow/requests/customer_requests_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
@@ -24,7 +25,11 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
           titleSpacing: 24.w,
           title: Text(
             'bookings'.tr,
-            style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(40.h),
@@ -44,16 +49,27 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
                   labelPadding: EdgeInsets.only(right: 8.w),
                   labelColor: AppColors.textPrimary,
                   unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
-                  unselectedLabelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  unselectedLabelStyle: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                   onTap: (index) => controller.selectedTabIndex.value = index,
-                  tabs: [_buildTab('upcoming'.tr, 0), _buildTab('pastEvents'.tr, 1)],
+                  tabs: [
+                    _buildTab('upcoming'.tr, 0),
+                    _buildTab('pastEvents'.tr, 1),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-        body: TabBarView(children: [_UpcomingRequestsTab(), _HistoryRequestsTab()]),
+        body: TabBarView(
+          children: [_UpcomingRequestsTab(), _HistoryRequestsTab()],
+        ),
       ),
     );
   }
@@ -67,7 +83,12 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.lightGrey.withOpacity(0.5), width: 1),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary.withOpacity(0.3)
+                : AppColors.lightGrey.withOpacity(0.5),
+            width: 1,
+          ),
         ),
         child: Text(text),
       );
@@ -85,8 +106,9 @@ class _UpcomingRequestsTab extends GetView<CustomerRequestsController> {
         if (controller.isLoading.value) {
           return Skeletonizer(
             enabled: true,
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: 5,
+              separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
                 return _RequestCard(
                   request: CustomerRequestModel(
@@ -105,8 +127,9 @@ class _UpcomingRequestsTab extends GetView<CustomerRequestsController> {
         if (list.isEmpty) {
           return const _EmptyState(message: 'noUpcomingRequests');
         }
-        return ListView.builder(
+        return ListView.separated(
           itemCount: list.length,
+          separatorBuilder: (context, index) => SizedBox(height: 8.h),
           itemBuilder: (context, index) {
             final item = list[index];
             return _RequestCard(request: item);
@@ -127,8 +150,9 @@ class _HistoryRequestsTab extends GetView<CustomerRequestsController> {
         if (controller.isLoading.value) {
           return Skeletonizer(
             enabled: true,
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: 5,
+              separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
                 return _RequestCard(
                   request: CustomerRequestModel(
@@ -147,8 +171,9 @@ class _HistoryRequestsTab extends GetView<CustomerRequestsController> {
         if (list.isEmpty) {
           return const _EmptyState(message: 'noHistoryRequests');
         }
-        return ListView.builder(
+        return ListView.separated(
           itemCount: list.length,
+          separatorBuilder: (context, index) => SizedBox(height: 8.h),
           itemBuilder: (context, index) {
             final item = list[index];
             return _RequestCard(request: item);
@@ -192,45 +217,17 @@ class _RequestCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColors.lightGrey),
-          boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20.r),
-              child: Image.asset(request.image, width: 80.w, height: 80.h, fit: BoxFit.cover),
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      request.date,
-                      style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      request.title,
-                      style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      request.subtitle,
-                      style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 8.h),
+        child: CustomerBookmarkCard(
+          imagePath: request.image,
+          title: request.title,
+          subtitle: request.subtitle,
+          location: request.subtitle,
+          price: '500',
+          priceUnit: 'AED/hr',
+          rating: '4.8',
+          showBookmarkButton: false,
         ),
       ),
     );
@@ -252,7 +249,10 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             message.tr,
-            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),

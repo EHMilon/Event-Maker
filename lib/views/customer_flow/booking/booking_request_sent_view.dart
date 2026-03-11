@@ -57,15 +57,17 @@ class BookingRequestSentView extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 60.h),
-              PrimaryTextButton(
-                onPressed: () {
-                  Get.offAllNamed(AppRoutes.customerHome);
-                },
-                text: 'backToHome'.tr,
-              ),
-              SizedBox(height: 40.h),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: PrimaryTextButton(
+          onPressed: () {
+            Get.offAllNamed(AppRoutes.customerHome);
+          },
+          text: 'backToHome'.tr,
         ),
       ),
     );

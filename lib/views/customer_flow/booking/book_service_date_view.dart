@@ -41,8 +41,8 @@ class BookServiceDateView extends StatelessWidget {
             Text(
               'selectDateTime'.tr,
               style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w500,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -63,7 +63,7 @@ class BookServiceDateView extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ),
@@ -85,7 +85,7 @@ class BookServiceDateView extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ),
@@ -101,7 +101,7 @@ class BookServiceDateView extends StatelessWidget {
             SizedBox(height: 16.h),
 
             SizedBox(
-              height: 80.h,
+              height: 70.h,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 7,
@@ -122,8 +122,8 @@ class BookServiceDateView extends StatelessWidget {
                     return GestureDetector(
                       onTap: () => controller.setSelectedDate(index),
                       child: Container(
-                        width: 60.w,
-                        margin: EdgeInsets.only(right: 12.w),
+                        // width: 42.w,
+                        margin: EdgeInsets.only(right: 6.w),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.primary
@@ -135,30 +135,36 @@ class BookServiceDateView extends StatelessWidget {
                                 : AppColors.lightGrey,
                           ),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              weekDays[index % 7],
-                              style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                color: isSelected
-                                    ? AppColors.white
-                                    : AppColors.textSecondary,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0,
+                            vertical: 8,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                weekDays[index % 7],
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.textSecondary,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              '$day',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected
-                                    ? AppColors.white
-                                    : AppColors.textPrimary,
+                              SizedBox(height: 4.h),
+                              Text(
+                                '$day',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: isSelected
+                                      ? AppColors.white
+                                      : AppColors.textPrimary,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -193,7 +199,7 @@ class BookServiceDateView extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                       decoration: BoxDecoration(
                         color: isSelected ? AppColors.primary : AppColors.white,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
                           color: isSelected
                               ? AppColors.primary

@@ -75,18 +75,16 @@ class BookServiceRequestView extends StatelessWidget {
             ),
 
             SizedBox(height: 24.h),
-
-            PrimaryTextButton(
-              onPressed: () {
-                Get.toNamed(
-                  AppRoutes.bookingRequestSent,
-                  arguments: Get.arguments,
-                );
-              },
-              text: 'continueText'.tr,
-            ),
-            SizedBox(height: 20.h),
           ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: PrimaryTextButton(
+          onPressed: () {
+            Get.toNamed(AppRoutes.bookingRequestSent, arguments: Get.arguments);
+          },
+          text: 'continueText'.tr,
         ),
       ),
     );

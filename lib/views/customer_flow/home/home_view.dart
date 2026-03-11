@@ -74,17 +74,18 @@ class _HomeViewState extends State<HomeView> {
                               // SizedBox(height: 4.h),
                               Row(
                                 children: [
-                                  Icon(
-                                    Icons.location_on_outlined,
-                                    size: 16.r,
-                                    color: AppColors.grey,
+                                  SvgPicture.asset(
+                                    'assets/icons/location.svg',
+                                    height: 16.h,
+                                    width: 16.w,
                                   ),
                                   SizedBox(width: 4.w),
                                   Text(
                                     'New York, USA', // TODO: Fetch from location service
                                     style: GoogleFonts.inter(
-                                      fontSize: 14.sp,
-                                      color: AppColors.grey,
+                                      fontSize: 12.sp,
+                                      // color: AppColors.grey,
+                                      fontWeight: FontWeight.w400,
                                     ),
                                   ),
                                 ],
@@ -162,10 +163,10 @@ class _HomeViewState extends State<HomeView> {
                   // Select Main Category
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    height: 56.h,
+                    height: 40.h,
                     decoration: BoxDecoration(
                       color: AppColors.white,
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(color: AppColors.lightGrey),
                     ),
                     child: DropdownButtonHideUnderline(
@@ -196,7 +197,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                   ),
-                  // SizedBox(height: 16.h),
+                  SizedBox(height: 18.h),
 
                   // Service Categories
                   _buildSectionHeader(
@@ -207,7 +208,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   // SizedBox(height: 16.h),
                   _buildCategories(),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 24.h),
                   // Catering Services
                   _buildSectionHeader(
                     'cateringServices'.tr,
@@ -257,11 +258,7 @@ class _HomeViewState extends State<HomeView> {
             final category = entry.value;
             return Padding(
               padding: EdgeInsets.only(right: 8.w),
-              child: CategoryItem(
-                label: category,
-                onTap: () {},
-                index: index,
-              ),
+              child: CategoryItem(label: category, onTap: () {}, index: index),
             );
           }).toList(),
         ),

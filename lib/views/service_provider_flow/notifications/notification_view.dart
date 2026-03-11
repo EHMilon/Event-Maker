@@ -1,6 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/views/service_provider_flow/notifications/notification_controller.dart';
-import 'package:event_maker/core/routes/app_routes.dart';
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -14,200 +15,195 @@ class NotificationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: _buildAppBar(),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              child: Text(
-                'Service Requests',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Obx(
-                () => ListView.builder(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.w,
-                    vertical: 8.h,
-                  ),
-                  itemCount: controller.serviceRequests.length,
-                  itemBuilder: (context, index) {
-                    final request = controller.serviceRequests[index];
-                    return _buildServiceRequestCard(request);
-                  },
-                ),
-              ),
-            ),
-          ],
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+        ),
+        titleSpacing: 0,
+        title: Text(
+          'Notification',
+          style: GoogleFonts.inter(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+      ),
+      body: Obx(
+        () => Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: ListView.builder(
+            padding: EdgeInsets.only(top: 16.h, bottom: 20.h),
+            itemCount: controller.serviceRequests.length,
+            itemBuilder: (context, index) {
+              final request = controller.serviceRequests[index];
+              return _NotificationCard(
+                request: request,
+                onTap: () => _handleNotificationClick(request),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: AppColors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: AppColors.black),
-        onPressed: () => Get.back(),
-      ),
-      title: Text(
-        'Notification',
-        style: GoogleFonts.inter(
-          fontSize: 18.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.black,
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.more_vert, color: AppColors.black),
-          onPressed: () {
-            // TODO: Add options menu
-          },
-        ),
-      ],
+  void _handleNotificationClick(ServiceRequest request) {
+    // Convert ServiceRequest to ServiceModel for ServiceDetailView
+    final serviceModel = _convertToServiceModel(request);
+    // Navigate to service detail view with accept/reject buttons (same as SP requests screen)
+    Get.to(
+      () => ServiceDetailView(service: serviceModel, isRequest: true),
     );
   }
 
-  Widget _buildServiceRequestCard(ServiceRequest request) {
+  /// Convert ServiceRequest to ServiceModel for ServiceDetailView
+  ServiceModel _convertToServiceModel(ServiceRequest request) {
+    return ServiceModel(
+      id: request.id,
+      title: request.serviceTitle,
+      description: request.serviceDescription,
+      images: [],
+      type: ServiceType.event,
+      provider: ServiceProvider(
+        name: request.customerName,
+        role: 'Customer',
+        imageUrl: request.customerImage,
+        isVerified: false,
+      ),
+      location: request.location,
+      rating: null,
+      reviewCount: null,
+      date: request.date,
+      basePrice: request.price,
+      priceUnit: request.priceUnit,
+      packages: null,
+      isBookmarked: false,
+    );
+  }
+}
+
+class _NotificationCard extends StatelessWidget {
+  final ServiceRequest request;
+  final VoidCallback onTap;
+
+  const _NotificationCard({
+    required this.request,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String name = request.customerName;
+    String action = 'sent you a request';
+
+    // Adjust action based on status
+    switch (request.status) {
+      case RequestStatus.accepted:
+        action = 'accepted your';
+        break;
+      case RequestStatus.rejected:
+        action = 'rejected your';
+        break;
+      case RequestStatus.pending:
+        action = 'sent you a';
+        break;
+    }
+
+    // Capitalize name
+    if (name.isNotEmpty) {
+      name = name[0].toUpperCase() + name.substring(1);
+    }
+
     return GestureDetector(
-      onTap: () {
-        // Navigate to service detail view with accept/reject buttons
-        Get.toNamed(
-          AppRoutes.serviceDetailWithDecision,
-          arguments: {'request': request},
-        );
-      },
+      onTap: onTap,
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.lightGrey),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: const Color(0xFFF0F0F0), width: 1.5),
         ),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Customer info row
-            Row(
-              children: [
-                _buildCustomerAvatar(request.customerImage),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
+            // Circular Logo with Black Background
+            Container(
+              height: 52.h,
+              width: 52.h,
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(10.w),
+                  child: Image.asset(
+                    'assets/images/food_fresho_logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 14.w),
+            // Text Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        request.customerName,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.black,
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '$name ',
+                                style: GoogleFonts.inter(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: action,
+                                style: GoogleFonts.inter(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF8A8A8A),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        'has sent you a request',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: AppColors.grey,
+                      Padding(
+                        padding: EdgeInsets.only(left: 8.w),
+                        child: Text(
+                          '9 hr ago',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF8A8A8A),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  _formatTimeAgo(request.date),
-                  style: GoogleFonts.inter(
-                    fontSize: 11.sp,
-                    color: AppColors.grey,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16.h),
-            // Service info
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: AppColors.lightGrey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48.w,
-                    height: 48.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: const Icon(
-                      Icons.request_quote,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          request.serviceTitle,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          '${request.price.toInt()} ${request.priceUnit}',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(request.status),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Text(
-                      _getStatusText(request.status),
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    'booking request',
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF8A8A8A),
                     ),
                   ),
                 ],
@@ -217,66 +213,5 @@ class NotificationView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildCustomerAvatar(String imageUrl) {
-    return Container(
-      width: 48.w,
-      height: 48.w,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(50.r)),
-      child: Image.network(
-        imageUrl,
-        width: 48.w,
-        height: 48.h,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: 48.w,
-            height: 48.h,
-            decoration: const BoxDecoration(
-              color: AppColors.lightGrey,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.person, color: AppColors.grey),
-          );
-        },
-      ),
-    );
-  }
-
-  Color _getStatusColor(RequestStatus status) {
-    switch (status) {
-      case RequestStatus.pending:
-        return AppColors.primary;
-      case RequestStatus.accepted:
-        return const Color(0xFF00C566); // Green
-      case RequestStatus.rejected:
-        return AppColors.error;
-    }
-  }
-
-  String _getStatusText(RequestStatus status) {
-    switch (status) {
-      case RequestStatus.pending:
-        return 'Pending';
-      case RequestStatus.accepted:
-        return 'Accepted';
-      case RequestStatus.rejected:
-        return 'Rejected';
-    }
-  }
-
-  String _formatTimeAgo(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else {
-      return '${difference.inDays}d ago';
-    }
   }
 }

@@ -1,11 +1,12 @@
+import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/shared/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
+import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/themes/app_colors.dart';
-import '../../service_provider_flow/profile/profile_controller.dart';
 
 class BookmarksView extends GetView<ProfileController> {
   const BookmarksView({super.key});
@@ -55,171 +56,20 @@ class BookmarksView extends GetView<ProfileController> {
                       return _buildShimmerItem();
                     }
                     final item = controller.bookmarks[index];
-                    return InkWell(
-                      onTap: () =>
-                          Get.to(() => ServiceDetailView(service: item)),
-                      borderRadius: BorderRadius.circular(16.r),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.r,
-                          vertical: 8.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(16.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.black.withOpacity(0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                          border: Border.all(color: AppColors.lightGrey),
-                        ),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12.r),
-                              child: Image.asset(
-                                item.images.first,
-                                width: 90.w,
-                                height: 90.h,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Container(
-                                      width: 90.w,
-                                      height: 90.h,
-                                      color: AppColors.lightGrey,
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        color: AppColors.grey,
-                                      ),
-                                    ),
-                              ),
-                            ),
-                            SizedBox(width: 16.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          item.title,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          controller.removeBookmark(item.id);
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(4.r),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary
-                                                .withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(
-                                              4.r,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.bookmark,
-                                            color: AppColors.primary,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Text(
-                                    item.provider.name,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.location_on_outlined,
-                                        size: 14,
-                                        color: AppColors.primary,
-                                      ),
-                                      SizedBox(width: 4.w),
-                                      Expanded(
-                                        child: Text(
-                                          item.location,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            color: AppColors.textSecondary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            '${item.basePrice}',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                          SizedBox(width: 2.w),
-                                          Text(
-                                            '${item.priceUnit}/hr',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 10.sp,
-                                              color: AppColors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
-                                            size: 14,
-                                          ),
-                                          SizedBox(width: 4.w),
-                                          Text(
-                                            '${item.rating}',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: CustomerBookmarkCard(
+                        imagePath: item.images.first,
+                        title: item.title,
+                        subtitle: item.provider.name,
+                        location: item.location,
+                        price: '${item.basePrice}',
+                        priceUnit: '${item.priceUnit}/hr',
+                        rating: '${item.rating}',
+                        showBookmarkButton: true,
+                        onTap: () =>
+                            Get.to(() => ServiceDetailView(service: item)),
+                        onBookmarkTap: () => controller.removeBookmark(item.id),
                       ),
                     );
                   },

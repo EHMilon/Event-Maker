@@ -186,15 +186,19 @@ class PaymentView extends StatelessWidget {
 
                 SizedBox(height: 40.h),
 
-                PrimaryTextButton(
-                  onPressed: () => controller.processPayment(),
-                  text: 'payNow'.tr,
-                ),
+                
                 SizedBox(height: 20.h),
               ],
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: PrimaryTextButton(
+                    onPressed: () => controller.processPayment(),
+                    text: 'payNow'.tr,
+                  ),
       ),
     );
   }
