@@ -9,6 +9,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
+import 'package:event_maker/data/models/service_model.dart';
 
 class SPHomeView extends GetView<SPHomeController> {
   const SPHomeView({super.key});
@@ -319,7 +321,7 @@ class SPHomeView extends GetView<SPHomeController> {
               ),
             ],
           ),
-              SizedBox(width: 12.w),
+          SizedBox(width: 12.w),
 
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -581,68 +583,94 @@ class SPHomeView extends GetView<SPHomeController> {
 
     final order = controller.activeOrders[index];
 
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.lightGrey),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        // Mocking ServiceModel from order details to reuse ServiceDetailView
+        final mockService = ServiceModel(
+          id: order.id,
+          title: order.title,
+          description:
+              'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
+          images: [order.imageUrl],
+          type: ServiceType.photography,
+          provider: ServiceProvider(
+            name: 'Jenny Smith',
+            role: 'Caterer',
+            imageUrl:
+                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop',
+            isVerified: true,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: Image.network(
-              order.imageUrl,
-              width: 64.w,
-              height: 64.h,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+          location:
+              'Airport Rd - Al Manhal - W14 02 - Abu Dhabi - United Arab Emirates',
+          rating: 4.8,
+          reviewCount: 120,
+          basePrice: 46,
+        );
+        Get.to(() => ServiceDetailView(service: mockService, isOrder: true));
+      },
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.lightGrey),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.r),
+              child: Image.network(
+                order.imageUrl,
                 width: 64.w,
                 height: 64.h,
-                color: Colors.grey[200],
-                child: const Icon(Icons.image_not_supported),
-              ),
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Text(
-              order.title,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-                height: 1.4,
-              ),
-            ),
-          ),
-          if (order.badgeCount > 0)
-            Container(
-              height: 24.h,
-              width: 24.h,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                color: Color(0xFFB485FF),
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                '${order.badgeCount}',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 64.w,
+                  height: 64.h,
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.image_not_supported),
                 ),
               ),
             ),
-        ],
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Text(
+                order.title,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            if (order.badgeCount > 0)
+              Container(
+                height: 24.h,
+                width: 24.h,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFB485FF),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '${order.badgeCount}',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

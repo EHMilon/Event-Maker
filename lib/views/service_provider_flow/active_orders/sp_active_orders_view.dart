@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
+import 'package:event_maker/data/models/service_model.dart';
 
 class SPActiveOrdersView extends StatelessWidget {
   const SPActiveOrdersView({super.key});
@@ -31,7 +33,11 @@ class SPActiveOrdersView extends StatelessWidget {
         ),
         title: Text(
           'Active Orders',
-          style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
       ),
       body: SafeArea(
@@ -52,37 +58,86 @@ class SPActiveOrdersView extends StatelessWidget {
   }
 
   Widget _buildOrderCard(int index, List<String> titles, List<int> badges) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: Image.network('https://picsum.photos/id/${index + 40}/120/120', width: 64.w, height: 64.h, fit: BoxFit.cover),
+    return GestureDetector(
+      onTap: () {
+        // Mocking ServiceModel from order details to reuse ServiceDetailView
+        final mockService = ServiceModel(
+          id: index.toString(),
+          title: titles[index % titles.length],
+          description:
+              'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
+          images: ['https://picsum.photos/id/${index + 40}/120/120'],
+          type: ServiceType.photography,
+          provider: ServiceProvider(
+            name: 'Jenny Smith',
+            role: 'Caterer',
+            imageUrl:
+                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop',
+            isVerified: true,
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Text(
-              titles[index % titles.length],
-              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.4),
+          location:
+              'Airport Rd - Al Manhal - W14 02 - Abu Dhabi - United Arab Emirates',
+          rating: 4.8,
+          reviewCount: 120,
+          basePrice: 46,
+        );
+        Get.to(() => ServiceDetailView(service: mockService, isOrder: true));
+      },
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          Container(
-            height: 24.h,
-            width: 24.h,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(color: Color(0xFFB485FF), shape: BoxShape.circle),
-            child: Text(
-              '${badges[index % badges.length]}',
-              style: GoogleFonts.inter(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.w700),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.r),
+              child: Image.network(
+                'https://picsum.photos/id/${index + 40}/120/120',
+                width: 64.w,
+                height: 64.h,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-        ],
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Text(
+                titles[index % titles.length],
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            Container(
+              height: 24.h,
+              width: 24.h,
+              alignment: Alignment.center,
+              decoration: const BoxDecoration(
+                color: Color(0xFFB485FF),
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '${badges[index % badges.length]}',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

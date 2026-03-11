@@ -40,11 +40,14 @@ class AppLocalization extends Translations {
     'skip': 'Skip',
     'next': 'Next',
     'onboardingTitle1': 'Grab all events now only in your hands',
-    'onboardingSubtitle1': 'Event Maker is here to help you to find the best events based on your interests.',
+    'onboardingSubtitle1':
+        'Event Maker is here to help you to find the best events based on your interests.',
     'onboardingTitle2': 'Find best events near you',
-    'onboardingSubtitle2': 'By enabling your location, you help us provide recommendations for events around you.',
+    'onboardingSubtitle2':
+        'By enabling your location, you help us provide recommendations for events around you.',
     'onboardingTitle3': "Let's go to your favorite event now",
-    'onboardingSubtitle3': 'Event Maker is here to help you to find the best events based on your interests.',
+    'onboardingSubtitle3':
+        'Event Maker is here to help you to find the best events based on your interests.',
 
     // User Type
     'selectUserType': 'Select a user type',
@@ -70,7 +73,8 @@ class AppLocalization extends Translations {
     'fullNamePlaceholder': 'John Doe',
     'createAccount': 'Create Account',
     'alreadyHaveAccount': 'Already have an account? ',
-    'termsAndPrivacy': 'By using the Event Maker app you agree to our Terms of Use and Privacy-Notice',
+    'termsAndPrivacy':
+        'By using the Event Maker app you agree to our Terms of Use and Privacy-Notice',
     'termsOfUse': 'Terms of Use',
     'privacyNotice': 'Privacy-Notice',
     'and': ' and ',
@@ -90,7 +94,8 @@ class AppLocalization extends Translations {
     'confirmPassword': 'Rewrite password',
     'confirm': 'Confirm',
     'congratulations': 'Congratulations !',
-    'resetSuccessful': 'Password Reset successful! You\'ll be redirected to the login screen now',
+    'resetSuccessful':
+        'Password Reset successful! You\'ll be redirected to the login screen now',
 
     // Auth - Signup Step Two
     'phoneNumber': 'Phone Number',
@@ -144,6 +149,11 @@ class AppLocalization extends Translations {
     'pricing': 'Pricing',
     'bookNow': 'Book Now',
     'reviewsCount': '@count reviews',
+    'details': 'Details',
+    'mobileNumber': 'Mobile Number',
+    'dateTime': 'Date & Time',
+    'subTotal': 'Sub Total',
+    'name': 'Name',
 
     // Profile & Settings
     'profile': 'Profile',
@@ -200,13 +210,15 @@ class AppLocalization extends Translations {
     'reject': 'Reject',
     'cancel': 'Cancel',
     'done': 'Done',
+    'markAsComplete': 'Mark as Complete',
     'requestDetails': 'Request Details',
     'confirmAcceptTitle': 'Confirm Request Acceptance',
     'confirmAcceptSubtitle': 'Are you sure you want to accept this request?',
     'confirmRejectTitle': 'Confirm Request Rejection',
     'confirmRejectSubtitle': 'Are you sure you want to reject this request?',
     'acceptSuccessTitle': 'Request Accepted Successfully',
-    'acceptSuccessSubtitle': 'You have successfully accepted the request. The client will be notified shortly.',
+    'acceptSuccessSubtitle':
+        'You have successfully accepted the request. The client will be notified shortly.',
     'rejectSuccessTitle': 'Request Rejected Successfully',
     'rejectSuccessSubtitle': 'You have successfully rejected the request.',
 
@@ -243,8 +255,10 @@ class AppLocalization extends Translations {
     'language': 'Language',
     'deleteAccount': 'Delete Account',
     'accountDeletionTitle': 'Account Deletion',
-    'accountDeletionSubtitle': 'Are you sure you want to delete the account? Once you delete the account you cannot get it back again.',
-    'accountDeletionSuccess': 'Account deleted successfully. Hope to see you again soon.',
+    'accountDeletionSubtitle':
+        'Are you sure you want to delete the account? Once you delete the account you cannot get it back again.',
+    'accountDeletionSuccess':
+        'Account deleted successfully. Hope to see you again soon.',
     'update': 'Update',
     'saveChanges': 'Save Changes',
     'profileUpdatedSuccessfully': 'Profile updated successfully',
@@ -258,7 +272,8 @@ class AppLocalization extends Translations {
     'upload': 'Upload',
     'addCaption': 'Add a caption',
     'enterCaption': 'Enter Caption',
-    'contactUsSubtitle': 'You can get in touch with us through below platforms. Our team will reach out to you as soon as it would be possible.',
+    'contactUsSubtitle':
+        'You can get in touch with us through below platforms. Our team will reach out to you as soon as it would be possible.',
     'customerSupport': 'Customer Support',
     'socialMedia': 'Social Media',
     'myProfile': 'My Profile',
@@ -293,7 +308,8 @@ class AppLocalization extends Translations {
     'setTimeSlots': 'Set Time Slots',
     'to': 'to',
     'save': 'Save',
-    'packagesInstructions': 'Create packages with different pricing tiers for your service',
+    'packagesInstructions':
+        'Create packages with different pricing tiers for your service',
     'noPackagesAdded': 'No packages added yet',
     'addFirstPackage': 'Add your first package',
     'savePackages': 'Save Packages',
@@ -303,7 +319,8 @@ class AppLocalization extends Translations {
     'features': 'Features',
     'addFeature': 'Add Feature',
     'enterFeatureHint': 'Enter feature',
-    'noFeaturesAdded': 'No features added. Click "Add Feature" to add features.',
+    'noFeaturesAdded':
+        'No features added. Click "Add Feature" to add features.',
     'packageLabel': 'Package @index',
     'availabilitySaved': 'Availability saved successfully',
     'packagesSaved': 'Packages saved successfully',
@@ -313,7 +330,8 @@ class AppLocalization extends Translations {
     'availability': 'Availability',
     'additionalAvailability': 'Additional Availability',
     'addAdditionalAvailability': 'Add Additional Availability',
-    'additionalAvailabilityDisabledMsg': 'Additional availability is disabled because "Cannot go outside location" is enabled.',
+    'additionalAvailabilityDisabledMsg':
+        'Additional availability is disabled because "Cannot go outside location" is enabled.',
     'startTime': 'Start Time',
     'endTime': 'End Time',
     'select': 'Select',
@@ -365,13 +383,15 @@ class AppLocalization extends Translations {
     'total': 'Total',
     'paymentMethod': 'Payment Method',
     'payNow': 'Pay now',
-    'paymentDisclaimer': 'Your payment information is secure and encrypted. By confirming, you agree to our Terms of Service.',
+    'paymentDisclaimer':
+        'Your payment information is secure and encrypted. By confirming, you agree to our Terms of Service.',
     'stripe': 'Stripe',
     'paypal': 'Paypal',
 
     // Payment Confirmation
     'paymentSuccessful': 'Payment Successful!',
-    'bookingConfirmedSubtitle': 'Your booking has been confirmed. Thank you for using our service!',
+    'bookingConfirmedSubtitle':
+        'Your booking has been confirmed. Thank you for using our service!',
     'backToHome': 'Back to Home',
     // Customer Home
     'serviceCategories': 'Service Categories',
@@ -401,9 +421,11 @@ class AppLocalization extends Translations {
     'selectLocationTitle': 'Select Location',
     'additionalRequest': 'Additional Request',
     'specialRequests': 'Special Requests (Optional)',
-    'specialRequestsHint': 'Any special requirements or notes for the service provider...',
+    'specialRequestsHint':
+        'Any special requirements or notes for the service provider...',
     'requestSentSuccessfully': 'Request Sent Successfully!',
-    'requestSentSubtitle': 'Your booking request has been sent to the service provider. You will be notified once they accept it.',
+    'requestSentSubtitle':
+        'Your booking request has been sent to the service provider. You will be notified once they accept it.',
   };
 
   // Arabic translations
@@ -422,11 +444,14 @@ class AppLocalization extends Translations {
     'skip': 'تخطي',
     'next': 'التالي',
     'onboardingTitle1': 'احصل على جميع الفعاليات الآن بين يديك',
-    'onboardingSubtitle1': 'صانع الفعاليات هنا لمساعدتك في العثور على أفضل الفعاليات بناءً على اهتماماتك.',
+    'onboardingSubtitle1':
+        'صانع الفعاليات هنا لمساعدتك في العثور على أفضل الفعاليات بناءً على اهتماماتك.',
     'onboardingTitle2': 'ابحث عن أفضل الفعاليات بالقرب منك',
-    'onboardingSubtitle2': 'من خلال تمكين موقعك، تساعدنا في تقديم توصيات للفعاليات من حولك.',
+    'onboardingSubtitle2':
+        'من خلال تمكين موقعك، تساعدنا في تقديم توصيات للفعاليات من حولك.',
     'onboardingTitle3': 'لنذهب إلى فعاليتك المفضلة الآن',
-    'onboardingSubtitle3': 'صانع الفعاليات هنا لمساعدتك في العثور على أفضل الفعاليات بناءً على اهتماماتك.',
+    'onboardingSubtitle3':
+        'صانع الفعاليات هنا لمساعدتك في العثور على أفضل الفعاليات بناءً على اهتماماتك.',
 
     // User Type
     'selectUserType': 'اختر نوع المستخدم',
@@ -452,7 +477,8 @@ class AppLocalization extends Translations {
     'fullNamePlaceholder': 'محمد أحمد',
     'createAccount': 'إنشاء حساب',
     'alreadyHaveAccount': 'لديك حساب بالفعل؟ ',
-    'termsAndPrivacy': 'باستخدام تطبيق صانع الفعاليات فإنك توافق على شروط الاستخدام وإشعار الخصوصية',
+    'termsAndPrivacy':
+        'باستخدام تطبيق صانع الفعاليات فإنك توافق على شروط الاستخدام وإشعار الخصوصية',
     'termsOfUse': 'شروط الاستخدام',
     'privacyNotice': 'إشعار الخصوصية',
     'and': ' و ',
@@ -472,7 +498,8 @@ class AppLocalization extends Translations {
     'confirmPassword': 'تأكيد كلمة المرور',
     'confirm': 'تأكيد',
     'congratulations': 'تهانينا!',
-    'resetSuccessful': 'تم إعادة تعيين كلمة المرور بنجاح! سيتم توجيهك إلى شاشة تسجيل الدخول الآن',
+    'resetSuccessful':
+        'تم إعادة تعيين كلمة المرور بنجاح! سيتم توجيهك إلى شاشة تسجيل الدخول الآن',
 
     // Auth - Signup Step Two
     'phoneNumber': 'رقم الهاتف',
@@ -526,6 +553,11 @@ class AppLocalization extends Translations {
     'pricing': 'التسعير',
     'bookNow': 'احجز الآن',
     'reviewsCount': '@count تقييم',
+    'details': 'التفاصيل',
+    'mobileNumber': 'رقم الهاتف المتحرك',
+    'dateTime': 'التاريخ والوقت',
+    'subTotal': 'المجموع الفرعي',
+    'name': 'الاسم',
 
     // Profile & Settings
     'profile': 'الملف الشخصي',
@@ -580,6 +612,7 @@ class AppLocalization extends Translations {
     'reject': 'رفض',
     'cancel': 'إلغاء',
     'done': 'تم',
+    'markAsComplete': 'وضع علامة كمكتمل',
     'requestDetails': 'تفاصيل الطلب',
     'confirmAcceptTitle': 'تأكيد قبول الطلب',
     'confirmAcceptSubtitle': 'هل أنت متأكد أنك تريد قبول هذا الطلب؟',
@@ -623,8 +656,10 @@ class AppLocalization extends Translations {
     'language': 'اللغة',
     'deleteAccount': 'حذف الحساب',
     'accountDeletionTitle': 'حذف الحساب',
-    'accountDeletionSubtitle': 'هل أنت متأكد أنك تريد حذف الحساب؟ بمجرد الحذف لن تتمكن من استعادته مرة أخرى.',
-    'accountDeletionSuccess': 'تم حذف الحساب بنجاح. نأمل أن نراك مرة أخرى قريباً.',
+    'accountDeletionSubtitle':
+        'هل أنت متأكد أنك تريد حذف الحساب؟ بمجرد الحذف لن تتمكن من استعادته مرة أخرى.',
+    'accountDeletionSuccess':
+        'تم حذف الحساب بنجاح. نأمل أن نراك مرة أخرى قريباً.',
     'update': 'تحديث',
     'saveChanges': 'حفظ التغييرات',
     'passwordsDoNotMatch': 'كلمات المرور غير متطابقة',
@@ -639,7 +674,8 @@ class AppLocalization extends Translations {
     'upload': 'تحميل',
     'addCaption': 'إضافة تعليق',
     'enterCaption': 'أدخل التعليق',
-    'contactUsSubtitle': 'يمكنك التواصل معنا من خلال المنصات أدناه. سيقوم فريقنا بالرد عليك في أقرب وقت ممكن.',
+    'contactUsSubtitle':
+        'يمكنك التواصل معنا من خلال المنصات أدناه. سيقوم فريقنا بالرد عليك في أقرب وقت ممكن.',
     'customerSupport': 'دعم العملاء',
     'socialMedia': 'وسائل التواصل الاجتماعي',
     'myProfile': 'ملفي الشخصي',
@@ -694,7 +730,8 @@ class AppLocalization extends Translations {
     'availability': 'التوفر',
     'additionalAvailability': 'التوفر الإضافي',
     'addAdditionalAvailability': 'إضافة توفر إضافي',
-    'additionalAvailabilityDisabledMsg': 'التوفر الإضافي معطل لأن "لا يمكن الخروج من الموقع" مفعل.',
+    'additionalAvailabilityDisabledMsg':
+        'التوفر الإضافي معطل لأن "لا يمكن الخروج من الموقع" مفعل.',
     'startTime': 'وقت البدء',
     'endTime': 'وقت الانتهاء',
     'select': 'اختر',
@@ -746,7 +783,8 @@ class AppLocalization extends Translations {
     'total': 'الإجمالي',
     'paymentMethod': 'طريقة الدفع',
     'payNow': 'ادفع الآن',
-    'paymentDisclaimer': 'معلومات الدفع الخاصة بك آمنة ومشفرة. من خلال التأكيد، فإنك توافق على شروط الخدمة الخاصة بنا.',
+    'paymentDisclaimer':
+        'معلومات الدفع الخاصة بك آمنة ومشفرة. من خلال التأكيد، فإنك توافق على شروط الخدمة الخاصة بنا.',
     'stripe': 'سترايب',
     'paypal': 'بايبال',
 
@@ -786,6 +824,7 @@ class AppLocalization extends Translations {
     'specialRequests': 'طلبات خاصة (اختياري)',
     'specialRequestsHint': 'أي متطلبات خاصة أو ملاحظات لمقدم الخدمة...',
     'requestSentSuccessfully': 'تم إرسال الطلب بنجاح!',
-    'requestSentSubtitle': 'تم إرسال طلب الحجز الخاص بك إلى مقدم الخدمة. سيتم إخطارك بمجرد قبوله.',
+    'requestSentSubtitle':
+        'تم إرسال طلب الحجز الخاص بك إلى مقدم الخدمة. سيتم إخطارك بمجرد قبوله.',
   };
 }
