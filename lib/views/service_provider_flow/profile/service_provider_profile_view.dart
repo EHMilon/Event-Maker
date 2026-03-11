@@ -22,13 +22,19 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
         appBar: AppBar(
           backgroundColor: AppColors.backgroundLight,
           elevation: 0,
+          titleSpacing: 24.w,
           title: Text(
             'myProfile'.tr,
             style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
           actions: [
             PopupMenuButton<String>(
-              icon: SvgPicture.asset('assets/images/setting_fill.svg', width: 24.r, height: 24.r, colorFilter: const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
+              icon: SvgPicture.asset(
+                'assets/images/setting_fill.svg',
+                width: 24.r,
+                height: 24.r,
+                colorFilter: const ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+              ),
               onSelected: (value) {
                 if (value == 'settings') {
                   Get.toNamed(AppRoutes.profile);

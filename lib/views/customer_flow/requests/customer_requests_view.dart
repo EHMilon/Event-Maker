@@ -21,39 +21,25 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
         appBar: AppBar(
           backgroundColor: AppColors.white,
           elevation: 0,
+          titleSpacing: 24.w,
           title: Text(
             'bookings'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
             indicatorWeight: 3,
-            labelStyle: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-            unselectedLabelStyle: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-            ),
+            labelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
             tabs: [
               Tab(text: 'upcoming'.tr),
               Tab(text: 'history'.tr),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _UpcomingRequestsTab(),
-            _HistoryRequestsTab(),
-          ],
-        ),
+        body: TabBarView(children: [_UpcomingRequestsTab(), _HistoryRequestsTab()]),
       ),
     );
   }
@@ -182,24 +168,13 @@ class _RequestCard extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(color: AppColors.lightGrey),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Row(
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20.r),
-              child: Image.asset(
-                request.image,
-                width: 80.w,
-                height: 80.h,
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset(request.image, width: 80.w, height: 80.h, fit: BoxFit.cover),
             ),
             Expanded(
               child: Padding(
@@ -209,28 +184,17 @@ class _RequestCard extends StatelessWidget {
                   children: [
                     Text(
                       request.date,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       request.title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       request.subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -258,10 +222,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             message.tr,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
           ),
         ],
       ),

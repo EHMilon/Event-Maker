@@ -24,20 +24,14 @@ class SPActiveOrdersView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFBFBFE),
         elevation: 0,
+        titleSpacing: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(
-            Icons.arrow_back,
-            color: AppColors.textPrimary,
-          ),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
         ),
         title: Text(
           'Active Orders',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
       ),
       body: SafeArea(
@@ -63,52 +57,29 @@ class SPActiveOrdersView extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
-            child: Image.network(
-              'https://picsum.photos/id/${index + 40}/120/120',
-              width: 64.w,
-              height: 64.h,
-              fit: BoxFit.cover,
-            ),
+            child: Image.network('https://picsum.photos/id/${index + 40}/120/120', width: 64.w, height: 64.h, fit: BoxFit.cover),
           ),
           SizedBox(width: 16.w),
           Expanded(
             child: Text(
               titles[index % titles.length],
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-                height: 1.4,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.4),
             ),
           ),
           Container(
             height: 24.h,
             width: 24.h,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFB485FF),
-              shape: BoxShape.circle,
-            ),
+            decoration: const BoxDecoration(color: Color(0xFFB485FF), shape: BoxShape.circle),
             child: Text(
               '${badges[index % badges.length]}',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-              ),
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.w700),
             ),
           ),
         ],

@@ -12,15 +12,9 @@ class ViewCertificateView extends StatefulWidget {
 }
 
 class _ViewCertificateViewState extends State<ViewCertificateView> {
-  final TextEditingController _documentTitleController = TextEditingController(
-    text: 'Professional Chef Certificate',
-  );
-  final TextEditingController _instituteController = TextEditingController(
-    text: 'Sonargaon College of Hotel Management',
-  );
-  final TextEditingController _passingYearController = TextEditingController(
-    text: '25/07/2025',
-  );
+  final TextEditingController _documentTitleController = TextEditingController(text: 'Professional Chef Certificate');
+  final TextEditingController _instituteController = TextEditingController(text: 'Sonargaon College of Hotel Management');
+  final TextEditingController _passingYearController = TextEditingController(text: '25/07/2025');
 
   @override
   void dispose() {
@@ -43,13 +37,8 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
         ),
         title: Text(
           'View Certificate',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
@@ -62,13 +51,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
               height: 200.h,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 4))],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12.r),
@@ -79,11 +62,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
                     return Container(
                       color: Colors.grey.shade200,
                       child: Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          size: 50.r,
-                          color: AppColors.textSecondary,
-                        ),
+                        child: Icon(Icons.image_not_supported, size: 50.r, color: AppColors.textSecondary),
                       ),
                     );
                   },
@@ -96,11 +75,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
             // Document Title
             Text(
               'Document Title',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
             ),
             SizedBox(height: 8.h),
             Container(
@@ -113,15 +88,8 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
               child: TextField(
                 controller: _documentTitleController,
                 readOnly: true,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textPrimary,
-                ),
+                decoration: InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
+                style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
               ),
             ),
 
@@ -130,11 +98,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
             // Institute
             Text(
               'Institute',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
             ),
             SizedBox(height: 8.h),
             Container(
@@ -147,15 +111,8 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
               child: TextField(
                 controller: _instituteController,
                 readOnly: true,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textPrimary,
-                ),
+                decoration: InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
+                style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
               ),
             ),
 
@@ -164,11 +121,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
             // Passing Year
             Text(
               'Passing Year',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
             ),
             SizedBox(height: 8.h),
             Container(
@@ -180,25 +133,14 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 20.r,
-                    color: AppColors.primary,
-                  ),
+                  Icon(Icons.calendar_today, size: 20.r, color: AppColors.primary),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: TextField(
                       controller: _passingYearController,
                       readOnly: true,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: AppColors.textPrimary,
-                      ),
+                      decoration: InputDecoration(border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero),
+                      style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
                     ),
                   ),
                 ],

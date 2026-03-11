@@ -19,39 +19,25 @@ class SPRequestsView extends GetView<RequestsController> {
         appBar: AppBar(
           backgroundColor: AppColors.white,
           elevation: 0,
+          titleSpacing: 24.w,
           title: Text(
             'requests'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primary,
             indicatorWeight: 3,
-            labelStyle: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-            unselectedLabelStyle: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-            ),
+            labelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500),
             tabs: [
               Tab(text: 'upcoming'.tr),
               Tab(text: 'pastEvents'.tr),
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            _UpcomingRequestsTab(),
-            _PastRequestsTab(),
-          ],
-        ),
+        body: TabBarView(children: [_UpcomingRequestsTab(), _PastRequestsTab()]),
       ),
     );
   }
@@ -90,9 +76,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
               title: service.title,
               subtitle: service.location,
               onTap: () {
-                Get.to(
-                  () => ServiceDetailView(service: service, isRequest: true),
-                );
+                Get.to(() => ServiceDetailView(service: service, isRequest: true));
               },
             );
           },
@@ -110,10 +94,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
         separatorBuilder: (_, __) => SizedBox(height: 16.h),
         itemBuilder: (_, __) => Container(
           height: 90.h,
-          decoration: BoxDecoration(
-            color: AppColors.lightGrey,
-            borderRadius: BorderRadius.circular(20.r),
-          ),
+          decoration: BoxDecoration(color: AppColors.lightGrey, borderRadius: BorderRadius.circular(20.r)),
           child: Row(
             children: [
               Container(width: 80.w, height: 80.h, color: AppColors.grey),
@@ -143,19 +124,14 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 16.h),
           Text(
             controller.errorMessage.value,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: controller.fetchRequests,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
             ),
             child: Text('retry'.tr),
           ),
@@ -174,10 +150,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 12.h),
           Text(
             message.tr,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -190,9 +163,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
     final suffix = _getDaySuffix(day);
     final month = _getMonthShort(dateTime.month);
     final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12
-        ? dateTime.hour - 12
-        : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
     return '$day$suffix $month - $weekday - $hour:$minute $period';
@@ -213,20 +184,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
   }
 
   String _getMonthShort(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[month - 1];
   }
 
@@ -268,9 +226,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
               title: service.title,
               subtitle: service.location,
               onTap: () {
-                Get.to(
-                  () => ServiceDetailView(service: service, isRequest: true),
-                );
+                Get.to(() => ServiceDetailView(service: service, isRequest: true));
               },
             );
           },
@@ -288,10 +244,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
         separatorBuilder: (_, __) => SizedBox(height: 16.h),
         itemBuilder: (_, __) => Container(
           height: 90.h,
-          decoration: BoxDecoration(
-            color: AppColors.lightGrey,
-            borderRadius: BorderRadius.circular(20.r),
-          ),
+          decoration: BoxDecoration(color: AppColors.lightGrey, borderRadius: BorderRadius.circular(20.r)),
           child: Row(
             children: [
               Container(width: 80.w, height: 80.h, color: AppColors.grey),
@@ -321,19 +274,14 @@ class _PastRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 16.h),
           Text(
             controller.errorMessage.value,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: controller.fetchRequests,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
             ),
             child: Text('retry'.tr),
           ),
@@ -351,10 +299,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
           SizedBox(height: 12.h),
           Text(
             'noPastRequests'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 16.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -367,9 +312,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
     final suffix = _getDaySuffix(day);
     final month = _getMonthShort(dateTime.month);
     final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12
-        ? dateTime.hour - 12
-        : (dateTime.hour == 0 ? 12 : dateTime.hour);
+    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
     final minute = dateTime.minute.toString().padLeft(2, '0');
     final period = dateTime.hour >= 12 ? 'PM' : 'AM';
     return '$day$suffix $month - $weekday - $hour:$minute $period';
@@ -390,20 +333,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
   }
 
   String _getMonthShort(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[month - 1];
   }
 
@@ -414,13 +344,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
 }
 
 class _RequestCard extends StatelessWidget {
-  const _RequestCard({
-    required this.image,
-    required this.date,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
+  const _RequestCard({required this.image, required this.date, required this.title, required this.subtitle, required this.onTap});
 
   final String image;
   final String date;
@@ -437,13 +361,7 @@ class _RequestCard extends StatelessWidget {
           color: AppColors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(color: AppColors.lightGrey),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: AppColors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 4))],
         ),
         child: Row(
           children: [
@@ -451,23 +369,9 @@ class _RequestCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20.r),
               child: image.isNotEmpty
                   ? (image.startsWith('http')
-                        ? Image.network(
-                            image,
-                            width: 80.w,
-                            height: 80.h,
-                            fit: BoxFit.cover,
-                          )
-                        : Image.asset(
-                            image,
-                            width: 80.w,
-                            height: 80.h,
-                            fit: BoxFit.cover,
-                          ))
-                  : Container(
-                      width: 80.w,
-                      height: 80.h,
-                      color: AppColors.lightGrey,
-                    ),
+                        ? Image.network(image, width: 80.w, height: 80.h, fit: BoxFit.cover)
+                        : Image.asset(image, width: 80.w, height: 80.h, fit: BoxFit.cover))
+                  : Container(width: 80.w, height: 80.h, color: AppColors.lightGrey),
             ),
             Expanded(
               child: Padding(
@@ -477,29 +381,18 @@ class _RequestCard extends StatelessWidget {
                   children: [
                     Text(
                       date,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       subtitle,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
                     ),
                   ],
                 ),

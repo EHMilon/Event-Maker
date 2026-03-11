@@ -13,11 +13,7 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
   final String categoryType;
   final String categoryName;
 
-  const CategoryServicesView({
-    super.key,
-    required this.categoryType,
-    required this.categoryName,
-  });
+  const CategoryServicesView({super.key, required this.categoryType, required this.categoryName});
 
   @override
   String get tag => '${categoryType}_$categoryName';
@@ -29,15 +25,10 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
       appBar: AppBar(
         title: Text(
           categoryName,
-          style: TextStyle(
-            color: AppColors.black,
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: AppColors.black, fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
         backgroundColor: AppColors.white,
         elevation: 0,
-        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () => Get.back(),
@@ -85,27 +76,16 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search_off,
-            size: 64.r,
-            color: AppColors.grey,
-          ),
+          Icon(Icons.search_off, size: 64.r, color: AppColors.grey),
           SizedBox(height: 16.h),
           Text(
             'No services found',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black,
-            ),
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.black),
           ),
           SizedBox(height: 8.h),
           Text(
             'There are no services available in this category yet.',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: AppColors.grey,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.grey),
             textAlign: TextAlign.center,
           ),
         ],
@@ -131,9 +111,7 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
           isBookmarked: service.isBookmarked,
           useFullWidth: true,
           onTap: () {
-            Get.to(
-              () => ServiceDetailView(service: service),
-            );
+            Get.to(() => ServiceDetailView(service: service));
           },
         );
       },

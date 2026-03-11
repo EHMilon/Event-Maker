@@ -16,6 +16,8 @@ class MapView extends GetView<MapController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
+        titleSpacing: 20.w,
+
         title: Text(
           'myLocation'.tr,
           style: GoogleFonts.inter(

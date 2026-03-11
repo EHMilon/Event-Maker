@@ -22,13 +22,10 @@ class ServicesView extends GetView<SPServicesController> {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
+        titleSpacing: 24.w,
         title: Text(
           'myServices'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
       ),
       body: SafeArea(
@@ -57,13 +54,7 @@ class ServicesView extends GetView<SPServicesController> {
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
               border: Border.all(color: AppColors.lightGrey),
             ),
             child: TextField(
@@ -71,20 +62,10 @@ class ServicesView extends GetView<SPServicesController> {
               onChanged: controller.onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'searchServices'.tr,
-                hintStyle: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textSecondary.withOpacity(0.6),
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: AppColors.primary,
-                  size: 20.r,
-                ),
+                hintStyle: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary.withOpacity(0.6)),
+                prefixIcon: Icon(Icons.search, color: AppColors.primary, size: 20.r),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 12.h,
-                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               ),
             ),
           ),
@@ -92,10 +73,7 @@ class ServicesView extends GetView<SPServicesController> {
         SizedBox(width: 12.w),
         // Add Button (Icon + Text)
         InkWell(
-          onTap: () => Get.to(
-            () => const AddServiceView(),
-            binding: AddScreensBinding(),
-          ),
+          onTap: () => Get.to(() => const AddServiceView(), binding: AddScreensBinding()),
           borderRadius: BorderRadius.circular(12.r),
           child: Container(
             height: 50.h,
@@ -103,13 +81,7 @@ class ServicesView extends GetView<SPServicesController> {
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -118,11 +90,7 @@ class ServicesView extends GetView<SPServicesController> {
                 SizedBox(width: 4.w),
                 Text(
                   'add'.tr,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.white,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.white),
                 ),
               ],
             ),
@@ -178,29 +146,15 @@ class ServicesView extends GetView<SPServicesController> {
           child: Container(
             height: 110.h,
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
+            decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(20.r)),
             child: ListTile(
               leading: Container(
                 width: 80.w,
                 height: 80.w,
-                decoration: BoxDecoration(
-                  color: AppColors.lightGrey,
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
+                decoration: BoxDecoration(color: AppColors.lightGrey, borderRadius: BorderRadius.circular(14.r)),
               ),
-              title: Container(
-                height: 16.h,
-                width: 100.w,
-                color: AppColors.lightGrey,
-              ),
-              subtitle: Container(
-                height: 12.h,
-                width: 150.w,
-                color: AppColors.lightGrey,
-              ),
+              title: Container(height: 16.h, width: 100.w, color: AppColors.lightGrey),
+              subtitle: Container(height: 12.h, width: 150.w, color: AppColors.lightGrey),
             ),
           ),
         );
@@ -214,28 +168,17 @@ class ServicesView extends GetView<SPServicesController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            isSearching ? Icons.search_off : Icons.inventory_2_outlined,
-            size: 64.r,
-            color: AppColors.grey.withOpacity(0.5),
-          ),
+          Icon(isSearching ? Icons.search_off : Icons.inventory_2_outlined, size: 64.r, color: AppColors.grey.withOpacity(0.5)),
           SizedBox(height: 16.h),
           Text(
             isSearching ? 'noServicesFound'.tr : 'noServicesYet'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+            style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
           ),
           SizedBox(height: 8.h),
           Text(
             isSearching ? '' : 'tapToAddService'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -247,11 +190,7 @@ class ServiceProviderServiceTile extends StatelessWidget {
   final ServiceModel service;
   final VoidCallback onTap;
 
-  const ServiceProviderServiceTile({
-    super.key,
-    required this.service,
-    required this.onTap,
-  });
+  const ServiceProviderServiceTile({super.key, required this.service, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -269,13 +208,7 @@ class ServiceProviderServiceTile extends StatelessWidget {
             color: AppColors.white,
             borderRadius: BorderRadius.circular(20.r),
             border: Border.all(color: AppColors.lightGrey),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
           ),
           child: Row(
             children: [
@@ -291,16 +224,14 @@ class ServiceProviderServiceTile extends StatelessWidget {
                                 width: 85.w,
                                 height: 85.w,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildPlaceholderImage(),
+                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
                               )
                             : Image.asset(
                                 imagePath,
                                 width: 85.w,
                                 height: 85.w,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildPlaceholderImage(),
+                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
                               ))
                       : _buildPlaceholderImage(),
                 ),
@@ -315,32 +246,16 @@ class ServiceProviderServiceTile extends StatelessWidget {
                       service.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                     ),
                     SizedBox(height: 4.h),
                     // Service type badge
                     Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getServiceTypeColor(
-                          service.type,
-                        ).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                      decoration: BoxDecoration(color: _getServiceTypeColor(service.type).withOpacity(0.1), borderRadius: BorderRadius.circular(6.r)),
                       child: Text(
                         _getServiceTypeLabel(service.type),
-                        style: GoogleFonts.inter(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w600,
-                          color: _getServiceTypeColor(service.type),
-                        ),
+                        style: GoogleFonts.inter(fontSize: 10.sp, fontWeight: FontWeight.w600, color: _getServiceTypeColor(service.type)),
                       ),
                     ),
                     SizedBox(height: 8.h),
@@ -350,28 +265,17 @@ class ServiceProviderServiceTile extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              size: 14.r,
-                              color: AppColors.textSecondary.withOpacity(0.7),
-                            ),
+                            Icon(Icons.location_on_outlined, size: 14.r, color: AppColors.textSecondary.withOpacity(0.7)),
                             SizedBox(width: 4.w),
                             Text(
                               service.location,
-                              style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
                             ).maxWidth,
                           ],
                         ),
                         Text(
                           '${service.basePrice?.toInt() ?? 0} ${service.priceUnit}',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
+                          style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.primary),
                         ),
                       ],
                     ),
@@ -379,11 +283,7 @@ class ServiceProviderServiceTile extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8.w),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 14.r,
-                color: AppColors.grey.withOpacity(0.5),
-              ),
+              Icon(Icons.arrow_forward_ios, size: 14.r, color: AppColors.grey.withOpacity(0.5)),
             ],
           ),
         ),

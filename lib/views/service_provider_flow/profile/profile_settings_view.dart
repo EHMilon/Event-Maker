@@ -18,17 +18,14 @@ class ProfileSettingsView extends GetView<ProfileController> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'profileSettings'.tr,
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w500),
         ),
       ),
       body: Obx(
@@ -48,17 +45,9 @@ class ProfileSettingsView extends GetView<ProfileController> {
                         padding: EdgeInsets.all(3.r),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primary,
-                            width: 2.w,
-                          ),
+                          border: Border.all(color: AppColors.primary, width: 2.w),
                         ),
-                        child: CircleAvatar(
-                          radius: 50.r,
-                          backgroundImage: AssetImage(
-                            controller.profileImage.value,
-                          ),
-                        ),
+                        child: CircleAvatar(radius: 50.r, backgroundImage: AssetImage(controller.profileImage.value)),
                       ),
                       Positioned(
                         bottom: 0,
@@ -70,19 +59,9 @@ class ProfileSettingsView extends GetView<ProfileController> {
                             decoration: BoxDecoration(
                               color: AppColors.white,
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
                             ),
-                            child: Icon(
-                              Icons.camera_alt_outlined,
-                              size: 20.sp,
-                              color: AppColors.textPrimary,
-                            ),
+                            child: Icon(Icons.camera_alt_outlined, size: 20.sp, color: AppColors.textPrimary),
                           ),
                         ),
                       ),
@@ -93,70 +72,37 @@ class ProfileSettingsView extends GetView<ProfileController> {
 
                 Text(
                   'fullName'.tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
                 ),
                 SizedBox(height: 8.h),
-                CustomTextField(
-                  controller: controller.nameController,
-                  hintText: 'fullNamePlaceholder'.tr,
-                ),
+                CustomTextField(controller: controller.nameController, hintText: 'fullNamePlaceholder'.tr),
 
                 SizedBox(height: 20.h),
                 Text(
                   'email'.tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
                 ),
                 SizedBox(height: 8.h),
-                CustomTextField(
-                  controller: controller.emailController,
-                  hintText: 'emailPlaceholder'.tr,
-                  keyboardType: TextInputType.emailAddress,
-                ),
+                CustomTextField(controller: controller.emailController, hintText: 'emailPlaceholder'.tr, keyboardType: TextInputType.emailAddress),
 
                 SizedBox(height: 20.h),
                 Text(
                   'phoneNumber'.tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
                 ),
                 SizedBox(height: 8.h),
-                CustomTextField(
-                  controller: controller.phoneController,
-                  hintText: 'phoneNumber'.tr,
-                  keyboardType: TextInputType.phone,
-                ),
+                CustomTextField(controller: controller.phoneController, hintText: 'phoneNumber'.tr, keyboardType: TextInputType.phone),
 
                 SizedBox(height: 20.h),
                 Text(
                   'nationality'.tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
                 ),
                 SizedBox(height: 8.h),
-                CustomTextField(
-                  controller: controller.nationalityController,
-                  hintText: 'selectNationality'.tr,
-                ),
+                CustomTextField(controller: controller.nationalityController, hintText: 'selectNationality'.tr),
 
                 SizedBox(height: 48.h),
-                PrimaryTextButton(
-                  onPressed: () => controller.updateProfile(),
-                  text: 'update'.tr,
-                ),
+                PrimaryTextButton(onPressed: () => controller.updateProfile(), text: 'update'.tr),
                 SizedBox(height: 24.h),
               ],
             ),

@@ -13,29 +13,17 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
+        leading: IconButton(onPressed: () => Get.back(), icon: const Icon(Icons.arrow_back_ios_new_rounded)),
         title: Text(
           'notifications'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
-        centerTitle: true,
         actions: [
           TextButton(
             onPressed: controller.clearAllNotifications,
             child: Text(
               'clearAll'.tr,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.primary,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.primary),
             ),
           ),
         ],
@@ -48,11 +36,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
             SizedBox(height: 16.h),
             Text(
               'today'.tr,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
             ),
             SizedBox(height: 8.h),
             Expanded(
@@ -60,9 +44,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
                 () => Skeletonizer(
                   enabled: controller.isLoading.value,
                   child: ListView.builder(
-                    itemCount: controller.isLoading.value
-                        ? 5
-                        : controller.notifications.length,
+                    itemCount: controller.isLoading.value ? 5 : controller.notifications.length,
                     itemBuilder: (context, index) {
                       if (controller.isLoading.value) {
                         return NotificationCard(
@@ -77,11 +59,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
                         );
                       }
                       final notification = controller.notifications[index];
-                      return NotificationCard(
-                        notification: notification,
-                        onTap: () =>
-                            controller.handleNotificationClick(notification),
-                      );
+                      return NotificationCard(notification: notification, onTap: () => controller.handleNotificationClick(notification));
                     },
                   ),
                 ),
@@ -98,11 +76,7 @@ class NotificationCard extends StatelessWidget {
   final CustomerNotificationModel notification;
   final VoidCallback onTap;
 
-  const NotificationCard({
-    super.key,
-    required this.notification,
-    required this.onTap,
-  });
+  const NotificationCard({super.key, required this.notification, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -110,12 +84,7 @@ class NotificationCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 12.h),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: notification.isRead
-              ? AppColors.borderLight
-              : AppColors.primary.withOpacity(0.2),
-          width: notification.isRead ? 1 : 2,
-        ),
+        side: BorderSide(color: notification.isRead ? AppColors.borderLight : AppColors.primary.withOpacity(0.2), width: notification.isRead ? 1 : 2),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: ListTile(
@@ -123,29 +92,18 @@ class NotificationCard extends StatelessWidget {
         leading: Container(
           height: 48.h,
           width: 48.h,
-          decoration: BoxDecoration(
-            color: _getNotificationColor(notification.type),
-            borderRadius: BorderRadius.circular(12.r),
-          ),
+          decoration: BoxDecoration(color: _getNotificationColor(notification.type), borderRadius: BorderRadius.circular(12.r)),
           child: Center(child: _getNotificationIcon(notification.type)),
         ),
         title: Text(
           notification.title.tr,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
         ),
         subtitle: Padding(
           padding: EdgeInsets.only(top: 4.h),
           child: Text(
             notification.body.tr,
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-            ),
+            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
           ),
         ),
         trailing: Column(
@@ -154,20 +112,13 @@ class NotificationCard extends StatelessWidget {
           children: [
             Text(
               notification.timeAgo,
-              style: GoogleFonts.inter(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textSecondary,
-              ),
+              style: GoogleFonts.inter(fontSize: 10.sp, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
             ),
             if (!notification.isRead)
               Container(
                 height: 8.h,
                 width: 8.h,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
+                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
               ),
           ],
         ),

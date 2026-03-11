@@ -17,17 +17,14 @@ class ScheduleView extends GetView<ScheduleController> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'schedule'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
+          style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
         ),
       ),
       body: Column(
@@ -40,13 +37,8 @@ class ScheduleView extends GetView<ScheduleController> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Text(
-              'myServices'
-                  .tr, // Using myServices.tr which is 'Services' or 'My Services'
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
+              'myServices'.tr, // Using myServices.tr which is 'Services' or 'My Services'
+              style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
             ),
           ),
           SizedBox(height: 20.h),
@@ -56,9 +48,7 @@ class ScheduleView extends GetView<ScheduleController> {
                 enabled: controller.isLoading.value,
                 child: ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  itemCount: controller.isLoading.value
-                      ? 4
-                      : controller.services.length,
+                  itemCount: controller.isLoading.value ? 4 : controller.services.length,
                   itemBuilder: (context, index) {
                     final service = controller.isLoading.value
                         ? {
@@ -96,11 +86,7 @@ class ScheduleView extends GetView<ScheduleController> {
               Obx(
                 () => Text(
                   controller.currentYear.value,
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                 ),
               ),
               IconButton(
@@ -122,11 +108,7 @@ class ScheduleView extends GetView<ScheduleController> {
               Obx(
                 () => Text(
                   controller.currentMonth.value,
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                 ),
               ),
               IconButton(
@@ -150,9 +132,7 @@ class ScheduleView extends GetView<ScheduleController> {
         final days = controller.getDaysInWeek();
         return Row(
           children: days.map((date) {
-            final isSelected =
-                DateFormat('yyyy-MM-dd').format(date) ==
-                DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
+            final isSelected = DateFormat('yyyy-MM-dd').format(date) == DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
             return GestureDetector(
               onTap: () => controller.selectDate(date),
               child: Container(
@@ -161,34 +141,18 @@ class ScheduleView extends GetView<ScheduleController> {
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.primary : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(
-                    color: isSelected
-                        ? AppColors.primary
-                        : const Color(0xFFF1F1F5),
-                  ),
+                  border: Border.all(color: isSelected ? AppColors.primary : const Color(0xFFF1F1F5)),
                 ),
                 child: Column(
                   children: [
                     Text(
                       DateFormat('E').format(date),
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: isSelected
-                            ? Colors.white
-                            : AppColors.textSecondary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w400, color: isSelected ? Colors.white : AppColors.textSecondary),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       DateFormat('d').format(date),
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? Colors.white
-                            : AppColors.textPrimary,
-                      ),
+                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.textPrimary),
                     ),
                   ],
                 ),
@@ -210,11 +174,7 @@ class ScheduleView extends GetView<ScheduleController> {
             width: 80.w,
             child: Text(
               service['time'].split(' - ')[0],
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
+              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
             ),
           ),
           Expanded(
@@ -226,20 +186,13 @@ class ScheduleView extends GetView<ScheduleController> {
                   decoration: BoxDecoration(
                     color: service['color'],
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: (service['color'] as Color).withOpacity(0.5),
-                    ),
+                    border: Border.all(color: (service['color'] as Color).withOpacity(0.5)),
                   ),
                   child: Row(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8.r),
-                        child: Image.network(
-                          service['image'],
-                          width: 40.w,
-                          height: 40.w,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.network(service['image'], width: 40.w, height: 40.w, fit: BoxFit.cover),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
@@ -248,20 +201,12 @@ class ScheduleView extends GetView<ScheduleController> {
                           children: [
                             Text(
                               service['time'],
-                              style: GoogleFonts.inter(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.textSecondary,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 11.sp, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
                             ),
                             SizedBox(height: 4.h),
                             Text(
                               service['title'],
-                              style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
+                              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -271,10 +216,7 @@ class ScheduleView extends GetView<ScheduleController> {
                     ],
                   ),
                 ),
-                if (service['time'].contains('10:00 PM'))
-                  SizedBox(height: 0)
-                else
-                  _buildTimeLine(),
+                if (service['time'].contains('10:00 PM')) SizedBox(height: 0) else _buildTimeLine(),
               ],
             ),
           ),
@@ -289,11 +231,7 @@ class ScheduleView extends GetView<ScheduleController> {
       margin: EdgeInsets.only(left: 0.w),
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Center(
-        child: Container(
-          width: double.infinity,
-          height: 1,
-          color: const Color(0xFFF1F1F5),
-        ),
+        child: Container(width: double.infinity, height: 1, color: const Color(0xFFF1F1F5)),
       ),
     );
   }

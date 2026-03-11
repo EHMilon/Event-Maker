@@ -19,13 +19,10 @@ class ProfileView extends GetView<ProfileController> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        titleSpacing: 24.w,
         title: Text(
           'settings'.tr,
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 24.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 24.sp, fontWeight: FontWeight.w600),
         ),
         centerTitle: false,
       ),
@@ -48,27 +45,14 @@ class ProfileView extends GetView<ProfileController> {
                           padding: EdgeInsets.all(3.r),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primary,
-                              width: 2.w,
-                            ),
+                            border: Border.all(color: AppColors.primary, width: 2.w),
                           ),
-                          child: CircleAvatar(
-                            radius: 50.r,
-                            backgroundImage: AssetImage(
-                              controller.profileImage.value,
-                            ),
-                          ),
+                          child: CircleAvatar(radius: 50.r, backgroundImage: AssetImage(controller.profileImage.value)),
                         ),
                         SizedBox(height: 12.h),
                         Text(
                           controller.userName.value,
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                            height: 1.2.h,
-                          ),
+                          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.2.h),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -78,30 +62,17 @@ class ProfileView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 32.h),
                 // Menu Items
-                _buildMenuItem(
-                  icon: 'assets/icons/profile_outline.svg',
-                  title: 'profileSettings'.tr,
-                  onTap: () => Get.toNamed(AppRoutes.profileSettings),
-                ),
-                _buildMenuItem(
-                  icon: 'assets/icons/shield-check.svg',
-                  title: 'security'.tr,
-                  onTap: () => Get.toNamed(AppRoutes.changePassword),
-                ),
+                _buildMenuItem(icon: 'assets/icons/profile_outline.svg', title: 'profileSettings'.tr, onTap: () => Get.toNamed(AppRoutes.profileSettings)),
+                _buildMenuItem(icon: 'assets/icons/shield-check.svg', title: 'security'.tr, onTap: () => Get.toNamed(AppRoutes.changePassword)),
                 if (controller.isServiceProvider.value) ...[
-                  _buildMenuItem(
-                    icon: 'assets/icons/scroll-text.svg',
-                    title: 'certifications'.tr,
-                    onTap: () => Get.toNamed(AppRoutes.spCertifications),
-                  ),
+                  _buildMenuItem(icon: 'assets/icons/scroll-text.svg', title: 'certifications'.tr, onTap: () => Get.toNamed(AppRoutes.spCertifications)),
                   _buildMenuItem(
                     icon: 'assets/icons/calendar-check-2.svg',
                     title: 'myAvailability'.tr,
                     onTap: () {},
                     trailing: Switch(
                       value: controller.isAvailable.value,
-                      onChanged: (value) =>
-                          controller.toggleAvailability(value),
+                      onChanged: (value) => controller.toggleAvailability(value),
                       activeThumbColor: AppColors.primary,
                     ),
                   ),
@@ -111,40 +82,16 @@ class ProfileView extends GetView<ProfileController> {
                     onTap: () => Get.toNamed(AppRoutes.spWallet),
                     trailing: Text(
                       '${controller.walletBalance.value} AED',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
                   ),
                 ] else ...[
-                  _buildMenuItem(
-                    icon: 'assets/icons/wallet.svg',
-                    title: 'myTransactions'.tr,
-                    onTap: () => Get.toNamed(AppRoutes.transactions),
-                  ),
-                  _buildMenuItem(
-                    icon: 'assets/icons/saved.svg',
-                    title: 'myBookmarks'.tr,
-                    onTap: () => Get.toNamed(AppRoutes.bookmarks),
-                  ),
+                  _buildMenuItem(icon: 'assets/icons/wallet.svg', title: 'myTransactions'.tr, onTap: () => Get.toNamed(AppRoutes.transactions)),
+                  _buildMenuItem(icon: 'assets/icons/saved.svg', title: 'myBookmarks'.tr, onTap: () => Get.toNamed(AppRoutes.bookmarks)),
                 ],
-                _buildMenuItem(
-                  icon: 'assets/icons/languages.svg',
-                  title: 'language'.tr,
-                  onTap: () => _showLanguageBottomSheet(context),
-                ),
-                _buildMenuItem(
-                  icon: 'assets/icons/mail.svg',
-                  title: 'contactUs'.tr,
-                  onTap: () => Get.toNamed(AppRoutes.contactUs),
-                ),
-                _buildMenuItem(
-                  icon: 'assets/icons/question-mark.svg',
-                  title: 'faq'.tr,
-                  onTap: () => Get.toNamed(AppRoutes.faq),
-                ),
+                _buildMenuItem(icon: 'assets/icons/languages.svg', title: 'language'.tr, onTap: () => _showLanguageBottomSheet(context)),
+                _buildMenuItem(icon: 'assets/icons/mail.svg', title: 'contactUs'.tr, onTap: () => Get.toNamed(AppRoutes.contactUs)),
+                _buildMenuItem(icon: 'assets/icons/question-mark.svg', title: 'faq'.tr, onTap: () => Get.toNamed(AppRoutes.faq)),
                 SizedBox(height: 16.h),
                 _buildMenuItem(
                   icon: 'assets/icons/security.svg',
@@ -153,12 +100,7 @@ class ProfileView extends GetView<ProfileController> {
                   onTap: () => _showDeleteAccountDialog(context),
                 ),
                 SizedBox(height: 8.h),
-                _buildMenuItem(
-                  icon: 'assets/icons/logout.svg',
-                  title: 'logout'.tr,
-                  titleColor: AppColors.error,
-                  onTap: () => _showLogoutDialog(context),
-                ),
+                _buildMenuItem(icon: 'assets/icons/logout.svg', title: 'logout'.tr, titleColor: AppColors.error, onTap: () => _showLogoutDialog(context)),
                 SizedBox(height: 40.h),
               ],
             ),
@@ -167,39 +109,16 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
- 
-  Widget _buildMenuItem({
-    required String icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? titleColor,
-    Widget? trailing,
-  }) {
+
+  Widget _buildMenuItem({required String icon, required String title, required VoidCallback onTap, Color? titleColor, Widget? trailing}) {
     return ListTile(
       onTap: onTap,
-      leading: SvgPicture.asset(
-        icon,
-        width: 24.w,
-        height: 24.h,
-        colorFilter: titleColor != null
-            ? ColorFilter.mode(titleColor, BlendMode.srcIn)
-            : null,
-      ),
+      leading: SvgPicture.asset(icon, width: 24.w, height: 24.h, colorFilter: titleColor != null ? ColorFilter.mode(titleColor, BlendMode.srcIn) : null),
       title: Text(
         title,
-        style: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w400,
-          color: titleColor ?? AppColors.textPrimary,
-        ),
+        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: titleColor ?? AppColors.textPrimary),
       ),
-      trailing:
-          trailing ??
-          Icon(
-            Icons.chevron_right,
-            size: 20.sp,
-            color: AppColors.textSecondary,
-          ),
+      trailing: trailing ?? Icon(Icons.chevron_right, size: 20.sp, color: AppColors.textSecondary),
       contentPadding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 0.h),
     );
   }
@@ -213,10 +132,7 @@ class ProfileView extends GetView<ProfileController> {
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
             onPressed: () => controller.logOut(),
-            child: const Text(
-              'Log Out',
-              style: TextStyle(color: AppColors.error),
-            ),
+            child: const Text('Log Out', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -225,10 +141,7 @@ class ProfileView extends GetView<ProfileController> {
 
   void _showLanguageBottomSheet(BuildContext context) {
     Get.bottomSheet(
-      LanguageBottomSheet(
-        selectedLanguage: controller.selectedLanguage.value,
-        onLanguageSelected: (language) => controller.changeLanguage(language),
-      ),
+      LanguageBottomSheet(selectedLanguage: controller.selectedLanguage.value, onLanguageSelected: (language) => controller.changeLanguage(language)),
       isScrollControlled: true,
     );
   }
@@ -240,12 +153,7 @@ class ProfileView extends GetView<ProfileController> {
         subtitle: 'accountDeletionSubtitle'.tr,
         mainButtonText: 'deleteAccount'.tr,
         mainButtonColor: AppColors.error,
-        icon: SvgPicture.asset(
-          'assets/icons/security.svg',
-          width: 64.w,
-          height: 64.h,
-          colorFilter: ColorFilter.mode(AppColors.error, BlendMode.srcIn),
-        ),
+        icon: SvgPicture.asset('assets/icons/security.svg', width: 64.w, height: 64.h, colorFilter: ColorFilter.mode(AppColors.error, BlendMode.srcIn)),
         onMainButtonPressed: () {
           Get.back();
           controller.deleteAccount();

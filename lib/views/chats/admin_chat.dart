@@ -17,14 +17,11 @@ class AdminChatView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
+        titleSpacing: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
         title: Text(
           'admin'.tr,
-          style: GoogleFonts.inter(
-            color: AppColors.textPrimary,
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w600),
         ),
         centerTitle: false,
       ),
@@ -32,11 +29,7 @@ class AdminChatView extends StatelessWidget {
       body: Center(
         child: Text(
           'Admin chat screen',
-          style: GoogleFonts.inter(
-            color: AppColors.textSecondary,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
-          ),
+          style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14.sp, fontWeight: FontWeight.w400),
         ),
       ),
     );
