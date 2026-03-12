@@ -37,8 +37,8 @@ class ConfirmationDialog extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -59,17 +59,17 @@ class ConfirmationDialog extends StatelessWidget {
               backgroundColor: mainButtonColor,
             ),
             SizedBox(height: 12.h),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'cancel'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
+            // TextButton(
+            //   onPressed: () => Navigator.pop(context),
+            //   child: Text(
+            //     'cancel'.tr,
+            //     style: GoogleFonts.inter(
+            //       fontSize: 14.sp,
+            //       color: AppColors.textSecondary,
+            //       fontWeight: FontWeight.w500,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

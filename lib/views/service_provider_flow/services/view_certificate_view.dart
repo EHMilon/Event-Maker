@@ -57,7 +57,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
                 borderRadius: BorderRadius.circular(12.r),
                 child: Image.asset(
                   'assets/images/certificate.png',
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: Colors.grey.shade200,

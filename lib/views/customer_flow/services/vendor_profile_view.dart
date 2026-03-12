@@ -4,17 +4,39 @@ import 'package:event_maker/shared/widgets/review_card.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class VendorProfileView extends StatelessWidget {
+class VendorProfileView extends StatefulWidget {
   const VendorProfileView({super.key});
 
   @override
+  State<VendorProfileView> createState() => _VendorProfileViewState();
+}
+
+class _VendorProfileViewState extends State<VendorProfileView> {
+  ServiceProvider? _vendor;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = Get.arguments;
+    if (args is ServiceProvider && args != _vendor) {
+      _vendor = args;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final ServiceProvider? vendor = Get.arguments;
+    final vendor = _vendor;
 
     if (vendor == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Navigator.of(context).canPop()) {
+          Get.back();
+        }
+      });
       return const Scaffold(body: Center(child: Text('No vendor data found')));
     }
 
@@ -112,8 +134,21 @@ class VendorProfileView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.star, color: Colors.amber, size: 20.r),
-                          SizedBox(width: 4.w),
+                          ...List.generate(5, (index) {
+                            final isSelected = index < 4;
+                            return Padding(
+                              padding: EdgeInsets.only(right: 4.w),
+                              child: SvgPicture.asset(
+                                'assets/icons/star_fill.svg',
+                                width: 20.r,
+                                height: 20.r,
+                                color: isSelected
+                                    ? Colors.orange
+                                    : AppColors.lightGrey,
+                                semanticsLabel: 'Star ${index + 1}',
+                              ),
+                            );
+                          }),
                           Text(
                             '4.9', // Dummy for now, should come from data
                             style: GoogleFonts.inter(

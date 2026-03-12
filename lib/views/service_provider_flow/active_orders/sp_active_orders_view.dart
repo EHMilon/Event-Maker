@@ -41,14 +41,16 @@ class SPActiveOrdersView extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-          child: Column(
-            children: List.generate(
-              titles.length,
-              (index) => Padding(
-                padding: EdgeInsets.only(bottom: 16.h),
-                child: _buildOrderCard(index, titles, badges),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+            child: Column(
+              children: List.generate(
+                titles.length,
+                (index) => Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: _buildOrderCard(index, titles, badges),
+                ),
               ),
             ),
           ),

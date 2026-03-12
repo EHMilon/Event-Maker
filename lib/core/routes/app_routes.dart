@@ -235,7 +235,11 @@ class AppRoutes {
     ),
     GetPage(name: profileSettings, page: () => const ProfileSettingsView()),
     GetPage(name: addImage, page: () => const AddImageView()),
-    GetPage(name: changePassword, page: () => const ChangePasswordView()),
+    GetPage(
+      name: changePassword,
+      page: () => const ChangePasswordView(),
+      binding: ProfileBinding(),
+    ),
     GetPage(name: transactions, page: () => const TransactionsView()),
     GetPage(name: spWallet, page: () => const WalletView()),
     GetPage(

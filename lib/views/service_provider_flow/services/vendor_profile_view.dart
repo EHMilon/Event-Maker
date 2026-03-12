@@ -4,6 +4,7 @@ import 'package:event_maker/shared/widgets/review_card.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
@@ -13,11 +14,14 @@ class VendorProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ServiceProvider? vendor = Get.arguments;
+    final args = Get.arguments;
 
-    if (vendor == null) {
+    // Ensure we have a valid ServiceProvider object
+    if (args == null || args is! ServiceProvider) {
       return const Scaffold(body: Center(child: Text('No vendor data found')));
-    }
+    } 
+
+    final ServiceProvider vendor = args;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -105,7 +109,7 @@ class VendorProfileView extends StatelessWidget {
                         vendor.name,
                         style: GoogleFonts.inter(
                           fontSize: 24.sp,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -113,12 +117,12 @@ class VendorProfileView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.star, color: Colors.amber, size: 20.r),
+                          SvgPicture.asset("assets/icons/star_fill.svg", height: 20.h, width: 20.w,),
                           SizedBox(width: 4.w),
                           Text(
                             '4.9', // Dummy for now, should come from data
                             style: GoogleFonts.inter(
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
@@ -127,7 +131,7 @@ class VendorProfileView extends StatelessWidget {
                           Text(
                             '(3,657)',
                             style: GoogleFonts.inter(
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -149,16 +153,16 @@ class VendorProfileView extends StatelessWidget {
                                 Text(
                                   cert,
                                   style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
                                 Text(
                                   'Institution Name', // Placeholder if not in data
                                   style: GoogleFonts.inter(
-                                    fontSize: 14.sp,
-                                    color: AppColors.textSecondary,
+                                    fontSize: 12.sp,
+                                    color: AppColors.darkGrey,
                                   ),
                                 ),
                               ],
@@ -175,7 +179,7 @@ class VendorProfileView extends StatelessWidget {
                           ),
                         ),
 
-                      SizedBox(height: 32.h),
+                      SizedBox(height: 18.h),
 
                       // Bio
                       _buildSectionTitle('Bio'),
@@ -183,8 +187,9 @@ class VendorProfileView extends StatelessWidget {
                       Text(
                         vendor.bio ?? 'No bio available',
                         style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.darkGrey,
                           height: 1.5,
                         ),
                       ),
@@ -331,7 +336,7 @@ class VendorProfileView extends StatelessWidget {
         title,
         style: GoogleFonts.inter(
           fontSize: 20.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
       ),

@@ -17,7 +17,6 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        titleSpacing: 20.w,
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         title: Text(
@@ -239,11 +238,10 @@ class ProfileView extends GetView<ProfileController> {
         subtitle: 'accountDeletionSubtitle'.tr,
         mainButtonText: 'deleteAccount'.tr,
         mainButtonColor: AppColors.error,
-        icon: SvgPicture.asset(
-          'assets/icons/security.svg',
+        icon: Image.asset(
+          'assets/images/delete_account.png',
           width: 64.w,
           height: 64.h,
-          colorFilter: ColorFilter.mode(AppColors.error, BlendMode.srcIn),
         ),
         onMainButtonPressed: () {
           Get.back();

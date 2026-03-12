@@ -5,6 +5,13 @@ class AppColors {
   static const Color secondary = Color(0xFF00F8FF);
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
+  // add different shades of grey
+  static const Color grey100 = Color(0xFFF5F5F5);
+  static const Color grey200 = Color(0xFFE0E0E0);
+  static const Color grey300 = Color(0xFFBDBDBD);
+  static const Color grey400 = Color(0xFF9E9E9E);
+  static const Color grey500 = Color(0xFF757575);
+
   static const Color grey = Color(0xFF808080);
   static const Color lightGrey = Color(0xFFE5E5E5);
   static const Color darkGrey = Color(0xFF1E1E1E);

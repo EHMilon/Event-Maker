@@ -379,6 +379,10 @@ class ProfileController extends GetxController {
     phoneController.dispose();
     nationalityController.dispose();
     captionController.dispose();
+    // Dispose password controllers to prevent "TextEditingController used after disposed" error
+    currentPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     super.onClose();
   }
 }
