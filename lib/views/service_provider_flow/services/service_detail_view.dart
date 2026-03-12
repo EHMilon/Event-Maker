@@ -11,7 +11,7 @@ import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:event_maker/shared/widgets/confirmation_dialog.dart';
+import 'package:event_maker/shared/widgets/app_custom_dialog.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -32,17 +32,18 @@ class ServiceDetailView extends StatelessWidget {
   void _showRejectDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => AppCustomDialog(
+        iconPath: 'assets/images/reject.svg',
         title: 'confirmRejectTitle'.tr,
-        subtitle: 'confirmRejectSubtitle'.tr,
+        subTitle: 'confirmRejectSubtitle'.tr,
         mainButtonText: 'reject'.tr,
         mainButtonColor: AppColors.error,
-        onMainButtonPressed: () {
-          // TODO: Send reject request to backend API
+        mainButtonCallback: () {
           Get.back(); // Close confirmation dialog
           _showRejectSuccessDialog(context);
         },
-        icon: _buildDialogIcon(Icons.close, AppColors.error),
+        secondaryButtonText: 'cancel'.tr,
+        secondaryButtonCallback: () => Get.back(),
       ),
     );
   }
@@ -51,18 +52,18 @@ class ServiceDetailView extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => AppCustomDialog(
+        iconPath: 'assets/images/reject.svg',
         title: 'rejectSuccessTitle'.tr,
-        subtitle: 'rejectSuccessSubtitle'.tr,
+        subTitle: 'rejectSuccessSubtitle'.tr,
         mainButtonText: 'done'.tr,
-        mainButtonColor: AppColors.primary,
-        onMainButtonPressed: () {
+        mainButtonColor: AppColors.error,
+        mainButtonCallback: () {
           final controller = Get.find<RequestsController>();
           controller.rejectRequest(service);
           Get.back(); // Close success dialog
           Get.back(); // Go back to list
         },
-        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
       ),
     );
   }
@@ -77,17 +78,17 @@ class ServiceDetailView extends StatelessWidget {
   void _showAcceptDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => AppCustomDialog(
+        iconPath: 'assets/images/accept.svg',
         title: 'confirmAcceptTitle'.tr,
-        subtitle: 'confirmAcceptSubtitle'.tr,
+        subTitle: 'confirmAcceptSubtitle'.tr,
         mainButtonText: 'accept'.tr,
-        mainButtonColor: AppColors.primary,
-        onMainButtonPressed: () {
-          // TODO: Send accept request to backend API
+        mainButtonCallback: () {
           Get.back(); // Close confirmation dialog
           _showAcceptSuccessDialog(context);
         },
-        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
+        secondaryButtonText: 'cancel'.tr,
+        secondaryButtonCallback: () => Get.back(),
       ),
     );
   }
@@ -96,71 +97,21 @@ class ServiceDetailView extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => AppCustomDialog(
+        iconPath: 'assets/images/accept.svg',
         title: 'acceptSuccessTitle'.tr,
-        subtitle: 'acceptSuccessSubtitle'.tr,
+        subTitle: 'acceptSuccessSubtitle'.tr,
         mainButtonText: 'done'.tr,
-        mainButtonColor: AppColors.primary,
-        onMainButtonPressed: () {
+        mainButtonCallback: () {
           final controller = Get.find<RequestsController>();
           controller.acceptRequest(service);
           Get.back(); // Close success dialog
           Get.back(); // Go back to list
         },
-        icon: _buildDialogIcon(Icons.check, const Color(0xFF00C566)),
       ),
     );
   }
 
-  Widget _buildDialogIcon(IconData iconData, Color color) {
-    return SizedBox(
-      width: 120.w,
-      height: 100.h,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Basic laptop/document shape
-          Container(
-            width: 80.w,
-            height: 60.h,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: color.withOpacity(0.3), width: 2),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 65.h),
-            width: 100.w,
-            height: 6.h,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(3.r),
-            ),
-          ),
-          // Centered Icon
-          Positioned(
-            top: 15.h,
-            child: Container(
-              padding: EdgeInsets.all(12.r),
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(iconData, color: AppColors.white, size: 32.r),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -826,8 +777,21 @@ class ServiceDetailView extends StatelessWidget {
                   if (isOrder)
                     PrimaryTextButton(
                       onPressed: () {
-                        // TODO: Handle mark as complete
-                        Get.back();
+                        showDialog(
+                          context: context,
+                          builder: (context) => AppCustomDialog(
+                            iconPath: 'assets/images/accept.svg',
+                            title: 'Are you sure you want to complete the service?',
+                            mainButtonText: 'yes'.tr,
+                            mainButtonCallback: () {
+                              // TODO: Handle actual completion logic (e.g., API call)
+                              Get.back(); // Close dialog
+                              Get.back(); // Go back
+                            },
+                            secondaryButtonText: 'no'.tr,
+                            secondaryButtonCallback: () => Get.back(),
+                          ),
+                        );
                       },
                       text: 'markAsComplete'.tr,
                     )

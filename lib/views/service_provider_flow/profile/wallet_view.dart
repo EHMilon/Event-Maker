@@ -30,99 +30,99 @@ class WalletView extends GetView<ProfileController> {
         ),
       ),
       body: Obx(
-        () => Skeletonizer(
-          enabled: controller.isLoading.value,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 18.h),
-              // Earnings Section
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      'totalEarnings'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+          () => Skeletonizer(
+            enabled: controller.isLoading.value,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 18.h),
+                // Earnings Section
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'totalEarnings'.tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          controller.walletBalance.value,
-                          style: GoogleFonts.inter(
-                            fontSize: 64.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                      SizedBox(height: 8.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            controller.walletBalance.value,
+                            style: GoogleFonts.inter(
+                              fontSize: 64.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'AED',
-                          style: GoogleFonts.inter(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                          SizedBox(width: 8.w),
+                          Text(
+                            'AED',
+                            style: GoogleFonts.inter(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 18.h),
-              // Withdraw Button
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Implement Withdraw flow with Backend API
-                      if (controller.walletBalance.value == "0") {
-                        Get.snackbar('error'.tr, 'insufficientFunds'.tr);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                SizedBox(height: 18.h),
+                // Withdraw Button
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 56.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // TODO: Implement Withdraw flow with Backend API
+                        if (controller.walletBalance.value == "0") {
+                          Get.snackbar('error'.tr, 'insufficientFunds'.tr);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'withdraw'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                      child: Text(
+                        'withdraw'.tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 18.h),
-              // Transactions Header
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Text(
-                  'transactions'.tr,
-                  style: GoogleFonts.inter(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                SizedBox(height: 18.h),
+                // Transactions Header
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Text(
+                    'transactions'.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 16.h),
-              // Transactions List
+                SizedBox(height: 16.h),
+                // Transactions List
               Expanded(
                 child: ListView.separated(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -161,7 +161,7 @@ class WalletView extends GetView<ProfileController> {
           Text(
             tx['title'] ?? 'User Name',
             style: GoogleFonts.inter(
-              fontSize: 16.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
@@ -173,6 +173,7 @@ class WalletView extends GetView<ProfileController> {
                 tx['time'] ?? 'Just Now',
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
+                  
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -182,8 +183,8 @@ class WalletView extends GetView<ProfileController> {
                   Text(
                     tx['amount'] ?? '0',
                     style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.primary,
                     ),
                   ),

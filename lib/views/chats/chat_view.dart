@@ -44,10 +44,16 @@ class ChatView extends StatelessWidget {
         // ),
         title: Text(
           'chats'.tr,
-          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(
+            color: AppColors.textPrimary,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
-      body: isServiceProvider ? _buildServiceProviderView(controller) : _buildCustomerView(controller),
+      body: isServiceProvider
+          ? _buildServiceProviderView(controller)
+          : _buildCustomerView(controller),
     );
   }
 
@@ -58,22 +64,40 @@ class ChatView extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
             child: Container(
-              height: 32.h,
-              decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(20.r)),
+              height: 32.h,   
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
               child: TabBar(
-                indicator: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(20.r)),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelPadding: EdgeInsets.symmetric(horizontal: 4.w),
+                splashFactory: NoSplash.splashFactory,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicator: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
                 labelColor: AppColors.white,
                 unselectedLabelColor: AppColors.textPrimary,
                 physics: const BouncingScrollPhysics(),
                 dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
                 tabs: [_buildTab('customer'.tr), _buildTab('admin'.tr)],
+              
               ),
             ),
           ),
-          Expanded(child: TabBarView(children: [_buildChatListContent(controller, true), _buildChatListContent(controller, false)])),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildChatListContent(controller, true),
+                _buildChatListContent(controller, false),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -83,12 +107,15 @@ class ChatView extends StatelessWidget {
     return Tab(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r), border: Border.all(color: AppColors.grey.withValues(alpha: 0.2))),
         child: Align(
           alignment: Alignment.center,
           child: Text(
             text,
-            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w500),
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
@@ -104,16 +131,25 @@ class ChatView extends StatelessWidget {
     );
   }
 
-  Widget _buildChatListContent(ChatViewController controller, bool isCustomerTab) {
+  Widget _buildChatListContent(
+    ChatViewController controller,
+    bool isCustomerTab,
+  ) {
     return Obx(() {
       final isLoading = controller.isLoading.value;
-      final chats = isCustomerTab ? controller.customerChats : controller.adminChats;
+      final chats = isCustomerTab
+          ? controller.customerChats
+          : controller.adminChats;
 
       if (chats.isEmpty && !isLoading) {
         return Center(
           child: Text(
             'postVibeFirstChat'.tr,
-            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14.sp, fontWeight: FontWeight.w400),
+            style: GoogleFonts.inter(
+              color: AppColors.textSecondary,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         );
       }
@@ -158,10 +194,19 @@ class ChatView extends StatelessWidget {
         onChanged: controller.updateSearchQuery,
         decoration: InputDecoration(
           hintText: 'search'.tr,
-          hintStyle: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14.sp),
+          hintStyle: GoogleFonts.inter(
+            color: AppColors.textSecondary,
+            fontSize: 14.sp,
+          ),
           prefixIcon: Padding(
             padding: EdgeInsets.all(12.w),
-            child: SvgPicture.asset('assets/icons/search.svg', colorFilter: const ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn)),
+            child: SvgPicture.asset(
+              'assets/icons/search.svg',
+              colorFilter: const ColorFilter.mode(
+                AppColors.textSecondary,
+                BlendMode.srcIn,
+              ),
+            ),
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 14.h),
@@ -195,7 +240,12 @@ class ChatView extends StatelessWidget {
         // Navigate to chat detail screen with admin/customer context
         Get.toNamed(
           AppRoutes.chatDetail,
-          arguments: {'id': chat['id'], 'name': chat['name'], 'image': chat['image'] ?? 'assets/images/person.jpg', 'isAdmin': isAdminChat},
+          arguments: {
+            'id': chat['id'],
+            'name': chat['name'],
+            'image': chat['image'] ?? 'assets/images/person.jpg',
+            'isAdmin': isAdminChat,
+          },
         );
       },
       borderRadius: BorderRadius.circular(12.r),
@@ -203,7 +253,9 @@ class ChatView extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24.r,
-            backgroundImage: const AssetImage('assets/images/person.jpg'), // fallback
+            backgroundImage: const AssetImage(
+              'assets/images/person.jpg',
+            ), // fallback
             // ignore: prefer_const_constructors
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           ),
@@ -214,12 +266,20 @@ class ChatView extends StatelessWidget {
               children: [
                 Text(
                   chat['name'] ?? 'User Name',
-                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.w600),
+                  style: GoogleFonts.inter(
+                    color: AppColors.textPrimary,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 Text(
                   chat['lastMessage'] ?? '',
-                  style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14.sp, fontWeight: FontWeight.w400),
+                  style: GoogleFonts.inter(
+                    color: AppColors.textSecondary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

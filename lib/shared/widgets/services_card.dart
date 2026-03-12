@@ -29,9 +29,9 @@ class ServicesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = useFullWidth ? double.infinity : 200.w;
+    final cardWidth = useFullWidth ? double.infinity : 230.w;
     final cardMargin = useFullWidth ? EdgeInsets.only(bottom: 16.h) : EdgeInsets.only(right: 16.w);
-    final imageHeight = useFullWidth ? 200.h : 120.h;
+    final imageHeight = useFullWidth ? 230.h : 120.h;
 
     return GestureDetector(
       onTap: onTap,

@@ -253,7 +253,7 @@ class AppLocalization extends Translations {
     'contactUs': 'Contact Us',
     'faq': 'FAQ',
     'language': 'Language',
-    'deleteAccount': 'Delete Account',
+    'deleteAccount': 'Delete',
     'accountDeletionTitle': 'Account Deletion',
     'accountDeletionSubtitle':
         'Are you sure you want to delete the account? Once you delete the account you cannot get it back again.',

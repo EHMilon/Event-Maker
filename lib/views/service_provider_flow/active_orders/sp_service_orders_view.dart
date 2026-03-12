@@ -39,7 +39,7 @@ class SPServiceOrdersView extends StatelessWidget {
       ),
       body: SafeArea(
         child: GridView.builder(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 9.w,

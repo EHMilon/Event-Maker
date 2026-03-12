@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../../shared/widgets/confirmation_dialog.dart';
+import '../../../shared/widgets/app_custom_dialog.dart';
 import '../../../shared/widgets/language_bottom_sheet.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
@@ -197,26 +197,17 @@ class ProfileView extends GetView<ProfileController> {
 
   void _showLogoutDialog(BuildContext context) {
     Get.dialog(
-      AlertDialog(
-        backgroundColor: AppColors.backgroundLight,
-        title: Text('logout'.tr),
-        content: Text('logoutConfirmation'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'cancel'.tr,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () => controller.logOut(),
-            child: Text(
-              'logout'.tr,
-              style: const TextStyle(color: AppColors.error),
-            ),
-          ),
-        ],
+      AppCustomDialog(
+        iconPath: 'assets/icons/logout.svg',
+        iconColor: AppColors.error,
+        iconHeight: 80.h,
+        title: 'logout'.tr,
+        subTitle: 'logoutConfirmation'.tr,
+        mainButtonText: 'logout'.tr,
+        mainButtonColor: AppColors.error,
+        mainButtonCallback: () => controller.logOut(),
+        secondaryButtonText: 'cancel'.tr,
+        secondaryButtonCallback: () => Get.back(),
       ),
     );
   }
@@ -233,20 +224,20 @@ class ProfileView extends GetView<ProfileController> {
 
   void _showDeleteAccountDialog(BuildContext context) {
     Get.dialog(
-      ConfirmationDialog(
+      AppCustomDialog(
+        iconPath: 'assets/icons/trash.svg',
+        iconColor: AppColors.error,
+        iconHeight: 80.h,
         title: 'accountDeletionTitle'.tr,
-        subtitle: 'accountDeletionSubtitle'.tr,
+        subTitle: 'accountDeletionSubtitle'.tr,
         mainButtonText: 'deleteAccount'.tr,
         mainButtonColor: AppColors.error,
-        icon: Image.asset(
-          'assets/images/delete_account.png',
-          width: 64.w,
-          height: 64.h,
-        ),
-        onMainButtonPressed: () {
+        mainButtonCallback: () {
           Get.back();
           controller.deleteAccount();
         },
+        secondaryButtonText: 'cancel'.tr,
+        secondaryButtonCallback: () => Get.back(),
       ),
     );
   }
