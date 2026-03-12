@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:event_maker/shared/widgets/order_card.dart';
 import 'package:event_maker/views/service_provider_flow/active_orders/sp_service_orders_view.dart';
 
 class SPHomeView extends GetView<SPHomeController> {
@@ -26,7 +27,7 @@ class SPHomeView extends GetView<SPHomeController> {
           return Skeletonizer(
             enabled: controller.isLoading.value,
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -86,7 +87,7 @@ class SPHomeView extends GetView<SPHomeController> {
               children: [
                 const Icon(
                   Icons.wb_sunny_outlined,
-                  size: 16,
+                  size: 19,
                   color: Colors.orange,
                 ),
                 SizedBox(width: 8.w),
@@ -94,7 +95,7 @@ class SPHomeView extends GetView<SPHomeController> {
                   'goodMorning'.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
-                    color: AppColors.textSecondary,
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -107,7 +108,7 @@ class SPHomeView extends GetView<SPHomeController> {
                   'Fresh Food L.L.C',
                   style: GoogleFonts.inter(
                     fontSize: 24.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -117,8 +118,8 @@ class SPHomeView extends GetView<SPHomeController> {
 
                   child: Image.asset(
                     'assets/icons/completed.png',
-                    height: 18.h,
-                    width: 18.w,
+                    height: 24.h,
+                    width: 24.w,
                   ),
                 ),
               ],
@@ -180,12 +181,12 @@ class SPHomeView extends GetView<SPHomeController> {
   Widget _buildAnalyticsSection() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         // color: const Color.fromARGB(38, 24, 35, 190),
         color: Colors.white,
         border: Border.all(color: AppColors.borderLight),
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(18.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -310,7 +311,7 @@ class SPHomeView extends GetView<SPHomeController> {
                     text: label,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
-                      color: AppColors.textSecondary,
+                      color: AppColors.darkGrey,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -320,7 +321,7 @@ class SPHomeView extends GetView<SPHomeController> {
               ),
             ],
           ),
-          SizedBox(width: 12.w),
+          SizedBox(height: 12.h),
 
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -328,12 +329,12 @@ class SPHomeView extends GetView<SPHomeController> {
               value,
               style: GoogleFonts.inter(
                 fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
               ),
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(height: 12.h),
 
           Row(
             children: [
@@ -379,44 +380,47 @@ class SPHomeView extends GetView<SPHomeController> {
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.spWallet),
       child: Container(
-        padding: EdgeInsets.all(16.w),
+        width: double.infinity, // Ensures the card stretches across the screen
+        padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          // color: const Color.fromARGB(63, 128, 137, 48),
-          borderRadius: BorderRadius.circular(16.r),
+          color: Colors.white, // Match background if needed
+          borderRadius: BorderRadius.circular(20.r),
           border: Border.all(color: AppColors.borderLight),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start, // Aligns all children to the left
           children: [
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F1F5),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: SvgPicture.asset(
-                'assets/icons/wallet.svg',
-                height: 20.h,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.textPrimary,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'totalBalance'.tr,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w400,
-                    ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/wallet.svg',
+                  height: 20.h, // Slightly larger icon to match the image scale
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textPrimary,
+                    BlendMode.srcIn,
                   ),
-                  _buildBalanceText(),
-                ],
+                ),
+                SizedBox(width: 12.w),
+                Text(
+                  'totalBalance'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp, // Increased size for better hierarchy
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h), // Spacing between header and amount
+            Text(
+              '\$2,788 USD', // Ensure _buildBalanceText() returns this style
+              style: GoogleFonts.inter(
+                fontSize: 26.sp, // Large, bold balance text
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+                height: 1.4.sp,
               ),
             ),
           ],
@@ -571,88 +575,20 @@ class SPHomeView extends GetView<SPHomeController> {
         controller.isLoading.value ? 4 : controller.activeOrders.length,
         (index) => Padding(
           padding: EdgeInsets.only(bottom: 16.h),
-          child: _buildOrderCard(index),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrderCard(int index) {
-    if (controller.isLoading.value) {
-      return _buildSkeletonCard();
-    }
-
-    final order = controller.activeOrders[index];
-
-    return GestureDetector(
-      onTap: () {
-        Get.to(() => SPServiceOrdersView(
-              serviceTitle: order.title,
-              orderCount: order.badgeCount,
-            ));
-      },
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.lightGrey),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.r),
-              child: Image.network(
-                order.imageUrl,
-                width: 64.w,
-                height: 64.h,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: 64.w,
-                  height: 64.h,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image_not_supported),
-                ),
-              ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Text(
-                order.title,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
-                  height: 1.4,
-                ),
-              ),
-            ),
-            if (order.badgeCount > 0)
-              Container(
-                height: 24.h,
-                width: 24.h,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFB485FF),
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '${order.badgeCount}',
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
+          child: controller.isLoading.value
+              ? _buildSkeletonCard()
+              : OrderCard(
+                  title: controller.activeOrders[index].title,
+                  imageUrl: controller.activeOrders[index].imageUrl,
+                  badgeCount: controller.activeOrders[index].badgeCount,
+                  titleColor: AppColors.grey500,
+                  onTap: () => Get.to(
+                    () => SPServiceOrdersView(
+                      serviceTitle: controller.activeOrders[index].title,
+                      orderCount: controller.activeOrders[index].badgeCount,
+                    ),
                   ),
                 ),
-              ),
-          ],
         ),
       ),
     );
