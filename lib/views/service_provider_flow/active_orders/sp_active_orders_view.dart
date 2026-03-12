@@ -3,8 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/views/service_provider_flow/active_orders/sp_service_orders_view.dart';
 
 class SPActiveOrdersView extends StatelessWidget {
   const SPActiveOrdersView({super.key});
@@ -62,28 +61,10 @@ class SPActiveOrdersView extends StatelessWidget {
   Widget _buildOrderCard(int index, List<String> titles, List<int> badges) {
     return GestureDetector(
       onTap: () {
-        // Mocking ServiceModel from order details to reuse ServiceDetailView
-        final mockService = ServiceModel(
-          id: index.toString(),
-          title: titles[index % titles.length],
-          description:
-              'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
-          images: ['https://picsum.photos/id/${index + 40}/120/120'],
-          type: ServiceType.photography,
-          provider: ServiceProvider(
-            name: 'Jenny Smith',
-            role: 'Caterer',
-            imageUrl:
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop',
-            isVerified: true,
-          ),
-          location:
-              'Airport Rd - Al Manhal - W14 02 - Abu Dhabi - United Arab Emirates',
-          rating: 4.8,
-          reviewCount: 120,
-          basePrice: 46,
-        );
-        Get.to(() => ServiceDetailView(service: mockService, isOrder: true));
+        Get.to(() => SPServiceOrdersView(
+              serviceTitle: titles[index % titles.length],
+              orderCount: badges[index % badges.length],
+            ));
       },
       child: Container(
         padding: EdgeInsets.all(12.w),
