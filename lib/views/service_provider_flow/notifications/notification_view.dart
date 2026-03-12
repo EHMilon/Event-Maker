@@ -23,7 +23,7 @@ class NotificationView extends StatelessWidget {
           onPressed: () => Get.back(),
           icon: const Icon(Icons.arrow_back, color: Colors.black),
         ),
-        titleSpacing: 0,
+        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
         title: Text(
           'Notification',
           style: GoogleFonts.inter(

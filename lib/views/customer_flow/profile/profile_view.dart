@@ -17,9 +17,10 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
         backgroundColor: Colors.white,
         elevation: 0,
-        titleSpacing: 24.w,
+        scrolledUnderElevation: 0,
         title: Text(
           'settings'.tr,
           style: TextStyle(color: AppColors.textPrimary, fontSize: 24.sp, fontWeight: FontWeight.w600),

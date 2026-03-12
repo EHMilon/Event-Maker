@@ -16,7 +16,7 @@ class MapView extends GetView<MapController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
-        titleSpacing: 20.w,
+        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
 
         title: Text(
           'myLocation'.tr,

@@ -24,7 +24,7 @@ class ContactUsView extends GetView<ProfileController> {
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

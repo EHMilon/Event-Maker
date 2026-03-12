@@ -25,7 +25,7 @@ class ProfileSettingsView extends GetView<ProfileController> {
         ),
         title: Text(
           'profileSettings'.tr,
-          style: TextStyle(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w500),
+          style: TextStyle(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w600),
         ),
       ),
       body: Obx(

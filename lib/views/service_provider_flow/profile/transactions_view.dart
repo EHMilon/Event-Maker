@@ -15,6 +15,7 @@ class TransactionsView extends GetView<ProfileController> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
+        titleSpacing: (ModalRoute.of(context)?.canPop ?? false) ? 0 : 24.w,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
@@ -24,7 +25,7 @@ class TransactionsView extends GetView<ProfileController> {
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
