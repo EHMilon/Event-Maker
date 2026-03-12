@@ -1,6 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ServicesCard extends StatelessWidget {
@@ -30,7 +31,9 @@ class ServicesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardWidth = useFullWidth ? double.infinity : 230.w;
-    final cardMargin = useFullWidth ? EdgeInsets.only(bottom: 16.h) : EdgeInsets.only(right: 16.w);
+    final cardMargin = useFullWidth
+        ? EdgeInsets.only(bottom: 16.h)
+        : EdgeInsets.only(right: 16.w);
     final imageHeight = useFullWidth ? 230.h : 120.h;
 
     return GestureDetector(
@@ -42,7 +45,13 @@ class ServicesCard extends StatelessWidget {
           border: Border.all(color: AppColors.lightGrey),
           color: AppColors.white,
           borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +60,9 @@ class ServicesCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(16.r),
+                  ),
                   child: imagePath.startsWith('http')
                       ? Image.network(
                           imagePath,
@@ -59,7 +70,11 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Container(height: imageHeight, color: AppColors.lightGrey, child: const Icon(Icons.broken_image)),
+                              Container(
+                                height: imageHeight,
+                                color: AppColors.lightGrey,
+                                child: const Icon(Icons.broken_image),
+                              ),
                         )
                       : Image.asset(
                           imagePath,
@@ -67,7 +82,11 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Container(height: imageHeight, color: AppColors.lightGrey, child: const Icon(Icons.broken_image)),
+                              Container(
+                                height: imageHeight,
+                                color: AppColors.lightGrey,
+                                child: const Icon(Icons.broken_image),
+                              ),
                         ),
                 ),
                 Positioned(
@@ -77,8 +96,15 @@ class ServicesCard extends StatelessWidget {
                     onTap: onBookmarkTap,
                     child: Container(
                       padding: EdgeInsets.all(6.r),
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.3), borderRadius: BorderRadius.circular(8.r)),
-                      child: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border, size: 18.r, color: Colors.white),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                        size: 18.r,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -94,19 +120,34 @@ class ServicesCard extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.black),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.black,
+                    ),
                   ),
                   SizedBox(height: 4.h),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 12.r, color: AppColors.grey),
+                      SvgPicture.asset(
+                        "assets/icons/location.svg",
+                        height: 16.h,
+                        width: 16.w,
+                        colorFilter: ColorFilter.mode(
+                          AppColors.grey,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
                           location,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.grey),
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: AppColors.grey,
+                          ),
                         ),
                       ),
                     ],
@@ -120,22 +161,41 @@ class ServicesCard extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: price,
-                              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.black),
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.black,
+                              ),
                             ),
                             TextSpan(
                               text: '/hr',
-                              style: GoogleFonts.inter(fontSize: 10.sp, color: AppColors.grey),
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: AppColors.grey,
+                              ),
                             ),
                           ],
                         ),
                       ),
                       Row(
                         children: [
-                          Icon(Icons.star, size: 14.r, color: Colors.orange),
+                          SvgPicture.asset(
+                            "assets/icons/star_fill.svg",
+                            height: 16.h,
+                            width: 16.w,
+                            colorFilter: ColorFilter.mode(
+                              Colors.yellow,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           SizedBox(width: 4.w),
                           Text(
                             rating,
-                            style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w500, color: AppColors.grey),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.grey,
+                            ),
                           ),
                         ],
                       ),

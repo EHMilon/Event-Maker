@@ -283,8 +283,8 @@ class _HomeViewState extends State<HomeView> {
         Text(
           title,
           style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),
         ),

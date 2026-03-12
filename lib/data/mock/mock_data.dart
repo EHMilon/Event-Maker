@@ -34,7 +34,7 @@ class MockData {
       rating: 4.8,
       reviewCount: 156,
       basePrice: 150,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
     ),
     ServiceModel(
@@ -54,7 +54,7 @@ class MockData {
       rating: 4.5,
       reviewCount: 89,
       basePrice: 120,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: true,
     ),
     ServiceModel(
@@ -73,7 +73,7 @@ class MockData {
       rating: 4.9,
       reviewCount: 234,
       basePrice: 250,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
     ),
 
@@ -192,7 +192,7 @@ class MockData {
       rating: 4.6,
       reviewCount: 95,
       basePrice: 300,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
     ),
 
@@ -214,7 +214,7 @@ class MockData {
       rating: 4.8,
       reviewCount: 445,
       basePrice: 80,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
     ),
     ServiceModel(
@@ -234,7 +234,7 @@ class MockData {
       rating: 4.6,
       reviewCount: 267,
       basePrice: 150,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: true,
     ),
     ServiceModel(
@@ -254,7 +254,7 @@ class MockData {
       rating: 4.7,
       reviewCount: 189,
       basePrice: 200,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
     ),
 
@@ -372,7 +372,7 @@ class MockData {
       rating: 4.6,
       reviewCount: 145,
       basePrice: 200,
-      priceUnit: 'AED/hr',
+      priceUnit: 'AED',
       isBookmarked: false,
     ),
   ];

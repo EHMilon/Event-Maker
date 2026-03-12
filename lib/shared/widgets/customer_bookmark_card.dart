@@ -1,6 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// A reusable horizontal service card widget for customer views.
@@ -45,12 +46,11 @@ class CustomerBookmarkCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withOpacity(0.04),
+              color: AppColors.black.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: AppColors.lightGrey),
         ),
         child: Row(
           children: [
@@ -91,8 +91,8 @@ class CustomerBookmarkCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
                         ),
@@ -109,27 +109,34 @@ class CustomerBookmarkCard extends StatelessWidget {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      color: AppColors.textSecondary,
+                      color: AppColors.grey500,
+                      fontWeight: FontWeight.w500
                     ),
                   ),
                   SizedBox(height: 4.h),
                   // Location
                   Row(
                     children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: AppColors.primary,
+                      SvgPicture.asset(
+                        "assets/icons/location.svg",
+                        height: 16.h,
+                        width: 16.w,
+                        colorFilter: ColorFilter.mode(
+                          AppColors.grey,
+                          BlendMode.srcIn,
+                        ),
                       ),
                       SizedBox(width: 4.w),
                       Expanded(
-                        child: Text(
+                        child:       Text(
                           location,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: AppColors.textSecondary,
+                            fontSize: 14.sp,
+                            color: AppColors.grey500,
+                            fontWeight: FontWeight.w500,
+                            height: 1.2.h
                           ),
                         ),
                       ),
@@ -143,26 +150,35 @@ class CustomerBookmarkCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            price,
+                            "$price $priceUnit",
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              height: 1.2.sp,
                             ),
                           ),
-                          SizedBox(width: 2.w),
                           Text(
-                            priceUnit,
+                            "/hr",
                             style: GoogleFonts.inter(
-                              fontSize: 10.sp,
-                              color: AppColors.grey,
+                              fontSize: 12.sp,
+                              color: AppColors.grey400,
+                              height: 1.2.sp,
                             ),
                           ),
                         ],
                       ),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 14),
+                          SvgPicture.asset(
+                            "assets/icons/star_fill.svg",
+                            height: 16.h,
+                            width: 16.w,
+                            colorFilter: ColorFilter.mode(
+                              Colors.yellow,
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           SizedBox(width: 4.w),
                           Text(
                             rating,

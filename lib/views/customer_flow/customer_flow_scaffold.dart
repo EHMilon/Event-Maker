@@ -56,7 +56,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                 colorFilter: ColorFilter.mode(
                   controller.selectedIndex.value == 0
                       ? AppColors.primary
-                      : AppColors.grey,
+                      : AppColors.grey500,
                   BlendMode.srcIn,
                 ),
               ),
@@ -69,7 +69,7 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                 colorFilter: ColorFilter.mode(
                   controller.selectedIndex.value == 1
                       ? AppColors.primary
-                      : AppColors.grey,
+                      : AppColors.grey500,
                   BlendMode.srcIn,
                 ),
               ),

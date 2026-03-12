@@ -225,7 +225,7 @@ class _RequestCard extends StatelessWidget {
           subtitle: request.subtitle,
           location: request.subtitle,
           price: '500',
-          priceUnit: 'AED/hr',
+          priceUnit: 'AED',
           rating: '4.8',
           showBookmarkButton: false,
         ),
