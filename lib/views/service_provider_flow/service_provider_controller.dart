@@ -1,4 +1,4 @@
-import 'package:event_maker/views/service_provider_flow/notifications/notification_controller.dart';
+import 'package:event_maker/views/notifications/notification_controller.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:get/get.dart';
 

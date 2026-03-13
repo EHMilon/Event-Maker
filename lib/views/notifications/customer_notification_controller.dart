@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../../../data/mock/mock_data.dart';
-import '../../../core/routes/app_routes.dart';
+import '../../data/mock/mock_data.dart';
+import '../../core/routes/app_routes.dart';
 
 class CustomerNotificationController extends GetxController {
   final RxList<CustomerNotificationModel> notifications =
@@ -15,10 +15,7 @@ class CustomerNotificationController extends GetxController {
 
   Future<void> _loadNotifications() async {
     isLoading.value = true;
-    // Simulate 2s delay for shimmer effect as per user rules
     await Future.delayed(const Duration(seconds: 2));
-
-    // TODO: Replace with actual API call
     notifications.addAll([
       CustomerNotificationModel(
         id: '1',
@@ -97,11 +94,8 @@ class CustomerNotificationController extends GetxController {
 
   void handleNotificationClick(CustomerNotificationModel notification) {
     markAsRead(notification.id);
-
-    // Navigate to payment screen for accepted booking notifications with valid service ID
     if (notification.serviceId != null &&
         notification.body == 'acceptedBookingBody') {
-      // Find service in HomeController or MockData
       final service = MockData.homeServices.firstWhereOrNull(
         (s) => s.id == notification.serviceId,
       );
@@ -119,7 +113,7 @@ class CustomerNotificationController extends GetxController {
 class CustomerNotificationModel {
   final String id;
   final String title;
-  final String body; // This will hold the localization key or the actual text
+  final String body;
   final String timeAgo;
   final bool isRead;
   final NotificationType type;

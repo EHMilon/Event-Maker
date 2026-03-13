@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 
-// Since service providers mainly deal with service requests, we'll create a specialized controller
-class SPNotificationController extends GetxController {
+class NotificationController extends GetxController {
   final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
   final RxList<ServiceRequest> serviceRequests = <ServiceRequest>[].obs;
 
@@ -17,41 +16,56 @@ class SPNotificationController extends GetxController {
     notifications.addAll([
       NotificationModel(
         id: '1',
-        title: 'Booking Request',
-        body: 'New booking request received',
-        timeAgo: '2 min ago',
+        title: 'Clara Tolson',
+        body: 'Accepted your booking request',
+        timeAgo: '9 hr ago',
         isRead: false,
         type: NotificationType.booking,
       ),
       NotificationModel(
         id: '2',
-        title: 'Payment Received',
-        body: 'Payment received for completed service',
-        timeAgo: '1 hr ago',
+        title: 'Clara Tolson',
+        body: 'Accepted your booking request',
+        timeAgo: '9 hr ago',
         isRead: false,
-        type: NotificationType.payment,
+        type: NotificationType.booking,
       ),
       NotificationModel(
         id: '3',
-        title: 'Customer Review',
-        body: 'New review received for your service',
-        timeAgo: '3 hr ago',
+        title: 'Clara Tolson',
+        body: 'Accepted your booking request',
+        timeAgo: '9 hr ago',
         isRead: true,
-        type: NotificationType.review,
+        type: NotificationType.booking,
       ),
       NotificationModel(
         id: '4',
-        title: 'Upcoming Event',
-        body: 'Reminder: Event starts in 24 hours',
-        timeAgo: '5 hr ago',
+        title: 'Clara Tolson',
+        body: 'Accepted your booking request',
+        timeAgo: '9 hr ago',
         isRead: true,
-        type: NotificationType.reminder,
+        type: NotificationType.booking,
+      ),
+      NotificationModel(
+        id: '5',
+        title: 'Clara Tolson',
+        body: 'Rejected your booking request',
+        timeAgo: '9 hr ago',
+        isRead: true,
+        type: NotificationType.booking,
+      ),
+      NotificationModel(
+        id: '6',
+        title: 'Clara Tolson',
+        body: 'Rejected your booking request',
+        timeAgo: '9 hr ago',
+        isRead: true,
+        type: NotificationType.booking,
       ),
     ]);
   }
 
   void _loadServiceRequests() {
-    // TODO: Replace with actual API call - Service requests for service provider
     serviceRequests.addAll([
       ServiceRequest(
         id: 'req-1',
@@ -91,7 +105,20 @@ class SPNotificationController extends GetxController {
         location: 'Emirates Palace',
         price: 2000,
         priceUnit: 'AED',
-        status: RequestStatus.accepted,
+        status: RequestStatus.pending,
+      ),
+      ServiceRequest(
+        id: 'req-4',
+        customerName: 'Michael Brown',
+        customerImage:
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop',
+        serviceTitle: 'Video Production',
+        serviceDescription: 'Cinematic wedding video with highlight reel',
+        date: DateTime.now().add(const Duration(days: 10)),
+        location: 'Burj Al Arab',
+        price: 4500,
+        priceUnit: 'AED',
+        status: RequestStatus.pending,
       ),
     ]);
   }
@@ -114,7 +141,6 @@ class SPNotificationController extends GetxController {
     notifications.clear();
   }
 
-  // Service request methods
   void acceptRequest(String requestId) {
     final index = serviceRequests.indexWhere((r) => r.id == requestId);
     if (index != -1) {

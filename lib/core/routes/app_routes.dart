@@ -33,9 +33,6 @@ import 'package:event_maker/views/customer_flow/home/home_binding.dart';
 import 'package:event_maker/views/service_provider_flow/service_provider_controller.dart';
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
-import 'package:event_maker/views/service_provider_flow/notifications/notification_binding.dart';
-import 'package:event_maker/views/service_provider_flow/notifications/notification_controller.dart';
-import 'package:event_maker/views/service_provider_flow/notifications/notification_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services/services_controller.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
@@ -43,13 +40,16 @@ import 'package:event_maker/views/service_provider_flow/service_provider_scaffol
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
 import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
-import 'package:event_maker/views/customer_flow/notifications/notification_view.dart';
-import 'package:event_maker/views/customer_flow/notifications/notification_binding.dart';
+import 'package:event_maker/views/notifications/customer_notification_view.dart';
+import 'package:event_maker/views/notifications/notification_binding.dart';
+import 'package:event_maker/views/notifications/notification_controller.dart';
+import 'package:event_maker/views/notifications/notification_view.dart';
 import 'package:event_maker/views/customer_flow/search/search_view.dart';
 import 'package:event_maker/views/customer_flow/search/search_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/category_services_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/category_services_controller.dart';
+
 import 'package:event_maker/views/customer_flow/booking/book_service_date_view.dart';
 import 'package:event_maker/views/customer_flow/booking/book_service_request_view.dart';
 import 'package:event_maker/views/customer_flow/booking/payment_confirmation_view.dart';
@@ -135,7 +135,7 @@ class AppRoutes {
   static final routes = [
     GetPage(
       name: notifications,
-      page: () => NotificationView(),
+      page: () => const NotificationView(),
       binding: NotificationBinding(),
     ),
     GetPage(
@@ -145,7 +145,7 @@ class AppRoutes {
     ),
     GetPage(
       name: serviceProviderNotifications,
-      page: () => NotificationView(),
+      page: () => const NotificationView(),
       binding: NotificationBinding(),
     ),
     GetPage(
