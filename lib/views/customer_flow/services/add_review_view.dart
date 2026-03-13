@@ -1,6 +1,7 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -75,7 +76,7 @@ class _AddReviewViewState extends State<AddReviewView> {
             color: AppColors.textPrimary,
           ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: Column(
         children: [
@@ -83,6 +84,7 @@ class _AddReviewViewState extends State<AddReviewView> {
             child: SingleChildScrollView(
               padding: EdgeInsets.all(24.w),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Vendor Logo
                   Container(
@@ -136,19 +138,21 @@ class _AddReviewViewState extends State<AddReviewView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (index) {
+                      final isSelected = index < _rating;
                       return GestureDetector(
                         onTap: () {
                           setState(() {
                             _rating = index + 1;
                           });
                         },
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4.w),
-                          child: Icon(
-                            index < _rating ? Icons.star : Icons.star_border,
-                            color: Colors.amber,
-                            size: 40.r,
-                          ),
+                        child: SvgPicture.asset(
+                          'assets/icons/star_fill.svg',
+                          width: 30.r,
+                          height: 30.r,
+                          color: isSelected
+                              ? Colors.orange
+                              : AppColors.lightGrey,
+                          semanticsLabel: 'Rating star ${index + 1}',
                         ),
                       );
                     }),
@@ -157,12 +161,15 @@ class _AddReviewViewState extends State<AddReviewView> {
                   SizedBox(height: 32.h),
 
                   // Question
-                  Text(
-                    'What did you enjoy the most?',
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'What did you enjoy the most?',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
 
@@ -172,8 +179,8 @@ class _AddReviewViewState extends State<AddReviewView> {
                   Container(
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: AppColors.grey200),
                     ),
                     child: TextField(
                       controller: _reviewController,
@@ -202,7 +209,6 @@ class _AddReviewViewState extends State<AddReviewView> {
           Container(
             padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
-              color: Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -236,6 +242,7 @@ class _AddReviewViewState extends State<AddReviewView> {
           ),
         ],
       ),
+            
     );
   }
 }

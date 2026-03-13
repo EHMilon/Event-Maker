@@ -1,5 +1,5 @@
 import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/data/mock/mock_data.dart';
+import 'package:event_maker/data/mock/services_mock.dart';
 import 'package:get/get.dart';
 
 /// Controller for managing services by category
@@ -21,22 +21,16 @@ class CategoryServicesController extends GetxController {
     loadServices();
   }
 
-  /// Load services based on category type
+  /// Load services based on category type from mock database
   Future<void> loadServices() async {
     try {
       isLoading.value = true;
-      
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // Get services by category type
-      if (categoryType == 'all') {
-        // Show all services when 'all' is selected
-        services.value = MockData.homeServices;
-      } else {
-        services.value = MockData.getHomeSectionServices(categoryType);
-      }
-      
+
+      // Use ServicesMock API-like method with simulated network delay
+      services.value = await ServicesMock.fetchServicesByCategory(
+        categoryType,
+        delay: const Duration(seconds: 1),
+      );
     } catch (e) {
       Get.snackbar('Error', 'Failed to load services: $e');
     } finally {
@@ -44,15 +38,17 @@ class CategoryServicesController extends GetxController {
     }
   }
 
-  /// Get ServiceType from string category type
-  ServiceType _getServiceType(String type) {
-    final typeMap = {
-      'catering': ServiceType.catering,
-      'filming': ServiceType.filming,
-      'cleaning': ServiceType.cleaning,
-      'photography': ServiceType.photography,
-      'event': ServiceType.event,
-    };
-    return typeMap[type] ?? ServiceType.event;
+  /// Toggle bookmark status for a service
+  Future<bool> toggleBookmark(ServiceModel service) async {
+    final isBookmarked = await ServicesMock.toggleBookmark(service.id);
+
+    // Update the service in the local list
+    final index = services.indexWhere((s) => s.id == service.id);
+    if (index != -1) {
+      services[index] = service.copyWith(isBookmarked: isBookmarked);
+      services.refresh();
+    }
+
+    return isBookmarked;
   }
 }

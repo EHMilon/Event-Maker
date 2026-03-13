@@ -1,5 +1,6 @@
+import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/data/models/vendor_profile_model.dart';
 import 'package:event_maker/shared/widgets/review_card.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:flutter/material.dart';
@@ -8,38 +9,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class VendorProfileView extends StatefulWidget {
-  const VendorProfileView({super.key});
+class VendorProfileView extends StatelessWidget {
+  final VendorProfileModel vendor;
 
-  @override
-  State<VendorProfileView> createState() => _VendorProfileViewState();
-}
-
-class _VendorProfileViewState extends State<VendorProfileView> {
-  ServiceProvider? _vendor;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = Get.arguments;
-    if (args is ServiceProvider && args != _vendor) {
-      _vendor = args;
-    }
-  }
+  const VendorProfileView({super.key, required this.vendor});
 
   @override
   Widget build(BuildContext context) {
-    final vendor = _vendor;
-
-    if (vendor == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (Navigator.of(context).canPop()) {
-          Get.back();
-        }
-      });
-      return const Scaffold(body: Center(child: Text('No vendor data found')));
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -98,10 +74,10 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                             border: Border.all(color: Colors.white, width: 4),
                             image: DecorationImage(
                               image:
-                                  vendor.imageUrl.startsWith('http://') ||
-                                      vendor.imageUrl.startsWith('https://')
-                                  ? NetworkImage(vendor.imageUrl)
-                                  : AssetImage(vendor.imageUrl)
+                                  vendor.provider.imageUrl.startsWith('http://') ||
+                                      vendor.provider.imageUrl.startsWith('https://')
+                                  ? NetworkImage(vendor.provider.imageUrl)
+                                  : AssetImage(vendor.provider.imageUrl)
                                         as ImageProvider,
                               fit: BoxFit.cover,
                             ),
@@ -142,15 +118,16 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                                 'assets/icons/star_fill.svg',
                                 width: 20.r,
                                 height: 20.r,
-                                color: isSelected
-                                    ? Colors.orange
-                                    : AppColors.lightGrey,
+                                colorFilter: ColorFilter.mode(
+                                  isSelected ? Colors.orange : AppColors.lightGrey,
+                                  BlendMode.srcIn,
+                                ),
                                 semanticsLabel: 'Star ${index + 1}',
                               ),
                             );
                           }),
                           Text(
-                            '4.9', // Dummy for now, should come from data
+                            vendor.rating.toString(),
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -159,7 +136,7 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '(3,657)',
+                            '(${vendor.reviewCount})',
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
                               color: AppColors.textSecondary,
@@ -231,9 +208,9 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                         height: 230.h,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: vendor.services?.length ?? 0,
+                          itemCount: vendor.services.length,
                           itemBuilder: (context, index) {
-                            final service = vendor.services![index];
+                            final service = vendor.services[index];
                             return ServicesCard(
                               imagePath: service.images.isNotEmpty
                                   ? service.images.first
@@ -254,7 +231,7 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                           },
                         ),
                       ),
-                      if (vendor.services == null || vendor.services!.isEmpty)
+                      if (vendor.services.isEmpty)
                         Text(
                           'No services listed',
                           style: GoogleFonts.inter(
@@ -271,14 +248,14 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                         height: 120.h,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: vendor.reviews?.length ?? 0,
+                          itemCount: vendor.reviews.length,
                           itemBuilder: (context, index) {
-                            final review = vendor.reviews![index];
+                            final review = vendor.reviews[index];
                             return ReviewCard(review: review);
                           },
                         ),
                       ),
-                      if (vendor.reviews == null || vendor.reviews!.isEmpty)
+                      if (vendor.reviews.isEmpty)
                         Text(
                           'No reviews yet',
                           style: GoogleFonts.inter(
@@ -320,18 +297,18 @@ class _VendorProfileViewState extends State<VendorProfileView> {
                 if (value == 'review') {
                   // Navigate to Add Review screen
                   Get.toNamed(
-                    '/add-review',
+                    AppRoutes.addReview,
                     arguments: {
                       'vendorName': vendor.name,
-                      'vendorLogo': vendor.imageUrl,
+                      'vendorLogo': vendor.provider.imageUrl,
                     },
                   );
                 } else if (value == 'certification') {
                   // Navigate to View Certificate screen
-                  Get.toNamed('/view-certificate');
+                  Get.toNamed(AppRoutes.viewCertificate);
                 } else if (value == 'report') {
                   // Navigate to Spam & Report screen
-                  Get.toNamed('/spam-report');
+                  Get.toNamed(AppRoutes.spamReport);
                 }
               },
               itemBuilder: (context) => [

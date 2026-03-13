@@ -81,7 +81,7 @@ class _SpamReportViewState extends State<SpamReportView> {
             color: AppColors.textPrimary,
           ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: Column(
         children: [
@@ -96,7 +96,7 @@ class _SpamReportViewState extends State<SpamReportView> {
                     'Report an issue',
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w400,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -119,13 +119,13 @@ class _SpamReportViewState extends State<SpamReportView> {
                             color: isSelected
                                 ? AppColors.primary
                                 : Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
                             reason,
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               color: isSelected
                                   ? Colors.white
                                   : AppColors.textPrimary,
@@ -153,7 +153,7 @@ class _SpamReportViewState extends State<SpamReportView> {
                   Container(
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      border: Border.all(color: AppColors.grey200),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: TextField(
@@ -187,7 +187,7 @@ class _SpamReportViewState extends State<SpamReportView> {
                       'We won\'t let the person know who reported them.\nIf someone is in immediate danger, call local emergency services. Don\'t wait.',
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: AppColors.textSecondary,
+                        color: AppColors.darkGrey,
                         height: 1.5,
                       ),
                     ),
@@ -201,7 +201,6 @@ class _SpamReportViewState extends State<SpamReportView> {
           Container(
             padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
-              color: Colors.white,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),

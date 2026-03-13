@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ViewCertificateView extends StatefulWidget {
-  const ViewCertificateView({super.key});
+class ViewCertificate extends StatefulWidget {
+  const ViewCertificate({super.key});
 
   @override
-  State<ViewCertificateView> createState() => _ViewCertificateViewState();
+  State<ViewCertificate> createState() => _ViewCertificateState();
 }
 
-class _ViewCertificateViewState extends State<ViewCertificateView> {
+class _ViewCertificateState extends State<ViewCertificate> {
   final TextEditingController _documentTitleController = TextEditingController(
     text: 'Professional Chef Certificate',
   );
@@ -49,7 +49,6 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
             color: AppColors.textPrimary,
           ),
         ),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
@@ -74,7 +73,7 @@ class _ViewCertificateViewState extends State<ViewCertificateView> {
                 borderRadius: BorderRadius.circular(12.r),
                 child: Image.asset(
                   'assets/images/certificate.png',
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: Colors.grey.shade200,

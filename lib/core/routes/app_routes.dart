@@ -34,7 +34,6 @@ import 'package:event_maker/views/service_provider_flow/service_provider_control
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
-import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
 import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
@@ -72,6 +71,9 @@ import 'package:event_maker/views/service_provider_flow/certifications/certifica
 import 'package:event_maker/views/service_provider_flow/active_orders/sp_active_orders_view.dart';
 import 'package:event_maker/views/chats/chat_detail_view.dart';
 import 'package:event_maker/views/chats/chat_detail_controller.dart';
+import 'package:event_maker/views/customer_flow/services/add_review_view.dart';
+import 'package:event_maker/views/customer_flow/services/spam_report_view.dart';
+import 'package:event_maker/views/customer_flow/services/view_certificate.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -375,6 +377,19 @@ class AppRoutes {
       name: categories,
       page: () => const CategoriesView(),
       binding: CategoriesBinding(),
+    ),
+    // Customer flow - vendor profile related routes
+    GetPage(
+      name: addReview,
+      page: () => const AddReviewView(),
+    ),
+    GetPage(
+      name: viewCertificate,
+      page: () => const ViewCertificate(),
+    ),
+    GetPage(
+      name: spamReport,
+      page: () => const SpamReportView(),
     ),
   ];
 }

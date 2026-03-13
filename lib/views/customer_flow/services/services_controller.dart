@@ -1,5 +1,5 @@
 import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/data/mock/mock_data.dart';
+import 'package:event_maker/data/mock/services_mock.dart';
 import 'package:get/get.dart';
 
 class ServicesController extends GetxController {
@@ -21,21 +21,15 @@ class ServicesController extends GetxController {
     });
   }
 
+  /// Load all services from the mock database
   Future<void> loadServices() async {
     try {
       isLoading.value = true;
-      // Simulate network check (mock)
-      // var connectivityResult = await (Connectivity().checkConnectivity());
-      // if (connectivityResult == ConnectivityResult.none) {
-      //   Get.snackbar('Error', 'No Internet Connection');
-      //   isLoading.value = false;
-      //   return;
-      // }
 
-      await Future.delayed(const Duration(seconds: 2)); // Simulate API delay
-
-      // Use centralized mock data
-      services.value = MockData.homeServices;
+      // Use ServicesMock API-like method with simulated network delay
+      services.value = await ServicesMock.fetchAllServices(
+        delay: const Duration(seconds: 2),
+      );
     } catch (e) {
       Get.snackbar('Error', 'Failed to load services: $e');
     } finally {
@@ -47,23 +41,33 @@ class ServicesController extends GetxController {
     selectedPackageIndex.value = index;
   }
 
-  void search(String query) {
+  /// Search services by query using mock database
+  Future<void> search(String query) async {
     searchQuery.value = query;
     if (query.isEmpty) {
       filteredServices.value = services;
     } else {
-      filteredServices.value = services.where((service) {
-        final searchLower = query.toLowerCase();
-        return service.title.toLowerCase().contains(searchLower) ||
-            service.description.toLowerCase().contains(searchLower) ||
-            service.location.toLowerCase().contains(searchLower) ||
-            service.provider.name.toLowerCase().contains(searchLower);
-      }).toList();
+      // Use the search method from ServicesMock
+      filteredServices.value = await ServicesMock.searchServices(query);
     }
   }
 
   void clearSearch() {
     searchQuery.value = '';
     filteredServices.value = services;
+  }
+
+  /// Toggle bookmark status for a service
+  Future<bool> toggleBookmark(ServiceModel service) async {
+    final isBookmarked = await ServicesMock.toggleBookmark(service.id);
+    
+    // Update the service in the local list
+    final index = services.indexWhere((s) => s.id == service.id);
+    if (index != -1) {
+      services[index] = service.copyWith(isBookmarked: isBookmarked);
+      services.refresh();
+    }
+    
+    return isBookmarked;
   }
 }
