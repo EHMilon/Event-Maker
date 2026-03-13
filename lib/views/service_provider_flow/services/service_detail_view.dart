@@ -22,12 +22,14 @@ class ServiceDetailView extends StatelessWidget {
     this.showEditButton = false,
     this.isRequest = false,
     this.isOrder = false,
-  });
+    bool? hideActionButtons,
+  }) : hideActionButtons = hideActionButtons ?? false;
 
   final bool isOrder;
   final bool isRequest;
   final ServiceModel service;
   final bool showEditButton;
+  final bool hideActionButtons;
 
   void _showRejectDialog(BuildContext context) {
     showDialog(
@@ -111,7 +113,6 @@ class ServiceDetailView extends StatelessWidget {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -766,7 +767,7 @@ class ServiceDetailView extends StatelessWidget {
           ),
 
           // Bottom Buttons
-          if (!showEditButton)
+          if (!showEditButton && !hideActionButtons)
             Positioned(
               bottom: 30.h,
               left: 24.w,
@@ -781,7 +782,8 @@ class ServiceDetailView extends StatelessWidget {
                           context: context,
                           builder: (context) => AppCustomDialog(
                             iconPath: 'assets/images/accept.svg',
-                            title: 'Are you sure you want to complete the service?',
+                            title:
+                                'Are you sure you want to complete the service?',
                             mainButtonText: 'yes'.tr,
                             mainButtonCallback: () {
                               // TODO: Handle actual completion logic (e.g., API call)

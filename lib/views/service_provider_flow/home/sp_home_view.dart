@@ -310,7 +310,7 @@ class SPHomeView extends GetView<SPHomeController> {
                   text: TextSpan(
                     text: label,
                     style: GoogleFonts.inter(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       color: AppColors.darkGrey,
                       fontWeight: FontWeight.w400,
                     ),

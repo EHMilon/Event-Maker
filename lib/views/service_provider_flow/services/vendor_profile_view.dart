@@ -7,7 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart'
+    as sp;
 
 class VendorProfileView extends StatelessWidget {
   const VendorProfileView({super.key});
@@ -19,7 +20,7 @@ class VendorProfileView extends StatelessWidget {
     // Ensure we have a valid ServiceProvider object
     if (args == null || args is! ServiceProvider) {
       return const Scaffold(body: Center(child: Text('No vendor data found')));
-    } 
+    }
 
     final ServiceProvider vendor = args;
 
@@ -117,7 +118,11 @@ class VendorProfileView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SvgPicture.asset("assets/icons/star_fill.svg", height: 20.h, width: 20.w,),
+                          SvgPicture.asset(
+                            "assets/icons/star_fill.svg",
+                            height: 20.h,
+                            width: 20.w,
+                          ),
                           SizedBox(width: 4.w),
                           Text(
                             '4.9', // Dummy for now, should come from data
@@ -216,7 +221,11 @@ class VendorProfileView extends StatelessWidget {
                               isBookmarked: service.isBookmarked,
                               onTap: () {
                                 Get.to(
-                                  () => ServiceDetailView(service: service),
+                                  () => sp.ServiceDetailView(
+                                    service: service,
+                                    showEditButton: true,
+                                    hideActionButtons: true,
+                                  ),
                                 );
                               },
                             );
@@ -273,55 +282,6 @@ class VendorProfileView extends StatelessWidget {
                 backgroundColor: Colors.white,
                 child: Icon(Icons.arrow_back, color: Colors.black, size: 20.r),
               ),
-            ),
-          ),
-
-          // More options button
-          Positioned(
-            top: 40.h,
-            right: 16.w,
-            child: PopupMenuButton<String>(
-              icon: CircleAvatar(
-                backgroundColor: Colors.white.withOpacity(0.3),
-                child: Icon(Icons.more_vert, color: Colors.black, size: 20.r),
-              ),
-              onSelected: (value) {
-                if (value == 'review') {
-                  // Navigate to Add Review screen
-                  Get.toNamed(
-                    '/add-review',
-                    arguments: {
-                      'vendorName': vendor.name,
-                      'vendorLogo': vendor.imageUrl,
-                    },
-                  );
-                } else if (value == 'certification') {
-                  // Navigate to View Certificate screen
-                  Get.toNamed('/view-certificate');
-                } else if (value == 'report') {
-                  // Navigate to Spam & Report screen
-                  Get.toNamed('/spam-report');
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'review',
-                  child: Text('Leave a Review', style: GoogleFonts.inter()),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem(
-                  value: 'certification',
-                  child: Text('View Certification', style: GoogleFonts.inter()),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem(
-                  value: 'report',
-                  child: Text(
-                    'Spam & Report',
-                    style: GoogleFonts.inter(color: Colors.red),
-                  ),
-                ),
-              ],
             ),
           ),
         ],

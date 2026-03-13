@@ -349,7 +349,7 @@ class _HomeViewState extends State<HomeView> {
       child: Row(
         children: services.map((service) {
           return Padding(
-            padding: EdgeInsets.only(right: 16.w),
+            padding: EdgeInsets.only(right: 6.w),
             child: ServicesCard(
               imagePath: service.images.isNotEmpty ? service.images[0] : '',
               title: service.title,

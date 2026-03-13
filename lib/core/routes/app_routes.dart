@@ -39,7 +39,6 @@ import 'package:event_maker/views/service_provider_flow/profile/profile_controll
 import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
-import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:event_maker/views/notifications/customer_notification_view.dart';
 import 'package:event_maker/views/notifications/notification_binding.dart';
 import 'package:event_maker/views/notifications/notification_controller.dart';
@@ -56,9 +55,6 @@ import 'package:event_maker/views/customer_flow/booking/payment_confirmation_vie
 import 'package:event_maker/views/customer_flow/booking/payment_view.dart';
 import 'package:event_maker/views/customer_flow/booking/booking_request_sent_view.dart';
 import 'package:event_maker/views/customer_flow/booking/booking_binding.dart';
-import 'package:event_maker/views/service_provider_flow/services/spam_report_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/view_certificate_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_review_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/service_detail_decision_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/documents_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/add_document_view.dart';
@@ -302,9 +298,6 @@ class AppRoutes {
       page: () => const BookingRequestSentView(),
       binding: BookingBinding(),
     ),
-    GetPage(name: spamReport, page: () => const SpamReportView()),
-    GetPage(name: viewCertificate, page: () => const ViewCertificateView()),
-    GetPage(name: addReview, page: () => const AddReviewView()),
     // Category Services route
     GetPage(
       name: categoryServices,
