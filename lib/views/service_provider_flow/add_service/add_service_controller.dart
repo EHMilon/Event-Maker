@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/service_model.dart';
-import '../../../views/service_provider_flow/services/sp_services_controller.dart';
+import '../services/sp_services_controller.dart';
 import '../../../shared/widgets/availability_widget_card.dart';
 
 enum ServiceCategory { hospitality, event, trainer }

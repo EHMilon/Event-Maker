@@ -319,16 +319,13 @@ class ProfileController extends GetxController {
     );
   }
 
+  // NOTE: TextEditingControllers are NOT disposed here because this controller
+  // is a singleton managed by GetX. Disposing them would cause errors when
+  // the controller is reused after navigation (e.g., returning to ChangePasswordView).
+  // For singleton controllers, TextEditingControllers persist for the app's lifetime.
   @override
   void onClose() {
-    nameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    nationalityController.dispose();
-    captionController.dispose();
-    currentPasswordController.dispose();
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
+    // TextEditingControllers intentionally not disposed for singleton lifecycle
     super.onClose();
   }
 }

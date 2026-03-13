@@ -34,7 +34,7 @@ import 'package:event_maker/views/service_provider_flow/service_provider_control
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
-import 'package:event_maker/views/service_provider_flow/services/services_controller.dart';
+import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
 import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
@@ -45,9 +45,10 @@ import 'package:event_maker/views/notifications/notification_controller.dart';
 import 'package:event_maker/views/notifications/notification_view.dart';
 import 'package:event_maker/views/customer_flow/search/search_view.dart';
 import 'package:event_maker/views/customer_flow/search/search_binding.dart';
+import 'package:event_maker/data/models/vendor_profile_model.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/category_services_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/category_services_controller.dart';
+import 'package:event_maker/views/customer_flow/services/category_services_view.dart';
+import 'package:event_maker/views/customer_flow/services/category_services_controller.dart';
 
 import 'package:event_maker/views/customer_flow/booking/book_service_date_view.dart';
 import 'package:event_maker/views/customer_flow/booking/book_service_request_view.dart';
@@ -55,14 +56,14 @@ import 'package:event_maker/views/customer_flow/booking/payment_confirmation_vie
 import 'package:event_maker/views/customer_flow/booking/payment_view.dart';
 import 'package:event_maker/views/customer_flow/booking/booking_request_sent_view.dart';
 import 'package:event_maker/views/customer_flow/booking/booking_binding.dart';
-import 'package:event_maker/views/service_provider_flow/services/service_detail_decision_view.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/service_detail_decision_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/documents_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/add_document_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/documents_binding.dart';
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_view.dart';
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_binding.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
+import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_list_view.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/view_certificate_view.dart'
     as sp_view;
@@ -260,7 +261,6 @@ class AppRoutes {
         Get.lazyPut<SPHomeController>(() => SPHomeController());
         Get.lazyPut<RequestsController>(() => RequestsController());
         Get.lazyPut<SPServicesController>(() => SPServicesController());
-        Get.lazyPut<ServicesController>(() => ServicesController());
         Get.lazyPut<NotificationController>(() => NotificationController());
         Get.put(
           ProfileController(),
@@ -272,7 +272,11 @@ class AppRoutes {
       page: () => const MapResultsView(),
       binding: MapResultsBinding(),
     ),
-    GetPage(name: vendorProfile, page: () => const VendorProfileView()),
+    GetPage(
+      name: vendorProfile,
+      page: () =>
+          VendorProfileView(vendor: Get.arguments as VendorProfileModel),
+    ),
     GetPage(
       name: bookServiceDate,
       page: () => const BookServiceDateView(),

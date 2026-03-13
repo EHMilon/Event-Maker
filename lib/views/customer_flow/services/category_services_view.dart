@@ -1,5 +1,5 @@
 import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/views/service_provider_flow/services/category_services_controller.dart';
+import 'package:event_maker/views/customer_flow/services/category_services_controller.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:flutter/material.dart';

@@ -1,13 +1,6 @@
 import 'review_model.dart';
 
-enum ServiceType {
-  event,
-  photography,
-  training,
-  catering,
-  cleaning,
-  filming,
-}
+enum ServiceType { event, photography, training, catering, cleaning, filming }
 
 class ServiceModel {
   final String id;
@@ -41,6 +34,40 @@ class ServiceModel {
     this.packages,
     this.isBookmarked = false,
   });
+
+  ServiceModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    List<String>? images,
+    ServiceType? type,
+    ServiceProvider? provider,
+    String? location,
+    double? rating,
+    int? reviewCount,
+    DateTime? date,
+    double? basePrice,
+    String? priceUnit,
+    List<ServicePackage>? packages,
+    bool? isBookmarked,
+  }) {
+    return ServiceModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      images: images ?? this.images,
+      type: type ?? this.type,
+      provider: provider ?? this.provider,
+      location: location ?? this.location,
+      rating: rating ?? this.rating,
+      reviewCount: reviewCount ?? this.reviewCount,
+      date: date ?? this.date,
+      basePrice: basePrice ?? this.basePrice,
+      priceUnit: priceUnit ?? this.priceUnit,
+      packages: packages ?? this.packages,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
+    );
+  }
 }
 
 class ServiceProvider {

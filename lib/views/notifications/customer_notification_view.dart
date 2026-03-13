@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import 'customer_notification_controller.dart';
-import 'notification_card.dart';
+import '../../shared/widgets/notification_card.dart';
 
 class CustomerNotificationView extends GetView<CustomerNotificationController> {
   const CustomerNotificationView({super.key});

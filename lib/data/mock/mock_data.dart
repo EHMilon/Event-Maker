@@ -1,3 +1,4 @@
+import 'package:event_maker/data/models/review_model.dart';
 import 'package:event_maker/data/models/service_model.dart';
 
 // Centralized mock data file
@@ -475,4 +476,23 @@ class MockData {
     final type = typeMap[section] ?? ServiceType.event;
     return getServicesByType(type);
   }
+
+  static final List<ReviewModel> reviews = [
+    ReviewModel(
+      userName: 'John Doe',
+      userImageUrl: 'https://i.pravatar.cc/150?img=1',
+      date: '10 Feb',
+      rating: 4,
+      reviewText: 'Thank you, Fresh Food L.L.C! That was a great event.',
+      providerName: 'Chef Antonio',
+    ),
+    ReviewModel(
+      userName: 'Jane Smith',
+      userImageUrl: 'https://i.pravatar.cc/150?img=2',
+      date: '12 Feb',
+      rating: 5,
+      reviewText: 'Loved the experience, super professional.',
+      providerName: 'Chef Antonio',
+    ),
+  ];
 }

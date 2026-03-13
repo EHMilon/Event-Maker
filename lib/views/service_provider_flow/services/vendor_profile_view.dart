@@ -1,5 +1,5 @@
 import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/data/models/vendor_profile_model.dart';
 import 'package:event_maker/shared/widgets/review_card.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
 import 'package:flutter/material.dart';
@@ -7,23 +7,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart'
+import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart'
     as sp;
 
 class VendorProfileView extends StatelessWidget {
-  const VendorProfileView({super.key});
+  final VendorProfileModel vendor;
+
+  const VendorProfileView({super.key, required this.vendor});
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments;
-
-    // Ensure we have a valid ServiceProvider object
-    if (args == null || args is! ServiceProvider) {
-      return const Scaffold(body: Center(child: Text('No vendor data found')));
-    }
-
-    final ServiceProvider vendor = args;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -82,10 +75,14 @@ class VendorProfileView extends StatelessWidget {
                             border: Border.all(color: Colors.white, width: 4),
                             image: DecorationImage(
                               image:
-                                  vendor.imageUrl.startsWith('http://') ||
-                                      vendor.imageUrl.startsWith('https://')
-                                  ? NetworkImage(vendor.imageUrl)
-                                  : AssetImage(vendor.imageUrl)
+                                  vendor.provider.imageUrl.startsWith(
+                                        'http://',
+                                      ) ||
+                                      vendor.provider.imageUrl.startsWith(
+                                        'https://',
+                                      )
+                                  ? NetworkImage(vendor.provider.imageUrl)
+                                  : AssetImage(vendor.provider.imageUrl)
                                         as ImageProvider,
                               fit: BoxFit.cover,
                             ),

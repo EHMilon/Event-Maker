@@ -323,17 +323,17 @@ class BookServiceDateView extends StatelessWidget {
 
             SizedBox(height: 40.h),
 
-            PrimaryTextButton(
-              onPressed: () {
-                Get.toNamed(
-                  AppRoutes.bookServiceRequest,
-                  arguments: Get.arguments,
-                );
-              },
-              text: 'continueText'.tr,
-            ),
             SizedBox(height: 20.h),
           ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: PrimaryTextButton(
+          onPressed: () {
+            Get.toNamed(AppRoutes.bookServiceRequest, arguments: Get.arguments);
+          },
+          text: 'continueText'.tr,
         ),
       ),
     );

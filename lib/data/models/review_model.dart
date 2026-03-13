@@ -4,6 +4,7 @@ class ReviewModel {
   final String date;
   final double rating;
   final String reviewText;
+  final String providerName;
 
   ReviewModel({
     required this.userName,
@@ -11,5 +12,6 @@ class ReviewModel {
     required this.date,
     required this.rating,
     required this.reviewText,
+    this.providerName = '',
   });
 }

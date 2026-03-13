@@ -1,12 +1,15 @@
 import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/data/models/vendor_profile_model.dart';
+import 'package:event_maker/data/services/service_repository.dart';
 import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
 import 'package:event_maker/data/models/review_model.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
+import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -30,6 +33,7 @@ class ServiceDetailView extends StatelessWidget {
   final ServiceModel service;
   final bool showEditButton;
   final bool hideActionButtons;
+  final ServiceRepository _repository = const ServiceRepository();
 
   void _showRejectDialog(BuildContext context) {
     showDialog(
@@ -203,90 +207,29 @@ class ServiceDetailView extends StatelessWidget {
                               ),
                             ),
                             if (showEditButton)
-                              IconButton(
-                                onPressed: _onEditPressed,
-                                icon: Icon(
-                                  Icons.edit_outlined,
-                                  color: AppColors.primary,
-                                  size: 24.r,
+                              Align(
+                                child: IconButton(
+                                  onPressed: _onEditPressed,
+                                  icon: SvgPicture.asset(
+                                    'assets/icons/edit.svg',
+                                    colorFilter: ColorFilter.mode(
+                                      AppColors.primary,
+                                      BlendMode.srcIn,
+                                    ),
+                                    width: 30.w,
+                                    height: 30.h,
+                                  ),
                                 ),
                               ),
                           ],
                         ),
                         SizedBox(height: 16.h),
 
-                        // Provider Info
                         GestureDetector(
-                          onTap: () {
-                            // Update provider with mock data for the profile screen
-                            final enhancedProvider = ServiceProvider(
-                              name: service.provider.name,
-                              role: service.provider.role,
-                              imageUrl: service.provider.imageUrl,
-                              isVerified: service.provider.isVerified,
-                              bannerUrl:
-                                  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
-                              certifications: [
-                                'Professional Chef',
-                                'Pizza Artisan',
-                              ],
-                              bio:
-                                  'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
-                              services: [
-                                ServiceModel(
-                                  id: '1',
-                                  title: 'Rose garden wedding',
-                                  description:
-                                      'Rose garden wedding description',
-                                  images: [
-                                    'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop',
-                                  ],
-                                  type: ServiceType.event,
-                                  provider: service.provider,
-                                  location: 'AD, Louver Museum',
-                                  rating: 4.5,
-                                  basePrice: 120,
-                                ),
-                                ServiceModel(
-                                  id: '2',
-                                  title: 'Rose garden wedding',
-                                  description:
-                                      'Rose garden wedding description',
-                                  images: [
-                                    'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop',
-                                  ],
-                                  type: ServiceType.event,
-                                  provider: service.provider,
-                                  location: 'AD, Louver Museum',
-                                  rating: 4.5,
-                                  basePrice: 120,
-                                ),
-                              ],
-                              reviews: [
-                                ReviewModel(
-                                  userName: 'John Doe',
-                                  userImageUrl:
-                                      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop',
-                                  date: '10 Feb',
-                                  rating: 4,
-                                  reviewText:
-                                      'Thank you, Fresh Food L.L.C! That was a great event.',
-                                ),
-                                ReviewModel(
-                                  userName: 'John Doe',
-                                  userImageUrl:
-                                      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop',
-                                  date: '10 Feb',
-                                  rating: 5,
-                                  reviewText:
-                                      'Thank you, Fresh Food L.L.C! That was a great event.',
-                                ),
-                              ],
-                            );
-                            Get.to(
-                              () => const VendorProfileView(),
-                              arguments: enhancedProvider,
-                            );
+                          onTap: () async {
+                            final profile = await _repository
+                                .fetchVendorProfile(service.provider);
+                            Get.to(() => VendorProfileView(vendor: profile));
                           },
                           child: Row(
                             children: [
@@ -446,7 +389,7 @@ class ServiceDetailView extends StatelessWidget {
                         ),
                         SizedBox(height: 16.h),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             Get.toNamed(AppRoutes.mapResults);
                           },
                           child: SizedBox(

@@ -1,9 +1,9 @@
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/shared/widgets/request_card.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_service_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/add_screens_binding.dart';
-import 'package:event_maker/views/service_provider_flow/services/service_detail_view.dart';
+import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
+import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
