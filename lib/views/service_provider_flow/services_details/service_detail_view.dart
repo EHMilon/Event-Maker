@@ -3,7 +3,7 @@ import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/service_model.dart';
 import 'package:event_maker/data/models/vendor_profile_model.dart';
 import 'package:event_maker/data/services/service_repository.dart';
-import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
+import 'package:event_maker/views/common/vendor_profile.dart';
 import 'package:event_maker/data/models/review_model.dart';
 import 'package:event_maker/shared/widgets/primary_text_button.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';

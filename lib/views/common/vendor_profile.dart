@@ -1,34 +1,38 @@
+import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/data/models/vendor_profile_model.dart';
 import 'package:event_maker/shared/widgets/review_card.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart'
+    as sp;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart'
-    as sp;
 
 class VendorProfileView extends StatelessWidget {
   final VendorProfileModel vendor;
+  final bool showCustomerActions;
 
-  const VendorProfileView({super.key, required this.vendor});
+  const VendorProfileView({
+    super.key,
+    required this.vendor,
+    this.showCustomerActions = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
-        // Main Stack to allow fixed elements (buttons) and a scrollable CustomScrollView
         children: [
           CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: Stack(
-                  clipBehavior: Clip.none, // Allows children to paint outside
+                  clipBehavior: Clip.none,
                   children: [
-                    // Banner Image (behind everything else in this stack)
                     SizedBox(
                       height: 200.h,
                       width: double.infinity,
@@ -46,7 +50,6 @@ class VendorProfileView extends StatelessWidget {
                               color: AppColors.primary.withOpacity(0.2),
                             ),
                     ),
-                    // Gradient Overlay (on top of banner image, but below profile)
                     Container(
                       height: 200.h,
                       decoration: BoxDecoration(
@@ -60,10 +63,8 @@ class VendorProfileView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Profile Image (on top of banner and gradient in this stack)
                     Positioned(
-                      top: 150
-                          .h, // Position at 200.h (banner bottom) - 50.h (half profile height)
+                      top: 150.h,
                       left: 0,
                       right: 0,
                       child: Center(
@@ -90,19 +91,15 @@ class VendorProfileView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Spacer for content below profile (to push content down)
-                    SizedBox(height: 250.h), // Banner (200) + Half Profile (50)
+                    SizedBox(height: 250.h),
                   ],
                 ),
               ),
-              // Actual content starts here
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Column(
                     children: [
-                      // This SizedBox ensures the content starts *after* the bottom half of the profile image
-                      // It aligns the content properly relative to the profile picture's bottom edge.
                       Text(
                         vendor.name,
                         style: GoogleFonts.inter(
@@ -122,7 +119,7 @@ class VendorProfileView extends StatelessWidget {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '4.9', // Dummy for now, should come from data
+                            '4.9',
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -140,8 +137,6 @@ class VendorProfileView extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 32.h),
-
-                      // Certifications
                       _buildSectionTitle('Certifications'),
                       SizedBox(height: 16.h),
                       ...?vendor.certifications?.map(
@@ -161,7 +156,7 @@ class VendorProfileView extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Institution Name', // Placeholder if not in data
+                                  'Institution Name',
                                   style: GoogleFonts.inter(
                                     fontSize: 12.sp,
                                     color: AppColors.darkGrey,
@@ -180,10 +175,7 @@ class VendorProfileView extends StatelessWidget {
                             color: AppColors.textSecondary,
                           ),
                         ),
-
                       SizedBox(height: 18.h),
-
-                      // Bio
                       _buildSectionTitle('Bio'),
                       SizedBox(height: 12.h),
                       Text(
@@ -196,8 +188,6 @@ class VendorProfileView extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 32.h),
-
-                      // Vendor's Services
                       _buildSectionTitle('${vendor.name}\'s Services'),
                       SizedBox(height: 16.h),
                       SizedBox(
@@ -236,10 +226,7 @@ class VendorProfileView extends StatelessWidget {
                             color: AppColors.textSecondary,
                           ),
                         ),
-
                       SizedBox(height: 32.h),
-
-                      // Reviews
                       _buildSectionTitle('Reviews'),
                       SizedBox(height: 16.h),
                       SizedBox(
@@ -260,7 +247,6 @@ class VendorProfileView extends StatelessWidget {
                             color: AppColors.textSecondary,
                           ),
                         ),
-
                       SizedBox(height: 50.h),
                     ],
                   ),
@@ -268,8 +254,6 @@ class VendorProfileView extends StatelessWidget {
               ),
             ],
           ),
-
-          // Back button
           Positioned(
             top: 40.h,
             left: 16.w,
@@ -281,6 +265,54 @@ class VendorProfileView extends StatelessWidget {
               ),
             ),
           ),
+          if (showCustomerActions)
+            Positioned(
+              top: 40.h,
+              right: 16.w,
+              child: PopupMenuButton<String>(
+                icon: CircleAvatar(
+                  backgroundColor: Colors.white.withOpacity(0.3),
+                  child: Icon(Icons.more_vert, color: Colors.black, size: 20.r),
+                ),
+                onSelected: (value) {
+                  if (value == 'review') {
+                    Get.toNamed(
+                      AppRoutes.addReview,
+                      arguments: {
+                        'vendorName': vendor.name,
+                        'vendorLogo': vendor.provider.imageUrl,
+                      },
+                    );
+                  } else if (value == 'certification') {
+                    Get.toNamed(AppRoutes.viewCertificate);
+                  } else if (value == 'report') {
+                    Get.toNamed(AppRoutes.spamReport);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'review',
+                    child: Text('Leave a Review', style: GoogleFonts.inter()),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    value: 'certification',
+                    child: Text(
+                      'View Certification',
+                      style: GoogleFonts.inter(),
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    value: 'report',
+                    child: Text(
+                      'Spam & Report',
+                      style: GoogleFonts.inter(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

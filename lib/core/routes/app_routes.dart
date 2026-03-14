@@ -20,7 +20,7 @@ import 'package:event_maker/views/service_provider_flow/profile/profile_view.dar
 import 'package:event_maker/views/service_provider_flow/profile/profile_settings_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/add_image_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/change_password_view.dart';
-import 'package:event_maker/views/service_provider_flow/profile/transactions_view.dart';
+import 'package:event_maker/views/customer_flow/profile/transactions_view.dart';
 import 'package:event_maker/views/service_provider_flow/profile/wallet_view.dart';
 import 'package:event_maker/views/customer_flow/bookmarks/bookmarks_view.dart';
 import 'package:event_maker/views/customer_flow/categories/categories_view.dart';
@@ -45,7 +45,7 @@ import 'package:event_maker/views/notifications/notification_view.dart';
 import 'package:event_maker/views/customer_flow/search/search_view.dart';
 import 'package:event_maker/views/customer_flow/search/search_binding.dart';
 import 'package:event_maker/data/models/vendor_profile_model.dart';
-import 'package:event_maker/views/service_provider_flow/services/vendor_profile_view.dart';
+import 'package:event_maker/views/common/vendor_profile.dart';
 import 'package:event_maker/views/customer_flow/services/category_services_view.dart';
 import 'package:event_maker/views/customer_flow/services/category_services_controller.dart';
 
@@ -379,17 +379,8 @@ class AppRoutes {
       binding: CategoriesBinding(),
     ),
     // Customer flow - vendor profile related routes
-    GetPage(
-      name: addReview,
-      page: () => const AddReviewView(),
-    ),
-    GetPage(
-      name: viewCertificate,
-      page: () => const ViewCertificate(),
-    ),
-    GetPage(
-      name: spamReport,
-      page: () => const SpamReportView(),
-    ),
+    GetPage(name: addReview, page: () => const AddReviewView()),
+    GetPage(name: viewCertificate, page: () => const ViewCertificate()),
+    GetPage(name: spamReport, page: () => const SpamReportView()),
   ];
 }
