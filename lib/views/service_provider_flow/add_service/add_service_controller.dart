@@ -8,6 +8,80 @@ enum ServiceCategory { hospitality, event, trainer }
 
 enum ProviderRole { freelancer, business, productiveFamily }
 
+/// Returns available ServiceAs options based on ProviderRole and ServiceCategory
+/// - Freelancer: Waitress, Barista, Juice Maker, Sandwich Maker, Burger Maker, Shawarma Maker, Chef
+/// - Business: Catering, Buffet, Live Cooking, Outdoor Cafe Kiosk, Coffee Hospitality Service
+/// - Productive Family: No Service As (empty list)
+/// - Professional Trainer (category): Villas, Farms, Lands
+List<ServiceAs> getServiceAsOptions(
+  ProviderRole role,
+  ServiceCategory category,
+) {
+  // Professional Trainer category has Villas, Farms, Lands
+  if (category == ServiceCategory.trainer) {
+    return [ServiceAs.villas, ServiceAs.farms, ServiceAs.lands];
+  }
+
+  // For other categories, options depend on role
+  switch (role) {
+    case ProviderRole.freelancer:
+      return [
+        ServiceAs.waitress,
+        ServiceAs.barista,
+        ServiceAs.juiceMaker,
+        ServiceAs.sandwichMaker,
+        ServiceAs.burgerMaker,
+        ServiceAs.shawarmaMaker,
+        ServiceAs.chef,
+      ];
+    case ProviderRole.business:
+      return [
+        ServiceAs.cateringBusiness,
+        ServiceAs.buffet,
+        ServiceAs.liveCooking,
+        ServiceAs.outdoorCafeKiosk,
+        ServiceAs.coffeeHospitalityService,
+      ];
+    case ProviderRole.productiveFamily:
+      // Productive Family has no Service As field
+      return [];
+  }
+}
+
+/// Returns available ServiceSubOption based on ServiceAs selection
+/// - Buffet: Indian Buffet, International Buffet, Japanese Buffet, Thai Buffet
+/// - Live Cooking: Pastry Station, Shawarma Station, Burger Station/Pizza Station/Sushi Station
+/// - Outdoor Cafe Kiosk: Outdoor Mobile Food Truck, Mobile Coffee Car/Mini Car, Coffee Cart, Outdoor Coffee Kiosk, Coffee Hospitality Service
+List<ServiceSubOption> getServiceSubOptions(ServiceAs? serviceAs) {
+  if (serviceAs == null) return [];
+
+  switch (serviceAs) {
+    case ServiceAs.buffet:
+      return [
+        ServiceSubOption.indianBuffet,
+        ServiceSubOption.internationalBuffet,
+        ServiceSubOption.japaneseBuffet,
+        ServiceSubOption.thaiBuffet,
+      ];
+    case ServiceAs.liveCooking:
+      return [
+        ServiceSubOption.pastryStation,
+        ServiceSubOption.shawarmaStation,
+        ServiceSubOption.burgerPizzaSushiStation,
+      ];
+    case ServiceAs.outdoorCafeKiosk:
+      return [
+        ServiceSubOption.outdoorMobileFoodTruck,
+        ServiceSubOption.mobileCoffeeCarMiniCar,
+        ServiceSubOption.coffeeCart,
+        ServiceSubOption.outdoorCoffeeKiosk,
+        ServiceSubOption.coffeeHospitalityServiceSub,
+      ];
+    default:
+      return [];
+  }
+}
+
 class AddServiceController extends GetxController {
   static const int primaryDayLimit = 7;
 
@@ -27,12 +101,34 @@ class AddServiceController extends GetxController {
   final selectedCategory = ServiceCategory.hospitality.obs;
   final selectedServiceType = ServiceType.catering.obs;
   final selectedRole = ProviderRole.freelancer.obs;
+  final selectedServiceAs = Rxn<ServiceAs>();
+  final selectedEventVenue = Rxn<EventVenue>();
+  final selectedSubOptions = <ServiceSubOption>[].obs;
+
+  /// Returns available ServiceAs options based on current selected role and category
+  List<ServiceAs> get availableServiceAsOptions =>
+      getServiceAsOptions(selectedRole.value, selectedCategory.value);
+
+  /// Returns true if Event Venue dropdown should be shown (when category is Event)
+  bool get showEventVenueDropdown => selectedCategory.value == ServiceCategory.event;
+
+  /// Returns available sub-options based on selected ServiceAs
+  List<ServiceSubOption> get availableSubOptions => getServiceSubOptions(selectedServiceAs.value);
+
+  /// Returns true if sub-options checklist should be shown (Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk)
+  bool get showSubOptionsChecklist =>
+      selectedCategory.value == ServiceCategory.event &&
+      selectedRole.value == ProviderRole.business &&
+      (selectedServiceAs.value == ServiceAs.buffet ||
+          selectedServiceAs.value == ServiceAs.liveCooking ||
+          selectedServiceAs.value == ServiceAs.outdoorCafeKiosk);
 
   // Step 2: Packages
   var packages = <PackageFormData>[].obs;
 
   // Step 3: Timings
-  var timings = <String, Map<String, dynamic>>{}.obs; // Day: {start: '', end: ''}
+  var timings =
+      <String, Map<String, dynamic>>{}.obs; // Day: {start: '', end: ''}
 
   var currentStep = 0.obs;
   var isLoading = false.obs;
@@ -62,6 +158,14 @@ class AddServiceController extends GetxController {
     if (service.provider.role.isNotEmpty) {
       selectedRole.value = _roleFromString(service.provider.role);
     }
+    // Set serviceAs if available
+    if (service.serviceAs != null) {
+      selectedServiceAs.value = service.serviceAs;
+    }
+    // Set eventVenue if available
+    if (service.eventVenue != null) {
+      selectedEventVenue.value = service.eventVenue;
+    }
   }
 
   @override
@@ -82,13 +186,17 @@ class AddServiceController extends GetxController {
 
   /// Add a new additional availability card
   void addAdditionalAvailabilityCard() {
-    final card = AvailabilityCardModel(id: DateTime.now().millisecondsSinceEpoch.toString());
+    final card = AvailabilityCardModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    );
     additionalAvailabilityCards.add(card);
   }
 
   /// Remove an additional availability card
   void removeAdditionalAvailabilityCard(String id) {
-    final index = additionalAvailabilityCards.indexWhere((card) => card.id == id);
+    final index = additionalAvailabilityCards.indexWhere(
+      (card) => card.id == id,
+    );
     if (index != -1) {
       additionalAvailabilityCards[index].dispose();
       additionalAvailabilityCards.removeAt(index);
@@ -125,7 +233,9 @@ class AddServiceController extends GetxController {
 
   /// Toggle day selection for additional availability card
   void toggleAdditionalDay(String cardId, String day) {
-    final cardIndex = additionalAvailabilityCards.indexWhere((card) => card.id == cardId);
+    final cardIndex = additionalAvailabilityCards.indexWhere(
+      (card) => card.id == cardId,
+    );
     if (cardIndex == -1) return;
 
     final card = additionalAvailabilityCards[cardIndex];
@@ -203,13 +313,31 @@ class AddServiceController extends GetxController {
 
   void updateCategory(ServiceCategory category) {
     selectedCategory.value = category;
+    // Reset ServiceAs when category changes since options depend on category
+    selectedServiceAs.value = null;
+    // Reset EventVenue when category changes
+    selectedEventVenue.value = null;
+    // Reset subOptions when category changes
+    selectedSubOptions.clear();
     if (_categoryFromServiceType(selectedServiceType.value) == category) {
       return;
     }
     selectedServiceType.value = _defaultTypeForCategory(category);
   }
 
-  Future<bool> saveService({bool isEdit = false, ServiceModel? existingService}) async {
+  /// Toggle a sub-option selection
+  void toggleSubOption(ServiceSubOption option) {
+    if (selectedSubOptions.contains(option)) {
+      selectedSubOptions.remove(option);
+    } else {
+      selectedSubOptions.add(option);
+    }
+  }
+
+  Future<bool> saveService({
+    bool isEdit = false,
+    ServiceModel? existingService,
+  }) async {
     isLoading.value = true;
     // Network Rules: 2s delay for shimmer/loading state visibility
     await Future.delayed(const Duration(seconds: 2));
@@ -224,15 +352,24 @@ class AddServiceController extends GetxController {
 
     // Create the service model from form data (Placeholder until Backend)
     final newService = ServiceModel(
-      id: existingService?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          existingService?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       title: titleController.text,
       description: descriptionController.text,
       location: locationController.text,
-      images: selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty ? [selectedImagePath.value!] : existingService?.images ?? [],
+      images:
+          selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty
+          ? [selectedImagePath.value!]
+          : existingService?.images ?? [],
       type: selectedServiceType.value,
       provider:
           existingService?.provider ??
-          ServiceProvider(name: 'Current User', role: _roleLabel(selectedRole.value), imageUrl: 'https://i.pravatar.cc/150?u=user'),
+          ServiceProvider(
+            name: 'Current User',
+            role: _roleLabel(selectedRole.value),
+            imageUrl: 'https://i.pravatar.cc/150?u=user',
+          ),
       basePrice: 0,
       priceUnit: 'AED',
       packages: packages
@@ -244,6 +381,9 @@ class AddServiceController extends GetxController {
             ),
           )
           .toList(),
+      serviceAs: selectedServiceAs.value,
+      eventVenue: selectedEventVenue.value,
+      subOptions: selectedSubOptions.isNotEmpty ? selectedSubOptions.toList() : null,
     );
 
     // Update the services list
@@ -256,7 +396,10 @@ class AddServiceController extends GetxController {
 
     isLoading.value = false;
     Get.back(result: true);
-    Get.snackbar('Success', isEdit ? 'Service updated successfully' : 'Service added successfully');
+    Get.snackbar(
+      'Success',
+      isEdit ? 'Service updated successfully' : 'Service added successfully',
+    );
     return true;
   }
 

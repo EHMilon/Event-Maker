@@ -339,6 +339,27 @@ class ServiceDetailView extends StatelessWidget {
                             height: 1.5,
                           ),
                         ),
+                        // Service As display
+                        if (service.serviceAs != null) ...[
+                          SizedBox(height: 24.h),
+                          Text(
+                            'serviceAs'.tr,
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          Text(
+                            service.serviceAs!.label,
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              color: AppColors.textSecondary,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
                         SizedBox(height: 24.h),
 
                         // Date & Time + Location (If applicable)

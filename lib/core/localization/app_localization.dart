@@ -113,6 +113,15 @@ class AppLocalization extends Translations {
     'productiveFamily': 'Productive Family',
     'serviceCategory': 'Service Category',
     'selectServiceCategory': 'Select Service Category',
+    'serviceAs': 'Service As',
+    'selectServiceAs': 'Select Service As',
+    'eventVenue': 'Event Venue',
+    'selectEventVenue': 'Select Event Venue',
+    'hotelVenues': 'Hotel Venues',
+    'mallVenues': 'Mall Venues',
+    'restaurantVenues': 'Restaurant Venues',
+    'eventHalls': 'Event Halls',
+    'selectOptions': 'Select Options',
 
     // Get Started
     'getStarted': 'Get Started',
@@ -517,6 +526,15 @@ class AppLocalization extends Translations {
     'productiveFamily': 'أسرة منتجة',
     'serviceCategory': 'فئة الخدمة',
     'selectServiceCategory': 'اختر فئة الخدمة',
+    'serviceAs': 'الخدمة كـ',
+    'selectServiceAs': 'اختر نوع الخدمة',
+    'eventVenue': 'مكان الفعالية',
+    'selectEventVenue': 'اختر مكان الفعالية',
+    'hotelVenues': 'أماكن الفنادق',
+    'mallVenues': 'أماكن المجمعات التجارية',
+    'restaurantVenues': 'أماكن المطاعم',
+    'eventHalls': 'قاعات الفعاليات',
+    'selectOptions': 'اختر الخيارات',
 
     // Get Started
     'getStarted': 'ابدأ الآن',

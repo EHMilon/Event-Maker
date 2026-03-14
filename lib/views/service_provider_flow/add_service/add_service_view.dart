@@ -6,6 +6,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../data/models/service_model.dart';
 import '../../../shared/widgets/custom_text_field.dart';
+import '../../../shared/widgets/custom_dropdown_field.dart';
 import '../../../shared/widgets/primary_text_button.dart';
 import '../../../shared/widgets/upload_widget.dart';
 import '../../../shared/widgets/availability_widget_card.dart';
@@ -73,76 +74,184 @@ class _AddServiceViewState extends State<AddServiceView> {
               children: [
                 UploadWidget(imagePath: controller.selectedImagePath.value, onImageSelected: (path) => controller.selectedImagePath.value = path),
                 SizedBox(height: 16.h),
+                CustomTextField(controller: controller.titleController, labelText: 'serviceTitle'.tr, hintText: 'serviceTitleHint'.tr),
+                SizedBox(height: 24.h),
                 Obx(
-                  () => DropdownButtonFormField<ServiceCategory>(
+                  () => CustomDropdownField<ServiceCategory>(
                     value: controller.selectedCategory.value,
+                    labelText: 'selectServiceType'.tr,
+                    hintText: 'selectServiceType'.tr,
+                    items: ServiceCategory.values.map((category) {
+                      return DropdownMenuItem(
+                        value: category,
+                        child: Text(_categoryLabel(category)),
+                      );
+                    }).toList(),
                     onChanged: (value) {
                       if (value != null) {
                         controller.updateCategory(value);
                       }
                     },
-                    decoration: InputDecoration(
-                      labelText: 'selectServiceType'.tr,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: AppColors.borderLight),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: AppColors.primary),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-                    ),
-                    items: ServiceCategory.values.map((category) {
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Text(
-                          _categoryLabel(category),
-                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
-                        ),
-                      );
-                    }).toList(),
-                    dropdownColor: Colors.white,
-                    icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
                   ),
                 ),
-                SizedBox(height: 16.h),
-                Obx(
-                  () => DropdownButtonFormField<ProviderRole>(
-                    value: controller.selectedRole.value,
-                    onChanged: (value) {
-                      if (value != null) {
-                        controller.selectedRole.value = value;
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'whatIsYourRole'.tr,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: AppColors.borderLight),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(color: AppColors.primary),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                
+                // Event Venue dropdown - only shown when category is Event
+                Obx(() {
+                  if (!controller.showEventVenueDropdown) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(top: 16.h),
+                    child: CustomDropdownField<EventVenue>(
+                      value: controller.selectedEventVenue.value,
+                      labelText: 'eventVenue'.tr,
+                      hintText: 'selectEventVenue'.tr,
+                      items: EventVenue.values.map((venue) {
+                        return DropdownMenuItem(
+                          value: venue,
+                          child: Text(venue.label),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        controller.selectedEventVenue.value = value;
+                      },
                     ),
+                  );
+                }),
+                
+                SizedBox(height: 24.h),
+                Obx(
+                  () => CustomDropdownField<ProviderRole>(
+                    value: controller.selectedRole.value,
+                    labelText: 'whatIsYourRole'.tr,
+                    hintText: 'selectRole'.tr,
                     items: ProviderRole.values.map((role) {
                       return DropdownMenuItem(
                         value: role,
-                        child: Text(
-                          _roleLabel(role),
-                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textPrimary),
-                        ),
+                        child: Text(_roleLabel(role)),
                       );
                     }).toList(),
-                    dropdownColor: Colors.white,
-                    icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.selectedRole.value = value;
+                        // Reset ServiceAs when role changes since options change
+                        controller.selectedServiceAs.value = null;
+                      }
+                    },
                   ),
                 ),
                 SizedBox(height: 24.h),
-                CustomTextField(controller: controller.titleController, labelText: 'serviceTitle'.tr, hintText: 'serviceTitleHint'.tr),
-                SizedBox(height: 16.h),
+                
+                // Service As section - only show when there are options available
+                Obx(() {
+                  final options = controller.availableServiceAsOptions;
+                  if (options.isEmpty) {
+                    return const SizedBox.shrink(); // Hide for Productive Family
+                  }
+                  return CustomDropdownField<ServiceAs>(
+                    value: controller.selectedServiceAs.value,
+                    labelText: 'serviceAs'.tr,
+                    hintText: 'selectServiceAs'.tr,
+                    items: options.map((serviceAs) {
+                      return DropdownMenuItem(
+                        value: serviceAs,
+                        child: Text(serviceAs.label),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      controller.selectedServiceAs.value = value;
+                      // Reset sub-options when ServiceAs changes
+                      controller.selectedSubOptions.clear();
+                    },
+                  );
+                }),
+                
+                // Sub-Options checklist - shown when Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk
+                Obx(() {
+                  if (!controller.showSubOptionsChecklist) {
+                    return const SizedBox.shrink();
+                  }
+                  final subOptions = controller.availableSubOptions;
+                  if (subOptions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(top: 24.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'selectOptions'.tr,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: AppColors.lightGrey),
+                          ),
+                          child: Column(
+                            children: subOptions.map((option) {
+                              final isSelected = controller.selectedSubOptions.contains(option);
+                              return GestureDetector(
+                                onTap: () => controller.toggleSubOption(option),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: subOptions.last == option
+                                          ? BorderSide.none
+                                          : BorderSide(color: AppColors.lightGrey.withOpacity(0.5)),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 20.w,
+                                        height: 20.w,
+                                        decoration: BoxDecoration(
+                                          color: isSelected ? AppColors.primary : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(25.r),
+                                          border: Border.all(
+                                            color: isSelected ? AppColors.primary : AppColors.lightGrey,
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: isSelected
+                                            ? Icon(Icons.check, size: 14.r, color: Colors.white)
+                                            : null,
+                                      ),
+                                      SizedBox(width: 12.w),
+                                      Expanded(
+                                        child: Text(
+                                          option.label,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                
+                SizedBox(height: 24.h),
+                
                 CustomTextField(
                   controller: controller.descriptionController,
                   labelText: 'description'.tr,
@@ -193,6 +302,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     ),
                   ],
                 ),
+                SizedBox(height: 8.h),
 
                 // Display added packages
                 Obx(() {
