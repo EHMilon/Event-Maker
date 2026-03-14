@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../core/themes/app_colors.dart';
-import 'profile_controller.dart';
+import '../../common/profile/profile_controller.dart';
 
 class TransactionsView extends GetView<ProfileController> {
   const TransactionsView({super.key});

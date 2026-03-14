@@ -2,7 +2,7 @@ import 'package:event_maker/core/routes/app_routes.dart';
 import 'package:event_maker/core/themes/app_colors.dart';
 import 'package:event_maker/shared/widgets/review_card.dart';
 import 'package:event_maker/shared/widgets/services_card.dart';
-import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
+import 'package:event_maker/views/common/profile/profile_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

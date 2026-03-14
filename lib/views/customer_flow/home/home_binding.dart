@@ -2,7 +2,7 @@ import 'package:event_maker/views/customer_flow/customer_flow_controller.dart';
 import 'package:event_maker/views/customer_flow/home/home_controller.dart';
 import 'package:event_maker/views/customer_flow/map/map_controller.dart';
 import 'package:event_maker/views/customer_flow/requests/customer_requests_controller.dart';
-import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
+import 'package:event_maker/views/common/profile/profile_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:get/get.dart';
 

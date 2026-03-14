@@ -1,6 +1,6 @@
 import 'package:event_maker/data/mock/mock_data.dart';
 import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/views/service_provider_flow/profile/profile_controller.dart';
+import 'package:event_maker/views/common/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

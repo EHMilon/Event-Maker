@@ -1,1 +1,0 @@
-Custom Rule Sync: Prioritize data-driven mock updates, minimize file reads, and keep calls/token usage low so the workflow stays efficient and focused on the issue at hand.

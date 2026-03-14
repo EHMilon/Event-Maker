@@ -7,7 +7,7 @@ import '../../../shared/widgets/app_custom_dialog.dart';
 import '../../../shared/widgets/language_bottom_sheet.dart';
 import '../../../core/themes/app_colors.dart';
 import '../../../core/routes/app_routes.dart';
-import 'profile_controller.dart';
+import '../../common/profile/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
