@@ -122,6 +122,11 @@ class AppLocalization extends Translations {
     'restaurantVenues': 'Restaurant Venues',
     'eventHalls': 'Event Halls',
     'selectOptions': 'Select Options',
+    'attendanceCapacity': 'Attendance Capacity',
+    'attendanceCapacityHint': 'Enter maximum number of attendees',
+    'addMoreServiceAs': 'Add More Service As',
+    'enterServiceType': 'Enter Service Type',
+    'enterServiceTypeHint': 'Type your custom service type...',
 
     // Get Started
     'getStarted': 'Get Started',
@@ -535,6 +540,11 @@ class AppLocalization extends Translations {
     'restaurantVenues': 'أماكن المطاعم',
     'eventHalls': 'قاعات الفعاليات',
     'selectOptions': 'اختر الخيارات',
+    'attendanceCapacity': 'سعة الحضور',
+    'attendanceCapacityHint': 'أدخل الحد الأقصى لعدد الحضور',
+    'addMoreServiceAs': 'إضافة المزيد من الخدمات',
+    'enterServiceType': 'أدخل نوع الخدمة',
+    'enterServiceTypeHint': 'اكتب نوع الخدمة المخصص...',
 
     // Get Started
     'getStarted': 'ابدأ الآن',

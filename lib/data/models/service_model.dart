@@ -3,12 +3,7 @@ import 'review_model.dart';
 enum ServiceType { event, photography, training, catering, cleaning, filming }
 
 // Event Venue options for Event service type
-enum EventVenue {
-  hotelVenues,
-  mallVenues,
-  restaurantVenues,
-  eventHalls,
-}
+enum EventVenue { hotelVenues, mallVenues, restaurantVenues, eventHalls }
 
 extension EventVenueExtension on EventVenue {
   String get label {
@@ -98,6 +93,9 @@ enum ServiceAs {
   villas,
   farms,
   lands,
+  // Professional Trainer options
+  furniture,
+  cateringTrainer,
 }
 
 extension ServiceAsExtension on ServiceAs {
@@ -136,6 +134,11 @@ extension ServiceAsExtension on ServiceAs {
         return 'Farms';
       case ServiceAs.lands:
         return 'Lands';
+      // Professional Trainer
+      case ServiceAs.furniture:
+        return 'Furniture';
+      case ServiceAs.cateringTrainer:
+        return 'Catering';
     }
   }
 }

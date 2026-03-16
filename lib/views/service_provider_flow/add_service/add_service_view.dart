@@ -61,7 +61,11 @@ class _AddServiceViewState extends State<AddServiceView> {
         ),
         title: Text(
           widget.isEdit ? 'editService'.tr : 'addNewService'.tr,
-          style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 20.sp, fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(
+            color: AppColors.textPrimary,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: Obx(
@@ -72,9 +76,17 @@ class _AddServiceViewState extends State<AddServiceView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                UploadWidget(imagePath: controller.selectedImagePath.value, onImageSelected: (path) => controller.selectedImagePath.value = path),
+                UploadWidget(
+                  imagePath: controller.selectedImagePath.value,
+                  onImageSelected: (path) =>
+                      controller.selectedImagePath.value = path,
+                ),
                 SizedBox(height: 16.h),
-                CustomTextField(controller: controller.titleController, labelText: 'serviceTitle'.tr, hintText: 'serviceTitleHint'.tr),
+                CustomTextField(
+                  controller: controller.titleController,
+                  labelText: 'serviceTitle'.tr,
+                  hintText: 'serviceTitleHint'.tr,
+                ),
                 SizedBox(height: 24.h),
                 Obx(
                   () => CustomDropdownField<ServiceCategory>(
@@ -94,7 +106,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     },
                   ),
                 ),
-                
+
                 // Event Venue dropdown - only shown when category is Event
                 Obx(() {
                   if (!controller.showEventVenueDropdown) {
@@ -118,14 +130,14 @@ class _AddServiceViewState extends State<AddServiceView> {
                     ),
                   );
                 }),
-                
+
                 SizedBox(height: 24.h),
                 Obx(
                   () => CustomDropdownField<ProviderRole>(
                     value: controller.selectedRole.value,
                     labelText: 'whatIsYourRole'.tr,
                     hintText: 'selectRole'.tr,
-                    items: ProviderRole.values.map((role) {
+                    items: controller.availableRoleOptions.map((role) {
                       return DropdownMenuItem(
                         value: role,
                         child: Text(_roleLabel(role)),
@@ -141,31 +153,175 @@ class _AddServiceViewState extends State<AddServiceView> {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                
+
                 // Service As section - only show when there are options available
                 Obx(() {
                   final options = controller.availableServiceAsOptions;
                   if (options.isEmpty) {
                     return const SizedBox.shrink(); // Hide for Productive Family
                   }
-                  return CustomDropdownField<ServiceAs>(
-                    value: controller.selectedServiceAs.value,
-                    labelText: 'serviceAs'.tr,
-                    hintText: 'selectServiceAs'.tr,
-                    items: options.map((serviceAs) {
-                      return DropdownMenuItem(
-                        value: serviceAs,
-                        child: Text(serviceAs.label),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      controller.selectedServiceAs.value = value;
-                      // Reset sub-options when ServiceAs changes
-                      controller.selectedSubOptions.clear();
-                    },
+                  return Column(
+                    children: [
+                      // Service As dropdown with + icon for Trainer category
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomDropdownField<ServiceAs>(
+                              value: controller.selectedServiceAs.value,
+                              labelText: 'serviceAs'.tr,
+                              hintText: 'selectServiceAs'.tr,
+                              items: options.map((serviceAs) {
+                                return DropdownMenuItem(
+                                  value: serviceAs,
+                                  child: Text(serviceAs.label),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                controller.selectedServiceAs.value = value;
+                                // Reset sub-options when ServiceAs changes
+                                controller.selectedSubOptions.clear();
+                              },
+                            ),
+                          ),
+                          // + icon button beside Service As for Trainer category (always +)
+                          if (controller.canAddMoreServiceAs)
+                            Padding(
+                              padding: EdgeInsets.only(left: 8.w, top: 25.h),
+                              child: GestureDetector(
+                                onTap: controller.addCustomServiceAsDirectly,
+                                child: Container(
+                                  padding: EdgeInsets.all(12.r),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.05),
+                                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.add,
+                                    color: AppColors.primary,
+                                    size: 25.r,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+
+                      // Text field for entering new Service As (shown when + is clicked)
+                      Obx(() {
+                        if (!controller.canAddMoreServiceAs ||
+                            !controller.showAddServiceAsField.value) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: EdgeInsets.only(top: 16.h),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextField(
+                                  controller: controller.newServiceAsController,
+                                  labelText: 'enterServiceType'.tr,
+                                  hintText: 'enterServiceTypeHint'.tr,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              // Close/Cancel button
+                              Padding(
+                                padding: EdgeInsets.only(top: 25.h),
+                                child: GestureDetector(
+                                  onTap: controller.closeAddServiceAsField,
+                                  child: Container(
+                                    padding: EdgeInsets.all(12.r),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.error.withOpacity(0.05),
+                                    border: Border.all(color: AppColors.error.withOpacity(0.3)),
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: AppColors.error,
+                                      size: 25.r,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              // Check/Confirm button
+                              Padding(
+                                padding: EdgeInsets.only(top: 25.h),
+                                child: GestureDetector(
+                                  onTap: controller.addCustomServiceAs,
+                                  child: Container(
+                                    padding: EdgeInsets.all(12.r),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.05),
+                                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.check,
+                                    color: AppColors.primary,
+                                    size: 25.r,
+                                  ),
+                                ),
+                              ),)
+                            ],
+                          ),
+                        );
+                      }),
+
+                      // Additional custom Service As entries for Trainer category
+                      ...controller.additionalServiceAsList.map((serviceAs) {
+                        return Padding(
+                          padding: EdgeInsets.only(top: 16.h),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: AppColors.lightGrey),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    serviceAs,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => controller.removeCustomServiceAs(
+                                    serviceAs,
+                                  ),
+                                  child: Container(
+                                    padding: EdgeInsets.all(4.r),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.error.withOpacity(0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      size: 16.r,
+                                      color: AppColors.error,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
                   );
                 }),
-                
+
                 // Sub-Options checklist - shown when Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk
                 Obx(() {
                   if (!controller.showSubOptionsChecklist) {
@@ -198,7 +354,8 @@ class _AddServiceViewState extends State<AddServiceView> {
                           ),
                           child: Column(
                             children: subOptions.map((option) {
-                              final isSelected = controller.selectedSubOptions.contains(option);
+                              final isSelected = controller.selectedSubOptions
+                                  .contains(option);
                               return GestureDetector(
                                 onTap: () => controller.toggleSubOption(option),
                                 child: Container(
@@ -207,7 +364,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                                     border: Border(
                                       bottom: subOptions.last == option
                                           ? BorderSide.none
-                                          : BorderSide(color: AppColors.lightGrey.withOpacity(0.5)),
+                                          : BorderSide(
+                                              color: AppColors.lightGrey
+                                                  .withOpacity(0.5),
+                                            ),
                                     ),
                                   ),
                                   child: Row(
@@ -216,15 +376,25 @@ class _AddServiceViewState extends State<AddServiceView> {
                                         width: 20.w,
                                         height: 20.w,
                                         decoration: BoxDecoration(
-                                          color: isSelected ? AppColors.primary : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(25.r),
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(
+                                            25.r,
+                                          ),
                                           border: Border.all(
-                                            color: isSelected ? AppColors.primary : AppColors.lightGrey,
+                                            color: isSelected
+                                                ? AppColors.primary
+                                                : AppColors.lightGrey,
                                             width: 1.5,
                                           ),
                                         ),
                                         child: isSelected
-                                            ? Icon(Icons.check, size: 14.r, color: Colors.white)
+                                            ? Icon(
+                                                Icons.check,
+                                                size: 14.r,
+                                                color: Colors.white,
+                                              )
                                             : null,
                                       ),
                                       SizedBox(width: 12.w),
@@ -249,9 +419,9 @@ class _AddServiceViewState extends State<AddServiceView> {
                     ),
                   );
                 }),
-                
+
                 SizedBox(height: 24.h),
-                
+
                 CustomTextField(
                   controller: controller.descriptionController,
                   labelText: 'description'.tr,
@@ -259,6 +429,22 @@ class _AddServiceViewState extends State<AddServiceView> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                 ),
+
+                // Attendance Capacity field - only shown when category is Event
+                Obx(() {
+                  if (!controller.showAttendanceCapacity) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: EdgeInsets.only(top: 24.h),
+                    child: CustomTextField(
+                      controller: controller.attendanceCapacityController,
+                      labelText: 'attendanceCapacity'.tr,
+                      hintText: 'attendanceCapacityHint'.tr,
+                      keyboardType: TextInputType.number,
+                    ),
+                  );
+                }),
 
                 // SizedBox(height: 16.h),
                 // CustomTextField(
@@ -293,12 +479,23 @@ class _AddServiceViewState extends State<AddServiceView> {
                   children: [
                     Text(
                       'packagesPricings'.tr,
-                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     TextButton.icon(
                       onPressed: () => _openPackages(context),
-                      icon: Icon(Icons.add, size: 18.sp, color: AppColors.primary),
-                      label: Text('addPackage'.tr, style: TextStyle(color: AppColors.primary)),
+                      icon: Icon(
+                        Icons.add,
+                        size: 18.sp,
+                        color: AppColors.primary,
+                      ),
+                      label: Text(
+                        'addPackage'.tr,
+                        style: TextStyle(color: AppColors.primary),
+                      ),
                     ),
                   ],
                 ),
@@ -312,7 +509,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                       child: Center(
                         child: Text(
                           'noPackagesAdded'.tr,
-                          style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     );
@@ -332,7 +532,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                   text: widget.isEdit ? 'updateService'.tr : 'addService'.tr,
                   onPressed: () async {
                     // TODO: Implement field validation before saving
-                    await controller.saveService(isEdit: widget.isEdit, existingService: widget.service);
+                    await controller.saveService(
+                      isEdit: widget.isEdit,
+                      existingService: widget.service,
+                    );
                   },
                 ),
                 SizedBox(height: 20.h),
@@ -389,12 +592,19 @@ class _AddServiceViewState extends State<AddServiceView> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: AppColors.textSecondary, size: 20.r),
+                  Icon(
+                    Icons.info_outline,
+                    color: AppColors.textSecondary,
+                    size: 20.r,
+                  ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       'additionalAvailabilityDisabledMsg'.tr,
-                      style: GoogleFonts.inter(fontSize: 13.sp, color: AppColors.textSecondary),
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ],
@@ -407,10 +617,12 @@ class _AddServiceViewState extends State<AddServiceView> {
               key: ValueKey(card.id),
               card: card,
               days: _days,
-              canSelectDay: (day) => controller.canSelectAdditionalDay(card, day),
+              canSelectDay: (day) =>
+                  controller.canSelectAdditionalDay(card, day),
               onDayTap: (day) => controller.toggleAdditionalDay(card.id, day),
               showRemoveButton: true,
-              onRemove: () => controller.removeAdditionalAvailabilityCard(card.id),
+              onRemove: () =>
+                  controller.removeAdditionalAvailabilityCard(card.id),
               isPrimary: false,
               isEnabled: !isDisabled,
               showCannotGoOutside: false,
@@ -424,18 +636,29 @@ class _AddServiceViewState extends State<AddServiceView> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3), style: BorderStyle.solid),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.3),
+                    style: BorderStyle.solid,
+                  ),
                   borderRadius: BorderRadius.circular(12.r),
                   color: AppColors.primary.withOpacity(0.05),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_circle_outline, color: AppColors.primary, size: 20.r),
+                    Icon(
+                      Icons.add_circle_outline,
+                      color: AppColors.primary,
+                      size: 20.r,
+                    ),
                     SizedBox(width: 8.w),
                     Text(
                       'addAdditionalAvailability'.tr,
-                      style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.primary),
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -456,7 +679,13 @@ class _AddServiceViewState extends State<AddServiceView> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: AppColors.borderLight),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,31 +695,51 @@ class _AddServiceViewState extends State<AddServiceView> {
               children: [
                 Expanded(
                   child: Text(
-                    package.nameController.text.isEmpty ? 'packageLabel'.trParams({'index': '${index + 1}'}) : package.nameController.text,
-                    style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    package.nameController.text.isEmpty
+                        ? 'packageLabel'.trParams({'index': '${index + 1}'})
+                        : package.nameController.text,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      package.priceController.text.isEmpty ? '0.00' : '${package.priceController.text} AED',
-                      style: GoogleFonts.inter(fontSize: 15.sp, fontWeight: FontWeight.w600, color: AppColors.primary),
+                      package.priceController.text.isEmpty
+                          ? '0.00'
+                          : '${package.priceController.text} AED',
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
                       onTap: () => controller.removePackage(index),
                       child: Container(
                         padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(color: AppColors.error.withOpacity(0.1), shape: BoxShape.circle),
-                        child: Icon(Icons.close, size: 16.r, color: AppColors.error),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close,
+                          size: 16.r,
+                          color: AppColors.error,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            if (package.features.isNotEmpty && package.features.any((f) => f.isNotEmpty)) ...[
+            if (package.features.isNotEmpty &&
+                package.features.any((f) => f.isNotEmpty)) ...[
               SizedBox(height: 8.h),
               Column(
                 spacing: 8.w,
@@ -500,16 +749,29 @@ class _AddServiceViewState extends State<AddServiceView> {
                     .take(3)
                     .map(
                       (feature) => Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                        decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(4.r)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.check, size: 12.r, color: AppColors.primary),
+                            Icon(
+                              Icons.check,
+                              size: 12.r,
+                              color: AppColors.primary,
+                            ),
                             SizedBox(width: 4.w),
                             Text(
                               feature,
-                              style: GoogleFonts.inter(fontSize: 11.sp, color: AppColors.primary),
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                color: AppColors.primary,
+                              ),
                             ),
                           ],
                         ),

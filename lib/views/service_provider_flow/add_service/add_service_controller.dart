@@ -12,14 +12,14 @@ enum ProviderRole { freelancer, business, productiveFamily }
 /// - Freelancer: Waitress, Barista, Juice Maker, Sandwich Maker, Burger Maker, Shawarma Maker, Chef
 /// - Business: Catering, Buffet, Live Cooking, Outdoor Cafe Kiosk, Coffee Hospitality Service
 /// - Productive Family: No Service As (empty list)
-/// - Professional Trainer (category): Villas, Farms, Lands
+/// - Professional Trainer (category): Furniture, Catering
 List<ServiceAs> getServiceAsOptions(
   ProviderRole role,
   ServiceCategory category,
 ) {
-  // Professional Trainer category has Villas, Farms, Lands
+  // Professional Trainer category has Furniture, Catering
   if (category == ServiceCategory.trainer) {
-    return [ServiceAs.villas, ServiceAs.farms, ServiceAs.lands];
+    return [ServiceAs.furniture, ServiceAs.cateringTrainer];
   }
 
   // For other categories, options depend on role
@@ -89,6 +89,7 @@ class AddServiceController extends GetxController {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final locationController = TextEditingController();
+  final attendanceCapacityController = TextEditingController();
   var outsideLocation = false.obs;
   var selectedImagePath = Rxn<String>();
 
@@ -110,10 +111,12 @@ class AddServiceController extends GetxController {
       getServiceAsOptions(selectedRole.value, selectedCategory.value);
 
   /// Returns true if Event Venue dropdown should be shown (when category is Event)
-  bool get showEventVenueDropdown => selectedCategory.value == ServiceCategory.event;
+  bool get showEventVenueDropdown =>
+      selectedCategory.value == ServiceCategory.event;
 
   /// Returns available sub-options based on selected ServiceAs
-  List<ServiceSubOption> get availableSubOptions => getServiceSubOptions(selectedServiceAs.value);
+  List<ServiceSubOption> get availableSubOptions =>
+      getServiceSubOptions(selectedServiceAs.value);
 
   /// Returns true if sub-options checklist should be shown (Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk)
   bool get showSubOptionsChecklist =>
@@ -122,6 +125,65 @@ class AddServiceController extends GetxController {
       (selectedServiceAs.value == ServiceAs.buffet ||
           selectedServiceAs.value == ServiceAs.liveCooking ||
           selectedServiceAs.value == ServiceAs.outdoorCafeKiosk);
+
+  /// Returns available ProviderRole options based on selected category
+  /// - Event: only Business role is available
+  /// - Trainer: Business and Productive Family (no Freelancer)
+  /// - Hospitality: All roles available
+  List<ProviderRole> get availableRoleOptions {
+    if (selectedCategory.value == ServiceCategory.event) {
+      return [ProviderRole.business];
+    }
+    if (selectedCategory.value == ServiceCategory.trainer) {
+      return [ProviderRole.business, ProviderRole.productiveFamily];
+    }
+    return ProviderRole.values;
+  }
+
+  /// Returns true if attendance capacity fields should be shown
+  /// Shown for Event and Trainer categories
+  bool get showAttendanceCapacity =>
+      selectedCategory.value == ServiceCategory.event ||
+      selectedCategory.value == ServiceCategory.trainer;
+
+  /// Returns true if Service As can be added dynamically (Trainer category)
+  bool get canAddMoreServiceAs =>
+      selectedCategory.value == ServiceCategory.trainer;
+
+  /// List of additional custom Service As entries for Trainer category
+  var additionalServiceAsList = <String>[].obs;
+
+  /// Controller for the new Service As text input
+  final newServiceAsController = TextEditingController();
+
+  /// Toggle for showing/hiding the add Service As text field
+  var showAddServiceAsField = false.obs;
+
+  /// Show the add Service As text field (called when + button is clicked)
+  void addCustomServiceAsDirectly() {
+    showAddServiceAsField.value = true;
+  }
+
+  /// Close/hide the add Service As text field
+  void closeAddServiceAsField() {
+    showAddServiceAsField.value = false;
+    newServiceAsController.clear();
+  }
+
+  /// Add a new custom Service As to the additional list
+  void addCustomServiceAs() {
+    final value = newServiceAsController.text.trim();
+    if (value.isNotEmpty && !additionalServiceAsList.contains(value)) {
+      additionalServiceAsList.add(value);
+      newServiceAsController.clear();
+      showAddServiceAsField.value = false;
+    }
+  }
+
+  /// Remove a custom Service As from the additional list
+  void removeCustomServiceAs(String serviceAs) {
+    additionalServiceAsList.remove(serviceAs);
+  }
 
   // Step 2: Packages
   var packages = <PackageFormData>[].obs;
@@ -315,10 +377,22 @@ class AddServiceController extends GetxController {
     selectedCategory.value = category;
     // Reset ServiceAs when category changes since options depend on category
     selectedServiceAs.value = null;
+    // Reset additional ServiceAs list when category changes
+    additionalServiceAsList.clear();
     // Reset EventVenue when category changes
     selectedEventVenue.value = null;
     // Reset subOptions when category changes
     selectedSubOptions.clear();
+    // When Event category is selected, auto-select Business role
+    if (category == ServiceCategory.event) {
+      selectedRole.value = ProviderRole.business;
+    }
+    // When Trainer category is selected, reset role if freelancer (not allowed)
+    else if (category == ServiceCategory.trainer) {
+      if (selectedRole.value == ProviderRole.freelancer) {
+        selectedRole.value = ProviderRole.business;
+      }
+    }
     if (_categoryFromServiceType(selectedServiceType.value) == category) {
       return;
     }
@@ -383,7 +457,9 @@ class AddServiceController extends GetxController {
           .toList(),
       serviceAs: selectedServiceAs.value,
       eventVenue: selectedEventVenue.value,
-      subOptions: selectedSubOptions.isNotEmpty ? selectedSubOptions.toList() : null,
+      subOptions: selectedSubOptions.isNotEmpty
+          ? selectedSubOptions.toList()
+          : null,
     );
 
     // Update the services list
@@ -408,6 +484,7 @@ class AddServiceController extends GetxController {
     titleController.dispose();
     descriptionController.dispose();
     locationController.dispose();
+    attendanceCapacityController.dispose();
     primaryAvailabilityCard.dispose();
     for (var card in additionalAvailabilityCards) {
       card.dispose();
