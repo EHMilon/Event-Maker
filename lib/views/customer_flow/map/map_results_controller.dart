@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
-import '../../../data/models/service_model.dart';
+import '../../../models/service_model.dart';
 
 class MapResultsController extends GetxController {
   final isLoading = false.obs;

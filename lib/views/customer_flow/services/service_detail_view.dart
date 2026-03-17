@@ -1,17 +1,17 @@
-import 'package:event_maker/core/routes/app_routes.dart';
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/data/services/service_repository.dart';
-import 'package:event_maker/views/common/vendor_profile.dart';
-import 'package:event_maker/data/models/review_model.dart';
-import 'package:event_maker/shared/widgets/primary_text_button.dart';
+import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/services/service_repository.dart';
+import 'package:event_maker/views/profile/vendor_profile.dart';
+import 'package:event_maker/models/review_model.dart';
+import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:event_maker/shared/widgets/app_custom_dialog.dart';
+import 'package:event_maker/widgets/app_custom_dialog.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 

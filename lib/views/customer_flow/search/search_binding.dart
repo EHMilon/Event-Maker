@@ -1,5 +1,5 @@
 import 'package:event_maker/views/customer_flow/search/search_controller.dart';
-import 'package:event_maker/views/common/profile/profile_controller.dart';
+import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:get/get.dart';
 
 class SearchBinding extends Bindings {

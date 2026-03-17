@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../core/routes/app_routes.dart';
-import '../../core/constants/app_strings.dart';
-import '../../shared/utils/logger.dart';
-import '../../shared/utils/user_preferences.dart';
+import '../../app_routes.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../utils/logger.dart';
+import '../../utils/user_preferences.dart';
 
 class OnboardingController extends GetxController {
   final PageController pageController = PageController();
@@ -11,18 +11,18 @@ class OnboardingController extends GetxController {
 
   final List<Map<String, String>> onboardingData = [
     {
-      "title": AppStrings.onboardingTitle1,
-      "subtitle": AppStrings.onboardingSubtitle1,
+      "title": "onboardingTitle1".tr,
+      "subtitle": "onboardingSubtitle1".tr,
       "image": "assets/images/onbording_1.png",
     },
     {
-      "title": AppStrings.onboardingTitle2,
-      "subtitle": AppStrings.onboardingSubtitle2,
+      "title": "onboardingTitle2".tr,
+      "subtitle": "onboardingSubtitle2".tr,
       "image": "assets/images/onbording_2.png",
     },
     {
-      "title": AppStrings.onboardingTitle3,
-      "subtitle": AppStrings.onboardingSubtitle3,
+      "title": "onboardingTitle3".tr,
+      "subtitle": "onboardingSubtitle3".tr,
       "image": "assets/images/onboarding_3.png",
     },
   ];

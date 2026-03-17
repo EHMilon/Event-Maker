@@ -1,9 +1,9 @@
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/shared/widgets/customer_bookmark_card.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/views/customer_flow/requests/customer_requests_controller.dart';
 import 'package:event_maker/views/customer_flow/requests/customer_requests_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/models/service_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';

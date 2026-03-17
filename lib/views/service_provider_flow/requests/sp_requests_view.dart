@@ -1,5 +1,5 @@
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/shared/widgets/request_card.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/widgets/request_card.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:flutter/material.dart';

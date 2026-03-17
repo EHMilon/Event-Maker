@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:event_maker/core/routes/app_routes.dart';
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/data/models/certification_model.dart';
+import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/certification_model.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

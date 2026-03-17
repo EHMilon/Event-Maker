@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../shared/utils/user_preferences.dart';
-import '../../core/routes/app_routes.dart';
-import '../../core/localization/app_localization.dart';
+import '../../utils/user_preferences.dart';
+import '../../app_routes.dart';
+import '../../localization/app_localization.dart';
 
 /// Controller for language selection screen
 /// 

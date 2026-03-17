@@ -3,11 +3,11 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../../shared/widgets/app_custom_dialog.dart';
-import '../../../shared/widgets/language_bottom_sheet.dart';
-import '../../../core/themes/app_colors.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../common/profile/profile_controller.dart';
+import '../../../widgets/app_custom_dialog.dart';
+import '../../../widgets/language_bottom_sheet.dart';
+import '../../../constants/app_colors.dart';
+import '../../../app_routes.dart';
+import '../../profile/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});

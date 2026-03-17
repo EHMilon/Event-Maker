@@ -1,7 +1,7 @@
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/shared/widgets/customer_bookmark_card.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
-import 'package:event_maker/views/common/profile/profile_controller.dart';
+import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

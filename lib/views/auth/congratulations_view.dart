@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class CongratulationsView extends GetView<AuthController> {
@@ -28,7 +28,7 @@ class CongratulationsView extends GetView<AuthController> {
               ),
               SizedBox(height: 40.h),
               Text(
-                AppStrings.congratulations,
+                "congratulations".tr,
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
@@ -37,7 +37,7 @@ class CongratulationsView extends GetView<AuthController> {
               ),
               SizedBox(height: 16.h),
               Text(
-                AppStrings.resetSuccessful,
+                "resetSuccessful".tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
@@ -46,7 +46,7 @@ class CongratulationsView extends GetView<AuthController> {
               ),
               const Spacer(),
               PrimaryTextButton(
-                text: AppStrings.login,
+                text: "login".tr,
                 onPressed: controller.onGoToLogin,
               ),
               SizedBox(height: 40.h),

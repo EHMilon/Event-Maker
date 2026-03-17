@@ -1,6 +1,6 @@
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
-import 'package:event_maker/shared/widgets/services_card.dart';
+import 'package:event_maker/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/search/search_controller.dart'
     as search;
 import 'package:flutter/material.dart';

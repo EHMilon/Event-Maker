@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'onboarding_controller.dart';
-import '../../core/themes/app_colors.dart';
-import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+// import '../../core/constants/app_strings.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
   const OnboardingView({super.key});
@@ -89,7 +89,7 @@ class OnboardingView extends GetView<OnboardingController> {
               child: TextButton(
                 onPressed: controller.skip,
                 child: Text(
-                  AppStrings.skip,
+                  "skip".tr,
                   style: TextStyle(color: AppColors.white, fontSize: 16.sp),
                 ),
               ),
@@ -139,7 +139,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        AppStrings.next,
+                        "next".tr,
                         style: TextStyle(
                           color: AppColors.black,
                           fontSize: 16.sp,

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'core/routes/app_routes.dart';
-import 'core/themes/app_themes.dart';
-import 'core/themes/app_colors.dart';
-import 'shared/utils/user_preferences.dart';
-import 'core/localization/app_localization.dart';
-import 'core/bindings/initial_binding.dart';
+import 'app_routes.dart';
+import 'constants/app_themes.dart';
+import 'constants/app_colors.dart';
+import 'utils/user_preferences.dart';
+import 'localization/app_localization.dart';
+import 'bindings/initial_binding.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

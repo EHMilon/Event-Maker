@@ -3,9 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/models/service_model.dart';
 
 class SPServiceOrdersView extends StatelessWidget {
   final String serviceTitle;

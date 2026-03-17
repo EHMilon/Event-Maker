@@ -1,5 +1,5 @@
-import 'package:event_maker/core/routes/app_routes.dart';
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
@@ -9,7 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:event_maker/shared/widgets/order_card.dart';
+import 'package:event_maker/widgets/order_card.dart';
 import 'package:event_maker/views/service_provider_flow/active_orders/sp_service_orders_view.dart';
 
 class SPHomeView extends GetView<SPHomeController> {

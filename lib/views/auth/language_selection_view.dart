@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'language_selection_controller.dart';
-import '../../core/themes/app_colors.dart';
-import '../../core/localization/app_localization.dart';
-import '../../shared/widgets/primary_text_button.dart';
+import '../../constants/app_colors.dart';
+import '../../localization/app_localization.dart';
+import '../../widgets/primary_text_button.dart';
 
 /// Language selection screen shown to first-time users
 ///

@@ -1,10 +1,10 @@
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../shared/widgets/notification_card.dart';
+import '../../widgets/notification_card.dart';
 import 'notification_controller.dart';
 
 class NotificationView extends GetView<NotificationController> {

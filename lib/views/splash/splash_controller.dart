@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import '../../core/routes/app_routes.dart';
-import '../../shared/utils/logger.dart';
-import '../../shared/utils/user_preferences.dart';
+import '../../app_routes.dart';
+import '../../utils/logger.dart';
+import '../../utils/user_preferences.dart';
 
 class SplashController extends GetxController {
   @override

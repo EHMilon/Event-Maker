@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/core/routes/app_routes.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/app_routes.dart';
 import 'chat_view_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 

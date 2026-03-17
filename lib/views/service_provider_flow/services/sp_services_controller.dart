@@ -1,5 +1,5 @@
-import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/data/services/service_repository.dart';
+import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/services/service_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

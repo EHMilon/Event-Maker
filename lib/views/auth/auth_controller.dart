@@ -1,8 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
-import '../../shared/utils/logger.dart';
-import '../../shared/utils/user_preferences.dart';
-import '../../core/routes/app_routes.dart';
+import '../../utils/logger.dart';
+import '../../utils/user_preferences.dart';
+import '../../app_routes.dart';
 
 /// Unified Auth Controller for all authentication screens.
 ///

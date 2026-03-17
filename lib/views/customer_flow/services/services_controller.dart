@@ -1,5 +1,5 @@
-import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/data/mock/services_mock.dart';
+import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/mock_data/services_mock.dart';
 import 'package:get/get.dart';
 
 class ServicesController extends GetxController {

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/themes/app_colors.dart';
-import '../../../shared/widgets/custom_text_field.dart';
-import '../../../shared/widgets/primary_text_button.dart';
+import '../../../constants/app_colors.dart';
+import '../../../widgets/custom_text_field.dart';
+import '../../../widgets/primary_text_button.dart';
 import 'add_service_controller.dart';
 
 /// View for managing packages and pricings for services

@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:event_maker/data/models/certification_model.dart';
+import 'package:event_maker/models/certification_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';

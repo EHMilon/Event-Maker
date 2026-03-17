@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class OtpVerificationView extends GetView<AuthController> {
@@ -50,7 +50,7 @@ class OtpVerificationView extends GetView<AuthController> {
                       Image.asset('assets/images/icon.png', height: 40.h),
                       SizedBox(height: 20.h),
                       Text(
-                        AppStrings.verifyEmail,
+                        "verifyEmail".tr,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -59,7 +59,7 @@ class OtpVerificationView extends GetView<AuthController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        AppStrings.verifyEmailSubtitle,
+                        "verifyEmailSubtitle".tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14.sp,
@@ -90,7 +90,7 @@ class OtpVerificationView extends GetView<AuthController> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        AppStrings.didntGetOtp,
+                        "didntGetOtp".tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
@@ -99,7 +99,7 @@ class OtpVerificationView extends GetView<AuthController> {
                       GestureDetector(
                         onTap: controller.onResend,
                         child: Text(
-                          AppStrings.resend,
+                          "resend".tr,
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.primary,
@@ -112,7 +112,7 @@ class OtpVerificationView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
-                  text: AppStrings.verify,
+                  text: "verify".tr,
                   onPressed: controller.onVerify,
                 ),
                 SizedBox(height: 20.h),

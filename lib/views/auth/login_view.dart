@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class LoginView extends GetView<AuthController> {
@@ -144,7 +144,7 @@ class LoginView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 30.h),
                 PrimaryTextButton(
-                  text: AppStrings.login,
+                  text: "login".tr,
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
                       controller.onLogin();
@@ -157,14 +157,14 @@ class LoginView extends GetView<AuthController> {
                     onTap: controller.onSignUp,
                     child: RichText(
                       text: TextSpan(
-                        text: AppStrings.dontHaveAccount,
+                        text: "dontHaveAccount".tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
                         ),
                         children: [
                           TextSpan(
-                            text: AppStrings.signUp,
+                            text: "signUp".tr,
                             style: TextStyle(
                               fontSize: 14.sp,
                               color: AppColors.primary,

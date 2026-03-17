@@ -1,6 +1,6 @@
-import 'package:event_maker/data/models/dashboard_stats_model.dart';
-import 'package:event_maker/data/models/order_model.dart';
-import 'package:event_maker/data/services/connectivity_service.dart';
+import 'package:event_maker/models/dashboard_stats_model.dart';
+import 'package:event_maker/models/order_model.dart';
+import 'package:event_maker/services/connectivity_service.dart';
 import 'package:get/get.dart';
 
 class SPHomeController extends GetxController {

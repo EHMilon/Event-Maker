@@ -1,6 +1,6 @@
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
-import 'package:event_maker/shared/widgets/services_card.dart';
+import 'package:event_maker/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/views/customer_flow/services/services_controller.dart';
 import 'package:flutter/material.dart';

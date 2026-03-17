@@ -1,4 +1,4 @@
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/service_provider_flow/home/sp_home_view.dart';
 import 'package:event_maker/views/service_provider_flow/service_provider_controller.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:event_maker/views/service_provider_flow/profile/service_provider_profile_view.dart';
-import 'package:event_maker/views/service_provider_flow/services/services_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/sp_services_view.dart';
 import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:event_maker/views/chats/chat_view.dart';

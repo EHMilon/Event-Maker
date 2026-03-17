@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../../data/mock/mock_data.dart';
-import '../../core/routes/app_routes.dart';
+import '../../mock_data/mock_data.dart';
+import '../../app_routes.dart';
 
 class CustomerNotificationController extends GetxController {
   final RxList<CustomerNotificationModel> notifications =

@@ -1,5 +1,5 @@
-import 'package:event_maker/data/mock/mock_data.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/mock_data/mock_data.dart';
+import 'package:event_maker/models/service_model.dart';
 import 'package:get/get.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 

@@ -1,4 +1,4 @@
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/customer_flow/map/map_controller.dart';
 import 'package:event_maker/views/customer_flow/map/widgets/sub_category_card.dart';
 import 'package:flutter/material.dart';

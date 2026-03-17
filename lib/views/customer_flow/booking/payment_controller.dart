@@ -1,5 +1,5 @@
-import 'package:event_maker/data/models/service_model.dart';
-import 'package:event_maker/core/routes/app_routes.dart';
+import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/app_routes.dart';
 import 'package:get/get.dart';
 
 class PaymentController extends GetxController {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../shared/widgets/primary_text_button.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class GetStartedView extends GetView<AuthController> {

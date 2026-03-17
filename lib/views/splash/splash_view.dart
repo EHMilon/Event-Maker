@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'splash_controller.dart';
-import '../../core/themes/app_colors.dart';
+import '../../constants/app_colors.dart';
 
 class SplashView extends GetView<SplashController> {
   const SplashView({super.key});

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class SignupView extends GetView<AuthController> {
@@ -52,15 +52,15 @@ class SignupView extends GetView<AuthController> {
               ),
               SizedBox(height: 20.h),
               CustomTextField(
-                labelText: AppStrings.email,
-                hintText: AppStrings.emailPlaceholder,
+                labelText: "email".tr,
+                hintText: "emailPlaceholder".tr,
                 keyboardType: TextInputType.emailAddress,
               ),
               SizedBox(height: 20.h),
               Obx(
                 () => CustomTextField(
-                  labelText: AppStrings.password,
-                  hintText: AppStrings.passwordPlaceholder,
+                  labelText: "password".tr,
+                  hintText: "passwordPlaceholder".tr,
                   obscureText: controller.obscureSignupPassword.value,
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -149,7 +149,7 @@ class SignupView extends GetView<AuthController> {
                       ),
                       children: [
                         TextSpan(
-                          text: AppStrings.login,
+                          text:"login".tr,
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.primary,

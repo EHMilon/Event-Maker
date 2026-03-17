@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../../core/themes/app_colors.dart';
-import '../../../shared/widgets/custom_text_field.dart';
-import '../../../shared/widgets/primary_text_button.dart';
-import '../../../core/routes/app_routes.dart';
-import '../../common/profile/profile_controller.dart';
+import '../../../constants/app_colors.dart';
+import '../../../widgets/custom_text_field.dart';
+import '../../../widgets/primary_text_button.dart';
+import '../../../app_routes.dart';
+import '../../profile/profile_controller.dart';
 
 class ProfileSettingsView extends GetView<ProfileController> {
   const ProfileSettingsView({super.key});
