@@ -1,4 +1,5 @@
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/views/chats/chat_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,19 +24,19 @@ class ChatDetailView extends StatelessWidget {
         children: [
           // Messages container with gradient background per design
           Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return Skeletonizer(
-                    enabled: true,
-                    child: _buildShimmerMessages(),
-                  );
-                }
-                return _buildMessagesList(
-                  controller,
-                  isAdminView: controller.isAdminChat,
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return Skeletonizer(
+                  enabled: true,
+                  child: _buildShimmerMessages(),
                 );
-              }),
-            ),
+              }
+              return _buildMessagesList(
+                controller,
+                isAdminView: controller.isAdminChat,
+              );
+            }),
+          ),
           // Message input
           _buildMessageInput(controller),
         ],
@@ -60,13 +61,13 @@ class ChatDetailView extends StatelessWidget {
       titleSpacing: 0,
       title: Row(
         children: [
-      CircleAvatar(
-        radius: 20.r,
-        backgroundImage: controller.chatImage.startsWith('http')
-            ? NetworkImage(controller.chatImage)
-            : AssetImage(controller.chatImage) as ImageProvider,
-        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-      ),
+          CircleAvatar(
+            radius: 20.r,
+            backgroundImage: controller.chatImage.startsWith('http')
+                ? NetworkImage(controller.chatImage)
+                : AssetImage(controller.chatImage) as ImageProvider,
+            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
@@ -136,16 +137,15 @@ class ChatDetailView extends StatelessWidget {
 
   /// Recommended topic card widget.
   Widget _buildTopicCard(
-    Map<String, dynamic> topic,
+    RecommendedTopic topic,
     ChatDetailController controller,
   ) {
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: InkWell(
         onTap: () {
-          // TODO: Send the topic text as a message
-          controller.messageText.value = topic['text'] ?? '';
-          controller.sendMessage();
+          // Send the topic text as a message
+          controller.sendMessage(overrideText: topic.text);
         },
         borderRadius: BorderRadius.circular(12.r),
         child: Container(
@@ -158,11 +158,11 @@ class ChatDetailView extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Text(topic['emoji'] ?? '💬', style: TextStyle(fontSize: 24.sp)),
+              Text(topic.emoji, style: TextStyle(fontSize: 24.sp)),
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  topic['text'] ?? '',
+                  topic.text,
                   style: GoogleFonts.inter(
                     color: AppColors.textPrimary,
                     fontSize: 14.sp,
@@ -182,32 +182,38 @@ class ChatDetailView extends StatelessWidget {
     ChatDetailController controller, {
     bool isAdminView = false,
   }) {
-    return ListView.builder(
-      padding: EdgeInsets.only(
-        left: 22.w,
-        right: 22.w,
-        top: 16.h,
-        bottom: 16.h,
-      ),
-      itemCount: controller.messages.length,
-      reverse: true,
-      itemBuilder: (context, index) {
-        final message = controller.messages[index];
-        return _buildMessageBubble(message, isAdminView: isAdminView);
-      },
-    );
+    return Obx(() {
+      final messages = controller.messages;
+
+      // Show admin welcome body if no messages and is admin chat
+      if (messages.isEmpty && isAdminView) {
+        return _buildAdminChatBody(controller);
+      }
+
+      return ListView.builder(
+        padding: EdgeInsets.only(
+          left: 22.w,
+          right: 22.w,
+          top: 16.h,
+          bottom: 16.h,
+        ),
+        itemCount: messages.length,
+        reverse: true,
+        itemBuilder: (context, index) {
+          final message = messages[index];
+          return _buildMessageBubble(message, isAdminView: isAdminView);
+        },
+      );
+    });
   }
 
   /// Individual message bubble widget.
   Widget _buildMessageBubble(
-    Map<String, dynamic> message, {
+    MessageModel message, {
     bool isAdminView = false,
   }) {
-    final isMe = message['isMe'] ?? false;
-    final messageType = message['type'] as String? ?? 'text';
-    final isAdminWelcome = isAdminView && !isMe && messageType == 'header';
-    final isAdminSubtitle =
-        isAdminView && !isMe && messageType == 'subtitle';
+    final isMe = message.isMe;
+    final messageType = message.type;
 
     return Padding(
       padding: EdgeInsets.only(bottom: 20.h),
@@ -217,67 +223,75 @@ class ChatDetailView extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: 280.w),
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
-            color: isAdminWelcome
-                ? Colors.transparent
-                : isMe
-                    ? Colors.white
-                    : AppColors.white,
+            color: isMe ? Colors.white : AppColors.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(isMe ? 12.r : 0.r),
               topRight: Radius.circular(isMe ? 0.r : 12.r),
               bottomLeft: Radius.circular(12.r),
               bottomRight: Radius.circular(12.r),
             ),
-            border: isAdminWelcome
-                ? null
-                : Border.all(color: const Color(0xFFF2F2F2)),
-            boxShadow: isAdminWelcome
-                ? null
-                : [
-                    BoxShadow(
-                      color: const Color.fromARGB(51, 70, 70, 70),
-                      blurRadius: 10,
-                      offset: const Offset(0, 0),
-                    ),
-                  ],
+            border: Border.all(color: const Color(0xFFF2F2F2)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromARGB(51, 70, 70, 70),
+                blurRadius: 10,
+                offset: const Offset(0, 0),
+              ),
+            ],
           ),
-          child: isAdminWelcome
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message['text'] ?? '',
-                      style: GoogleFonts.inter(
-                        color: AppColors.textPrimary,
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(height: 6.h),
-                    Text(
-                      'adminChatWelcome'.tr,
-                      style: GoogleFonts.inter(
-                        color: AppColors.textSecondary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                )
-              : Text(
-                  message['text'] ?? '',
-                  style: GoogleFonts.roboto(
-                    color: isAdminSubtitle
-                        ? AppColors.textSecondary
-                        : const Color(0xFF5E5F60),
-                    fontSize: 14.sp,
-                    fontWeight: isAdminSubtitle
-                        ? FontWeight.w500
-                        : FontWeight.w400,
-                    height: 1.5,
-                  ),
-                ),
+          child: _buildMessageContent(message, messageType),
         ),
+      ),
+    );
+  }
+
+  /// Builds the content inside a message bubble based on message type.
+  Widget _buildMessageContent(MessageModel message, MessageType messageType) {
+    // Handle different message types
+    if (messageType == MessageType.image && message.attachmentUrl != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Image.network(
+              message.attachmentUrl!,
+              width: 200.w,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 200.w,
+                  height: 150.h,
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.broken_image),
+                );
+              },
+            ),
+          ),
+          if (message.content.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            Text(
+              message.content,
+              style: GoogleFonts.roboto(
+                color: const Color(0xFF5E5F60),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    // Default text message
+    return Text(
+      message.content,
+      style: GoogleFonts.roboto(
+        color: const Color(0xFF5E5F60),
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w400,
+        height: 1.5,
       ),
     );
   }
@@ -323,7 +337,7 @@ class ChatDetailView extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-      decoration: BoxDecoration(color: AppColors.white),
+      decoration: const BoxDecoration(color: AppColors.white),
       child: SafeArea(
         child: Row(
           children: [
@@ -331,7 +345,7 @@ class ChatDetailView extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Color(0xFFEBEBEB)), // #EBEBEB
+                  border: Border.all(color: const Color(0xFFEBEBEB)),
                 ),
                 child: TextField(
                   minLines: 1,
@@ -345,7 +359,7 @@ class ChatDetailView extends StatelessWidget {
                   decoration: InputDecoration(
                     hintText: 'Type your message',
                     hintStyle: GoogleFonts.roboto(
-                      color: Color(0xFF818181), // #818181
+                      color: const Color(0xFF818181),
                       fontSize: 14.sp,
                     ),
                     border: InputBorder.none,
@@ -359,26 +373,40 @@ class ChatDetailView extends StatelessWidget {
             ),
             SizedBox(width: 4.w),
             // Send button
-            GestureDetector(
-              onTap: () {
-                controller.sendMessage();
-                textController.clear();
-              },
-              child: Container(
-                width: 48.w,
-                height: 48.h,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Color(0xFFEBEBEB)), // #EBEBEB
+            Obx(() {
+              final isSending = controller.isSending.value;
+              return GestureDetector(
+                onTap: isSending
+                    ? null
+                    : () {
+                        controller.sendMessage();
+                        textController.clear();
+                      },
+                child: Container(
+                  width: 48.w,
+                  height: 48.h,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFEBEBEB)),
+                  ),
+                  child: isSending
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.h,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.w,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : SvgPicture.asset(
+                          'assets/icons/send.svg',
+                          height: 40.h,
+                          width: 40.w,
+                          fit: BoxFit.none,
+                        ),
                 ),
-                child: SvgPicture.asset(
-                  'assets/icons/send.svg',
-                  height: 40.h,
-                  width: 40.w,
-                  fit: BoxFit.none,
-                ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),

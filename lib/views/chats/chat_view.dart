@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/models/chat_model.dart';
 import 'chat_view_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -26,22 +27,6 @@ class ChatView extends StatelessWidget {
         titleSpacing: 24.w,
         automaticallyImplyLeading: false,
         leadingWidth: 40.w,
-        // leading: Builder(
-        //   builder: (context) {
-        //     final navigator = Navigator.of(context);
-        //     if (navigator.canPop()) {
-        //       return IconButton(
-        //         icon: Icon(
-        //           Icons.arrow_back,
-        //           color: AppColors.textPrimary,
-        //           size: 24.w,
-        //         ),
-        //         onPressed: () => navigator.pop(),
-        //       );
-        //     }
-        //     return const SizedBox.shrink();
-        //   },
-        // ),
         title: Text(
           'chats'.tr,
           style: GoogleFonts.inter(
@@ -66,7 +51,7 @@ class ChatView extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
             child: Container(
-              height: 32.h,   
+              height: 32.h,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(20.r),
@@ -86,7 +71,6 @@ class ChatView extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 dividerColor: Colors.transparent,
                 tabs: [_buildTab('customer'.tr), _buildTab('admin'.tr)],
-              
               ),
             ),
           ),
@@ -107,7 +91,10 @@ class ChatView extends StatelessWidget {
     return Tab(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.r), border: Border.all(color: AppColors.grey.withValues(alpha: 0.2))),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(color: AppColors.grey.withValues(alpha: 0.2)),
+        ),
         child: Align(
           alignment: Alignment.center,
           child: Text(
@@ -138,8 +125,8 @@ class ChatView extends StatelessWidget {
     return Obx(() {
       final isLoading = controller.isLoading.value;
       final chats = isCustomerTab
-          ? controller.customerChats
-          : controller.adminChats;
+          ? controller.filteredCustomerChats
+          : controller.filteredAdminChats;
 
       if (chats.isEmpty && !isLoading) {
         return Center(
@@ -234,16 +221,16 @@ class ChatView extends StatelessWidget {
     );
   }
 
-  Widget _buildChatTile(Map<String, dynamic> chat, {bool isAdminChat = false}) {
+  Widget _buildChatTile(ChatModel chat, {bool isAdminChat = false}) {
     return InkWell(
       onTap: () {
         // Navigate to chat detail screen with admin/customer context
         Get.toNamed(
           AppRoutes.chatDetail,
           arguments: {
-            'id': chat['id'],
-            'name': chat['name'],
-            'image': chat['image'] ?? 'assets/images/person.jpg',
+            'id': chat.id,
+            'name': chat.participant.name,
+            'image': chat.participant.avatarUrl ?? 'assets/images/person.jpg',
             'isAdmin': isAdminChat,
           },
         );
@@ -253,10 +240,10 @@ class ChatView extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24.r,
-            backgroundImage: const AssetImage(
-              'assets/images/person.jpg',
-            ), // fallback
-            // ignore: prefer_const_constructors
+            backgroundImage: chat.participant.avatarUrl != null &&
+                    chat.participant.avatarUrl!.startsWith('http')
+                ? NetworkImage(chat.participant.avatarUrl!)
+                : const AssetImage('assets/images/person.jpg') as ImageProvider,
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           ),
           SizedBox(width: 12.w),
@@ -264,17 +251,45 @@ class ChatView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  chat['name'] ?? 'User Name',
-                  style: GoogleFonts.inter(
-                    color: AppColors.textPrimary,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        chat.participant.name,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textPrimary,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (chat.unreadCount > 0) ...[
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Text(
+                          '${chat.unreadCount}',
+                          style: GoogleFonts.inter(
+                            color: AppColors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  chat['lastMessage'] ?? '',
+                  chat.lastMessage.content,
                   style: GoogleFonts.inter(
                     color: AppColors.textSecondary,
                     fontSize: 14.sp,

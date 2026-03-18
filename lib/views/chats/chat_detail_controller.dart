@@ -1,11 +1,25 @@
 import 'package:get/get.dart';
+import 'package:event_maker/models/chat_model.dart';
+import 'package:event_maker/repository/chat_repository.dart';
 
 /// Controller for the chat detail / conversation screen.
-/// TODO: Integrate with backend chat API (WebSocket / REST).
+/// Uses [ChatRepository] for data fetching with backend-compatible patterns.
 class ChatDetailController extends GetxController {
+  final ChatRepository _repository = const ChatRepository();
+
   final isLoading = true.obs;
+  final isSending = false.obs;
   final messageText = ''.obs;
-  final RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
+  final hasError = false.obs;
+  String? errorMessage;
+
+  // Typed messages list
+  final RxList<MessageModel> messages = <MessageModel>[].obs;
+
+  // Pagination support
+  bool hasMoreMessages = false;
+  String? nextCursor;
+  final isLoadingMore = false.obs;
 
   // Chat metadata passed via arguments
   late final String chatId;
@@ -13,112 +27,153 @@ class ChatDetailController extends GetxController {
   late final String chatImage;
   late final bool isAdminChat;
 
+  // Current user ID (should come from auth service in production)
+  static const String currentUserId = 'current_user';
+
   @override
   void onInit() {
     super.onInit();
+    _parseArguments();
+    loadMessages();
+  }
+
+  /// Parses navigation arguments.
+  void _parseArguments() {
     final args = Get.arguments as Map<String, dynamic>? ?? {};
-    chatId = args['id'] ?? '';
-    chatName = args['name'] ?? 'Unknown';
-    chatImage = args['image'] ?? 'assets/images/person.jpg';
-    isAdminChat = args['isAdmin'] ?? false;
-    _loadMockMessages();
+    chatId = args['id'] as String? ?? '';
+    chatName = args['name'] as String? ?? 'Unknown';
+    chatImage = args['image'] as String? ?? 'assets/images/person.jpg';
+    isAdminChat = args['isAdmin'] as bool? ?? false;
   }
 
-  /// Load mock message data with a 2s shimmer delay.
-  void _loadMockMessages() async {
+  /// Loads messages for the current chat.
+  Future<void> loadMessages() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
+    hasError.value = false;
+    errorMessage = null;
 
-    if (isAdminChat) {
-      messages.value = [
-        {
-          'id': '1',
-          'text': 'How can I improve my sleep?',
-          'isMe': true,
-          'time': '9:40 AM',
-          'type': 'text',
-        },
-        {
-          'id': '2',
-          'text': 'Here are some tips that might help you rest better.',
-          'isMe': false,
-          'time': '9:41 AM',
-          'type': 'text',
-        },
-        {
-          'id': '3',
-          'text': 'How can I improve my Services?',
-          'isMe': true,
-          'time': '9:42 AM',
-          'type': 'text',
-        },
-      ];
-    } else {
-      messages.value = [
-        {
-          'id': '1',
-          'text':
-              'lorem, sed volutpat lacus ullamcorper.Sed hendrerit ullamcorper elit adipiscing urna. Ut ipsum orci libero, consectetur at.',
-          'isMe': true,
-          'time': '9:41 AM',
-          'type': 'text',
-        },
-      ];
+    try {
+      final response = await _repository.fetchMessages(chatId: chatId);
+      messages.value = response.messages;
+      hasMoreMessages = response.hasMore;
+      nextCursor = response.nextCursor;
+
+      // Mark messages as read when opening chat
+      if (messages.isNotEmpty) {
+        await _repository.markAsRead(chatId);
+      }
+    } catch (e) {
+      hasError.value = true;
+      errorMessage = e.toString();
+      // TODO: Handle error appropriately
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
-  /// Update message text field value.
+  /// Loads more messages (pagination).
+  Future<void> loadMoreMessages() async {
+    if (isLoadingMore.value || !hasMoreMessages || nextCursor == null) return;
+
+    isLoadingMore.value = true;
+
+    try {
+      final response = await _repository.fetchMessages(
+        chatId: chatId,
+        cursor: nextCursor,
+      );
+      messages.addAll(response.messages);
+      hasMoreMessages = response.hasMore;
+      nextCursor = response.nextCursor;
+    } catch (e) {
+      // TODO: Handle pagination error
+    } finally {
+      isLoadingMore.value = false;
+    }
+  }
+
+  /// Updates the message text field value.
   void updateMessageText(String text) {
     messageText.value = text;
   }
 
-  /// Send a new message.
-  /// TODO: Integrate with backend to send message via API.
-  void sendMessage({String? overrideText}) {
+  /// Sends a new message.
+  Future<void> sendMessage({String? overrideText}) async {
     final composed = (overrideText ?? messageText.value).trim();
-    if (composed.isEmpty) return;
+    if (composed.isEmpty || isSending.value) return;
 
-    messages.insert(0, {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'text': composed,
-      'isMe': true,
-      'time': _formatCurrentTime(),
-      'type': 'text',
-    });
+    isSending.value = true;
 
+    // Optimistically add message to UI
+    final optimisticMessage = MessageModel(
+      id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+      chatId: chatId,
+      senderId: currentUserId,
+      content: composed,
+      createdAt: DateTime.now(),
+      isMe: true,
+    );
+
+    messages.insert(0, optimisticMessage);
     messageText.value = '';
 
-    _scheduleDemoReply();
+    try {
+      // Send message via repository
+      final sentMessage = await _repository.sendMessage(
+        chatId: chatId,
+        content: composed,
+      );
+
+      // Replace optimistic message with actual message from server
+      final index = messages.indexWhere((m) => m.id == optimisticMessage.id);
+      if (index != -1) {
+        messages[index] = sentMessage;
+      }
+
+      // For demo purposes, simulate a reply after sending
+      _scheduleDemoReply();
+    } catch (e) {
+      // Remove optimistic message on failure
+      messages.removeWhere((m) => m.id == optimisticMessage.id);
+      hasError.value = true;
+      errorMessage = 'Failed to send message: $e';
+      // TODO: Show error to user
+    } finally {
+      isSending.value = false;
+    }
   }
 
+  /// Demo auto-reply simulation.
+  /// TODO: Remove this when WebSocket/real-time messaging is implemented.
   void _scheduleDemoReply() {
     Future.delayed(const Duration(milliseconds: 700), () {
       if (isClosed) return;
-      final replyText =
-          isAdminChat ? 'autoReplyAdmin'.tr : 'autoReplyCustomer'.tr;
-      messages.insert(0, {
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'text': replyText,
-        'isMe': false,
-        'time': _formatCurrentTime(),
-        'type': 'text',
-      });
+
+      final replyText = isAdminChat ? 'autoReplyAdmin'.tr : 'autoReplyCustomer'.tr;
+      final replyMessage = MessageModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        chatId: chatId,
+        senderId: isAdminChat ? 'admin' : 'other_user',
+        content: replyText,
+        createdAt: DateTime.now(),
+        isMe: false,
+      );
+
+      messages.insert(0, replyMessage);
     });
   }
 
-  /// Helper to format current time for display.
-  String _formatCurrentTime() {
-    final now = DateTime.now();
-    final hour = now.hour > 12 ? now.hour - 12 : now.hour;
-    final period = now.hour >= 12 ? 'PM' : 'AM';
-    final minute = now.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
-  }
-
-  /// Recommended topics for admin chat (from the mockup).
-  List<Map<String, dynamic>> get recommendedTopics => [
-        {'emoji': '😴', 'text': 'howCanIImprovedSleep'.tr},
-        {'emoji': '🧘', 'text': 'howCanIImproveMyServices'.tr},
+  /// Recommended topics for admin chat.
+  List<RecommendedTopic> get recommendedTopics => [
+        RecommendedTopic(emoji: '😴', text: 'howCanIImprovedSleep'.tr),
+        RecommendedTopic(emoji: '🧘', text: 'howCanIImproveMyServices'.tr),
       ];
+}
+
+/// Model for recommended topics in admin chat.
+class RecommendedTopic {
+  final String emoji;
+  final String text;
+
+  const RecommendedTopic({required this.emoji, required this.text});
 }
