@@ -1,4 +1,5 @@
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/schedule_model.dart';
 import 'package:event_maker/views/service_provider_flow/schedule/schedule_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,103 +25,95 @@ class ScheduleView extends GetView<ScheduleController> {
         ),
         title: Text(
           'schedule'.tr,
-          style: GoogleFonts.inter(fontSize: 20.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+          style: GoogleFonts.inter(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
         ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildCalendarHeader(),
-          SizedBox(height: 20.h),
+          SizedBox(height: 18.h),
           _buildWeekPicker(),
-          SizedBox(height: 30.h),
+          SizedBox(height: 16.h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Text(
-              'myServices'.tr, // Using myServices.tr which is 'Services' or 'My Services'
-              style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-            ),
-          ),
-          SizedBox(height: 20.h),
-          Expanded(
-            child: Obx(
-              () => Skeletonizer(
-                enabled: controller.isLoading.value,
-                child: ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  itemCount: controller.isLoading.value ? 4 : controller.services.length,
-                  itemBuilder: (context, index) {
-                    final service = controller.isLoading.value
-                        ? {
-                            'time': '09:00 AM - 12:30 pm',
-                            'title': 'Service Title Here',
-                            'color': Colors.grey.shade200,
-                            'image': 'https://picsum.photos/id/1/100/100',
-                          }
-                        : controller.services[index];
-                    return _buildServiceCard(service);
-                  },
-                ),
+              'services'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.darkGrey,
               ),
             ),
           ),
+          SizedBox(height: 20.h),
+          Expanded(child: _buildScheduleList()),
         ],
       ),
     );
   }
 
   Widget _buildCalendarHeader() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.chevron_left, size: 20),
-                onPressed: () => controller.prevYear(),
-              ),
-              Obx(
-                () => Text(
-                  controller.currentYear.value,
-                  style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: const Icon(Icons.chevron_left, size: 20),
+              onPressed: () => controller.prevYear(),
+            ),
+            Obx(
+              () => Text(
+                controller.currentYear.value,
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.darkGrey,
                 ),
               ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.chevron_right, size: 20),
-                onPressed: () => controller.nextYear(),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.chevron_left, size: 20),
-                onPressed: () => controller.prevMonth(),
-              ),
-              Obx(
-                () => Text(
-                  controller.currentMonth.value,
-                  style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            ),
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: const Icon(Icons.chevron_right, size: 20),
+              onPressed: () => controller.nextYear(),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: const Icon(Icons.chevron_left, size: 20),
+              onPressed: () => controller.prevMonth(),
+            ),
+            Obx(
+              () => Text(
+                controller.currentMonth.value,
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.darkGrey,
                 ),
               ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.chevron_right, size: 20),
-                onPressed: () => controller.nextMonth(),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              icon: const Icon(Icons.chevron_right, size: 20),
+              onPressed: () => controller.nextMonth(),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -132,27 +125,37 @@ class ScheduleView extends GetView<ScheduleController> {
         final days = controller.getDaysInWeek();
         return Row(
           children: days.map((date) {
-            final isSelected = DateFormat('yyyy-MM-dd').format(date) == DateFormat('yyyy-MM-dd').format(controller.selectedDate.value);
+            final isSelected = controller.isSelectedDate(date);
             return GestureDetector(
               onTap: () => controller.selectDate(date),
               child: Container(
-                margin: EdgeInsets.only(right: 12.w),
+                margin: EdgeInsets.only(right: 6.w),
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: isSelected ? AppColors.primary : Colors.white,
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: isSelected ? AppColors.primary : const Color(0xFFF1F1F5)),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : AppColors.grey200,
+                  ),
                 ),
                 child: Column(
                   children: [
                     Text(
                       DateFormat('E').format(date),
-                      style: GoogleFonts.inter(fontSize: 12.sp, fontWeight: FontWeight.w400, color: isSelected ? Colors.white : AppColors.textSecondary),
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: isSelected ? Colors.white : AppColors.darkGrey,
+                      ),
                     ),
                     SizedBox(height: 8.h),
                     Text(
                       DateFormat('d').format(date),
-                      style: GoogleFonts.inter(fontSize: 16.sp, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.textPrimary),
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected ? Colors.white : AppColors.darkGrey,
+                      ),
                     ),
                   ],
                 ),
@@ -164,7 +167,53 @@ class ScheduleView extends GetView<ScheduleController> {
     );
   }
 
-  Widget _buildServiceCard(Map<String, dynamic> service) {
+  Widget _buildScheduleList() {
+    return Obx(() {
+      if (controller.hasError.value) {
+        return _buildErrorState();
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.refreshSchedules,
+        child: Skeletonizer(
+          enabled: controller.isLoading.value,
+          child: controller.schedules.isEmpty && !controller.isLoading.value
+              ? _buildEmptyState()
+              : _buildScheduleListView(),
+        ),
+      );
+    });
+  }
+
+  Widget _buildScheduleListView() {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      itemCount: controller.isLoading.value ? 4 : controller.schedules.length,
+      itemBuilder: (context, index) {
+        final schedule = controller.isLoading.value
+            ? ScheduleModel(
+                id: '',
+                title: 'Service Title Here',
+                imageUrl: 'https://picsum.photos/id/1/100/100',
+                startTime: DateTime.now(),
+                endTime: DateTime.now().add(const Duration(hours: 3)),
+              )
+            : controller.schedules[index];
+        return _buildServiceCard(schedule, index);
+      },
+    );
+  }
+
+  Widget _buildServiceCard(ScheduleModel schedule, int index) {
+    // Get the previous schedule to determine if we need a timeline
+    // Only access schedules list when not loading (skeleton mode)
+    final ScheduleModel? previousSchedule = !controller.isLoading.value && index > 0
+        ? controller.schedules[index - 1]
+        : null;
+    final bool showTimeline =
+        previousSchedule != null &&
+        !_shouldSkipTimeline(previousSchedule, schedule);
+
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
       child: Row(
@@ -173,26 +222,41 @@ class ScheduleView extends GetView<ScheduleController> {
           SizedBox(
             width: 80.w,
             child: Text(
-              service['time'].split(' - ')[0],
-              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+              _formatTime(schedule.startTime),
+              style: GoogleFonts.inter(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.darkGrey,
+                height: 2.4.sp,
+              ),
             ),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (showTimeline) _buildTimeLine(),
                 Container(
                   padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
-                    color: service['color'],
+                    color: _getCardColor(index).withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: (service['color'] as Color).withOpacity(0.5)),
+                    border: Border.all(color: _getCardColor(index)),
                   ),
                   child: Row(
                     children: [
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(8.r),
-                        child: Image.network(service['image'], width: 40.w, height: 40.w, fit: BoxFit.cover),
+                        borderRadius: BorderRadius.circular(25.r),
+                        child: schedule.imageUrl != null
+                            ? Image.network(
+                                schedule.imageUrl!,
+                                width: 48.w,
+                                height: 48.w,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildPlaceholderImage(),
+                              )
+                            : _buildPlaceholderImage(),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
@@ -200,13 +264,21 @@ class ScheduleView extends GetView<ScheduleController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              service['time'],
-                              style: GoogleFonts.inter(fontSize: 11.sp, fontWeight: FontWeight.w400, color: AppColors.textSecondary),
+                              schedule.timeRangeString,
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                             SizedBox(height: 4.h),
                             Text(
-                              service['title'],
-                              style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                              schedule.title,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -216,12 +288,20 @@ class ScheduleView extends GetView<ScheduleController> {
                     ],
                   ),
                 ),
-                if (service['time'].contains('10:00 PM')) SizedBox(height: 0) else _buildTimeLine(),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Container(
+      width: 48.w,
+      height: 48.w,
+      color: AppColors.grey200,
+      child: Icon(Icons.event, size: 24.sp, color: AppColors.grey400),
     );
   }
 
@@ -231,8 +311,118 @@ class ScheduleView extends GetView<ScheduleController> {
       margin: EdgeInsets.only(left: 0.w),
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Center(
-        child: Container(width: double.infinity, height: 1, color: const Color(0xFFF1F1F5)),
+        child: Container(
+          width: double.infinity,
+          height: 1,
+          color: const Color(0xFFF1F1F5),
+        ),
       ),
     );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.event_busy, size: 64.sp, color: AppColors.grey300),
+          SizedBox(height: 16.h),
+          Text(
+            'noSchedulesFound'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'noSchedulesForDate'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.grey400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64.sp, color: AppColors.error),
+          SizedBox(height: 16.h),
+          Text(
+            'errorLoadingSchedules'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            controller.errorMessage.value,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.grey400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24.h),
+          ElevatedButton(
+            onPressed: controller.retry,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: Text(
+              'retry'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Returns the card color based on index for visual variety.
+  Color _getCardColor(int index) {
+    final colors = [
+      const Color(0xFFE9D5FF), // Light purple
+      const Color(0xFFCCFBF1), // Light teal
+      const Color(0xFFDBEAFE), // Light blue
+      const Color(0xFFFEE2E2), // Light red
+      const Color(0xFFFEF3C7), // Light amber
+    ];
+    return colors[index % colors.length];
+  }
+
+  /// Formats time in 12-hour format.
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$displayHour:$minute $period';
+  }
+
+  /// Determines if timeline should be skipped between two schedules.
+  bool _shouldSkipTimeline(ScheduleModel previous, ScheduleModel current) {
+    // Skip timeline if there's a significant gap (more than 2 hours)
+    final gap = current.startTime.difference(previous.endTime);
+    return gap.inHours >= 2;
   }
 }
