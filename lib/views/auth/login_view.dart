@@ -51,6 +51,7 @@ class LoginView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 40.h),
                 CustomTextField(
+                  controller: controller.loginEmailController,
                   labelText: 'email'.tr,
                   hintText: 'emailPlaceholder'.tr,
                   keyboardType: TextInputType.emailAddress,
@@ -67,6 +68,7 @@ class LoginView extends GetView<AuthController> {
                 SizedBox(height: 20.h),
                 Obx(
                   () => CustomTextField(
+                    controller: controller.loginPasswordController,
                     labelText: 'password'.tr,
                     hintText: 'passwordPlaceholder'.tr,
                     obscureText: controller.obscurePassword.value,

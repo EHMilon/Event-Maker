@@ -46,12 +46,14 @@ class SignupView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 30.h),
-              const CustomTextField(
+              CustomTextField(
+                controller: controller.signupNameController,
                 labelText: "Full Name",
                 hintText: "John Doe",
               ),
               SizedBox(height: 20.h),
               CustomTextField(
+                controller: controller.signupEmailController,
                 labelText: "email".tr,
                 hintText: "emailPlaceholder".tr,
                 keyboardType: TextInputType.emailAddress,
@@ -59,6 +61,7 @@ class SignupView extends GetView<AuthController> {
               SizedBox(height: 20.h),
               Obx(
                 () => CustomTextField(
+                  controller: controller.signupPasswordController,
                   labelText: "password".tr,
                   hintText: "passwordPlaceholder".tr,
                   obscureText: controller.obscureSignupPassword.value,

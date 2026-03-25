@@ -10,6 +10,11 @@ class UserPreferences {
   static const String _languageCodeKey = 'language_code';
   static const String _hasSeenOnboardingKey = 'has_seen_onboarding';
   
+  // JWT Token keys
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+  static const String _tokenExpiresAtKey = 'token_expires_at';
+  
   static const String USER_TYPE_CUSTOMER = 'customer';
   static const String USER_TYPE_SERVICE_PROVIDER = 'provider';
   
@@ -164,6 +169,59 @@ class UserPreferences {
     };
   }
   
+  // ===== JWT Token Management =====
+  
+  /// Save JWT tokens after login/signup
+  static Future<bool> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+    required int expiresIn,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final expiresAt = DateTime.now().add(Duration(seconds: expiresIn));
+    
+    final results = await Future.wait([
+      prefs.setString(_accessTokenKey, accessToken),
+      prefs.setString(_refreshTokenKey, refreshToken),
+      prefs.setString(_tokenExpiresAtKey, expiresAt.toIso8601String()),
+    ]);
+    
+    return results.every((result) => result);
+  }
+  
+  /// Get access token
+  static Future<String?> getAccessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_accessTokenKey);
+  }
+  
+  /// Get refresh token
+  static Future<String?> getRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_refreshTokenKey);
+  }
+  
+  /// Check if access token is expired
+  static Future<bool> isTokenExpired() async {
+    final prefs = await SharedPreferences.getInstance();
+    final expiresAtStr = prefs.getString(_tokenExpiresAtKey);
+    
+    if (expiresAtStr == null) return true;
+    
+    final expiresAt = DateTime.tryParse(expiresAtStr);
+    if (expiresAt == null) return true;
+    
+    // Consider token expired 5 minutes before actual expiration
+    return DateTime.now().isAfter(expiresAt.subtract(const Duration(minutes: 5)));
+  }
+  
+  /// Check if user has valid tokens
+  static Future<bool> hasValidTokens() async {
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
+    return accessToken != null && refreshToken != null;
+  }
+  
   // ===== Cleanup =====
   
   /// Clear all user data (for logout) but keep language preference
@@ -178,6 +236,9 @@ class UserPreferences {
       prefs.remove(_userNameKey),
       prefs.remove(_userEmailKey),
       prefs.remove(_isLoggedInKey),
+      prefs.remove(_accessTokenKey),
+      prefs.remove(_refreshTokenKey),
+      prefs.remove(_tokenExpiresAtKey),
     ]);
     
     // Restore language preference

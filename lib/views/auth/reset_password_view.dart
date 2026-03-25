@@ -57,6 +57,7 @@ class ResetPasswordView extends GetView<AuthController> {
                 SizedBox(height: 40.h),
                 Obx(
                   () => CustomTextField(
+                    controller: controller.newPasswordController,
                     labelText: "newPassword".tr,
                     hintText: "passwordPlaceholder".tr,
                     obscureText: controller.obscureNewPassword.value,
@@ -75,6 +76,7 @@ class ResetPasswordView extends GetView<AuthController> {
                 SizedBox(height: 20.h),
                 Obx(
                   () => CustomTextField(
+                    controller: controller.confirmPasswordController,
                     labelText: "confirmPassword".tr,
                     hintText: "passwordPlaceholder".tr,
                     obscureText: controller.obscureConfirmPassword.value,

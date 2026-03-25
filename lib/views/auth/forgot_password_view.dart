@@ -56,6 +56,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 40.h),
                 CustomTextField(
+                  controller: controller.forgotEmailController,
                   labelText: "email".tr,
                   hintText: "emailPlaceholder".tr,
                   keyboardType: TextInputType.emailAddress,
