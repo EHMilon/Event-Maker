@@ -103,8 +103,11 @@ class AddServiceController extends GetxController {
   final selectedServiceType = ServiceType.catering.obs;
   final selectedRole = ProviderRole.freelancer.obs;
   final selectedServiceAs = Rxn<ServiceAs>();
+  final selectedServiceAsItems = <dynamic>[].obs; // Can hold ServiceAs enum or String
+
   final selectedEventVenue = Rxn<EventVenue>();
   final selectedSubOptions = <ServiceSubOption>[].obs;
+  final selectedSubOptionsItems = <dynamic>[].obs; // Can hold ServiceSubOption enum or String
 
   /// Returns available ServiceAs options based on current selected role and category
   List<ServiceAs> get availableServiceAsOptions =>
@@ -146,18 +149,20 @@ class AddServiceController extends GetxController {
       selectedCategory.value == ServiceCategory.event ||
       selectedCategory.value == ServiceCategory.trainer;
 
-  /// Returns true if Service As can be added dynamically (Trainer category)
-  bool get canAddMoreServiceAs =>
-      selectedCategory.value == ServiceCategory.trainer;
-
-  /// List of additional custom Service As entries for Trainer category
-  var additionalServiceAsList = <String>[].obs;
+  /// Returns true if Service As can be added dynamically
+  bool get canAddMoreServiceAs => true; // Enabled for all categories per user request
 
   /// Controller for the new Service As text input
   final newServiceAsController = TextEditingController();
 
   /// Toggle for showing/hiding the add Service As text field
   var showAddServiceAsField = false.obs;
+
+  /// Controller for the new Sub Option text input
+  final newSubOptionController = TextEditingController();
+
+  /// Toggle for showing/hiding the add Sub Option text field
+  var showAddSubOptionField = false.obs;
 
   /// Show the add Service As text field (called when + button is clicked)
   void addCustomServiceAsDirectly() {
@@ -170,19 +175,88 @@ class AddServiceController extends GetxController {
     newServiceAsController.clear();
   }
 
-  /// Add a new custom Service As to the additional list
+  /// Add a new custom Service As to the selection
   void addCustomServiceAs() {
     final value = newServiceAsController.text.trim();
-    if (value.isNotEmpty && !additionalServiceAsList.contains(value)) {
-      additionalServiceAsList.add(value);
+    if (value.isNotEmpty) {
+      selectedServiceAsItems.clear(); // Enforce single selection
+      selectedServiceAsItems.add(value);
       newServiceAsController.clear();
       showAddServiceAsField.value = false;
     }
   }
 
-  /// Remove a custom Service As from the additional list
-  void removeCustomServiceAs(String serviceAs) {
-    additionalServiceAsList.remove(serviceAs);
+  /// Toggle ServiceAs selection
+  void toggleServiceAs(dynamic item) {
+    if (selectedServiceAsItems.contains(item)) {
+      selectedServiceAsItems.remove(item);
+      if (item is ServiceAs && selectedServiceAs.value == item) {
+        selectedServiceAs.value = null;
+      }
+    } else {
+      selectedServiceAsItems.clear(); // Enforce single selection
+      selectedServiceAsItems.add(item);
+      if (item is ServiceAs) {
+        selectedServiceAs.value = item;
+      } else {
+        selectedServiceAs.value = null;
+      }
+    }
+  }
+
+  /// Remove a Service As from the selection
+  void removeServiceAs(dynamic item) {
+    selectedServiceAsItems.remove(item);
+    if (item is ServiceAs && selectedServiceAs.value == item) {
+      selectedServiceAs.value = null;
+    }
+  }
+
+  /// Show the add Sub Option text field
+  void addCustomSubOptionDirectly() {
+    showAddSubOptionField.value = true;
+  }
+
+  /// Close/hide the add Sub Option text field
+  void closeAddSubOptionField() {
+    showAddSubOptionField.value = false;
+    newSubOptionController.clear();
+  }
+
+  /// Add a new custom Sub Option to the selection
+  void addCustomSubOption() {
+    final value = newSubOptionController.text.trim();
+    if (value.isNotEmpty) {
+      selectedSubOptionsItems.clear(); // Enforce single selection
+      selectedSubOptionsItems.add(value);
+      newSubOptionController.clear();
+      showAddSubOptionField.value = false;
+    }
+  }
+
+  /// Toggle SubOption selection
+  void toggleSubOptionItem(dynamic item) {
+    if (selectedSubOptionsItems.contains(item)) {
+      selectedSubOptionsItems.remove(item);
+      if (item is ServiceSubOption) {
+        selectedSubOptions.remove(item);
+      }
+    } else {
+      selectedSubOptionsItems.clear(); // Enforce single selection
+      selectedSubOptions.clear();
+      selectedSubOptionsItems.add(item);
+      if (item is ServiceSubOption) {
+        selectedSubOptions.add(item);
+      }
+    }
+  }
+
+  /// Remove a Sub Option from the selection
+  void removeSubOptionItem(dynamic item) {
+    selectedSubOptionsItems.remove(item);
+    if (item is ServiceSubOption) {
+      selectedSubOptions.remove(item);
+    }
   }
 
   // Step 2: Packages
@@ -223,6 +297,9 @@ class AddServiceController extends GetxController {
     // Set serviceAs if available
     if (service.serviceAs != null) {
       selectedServiceAs.value = service.serviceAs;
+      if (!selectedServiceAsItems.contains(service.serviceAs)) {
+        selectedServiceAsItems.add(service.serviceAs);
+      }
     }
     // Set eventVenue if available
     if (service.eventVenue != null) {
@@ -377,8 +454,7 @@ class AddServiceController extends GetxController {
     selectedCategory.value = category;
     // Reset ServiceAs when category changes since options depend on category
     selectedServiceAs.value = null;
-    // Reset additional ServiceAs list when category changes
-    additionalServiceAsList.clear();
+    selectedServiceAsItems.clear();
     // Reset EventVenue when category changes
     selectedEventVenue.value = null;
     // Reset subOptions when category changes
@@ -401,11 +477,7 @@ class AddServiceController extends GetxController {
 
   /// Toggle a sub-option selection
   void toggleSubOption(ServiceSubOption option) {
-    if (selectedSubOptions.contains(option)) {
-      selectedSubOptions.remove(option);
-    } else {
-      selectedSubOptions.add(option);
-    }
+    toggleSubOptionItem(option);
   }
 
   Future<bool> saveService({

@@ -10,6 +10,7 @@ import '../../../widgets/custom_dropdown_field.dart';
 import '../../../widgets/primary_text_button.dart';
 import '../../../widgets/upload_widget.dart';
 import '../../../widgets/availability_widget_card.dart';
+import '../../../widgets/dynamic_dropdown_field.dart';
 import 'add_service_controller.dart';
 
 import 'packages_pricings_view.dart';
@@ -160,169 +161,27 @@ class _AddServiceViewState extends State<AddServiceView> {
                   if (options.isEmpty) {
                     return const SizedBox.shrink(); // Hide for Productive Family
                   }
-                  return Column(
-                    children: [
-                      // Service As dropdown with + icon for Trainer category
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CustomDropdownField<ServiceAs>(
-                              value: controller.selectedServiceAs.value,
-                              labelText: 'serviceAs'.tr,
-                              hintText: 'selectServiceAs'.tr,
-                              items: options.map((serviceAs) {
-                                return DropdownMenuItem(
-                                  value: serviceAs,
-                                  child: Text(serviceAs.label),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                controller.selectedServiceAs.value = value;
-                                // Reset sub-options when ServiceAs changes
-                                controller.selectedSubOptions.clear();
-                              },
-                            ),
-                          ),
-                          // + icon button beside Service As for Trainer category (always +)
-                          if (controller.canAddMoreServiceAs)
-                            Padding(
-                              padding: EdgeInsets.only(left: 8.w, top: 25.h),
-                              child: GestureDetector(
-                                onTap: controller.addCustomServiceAsDirectly,
-                                child: Container(
-                                  padding: EdgeInsets.all(12.r),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.05),
-                                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                                    borderRadius: BorderRadius.circular(12.r),
-                                  ),
-                                  child: Icon(
-                                    Icons.add,
-                                    color: AppColors.primary,
-                                    size: 25.r,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-
-                      // Text field for entering new Service As (shown when + is clicked)
-                      Obx(() {
-                        if (!controller.canAddMoreServiceAs ||
-                            !controller.showAddServiceAsField.value) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: EdgeInsets.only(top: 16.h),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: CustomTextField(
-                                  controller: controller.newServiceAsController,
-                                  labelText: 'enterServiceType'.tr,
-                                  hintText: 'enterServiceTypeHint'.tr,
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              // Close/Cancel button
-                              Padding(
-                                padding: EdgeInsets.only(top: 25.h),
-                                child: GestureDetector(
-                                  onTap: controller.closeAddServiceAsField,
-                                  child: Container(
-                                    padding: EdgeInsets.all(12.r),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.error.withOpacity(0.05),
-                                    border: Border.all(color: AppColors.error.withOpacity(0.3)),
-                                      borderRadius: BorderRadius.circular(12.r),
-                                    ),
-                                    child: Icon(
-                                      Icons.close,
-                                      color: AppColors.error,
-                                      size: 25.r,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              // Check/Confirm button
-                              Padding(
-                                padding: EdgeInsets.only(top: 25.h),
-                                child: GestureDetector(
-                                  onTap: controller.addCustomServiceAs,
-                                  child: Container(
-                                    padding: EdgeInsets.all(12.r),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.05),
-                                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                                    borderRadius: BorderRadius.circular(12.r),
-                                  ),
-                                  child: Icon(
-                                    Icons.check,
-                                    color: AppColors.primary,
-                                    size: 25.r,
-                                  ),
-                                ),
-                              ),)
-                            ],
-                          ),
-                        );
-                      }),
-
-                      // Additional custom Service As entries for Trainer category
-                      ...controller.additionalServiceAsList.map((serviceAs) {
-                        return Padding(
-                          padding: EdgeInsets.only(top: 16.h),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 12.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(color: AppColors.lightGrey),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    serviceAs,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w400,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => controller.removeCustomServiceAs(
-                                    serviceAs,
-                                  ),
-                                  child: Container(
-                                    padding: EdgeInsets.all(4.r),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.error.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.close,
-                                      size: 16.r,
-                                      color: AppColors.error,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ],
+                  return DynamicDropdownField<ServiceAs>(
+                    items: options,
+                    selectedItems: controller.selectedServiceAsItems,
+                    label: 'serviceAs'.tr,
+                    hintText: 'selectServiceAs'.tr,
+                    itemBuilder: (serviceAs) => serviceAs.label,
+                    onSelected: (item) {
+                      controller.toggleServiceAs(item);
+                      // Reset sub-options if the base service changed significantly
+                      // controller.selectedSubOptions.clear();
+                    },
+                    onRemoved: (item) => controller.removeServiceAs(item),
+                    onAddPressed: controller.addCustomServiceAsDirectly,
+                    isAdding: controller.showAddServiceAsField,
+                    addController: controller.newServiceAsController,
+                    onSaveAdd: controller.addCustomServiceAs,
+                    onCancelAdd: controller.closeAddServiceAsField,
                   );
                 }),
 
-                // Sub-Options checklist - shown when Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk
+                // Sub-Options dropdown - shown when Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk
                 Obx(() {
                   if (!controller.showSubOptionsChecklist) {
                     return const SizedBox.shrink();
@@ -333,89 +192,19 @@ class _AddServiceViewState extends State<AddServiceView> {
                   }
                   return Padding(
                     padding: EdgeInsets.only(top: 24.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'selectOptions'.tr,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        Container(
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: AppColors.lightGrey),
-                          ),
-                          child: Column(
-                            children: subOptions.map((option) {
-                              final isSelected = controller.selectedSubOptions
-                                  .contains(option);
-                              return GestureDetector(
-                                onTap: () => controller.toggleSubOption(option),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: subOptions.last == option
-                                          ? BorderSide.none
-                                          : BorderSide(
-                                              color: AppColors.lightGrey
-                                                  .withOpacity(0.5),
-                                            ),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 20.w,
-                                        height: 20.w,
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? AppColors.primary
-                                              : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            25.r,
-                                          ),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? AppColors.primary
-                                                : AppColors.lightGrey,
-                                            width: 1.5,
-                                          ),
-                                        ),
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                size: 14.r,
-                                                color: Colors.white,
-                                              )
-                                            : null,
-                                      ),
-                                      SizedBox(width: 12.w),
-                                      Expanded(
-                                        child: Text(
-                                          option.label,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w400,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ],
+                    child: DynamicDropdownField<ServiceSubOption>(
+                      items: subOptions,
+                      selectedItems: controller.selectedSubOptionsItems,
+                      label: 'selectOptions'.tr,
+                      hintText: 'selectOptions'.tr, // Using same key as label for now
+                      itemBuilder: (option) => option.label,
+                      onSelected: (item) => controller.toggleSubOptionItem(item),
+                      onRemoved: (item) => controller.removeSubOptionItem(item),
+                      onAddPressed: controller.addCustomSubOptionDirectly,
+                      isAdding: controller.showAddSubOptionField,
+                      addController: controller.newSubOptionController,
+                      onSaveAdd: controller.addCustomSubOption,
+                      onCancelAdd: controller.closeAddSubOptionField,
                     ),
                   );
                 }),
