@@ -70,7 +70,7 @@ import 'package:event_maker/views/service_provider_flow/certifications/add_edit_
 import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
 import 'package:event_maker/views/service_provider_flow/active_orders/sp_active_orders_view.dart';
 import 'package:event_maker/views/chats/chat_detail_view.dart';
-import 'package:event_maker/views/chats/chat_detail_controller.dart';
+import 'package:event_maker/views/chats/chat_view_binding.dart';
 import 'package:event_maker/views/customer_flow/services/add_review_view.dart';
 import 'package:event_maker/views/customer_flow/services/spam_report_view.dart';
 import 'package:event_maker/views/customer_flow/services/view_certificate.dart';
@@ -364,9 +364,7 @@ class AppRoutes {
     GetPage(
       name: chatDetail,
       page: () => const ChatDetailView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<ChatDetailController>(() => ChatDetailController());
-      }),
+      binding: ChatViewBinding(),
     ),
     GetPage(
       name: search,

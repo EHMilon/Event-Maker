@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/repository/chat_repository.dart';
@@ -27,14 +28,28 @@ class ChatDetailController extends GetxController {
   late final String chatImage;
   late final bool isAdminChat;
 
-  // Current user ID (should come from auth service in production)
-  static const String currentUserId = 'current_user';
+  // Auto-reply stream subscription
+  StreamSubscription<MessageModel>? _autoReplySubscription;
+
+  // Recommended topics for admin chat
+  List<RecommendedTopic> get recommendedTopics => [
+    RecommendedTopic(emoji: '📅', text: 'How can I book a service?'),
+    RecommendedTopic(emoji: '💰', text: 'What are your pricing options?'),
+    RecommendedTopic(emoji: '🎯', text: 'How can I improve my services?'),
+  ];
 
   @override
   void onInit() {
     super.onInit();
     _parseArguments();
     loadMessages();
+    _listenToAutoReplies();
+  }
+
+  @override
+  void onClose() {
+    _autoReplySubscription?.cancel();
+    super.onClose();
   }
 
   /// Parses navigation arguments.
@@ -108,7 +123,7 @@ class ChatDetailController extends GetxController {
     final optimisticMessage = MessageModel(
       id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
       chatId: chatId,
-      senderId: currentUserId,
+      senderId: 'current_user',
       content: composed,
       createdAt: DateTime.now(),
       isMe: true,
@@ -129,9 +144,6 @@ class ChatDetailController extends GetxController {
       if (index != -1) {
         messages[index] = sentMessage;
       }
-
-      // For demo purposes, simulate a reply after sending
-      _scheduleDemoReply();
     } catch (e) {
       // Remove optimistic message on failure
       messages.removeWhere((m) => m.id == optimisticMessage.id);
@@ -143,31 +155,17 @@ class ChatDetailController extends GetxController {
     }
   }
 
-  /// Demo auto-reply simulation.
-  /// TODO: Remove this when WebSocket/real-time messaging is implemented.
-  void _scheduleDemoReply() {
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (isClosed) return;
-
-      final replyText = isAdminChat ? 'autoReplyAdmin'.tr : 'autoReplyCustomer'.tr;
-      final replyMessage = MessageModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        chatId: chatId,
-        senderId: isAdminChat ? 'admin' : 'other_user',
-        content: replyText,
-        createdAt: DateTime.now(),
-        isMe: false,
-      );
-
-      messages.insert(0, replyMessage);
+  /// Listens to auto-reply messages from the repository.
+  void _listenToAutoReplies() {
+    _autoReplySubscription = ChatRepository.autoReplyStream.listen((
+      replyMessage,
+    ) {
+      // Only add if it's for this chat
+      if (replyMessage.chatId == chatId) {
+        messages.insert(0, replyMessage);
+      }
     });
   }
-
-  /// Recommended topics for admin chat.
-  List<RecommendedTopic> get recommendedTopics => [
-        RecommendedTopic(emoji: '😴', text: 'howCanIImprovedSleep'.tr),
-        RecommendedTopic(emoji: '🧘', text: 'howCanIImproveMyServices'.tr),
-      ];
 }
 
 /// Model for recommended topics in admin chat.

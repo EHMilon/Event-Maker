@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../models/chat_model.dart';
 
 /// Repository abstraction for chat-related data operations.
@@ -79,7 +80,7 @@ class ChatRepository {
     await Future.delayed(const Duration(milliseconds: 200));
 
     // Return a mock sent message
-    return MessageModel(
+    final sentMessage = MessageModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       chatId: chatId,
       senderId: 'current_user',
@@ -90,6 +91,88 @@ class ChatRepository {
       attachmentUrl: attachmentUrl,
       attachmentName: attachmentName,
     );
+
+    // Trigger auto-reply after a short delay (mock behavior)
+    _triggerAutoReply(chatId, content);
+
+    return sentMessage;
+  }
+
+  /// Triggers an auto-reply message (mock behavior for testing).
+  /// In production, this would be handled by the backend or WebSocket.
+  void _triggerAutoReply(String chatId, String userMessage) {
+    Future.delayed(const Duration(seconds: 2), () {
+      final replyContent = _getAutoReplyMessage(userMessage);
+      final replyMessage = MessageModel(
+        id: 'reply-${DateTime.now().millisecondsSinceEpoch}',
+        chatId: chatId,
+        senderId: chatId.startsWith('admin') ? 'admin' : 'bot',
+        content: replyContent,
+        createdAt: DateTime.now(),
+        isMe: false,
+      );
+
+      // Notify ChatProvider about the new message
+      _autoReplyController.add(replyMessage);
+    });
+  }
+
+  /// Generates an appropriate auto-reply based on user message.
+  String _getAutoReplyMessage(String userMessage) {
+    final lowerMessage = userMessage.toLowerCase();
+
+    // Simple keyword-based replies
+    if (lowerMessage.contains('hello') ||
+        lowerMessage.contains('hi') ||
+        lowerMessage.contains('hey')) {
+      return 'Hello! 👋 How can I help you today?';
+    }
+    if (lowerMessage.contains('how are you')) {
+      return 'I\'m doing great, thanks for asking! How about you? 😊';
+    }
+    if (lowerMessage.contains('service') || lowerMessage.contains('booking')) {
+      return 'I\'d be happy to help with your service booking! What type of event are you planning?';
+    }
+    if (lowerMessage.contains('price') ||
+        lowerMessage.contains('cost') ||
+        lowerMessage.contains('rate')) {
+      return 'Our pricing varies based on the service type and duration. Would you like me to send you a detailed quote?';
+    }
+    if (lowerMessage.contains('thank')) {
+      return 'You\'re welcome! Is there anything else I can help you with? 🙏';
+    }
+    if (lowerMessage.contains('bye') || lowerMessage.contains('goodbye')) {
+      return 'Goodbye! Have a wonderful day! 👋';
+    }
+
+    // Default replies
+    final defaultReplies = [
+      'That\'s interesting! Tell me more about it.',
+      'I understand. How can I assist you further?',
+      'Thanks for sharing! Is there anything specific you\'d like to know?',
+      'Great question! Let me help you with that.',
+      'I\'m here to help. What would you like to know?',
+    ];
+
+    return defaultReplies[DateTime.now().second % defaultReplies.length];
+  }
+
+  /// Stream controller for auto-reply messages (used by ChatProvider).
+  static StreamController<MessageModel>? _autoReplyControllerInternal;
+  static StreamController<MessageModel> get _autoReplyController {
+    _autoReplyControllerInternal ??= StreamController<MessageModel>.broadcast();
+    return _autoReplyControllerInternal!;
+  }
+
+  /// Get the auto-reply stream for ChatProvider to listen to.
+  static Stream<MessageModel> get autoReplyStream =>
+      _autoReplyController.stream;
+
+  /// Dispose the auto-reply stream controller.
+  /// Call this when the app is shutting down to prevent memory leaks.
+  static void disposeAutoReply() {
+    _autoReplyControllerInternal?.close();
+    _autoReplyControllerInternal = null;
   }
 
   /// Marks messages as read in a chat.
@@ -125,10 +208,7 @@ class ChatRepository {
 
     return ChatModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      participant: ChatParticipant(
-        id: participantId,
-        name: 'New Chat',
-      ),
+      participant: ChatParticipant(id: participantId, name: 'New Chat'),
       lastMessage: MessageModel(
         id: 'temp',
         chatId: 'temp',
@@ -164,9 +244,15 @@ class ChatRepository {
     if (query.isEmpty) return allChats;
 
     final filteredChats = allChats.chats
-        .where((chat) =>
-            chat.participant.name.toLowerCase().contains(query.toLowerCase()) ||
-            chat.lastMessage.content.toLowerCase().contains(query.toLowerCase()))
+        .where(
+          (chat) =>
+              chat.participant.name.toLowerCase().contains(
+                query.toLowerCase(),
+              ) ||
+              chat.lastMessage.content.toLowerCase().contains(
+                query.toLowerCase(),
+              ),
+        )
         .toList();
 
     return ChatsResponse(chats: filteredChats, hasMore: false);

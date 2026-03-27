@@ -6,23 +6,18 @@
 /// - Request/Response keys
 /// - Timeout configurations
 /// - HTTP headers
+/// - WebSocket URLs and event types
 class ApiConstant {
   // ===== BASE URLS =====
-  
-  /// Development server URL
-  static const String devBaseUrl = 'https://dev-api.eventmaker.com/api/v1';
-  
-  /// Staging server URL
-  static const String stagingBaseUrl = 'https://staging-api.eventmaker.com/api/v1';
-  
-  /// Production server URL
-  static const String prodBaseUrl = 'https://api.eventmaker.com/api/v1';
-  
-  /// Current base URL (change based on build flavor)
-  static const String baseUrl = devBaseUrl;
+
+  static const String baseUrl = 'http://10.10.12.62:8005/api';
+
+  // ===== WEBSOCKET URLS =====
+
+  static const String wsBaseUrl = 'wss://api.eventmaker.com/ws';
 
   // ===== AUTH ENDPOINTS =====
-  
+
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String logout = '/auth/logout';
@@ -34,13 +29,13 @@ class ApiConstant {
   static const String changePassword = '/auth/change-password';
 
   // ===== USER ENDPOINTS =====
-  
+
   static const String userProfile = '/user/profile';
   static const String updateProfile = '/user/profile/update';
   static const String deleteAccount = '/user/account/delete';
 
   // ===== SERVICE PROVIDER ENDPOINTS =====
-  
+
   static const String providerProfile = '/provider/profile';
   static const String providerServices = '/provider/services';
   static const String providerBookings = '/provider/bookings';
@@ -49,51 +44,82 @@ class ApiConstant {
   static const String providerAvailability = '/provider/availability';
 
   // ===== CUSTOMER ENDPOINTS =====
-  
+
   static const String customerBookings = '/customer/bookings';
   static const String customerFavorites = '/customer/favorites';
   static const String customerReviews = '/customer/reviews';
 
   // ===== SERVICE ENDPOINTS =====
-  
+
   static const String services = '/services';
   static const String serviceCategories = '/services/categories';
   static const String serviceSearch = '/services/search';
 
   // ===== BOOKING ENDPOINTS =====
-  
+
   static const String bookings = '/bookings';
   static const String createBooking = '/bookings/create';
   static const String cancelBooking = '/bookings/cancel';
 
   // ===== REVIEW ENDPOINTS =====
-  
+
   static const String reviews = '/reviews';
   static const String createReview = '/reviews/create';
 
   // ===== CHAT ENDPOINTS =====
-  
+
   static const String chats = '/chats';
   static const String chatMessages = '/chats/messages';
+  static const String chatRead = '/chats/read';
+  static const String chatCreate = '/chats/create';
 
   // ===== NOTIFICATION ENDPOINTS =====
-  
+
   static const String notifications = '/notifications';
   static const String markNotificationRead = '/notifications/read';
 
   // ===== TIMEOUTS (in milliseconds) =====
-  
+
   static const int connectionTimeout = 30000; // 30 seconds
   static const int receiveTimeout = 30000; // 30 seconds
   static const int sendTimeout = 30000; // 30 seconds
 
+  // ===== WEBSOCKET TIMEOUTS =====
+
+  /// WebSocket connection timeout
+  static const int wsConnectionTimeout = 10000; // 10 seconds
+
+  /// Heartbeat interval for keeping connection alive
+  static const int wsHeartbeatInterval = 30000; // 30 seconds
+
+  /// Reconnect delay base (exponential backoff)
+  static const int wsReconnectDelayBase = 1000; // 1 second
+
+  /// Maximum reconnect delay
+  static const int wsReconnectMaxDelay = 30000; // 30 seconds
+
+  /// Maximum reconnect attempts (0 = infinite)
+  static const int wsMaxReconnectAttempts = 0; // infinite
+
   // ===== PAGINATION =====
-  
+
   static const int defaultPageSize = 20;
   static const int maxPageSize = 100;
 
+  // ===== ERROR CODES =====
+
+  static const int codeSuccess = 200;
+  static const int codeCreated = 201;
+  static const int codeBadRequest = 400;
+  static const int codeUnauthorized = 401;
+  static const int codeForbidden = 403;
+  static const int codeNotFound = 404;
+  static const int codeValidationError = 422;
+  static const int codeServerError = 500;
+  static const int codeServiceUnavailable = 503;
+
   // ===== HTTP HEADERS =====
-  
+
   static Map<String, String> get defaultHeaders => {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -106,7 +132,7 @@ class ApiConstant {
   };
 
   // ===== REQUEST KEYS =====
-  
+
   static const String keyEmail = 'email';
   static const String keyPassword = 'password';
   static const String keyName = 'name';
@@ -122,22 +148,89 @@ class ApiConstant {
   static const String keySearch = 'search';
 
   // ===== RESPONSE KEYS =====
-  
+
   static const String keySuccess = 'success';
   static const String keyMessage = 'message';
   static const String keyData = 'data';
   static const String keyErrors = 'errors';
   static const String keyStatusCode = 'status_code';
+}
 
-  // ===== ERROR CODES =====
-  
-  static const int codeSuccess = 200;
-  static const int codeCreated = 201;
-  static const int codeBadRequest = 400;
-  static const int codeUnauthorized = 401;
-  static const int codeForbidden = 403;
-  static const int codeNotFound = 404;
-  static const int codeValidationError = 422;
-  static const int codeServerError = 500;
-  static const int codeServiceUnavailable = 503;
+/// WebSocket event types for chat functionality.
+///
+/// Backend developer: Ensure your WebSocket server sends events
+/// with these exact type names for seamless integration.
+class WsEventType {
+  // ===== CONNECTION EVENTS =====
+
+  /// Sent by client to authenticate connection
+  static const String authenticate = 'authenticate';
+
+  /// Server confirms successful authentication
+  static const String authenticated = 'authenticated';
+
+  /// Ping/pong for connection health
+  static const String ping = 'ping';
+  static const String pong = 'pong';
+
+  // ===== MESSAGE EVENTS =====
+
+  /// Send a new message
+  static const String messageSend = 'message:send';
+
+  /// Server confirms message sent (with message ID)
+  static const String messageSent = 'message:sent';
+
+  /// Receive a new message from another user
+  static const String messageReceived = 'message:received';
+
+  /// Message delivery confirmation
+  static const String messageDelivered = 'message:delivered';
+
+  /// Message read confirmation
+  static const String messageRead = 'message:read';
+
+  /// Message deleted event
+  static const String messageDeleted = 'message:deleted';
+
+  // ===== TYPING EVENTS =====
+
+  /// User started typing
+  static const String typingStart = 'typing:start';
+
+  /// User stopped typing
+  static const String typingStop = 'typing:stop';
+
+  // ===== PRESENCE EVENTS =====
+
+  /// User came online
+  static const String userOnline = 'user:online';
+
+  /// User went offline
+  static const String userOffline = 'user:offline';
+
+  /// User status changed (online/offline/away)
+  static const String userStatus = 'user:status';
+
+  // ===== CHAT EVENTS =====
+
+  /// New chat created
+  static const String chatCreated = 'chat:created';
+
+  /// Chat updated (e.g., last message, unread count)
+  static const String chatUpdated = 'chat:updated';
+
+  /// User joined a chat
+  static const String chatJoined = 'chat:joined';
+
+  /// User left a chat
+  static const String chatLeft = 'chat:left';
+
+  // ===== ERROR EVENTS =====
+
+  /// General error event
+  static const String error = 'error';
+
+  /// Connection error
+  static const String connectionError = 'connection:error';
 }

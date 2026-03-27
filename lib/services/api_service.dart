@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../utils/user_preferences.dart';
 import '../utils/logger.dart';
-import 'api_constant.dart';
+import '../constants/api_constant.dart';
 
 /// API Service for handling all HTTP requests.
 ///

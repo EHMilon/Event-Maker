@@ -75,15 +75,19 @@ class ChatViewController extends GetxController {
     }
 
     filteredCustomerChats.value = customerChats
-        .where((chat) =>
-            chat.participant.name.toLowerCase().contains(query) ||
-            chat.lastMessage.content.toLowerCase().contains(query))
+        .where(
+          (chat) =>
+              chat.participant.name.toLowerCase().contains(query) ||
+              chat.lastMessage.content.toLowerCase().contains(query),
+        )
         .toList();
 
     filteredAdminChats.value = adminChats
-        .where((chat) =>
-            chat.participant.name.toLowerCase().contains(query) ||
-            chat.lastMessage.content.toLowerCase().contains(query))
+        .where(
+          (chat) =>
+              chat.participant.name.toLowerCase().contains(query) ||
+              chat.lastMessage.content.toLowerCase().contains(query),
+        )
         .toList();
   }
 
