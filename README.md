@@ -1,3 +1,5 @@
+Figma Design Link: https://www.figma.com/design/tNaCm78heHm7ziJoUNIQ06/Event-Maker?node-id=0-1&p=f&t=EJeubenGoNOE5loH-0
+
 # PROJECT OVERVIEW
 
 The mobile app aims to revolutionize event and hospitality service coordination by creating a seamless connection between customers and verified service providers such as caterers, photographers, event planners, and decorators. Serving as a comprehensive marketplace, the app allows customers to browse, book, and manage event-related services with ease. The app features multi-role registration and verification processes for both customers and providers, ensuring a secure and streamlined experience. Service providers can list their offerings, while customers can request bookings, track progress, and communicate with providers in real time.
