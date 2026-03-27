@@ -1,7 +1,7 @@
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/widgets/customer_bookmark_card.dart';
-import 'package:event_maker/views/customer_flow/requests/customer_requests_controller.dart';
-import 'package:event_maker/views/customer_flow/requests/customer_requests_model.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_bookings_controller.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_requests_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CustomerRequestsView extends GetView<CustomerRequestsController> {
+class CustomerRequestsView extends GetView<CustomerBookingsController> {
   const CustomerRequestsView({super.key});
 
   @override
@@ -97,7 +97,7 @@ class CustomerRequestsView extends GetView<CustomerRequestsController> {
 }
 
 /// Upcoming requests tab widget
-class _UpcomingRequestsTab extends GetView<CustomerRequestsController> {
+class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -111,7 +111,7 @@ class _UpcomingRequestsTab extends GetView<CustomerRequestsController> {
               separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
                 return _RequestCard(
-                  request: CustomerRequestModel(
+                  request: CustomerBookingModel(
                     image: 'assets/images/catering.jpg',
                     date: '10th Jan - Fri - 4:00 PM',
                     title: 'Skeleton Title Loading...',
@@ -141,7 +141,7 @@ class _UpcomingRequestsTab extends GetView<CustomerRequestsController> {
 }
 
 /// History requests tab widget
-class _HistoryRequestsTab extends GetView<CustomerRequestsController> {
+class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -155,7 +155,7 @@ class _HistoryRequestsTab extends GetView<CustomerRequestsController> {
               separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
                 return _RequestCard(
-                  request: CustomerRequestModel(
+                  request: CustomerBookingModel(
                     image: 'assets/images/catering.jpg',
                     date: '10th Jan - Fri - 4:00 PM',
                     title: 'Skeleton Title Loading...',
@@ -187,7 +187,7 @@ class _HistoryRequestsTab extends GetView<CustomerRequestsController> {
 class _RequestCard extends StatelessWidget {
   const _RequestCard({required this.request});
 
-  final CustomerRequestModel request;
+  final CustomerBookingModel request;
 
   @override
   Widget build(BuildContext context) {

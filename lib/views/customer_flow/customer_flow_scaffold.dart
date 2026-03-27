@@ -8,7 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
-import 'package:event_maker/views/customer_flow/requests/customer_requests_view.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_requests_view.dart';
 import 'package:event_maker/views/chats/chat_view.dart';
 
 class CustomerFlowScaffold extends GetView<CustomerFlowController> {

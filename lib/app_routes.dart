@@ -49,12 +49,12 @@ import 'package:event_maker/views/profile/vendor_profile.dart';
 import 'package:event_maker/views/customer_flow/services/category_services_view.dart';
 import 'package:event_maker/views/customer_flow/services/category_services_controller.dart';
 
-import 'package:event_maker/views/customer_flow/booking/book_service_date_view.dart';
-import 'package:event_maker/views/customer_flow/booking/book_service_request_view.dart';
-import 'package:event_maker/views/customer_flow/booking/payment_confirmation_view.dart';
-import 'package:event_maker/views/customer_flow/booking/payment_view.dart';
-import 'package:event_maker/views/customer_flow/booking/booking_request_sent_view.dart';
-import 'package:event_maker/views/customer_flow/booking/booking_binding.dart';
+import 'package:event_maker/views/customer_flow/service_booking/book_service_date_view.dart';
+import 'package:event_maker/views/customer_flow/service_booking/book_service_request_view.dart';
+import 'package:event_maker/views/customer_flow/service_booking/payment_confirmation_view.dart';
+import 'package:event_maker/views/customer_flow/service_booking/payment_view.dart';
+import 'package:event_maker/views/customer_flow/service_booking/booking_request_sent_view.dart';
+import 'package:event_maker/views/customer_flow/service_booking/booking_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_decision_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/documents_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/add_document_view.dart';

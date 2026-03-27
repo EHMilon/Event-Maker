@@ -1,10 +1,10 @@
-import 'package:event_maker/views/customer_flow/requests/customer_requests_model.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_requests_model.dart';
 import 'package:get/get.dart';
 
-class CustomerRequestsController extends GetxController {
+class CustomerBookingsController extends GetxController {
   final isLoading = true.obs;
-  final upcomingRequests = <CustomerRequestModel>[].obs;
-  final pastRequests = <CustomerRequestModel>[].obs;
+  final upcomingRequests = <CustomerBookingModel>[].obs;
+  final pastRequests = <CustomerBookingModel>[].obs;
   final selectedTabIndex = 0.obs;
 
   @override
@@ -20,20 +20,20 @@ class CustomerRequestsController extends GetxController {
     isLoading.value = false;
   }
 
-  List<CustomerRequestModel> get currentRequests => [...upcomingRequests, ...pastRequests];
+  List<CustomerBookingModel> get currentRequests => [...upcomingRequests, ...pastRequests];
 
   void _loadMockData() {
     final now = DateTime.now();
 
     // Upcoming events (future dates)
     upcomingRequests.assignAll([
-      CustomerRequestModel(
+      CustomerBookingModel(
         image: 'assets/images/catering.jpg',
         date: '15th Mar - Sun - 4:00 PM',
         title: 'Wedding Catering Services',
         subtitle: 'Grand Hyatt, Dubai',
       ),
-      CustomerRequestModel(
+      CustomerBookingModel(
         image: 'assets/images/event.png',
         date: '20th Mar - Fri - 11:00 AM',
         title: 'Corporate Event Planning',
@@ -43,8 +43,8 @@ class CustomerRequestsController extends GetxController {
 
     // Past events (history - past dates)
     pastRequests.assignAll([
-      CustomerRequestModel(image: 'assets/images/filming.jpg', date: '12th Dec - Tue - 3:00 PM', title: 'Product Launch Event', subtitle: 'Expo City, Dubai'),
-      CustomerRequestModel(image: 'assets/images/cake.png', date: '5th Jan - Sun - 6:00 PM', title: 'Birthday Party Décor', subtitle: 'Palm Jumeirah, Dubai'),
+      CustomerBookingModel(image: 'assets/images/filming.jpg', date: '12th Dec - Tue - 3:00 PM', title: 'Product Launch Event', subtitle: 'Expo City, Dubai'),
+      CustomerBookingModel(image: 'assets/images/cake.png', date: '5th Jan - Sun - 6:00 PM', title: 'Birthday Party Décor', subtitle: 'Palm Jumeirah, Dubai'),
     ]);
   }
 }

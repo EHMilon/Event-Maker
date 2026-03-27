@@ -1,4 +1,4 @@
-import 'package:event_maker/views/customer_flow/booking/payment_controller.dart';
+import 'package:event_maker/views/customer_flow/service_booking/payment_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';

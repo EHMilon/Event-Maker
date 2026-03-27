@@ -1,6 +1,6 @@
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
-import 'package:event_maker/views/customer_flow/booking/payment_controller.dart';
-import 'package:event_maker/views/customer_flow/booking/booking_controller.dart';
+import 'package:event_maker/views/customer_flow/service_booking/payment_controller.dart';
+import 'package:event_maker/views/customer_flow/service_booking/booking_controller.dart';
 import 'package:get/get.dart';
 
 class BookingBinding extends Bindings {
