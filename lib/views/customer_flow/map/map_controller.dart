@@ -1,5 +1,6 @@
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 
 class MapController extends GetxController {
@@ -23,9 +24,43 @@ class MapController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _checkLocationPermission();
     // Listen to main category changes and update sub-categories
     ever(selectedMainCategory, (_) => updateSubCategories());
     fetchSubCategories();
+  }
+
+  Future<void> _checkLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      Get.snackbar('Location Disabled', 'Please enable location services to view nearby services.');
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        Get.snackbar('Permission Denied', 'Location permission is required to show nearby services.');
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      Get.snackbar('Permission Denied', 'Location permissions are permanently denied.');
+      return;
+    }
+
+    // Permission granted, optionally get current position
+    try {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      print('Current user location: ${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      print('Error getting location: $e');
+    }
   }
 
   void updateSubCategories() {

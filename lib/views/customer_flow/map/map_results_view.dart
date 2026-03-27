@@ -3,11 +3,10 @@ import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_controller.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:latlong2/latlong.dart' hide Path;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapResultsView extends GetView<MapResultsController> {
   const MapResultsView({super.key});
@@ -17,55 +16,26 @@ class MapResultsView extends GetView<MapResultsController> {
     return Scaffold(
       body: Stack(
         children: [
-          // Flutter Map
-          FlutterMap(
-            options: MapOptions(
-              initialCenter: const LatLng(24.4539, 54.3773),
-              initialZoom: 13.0,
+          // Google Map
+          Obx(() => GoogleMap(
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(24.4539, 54.3773),
+              zoom: 13.0,
             ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                userAgentPackageName: 'com.example.event_maker',
+            markers: controller.markers.toSet(),
+            polylines: {
+              Polyline(
+                polylineId: const PolylineId('route_line'),
+                points: controller.polylinePoints,
+                color: AppColors.black,
+                width: 3,
               ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: controller.polylinePoints,
-                    strokeWidth: 3.0,
-                    color: AppColors.black,
-                  ),
-                ],
-              ),
-              MarkerLayer(
-                markers: [
-                  // Center red marker
-                  const Marker(
-                    point: LatLng(24.4450, 54.3780),
-                    child: Icon(
-                      Icons.location_on,
-                      color: AppColors.error,
-                      size: 40,
-                    ),
-                  ),
-                  // Dynamic markers from mock services
-                  ...controller.mockServices.map((service) {
-                    final point =
-                        controller.serviceLocations[service.id] ??
-                        const LatLng(0, 0);
-                    return _buildServiceMarker(
-                      point: point,
-                      service: service,
-                      isBlue:
-                          service.id ==
-                          '1', // Blue for elite photography as in design
-                    );
-                  }),
-                ],
-              ),
-            ],
-          ),
+            },
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            mapToolbarEnabled: false,
+          )),
 
           // Back Button
           Positioned(
@@ -101,99 +71,6 @@ class MapResultsView extends GetView<MapResultsController> {
             }),
           ),
         ],
-      ),
-    );
-  }
-
-  Marker _buildServiceMarker({
-    required LatLng point,
-    required ServiceModel service,
-    required bool isBlue,
-  }) {
-    return Marker(
-      point: point,
-      width: 150.w,
-      height: 60.h,
-      child: GestureDetector(
-        onTap: () => controller.onMarkerTap(service),
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Bubble style info window
-            Container(
-              margin: EdgeInsets.only(bottom: 10.h),
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: isBlue ? AppColors.primary : AppColors.white,
-                borderRadius: BorderRadius.circular(10.r),
-                border: isBlue
-                    ? Border.all(color: AppColors.white, width: 2)
-                    : null,
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4.r),
-                    child: Image.network(
-                      service.images.isNotEmpty ? service.images.first : '',
-                      width: 30.w,
-                      height: 30.h,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        size: 20.r,
-                        color: AppColors.grey,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          service.title,
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                            color: isBlue ? AppColors.white : AppColors.black,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                        Text(
-                          '${service.basePrice} ${service.priceUnit}',
-                          style: GoogleFonts.inter(
-                            fontSize: 9.sp,
-                            color: isBlue ? AppColors.lightGrey : AppColors.grey,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Triangle pointer at the bottom of the bubble
-            CustomPaint(
-              size: Size(15.w, 10.h),
-              painter: TrianglePainter(
-                color: isBlue ? AppColors.primary : AppColors.white,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -336,21 +213,4 @@ class MapResultsView extends GetView<MapResultsController> {
   }
 }
 
-class TrianglePainter extends CustomPainter {
-  final Color color;
-  TrianglePainter({required this.color});
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width / 2, size.height);
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}

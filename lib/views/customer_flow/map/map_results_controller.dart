@@ -1,10 +1,11 @@
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../models/service_model.dart';
 
 class MapResultsController extends GetxController {
   final isLoading = false.obs;
   final selectedService = Rxn<ServiceModel>();
+  final markers = <Marker>{}.obs;
 
   // Mock points for polyline (as seen in the image)
   final List<LatLng> polylinePoints = [
@@ -93,8 +94,42 @@ class MapResultsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Initially select the first service as in the image
     selectedService.value = mockServices[0];
+    _buildMarkers();
+  }
+
+  void _buildMarkers() {
+    final Set<Marker> newMarkers = {};
+    
+    // Center red marker (mock user location or search center)
+    newMarkers.add(
+      const Marker(
+        markerId: MarkerId('center'),
+        position: LatLng(24.4450, 54.3780),
+        icon: BitmapDescriptor.defaultMarker,
+      ),
+    );
+
+    // Dynamic mock services
+    for (var service in mockServices) {
+      final point = serviceLocations[service.id] ?? const LatLng(0, 0);
+      newMarkers.add(
+        Marker(
+          markerId: MarkerId(service.id),
+          position: point,
+          onTap: () => onMarkerTap(service),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            service.id == '1' ? BitmapDescriptor.hueBlue : BitmapDescriptor.hueRed,
+          ),
+          infoWindow: InfoWindow(
+            title: service.title,
+            snippet: '${service.basePrice} ${service.priceUnit}',
+          ),
+        ),
+      );
+    }
+    
+    markers.assignAll(newMarkers);
   }
 
   void onMarkerTap(ServiceModel service) {
