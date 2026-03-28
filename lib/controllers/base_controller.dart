@@ -4,13 +4,13 @@ import '../models/api_result.dart';
 import '../services/connectivity_service.dart';
 
 /// Base controller providing common state management functionality.
-/// 
+///
 /// Provides:
 /// - Loading state management (initial, refreshing, loading more)
 /// - Error state management with user-friendly messages
 /// - Network connectivity awareness
 /// - Result handling helpers
-/// 
+///
 /// Usage:
 /// ```dart
 /// class MyController extends BaseController {
@@ -27,39 +27,39 @@ abstract class BaseController extends GetxController {
   final connectivity = Get.find<ConnectivityService>();
 
   // ===== Loading States =====
-  
+
   /// Initial loading state (first load)
   final isLoading = false.obs;
-  
+
   /// Refreshing state (pull-to-refresh)
   final isRefreshing = false.obs;
-  
+
   /// Loading more state (pagination)
   final isLoadingMore = false.obs;
-  
+
   /// Loading message for display
   final loadingMessage = ''.obs;
 
   // ===== Error States =====
-  
+
   /// Current error message
   final errorMessage = ''.obs;
-  
+
   /// Current error type
   final errorType = Rxn<ErrorType>();
-  
+
   /// Validation errors by field
   final validationErrors = Rxn<Map<String, List<String>>>();
-  
+
   /// Whether an error is currently shown
   final hasError = false.obs;
 
   // ===== Computed Properties =====
-  
+
   /// Returns true if any loading state is active
-  bool get isAnyLoading => 
+  bool get isAnyLoading =>
       isLoading.value || isRefreshing.value || isLoadingMore.value;
-  
+
   /// Returns true if connected to network
   bool get isConnected => connectivity.isConnected.value;
 
@@ -136,7 +136,7 @@ abstract class BaseController extends GetxController {
   // ===== Async Operation Handler =====
 
   /// Handles an async operation with automatic loading/error states.
-  /// 
+  ///
   /// [operation] - The async operation to execute
   /// [onSuccess] - Called with the data on success
   /// [onError] - Called with the error message on failure (optional)
@@ -183,7 +183,7 @@ abstract class BaseController extends GetxController {
       // Handle error
       final message = _getErrorMessage(e);
       final errorType = _getErrorType(e);
-      
+
       setError(message, type: errorType);
       onError?.call(message, errorType);
       showError(message);
@@ -192,8 +192,8 @@ abstract class BaseController extends GetxController {
     }
   }
 
-  /// Handles a Result<T> with automatic state management.
-  /// 
+  /// Handles a Result with automatic state management.
+  ///
   /// [result] - The Result to handle
   /// [onSuccess] - Called with the data on success
   /// [onError] - Called with the error on failure (optional)
@@ -220,9 +220,11 @@ abstract class BaseController extends GetxController {
         validationErrors: final errors,
       ):
         setError(message, type: type, errors: errors);
-        onError?.call(result as Error<T>);
+        onError?.call(
+          Error<T>(message, errorType: type, validationErrors: errors),
+        );
         showError(message);
-        
+
       case Loading<T>():
         // Loading state should be handled before calling this
         break;
@@ -314,10 +316,10 @@ abstract class BaseController extends GetxController {
 enum LoadingType {
   /// Initial load (first time loading data)
   initial,
-  
+
   /// Refresh (pull-to-refresh)
   refresh,
-  
+
   /// Load more (pagination)
   loadMore,
 }
@@ -326,7 +328,7 @@ enum LoadingType {
 mixin RetryableController on BaseController {
   /// Current retry count
   final retryCount = 0.obs;
-  
+
   /// Maximum retry attempts
   static const int maxRetries = 3;
 
@@ -353,16 +355,16 @@ mixin RetryableController on BaseController {
 mixin PaginationController<T> on BaseController {
   /// Current page number
   final currentPage = 1.obs;
-  
+
   /// Items per page
   final pageSize = 20.obs;
-  
+
   /// Total number of items
   final totalItems = 0.obs;
-  
+
   /// Whether there are more items to load
   final hasMore = true.obs;
-  
+
   /// List of items
   final items = <T>[].obs;
 

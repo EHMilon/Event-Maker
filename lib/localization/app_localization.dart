@@ -66,6 +66,7 @@ class AppLocalization extends Translations {
     'signUp': 'Sign Up',
     'emailPlaceholder': 'eg: mail@gmail.com',
     'passwordPlaceholder': 'Enter your password',
+    'changeUserType': 'Change User Type',
 
     // Auth - Signup
     'registerNewAccount': 'Register New Account',
@@ -155,6 +156,8 @@ class AppLocalization extends Translations {
     'otpFailed': 'Failed to send OTP',
     'passwordResetSuccess': 'Password reset successful',
     'passwordResetFailed': 'Failed to reset password',
+    'accountCreatedSuccessfully':
+        'Your account created successfully, request sent to admin',
 
     // Service Details
     'description': 'Description',
@@ -440,6 +443,12 @@ class AppLocalization extends Translations {
     'requestSentSuccessfully': 'Request Sent Successfully!',
     'requestSentSubtitle':
         'Your booking request has been sent to the service provider. You will be notified once they accept it.',
+
+    // Provider Request Sent
+    'accountVerifiedPendingApproval': 'Account Verified Successfully!',
+    'providerApprovalSubtitle':
+        'Your account has been verified and is now pending admin approval. You will be notified once your account is approved.',
+    'backToLogin': 'Back to Login',
   };
 
   // Arabic translations
@@ -484,6 +493,7 @@ class AppLocalization extends Translations {
     'signUp': 'إنشاء حساب',
     'emailPlaceholder': 'مثال: mail@gmail.com',
     'passwordPlaceholder': 'أدخل كلمة المرور',
+    'changeUserType': 'تغيير نوع المستخدم',
 
     // Auth - Signup
     'registerNewAccount': 'تسجيل حساب جديد',
@@ -573,6 +583,8 @@ class AppLocalization extends Translations {
     'otpFailed': 'فشل إرسال رمز التحقق',
     'passwordResetSuccess': 'تم إعادة تعيين كلمة المرور بنجاح',
     'passwordResetFailed': 'فشل إعادة تعيين كلمة المرور',
+    'accountCreatedSuccessfully':
+        'تم إنشاء حسابك بنجاح، تم إرسال الطلب إلى المسؤول',
 
     // Service Details
     'description': 'الوصف',
@@ -854,5 +866,11 @@ class AppLocalization extends Translations {
     'requestSentSuccessfully': 'تم إرسال الطلب بنجاح!',
     'requestSentSubtitle':
         'تم إرسال طلب الحجز الخاص بك إلى مقدم الخدمة. سيتم إخطارك بمجرد قبوله.',
+
+    // Provider Request Sent
+    'accountVerifiedPendingApproval': 'تم التحقق من الحساب بنجاح!',
+    'providerApprovalSubtitle':
+        'تم التحقق من حسابك وهو الآن بانتظار موافقة المسؤول. سيتم إخطارك بمجرد الموافقة على حسابك.',
+    'backToLogin': 'العودة لتسجيل الدخول',
   };
 }

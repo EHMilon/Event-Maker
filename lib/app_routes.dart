@@ -14,6 +14,7 @@ import 'package:event_maker/views/auth/congratulations_view.dart';
 import 'package:event_maker/views/auth/signup_step_two_view.dart';
 import 'package:event_maker/views/auth/provider_details_view.dart';
 import 'package:event_maker/views/auth/get_started_view.dart';
+import 'package:event_maker/views/auth/provider_request_sent_view.dart';
 import 'package:event_maker/views/auth/language_selection_view.dart';
 import 'package:event_maker/views/auth/language_selection_controller.dart';
 import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
@@ -89,6 +90,7 @@ class AppRoutes {
   static const String signupStepTwo = '/signup-step-two';
   static const String providerDetails = '/provider-details';
   static const String getStarted = '/get-started';
+  static const String providerRequestSent = '/request-sent';
   static const String profile = '/profile';
   static const String profileSettings = '/profile-settings';
   static const String addImage = '/add-image';
@@ -225,6 +227,11 @@ class AppRoutes {
     GetPage(
       name: getStarted,
       page: () => const GetStartedView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: providerRequestSent,
+      page: () => const ProviderRequestSentView(),
       binding: AuthBinding(),
     ),
     GetPage(

@@ -11,7 +11,7 @@ import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
 
 /// Controller for handling authentication state and operations.
-/// 
+///
 /// Extends [BaseController] for built-in loading/error state management
 /// and uses [Result<T>] pattern for type-safe API response handling.
 class AuthController extends BaseController {
@@ -214,6 +214,13 @@ class AuthController extends BaseController {
         selectedType.value = userType;
       }
 
+      // Ensure role is never empty before creating request
+      if (userType.isEmpty) {
+        showError('Please select user type');
+        Get.offAllNamed('/user-type');
+        return;
+      }
+
       final request = SignInRequestModel(
         role: userType,
         emailAddress: email,
@@ -227,6 +234,13 @@ class AuthController extends BaseController {
           loginEmailController.clear();
           loginPasswordController.clear();
           clearError();
+
+          // Check if user is verified
+          if (!data.user.isVerified) {
+            // User is not verified - show message and don't navigate
+            showSuccess('accountCreatedSuccessfully'.tr);
+            return;
+          }
 
           if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
             Get.offAllNamed(AppRoutes.serviceProviderHome);
@@ -485,7 +499,10 @@ class AuthController extends BaseController {
       }
     } catch (e, stackTrace) {
       Log.e('Forgot password failed', e, stackTrace);
-      setError('Something went wrong. Please try again.', type: ErrorType.unknown);
+      setError(
+        'Something went wrong. Please try again.',
+        type: ErrorType.unknown,
+      );
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -586,7 +603,10 @@ class AuthController extends BaseController {
       }
     } catch (e, stackTrace) {
       Log.e('OTP verification failed', e, stackTrace);
-      setError('Verification failed. Please try again.', type: ErrorType.unknown);
+      setError(
+        'Verification failed. Please try again.',
+        type: ErrorType.unknown,
+      );
       showError('Verification failed. Please try again.');
     } finally {
       setLoading(false);
@@ -627,7 +647,10 @@ class AuthController extends BaseController {
       }
     } catch (e, stackTrace) {
       Log.e('Resend OTP failed', e, stackTrace);
-      setError('Something went wrong. Please try again.', type: ErrorType.unknown);
+      setError(
+        'Something went wrong. Please try again.',
+        type: ErrorType.unknown,
+      );
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -695,7 +718,10 @@ class AuthController extends BaseController {
       }
     } catch (e, stackTrace) {
       Log.e('Reset password failed', e, stackTrace);
-      setError('Something went wrong. Please try again.', type: ErrorType.unknown);
+      setError(
+        'Something went wrong. Please try again.',
+        type: ErrorType.unknown,
+      );
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -764,7 +790,10 @@ class AuthController extends BaseController {
       }
     } catch (e, stackTrace) {
       Log.e('Change password failed', e, stackTrace);
-      setError('Something went wrong. Please try again.', type: ErrorType.unknown);
+      setError(
+        'Something went wrong. Please try again.',
+        type: ErrorType.unknown,
+      );
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
