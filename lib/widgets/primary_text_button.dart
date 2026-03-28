@@ -8,6 +8,7 @@ class PrimaryTextButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget? icon;
   final Color? backgroundColor;
+  final bool isLoading;
 
   const PrimaryTextButton({
     super.key,
@@ -15,6 +16,7 @@ class PrimaryTextButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.backgroundColor,
+    this.isLoading = false,
   });
 
   @override
@@ -24,7 +26,7 @@ class PrimaryTextButton extends StatelessWidget {
         width: double.infinity,
         height: 56.h,
         child: ElevatedButton(
-          onPressed: onPressed,
+          onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: backgroundColor ?? AppColors.primary,
             shape: RoundedRectangleBorder(
@@ -35,15 +37,26 @@ class PrimaryTextButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                text,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
+              if (isLoading)
+                SizedBox(
+                  width: 20.w,
+                  height: 20.w,
+                  child: const CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              else ...[
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              if (icon != null) ...[SizedBox(width: 8.w), icon!],
+                if (icon != null) ...[SizedBox(width: 8.w), icon!],
+              ],
             ],
           ),
         ),

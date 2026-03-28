@@ -1,104 +1,144 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/auth_models.dart';
 import '../../repository/auth_repository.dart';
 import '../../utils/logger.dart';
 import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
 
-/// Unified Auth Controller for all authentication screens.
-///
-/// Handles login, signup, forgot password, OTP verification, and password reset.
-/// Uses AuthRepository for all backend API calls.
 class AuthController extends GetxController {
-  // Repository instance
   final AuthRepository _authRepository = AuthRepository();
 
-  // ===== TextEditingControllers =====
-  
-  // Login
-  final loginEmailController = TextEditingController();
-  final loginPasswordController = TextEditingController();
-  
-  // Signup Step 1
-  final signupNameController = TextEditingController();
-  final signupEmailController = TextEditingController();
-  final signupPasswordController = TextEditingController();
-  
-  // Signup Step 2
-  final signupPhoneController = TextEditingController();
-  
-  // Forgot Password
-  final forgotEmailController = TextEditingController();
-  
-  // OTP Verification
-  final otpController = TextEditingController();
-  
-  // Reset Password
-  final newPasswordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
+  // Controllers - using late to prevent early disposal issues
+  late final loginEmailController = TextEditingController();
+  late final loginPasswordController = TextEditingController();
+  late final signupNameController = TextEditingController();
+  late final signupEmailController = TextEditingController();
+  late final signupPasswordController = TextEditingController();
+  late final signupPhoneController = TextEditingController();
+  late final forgotEmailController = TextEditingController();
+  late final otpController = TextEditingController();
+  late final newPasswordController = TextEditingController();
+  late final confirmPasswordController = TextEditingController();
+  late final currentPasswordController = TextEditingController();
+  late final changeNewPasswordController = TextEditingController();
+  late final changeConfirmPasswordController = TextEditingController();
 
-  // ===== UI State =====
-  
-  // Login state
-  final RxBool rememberMe = false.obs;
-  final RxBool obscurePassword = true.obs;
+  // UI State
+  final rememberMe = false.obs;
+  final obscurePassword = true.obs;
+  final obscureSignupPassword = true.obs;
+  final acceptedTerms = false.obs;
+  final selectedNationality = 'Bangladeshi'.obs;
+  final selectedServiceType = ''.obs;
+  final selectedRole = ''.obs;
+  final selectedServiceCategory = ''.obs;
+  final obscureNewPassword = true.obs;
+  final obscureConfirmPassword = true.obs;
+  final obscureCurrentPassword = true.obs;
+  final obscureChangeNewPassword = true.obs;
+  final obscureChangeConfirmPassword = true.obs;
+  final selectedType = ''.obs;
+  final currentAuthFlow = ''.obs;
+  final isLoading = false.obs;
+  final otpResendTimer = 0.obs;
+  final canResendOtp = false.obs;
+  final verificationUserId = ''.obs;
+  final resetSecretKey = ''.obs;
 
-  // Signup state
-  final RxBool obscureSignupPassword = true.obs;
-  final RxBool acceptedTerms = false.obs;
-  final RxString selectedNationality = 'UAE'.obs;
-  final RxString selectedServiceType = ''.obs;
-  final RxString selectedRole = ''.obs;
-  final RxString selectedServiceCategory = ''.obs;
-
-  // Reset password state
-  final RxBool obscureNewPassword = true.obs;
-  final RxBool obscureConfirmPassword = true.obs;
-
-  // User Type state
-  final RxString selectedType = ''.obs; // 'customer' or 'provider'
-
-  // Auth flow state
-  final RxString currentAuthFlow = ''.obs;
-  final RxBool isLoading = false.obs;
-  
-  // Signup data aggregation
-  final Rx<SignupRequestModel?> signupData = Rx<SignupRequestModel?>(null);
-  
-  // OTP state
-  final RxInt otpResendTimer = 0.obs;
-  final RxBool canResendOtp = false.obs;
   Timer? _otpTimer;
-  
-  // Email for OTP verification flow
-  final RxString verificationEmail = ''.obs;
+  bool _controllersDisposed = false;
 
-  // ===== Lifecycle =====
-  
+  @override
+  void onInit() {
+    super.onInit();
+    _loadPersistedUserId();
+  }
+
+  /// Load persisted user ID from SharedPreferences
+  Future<void> _loadPersistedUserId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString('temp_verification_user_id');
+      if (userId != null && userId.isNotEmpty) {
+        verificationUserId.value = userId;
+      }
+    } catch (e) {
+      Log.e('Error loading user ID', e);
+    }
+  }
+
+  /// Persist user ID to SharedPreferences
+  Future<void> _persistUserId(String userId) async {
+    try {
+      verificationUserId.value = userId;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('temp_verification_user_id', userId);
+    } catch (e) {
+      Log.e('Error persisting user ID', e);
+    }
+  }
+
+  /// Clear persisted user ID
+  Future<void> _clearPersistedUserId() async {
+    try {
+      verificationUserId.value = '';
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('temp_verification_user_id');
+    } catch (e) {
+      Log.e('Error clearing user ID', e);
+    }
+  }
+
   @override
   void onClose() {
-    // Dispose all controllers
-    loginEmailController.dispose();
-    loginPasswordController.dispose();
-    signupNameController.dispose();
-    signupEmailController.dispose();
-    signupPasswordController.dispose();
-    signupPhoneController.dispose();
-    forgotEmailController.dispose();
-    otpController.dispose();
-    newPasswordController.dispose();
-    confirmPasswordController.dispose();
-    
+    // Cancel timer only - controllers persist for app lifetime
     _otpTimer?.cancel();
     super.onClose();
   }
 
-  // ===== User Type Methods =====
+  /// Dispose all controllers - call ONLY on app logout/termination
+  void disposeAllControllers() {
+    if (_controllersDisposed) return;
+    _controllersDisposed = true;
+
+    try {
+      loginEmailController.dispose();
+      loginPasswordController.dispose();
+      signupNameController.dispose();
+      signupEmailController.dispose();
+      signupPasswordController.dispose();
+      signupPhoneController.dispose();
+      forgotEmailController.dispose();
+      otpController.dispose();
+      newPasswordController.dispose();
+      confirmPasswordController.dispose();
+      currentPasswordController.dispose();
+      changeNewPasswordController.dispose();
+      changeConfirmPasswordController.dispose();
+    } catch (e) {
+      Log.e('Error disposing controllers', e);
+    }
+    _otpTimer?.cancel();
+  }
 
   void selectType(String type) {
     selectedType.value = type;
+  }
+
+  /// Restore user type from SharedPreferences
+  /// This ensures user type is restored even after password reset flow
+  Future<void> restoreUserType() async {
+    try {
+      final userType = await UserPreferences.getUserType();
+      if (userType.isNotEmpty && selectedType.value.isEmpty) {
+        selectedType.value = userType;
+      }
+    } catch (e) {
+      Log.e('Error restoring user type', e);
+    }
   }
 
   Future<void> onContinueUserType() async {
@@ -106,15 +146,9 @@ class AuthController extends GetxController {
       await UserPreferences.setUserType(selectedType.value);
       Get.toNamed(AppRoutes.login);
     } else {
-      Get.snackbar(
-        'error'.tr,
-        'pleaseSelectUserType'.tr,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'Please select user type');
     }
   }
-
-  // ===== Login Methods =====
 
   void toggleRememberMe(bool? value) {
     rememberMe.value = value ?? false;
@@ -126,24 +160,51 @@ class AuthController extends GetxController {
 
   Future<void> onLogin() async {
     if (isLoading.value) return;
-    
+
     isLoading.value = true;
     try {
-      final request = LoginRequestModel(
-        email: loginEmailController.text.trim(),
+      // Always try to get user type from SharedPreferences first
+      // This ensures user type is restored even after password reset flow
+      var userType = await UserPreferences.getUserType();
+
+      // If SharedPreferences returns default 'customer', check if it was actually set
+      if (userType == UserPreferences.USER_TYPE_CUSTOMER) {
+        final hasUserType = await UserPreferences.hasUserType();
+        if (!hasUserType) {
+          // User type was not explicitly set, check controller state
+          if (selectedType.value.isNotEmpty) {
+            userType = selectedType.value;
+            await UserPreferences.setUserType(userType);
+          } else {
+            // No user type found, redirect to user type selection
+            Get.snackbar(
+              'Error',
+              'Please select user type',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+            Get.offAllNamed('/user-type');
+            return;
+          }
+        }
+      }
+
+      // Also update controller state to match SharedPreferences
+      if (selectedType.value.isEmpty && userType.isNotEmpty) {
+        selectedType.value = userType;
+      }
+
+      final request = SignInRequestModel(
+        role: userType,
+        emailAddress: loginEmailController.text.trim(),
         password: loginPasswordController.text,
-        rememberMe: rememberMe.value,
       );
 
-      final response = await _authRepository.login(request);
+      final response = await _authRepository.signIn(request);
 
-      if (response.success) {
-        // Clear form
+      if (response.success && response.data != null) {
         loginEmailController.clear();
         loginPasswordController.clear();
-        
-        // Navigate based on user type
-        final userType = await UserPreferences.getUserType();
+
         if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
           Get.offAllNamed(AppRoutes.serviceProviderHome);
         } else {
@@ -151,16 +212,16 @@ class AuthController extends GetxController {
         }
       } else {
         Get.snackbar(
-          'error'.tr,
-          response.message.tr,
+          'Error',
+          response.message,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Log.e('Login failed', e);
       Get.snackbar(
-        'error'.tr,
-        'loginFailed'.tr,
+        'Error',
+        'Login failed',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -177,8 +238,6 @@ class AuthController extends GetxController {
     currentAuthFlow.value = 'signup';
     Get.toNamed('/signup');
   }
-
-  // ===== Signup Methods =====
 
   void toggleSignupPasswordVisibility() {
     obscureSignupPassword.value = !obscureSignupPassword.value;
@@ -208,110 +267,136 @@ class AuthController extends GetxController {
     if (value != null) selectedServiceCategory.value = value;
   }
 
-  /// Validate and proceed to step 2 of signup
   void onSignup() {
-    // Validate step 1
     if (signupNameController.text.trim().isEmpty) {
-      Get.snackbar('error'.tr, 'pleaseEnterName'.tr);
-      return;
-    }
-    
-    if (!GetUtils.isEmail(signupEmailController.text.trim())) {
-      Get.snackbar('error'.tr, 'pleaseEnterValidEmail'.tr);
-      return;
-    }
-    
-    if (signupPasswordController.text.length < 6) {
-      Get.snackbar('error'.tr, 'passwordMinLength'.tr);
-      return;
-    }
-    
-    if (!acceptedTerms.value) {
-      Get.snackbar('error'.tr, 'pleaseAcceptTerms'.tr);
+      Get.snackbar('Error', 'Please enter name');
       return;
     }
 
-    // Initialize signup data
-    signupData.value = SignupRequestModel(
-      name: signupNameController.text.trim(),
-      email: signupEmailController.text.trim(),
-      password: signupPasswordController.text,
-      userType: selectedType.value,
-      acceptedTerms: true,
-    );
+    if (!GetUtils.isEmail(signupEmailController.text.trim())) {
+      Get.snackbar('Error', 'Please enter valid email');
+      return;
+    }
+
+    if (signupPasswordController.text.length < 8) {
+      Get.snackbar('Error', 'Password must be at least 8 characters');
+      return;
+    }
+
+    if (!acceptedTerms.value) {
+      Get.snackbar('Error', 'Please accept terms');
+      return;
+    }
 
     Get.toNamed('/signup-step-two');
   }
 
-  /// Continue to provider details or complete signup
   Future<void> onContinueSignup() async {
     if (signupPhoneController.text.trim().isEmpty) {
-      Get.snackbar('error'.tr, 'pleaseEnterPhone'.tr);
+      Get.snackbar('Error', 'Please enter phone');
       return;
     }
 
-    // Update signup data with step 2 info
-    signupData.value = signupData.value?.copyWith(
-      nationality: selectedNationality.value,
-      phone: signupPhoneController.text.trim(),
-    );
-
-    // Save user type
     await UserPreferences.setUserType(selectedType.value);
 
     if (selectedType.value == 'provider') {
       Get.toNamed(AppRoutes.providerDetails);
     } else {
-      // For customer, complete registration
-      await _completeSignup();
+      await _completeCustomerSignup();
     }
   }
 
-  /// Complete provider details and register
   Future<void> onContinueProviderDetails() async {
     if (selectedServiceType.value.isEmpty ||
         selectedRole.value.isEmpty ||
         selectedServiceCategory.value.isEmpty) {
-      Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
+      Get.snackbar('Error', 'Please select all fields');
       return;
     }
 
-    // Update signup data with provider details
-    signupData.value = signupData.value?.copyWith(
-      serviceType: selectedServiceType.value,
-      role: selectedRole.value,
-      serviceCategory: selectedServiceCategory.value,
-    );
-
-    await _completeSignup();
+    await _completeProviderSignup();
   }
 
-  /// Complete the signup process
-  Future<void> _completeSignup() async {
+  Future<void> _completeCustomerSignup() async {
     if (isLoading.value) return;
-    
+
     isLoading.value = true;
     try {
-      final response = await _authRepository.signup(signupData.value!);
+      final request = SignUpRequestModel(
+        role: 'customer',
+        fullName: signupNameController.text.trim(),
+        emailAddress: signupEmailController.text.trim(),
+        password: signupPasswordController.text,
+        nationality: selectedNationality.value,
+        phoneNumber: signupPhoneController.text.trim(),
+        termsAgreed: true,
+      );
 
-      if (response.success) {
-        // Clear form
-        _clearSignupForm();
-        
-        // Navigate to get started
-        Get.offAllNamed(AppRoutes.getStarted);
+      final response = await _authRepository.signUp(request);
+
+      if (response.success && response.data != null) {
+        // Persist user ID for verification
+        await _persistUserId(response.data!.userId);
+        signupPasswordController.clear();
+        Get.toNamed('/otp-verification');
+        _startOtpTimer();
       } else {
         Get.snackbar(
-          'error'.tr,
-          response.message.tr,
+          'Error',
+          response.message,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      Log.e('Signup failed', e);
+      Log.e('Customer signup failed', e);
       Get.snackbar(
-        'error'.tr,
-        'signupFailed'.tr,
+        'Error',
+        'Signup failed',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> _completeProviderSignup() async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+    try {
+      final request = SignUpRequestModel(
+        role: 'provider',
+        fullName: signupNameController.text.trim(),
+        emailAddress: signupEmailController.text.trim(),
+        password: signupPasswordController.text,
+        nationality: selectedNationality.value,
+        phoneNumber: signupPhoneController.text.trim(),
+        termsAgreed: true,
+        serviceTypeName: selectedServiceType.value,
+        providerType: selectedRole.value,
+        serviceCategoryName: selectedServiceCategory.value,
+      );
+
+      final response = await _authRepository.signUp(request);
+
+      if (response.success && response.data != null) {
+        // Persist user ID for verification
+        await _persistUserId(response.data!.userId);
+        signupPasswordController.clear();
+        Get.toNamed('/otp-verification');
+        _startOtpTimer();
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Log.e('Provider signup failed', e);
+      Get.snackbar(
+        'Error',
+        'Signup failed',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -324,49 +409,45 @@ class AuthController extends GetxController {
     signupEmailController.clear();
     signupPasswordController.clear();
     signupPhoneController.clear();
-    signupData.value = null;
-    acceptedTerms.value = false;
   }
 
   void onLoginFromSignup() {
     _clearSignupForm();
+    _clearPersistedUserId();
     Get.offAllNamed(AppRoutes.login);
   }
 
-  // ===== Forgot Password Methods =====
-
   Future<void> onResetPassword() async {
     if (isLoading.value) return;
-    
+
     final email = forgotEmailController.text.trim();
     if (email.isEmpty || !GetUtils.isEmail(email)) {
-      Get.snackbar('error'.tr, 'pleaseEnterValidEmail'.tr);
+      Get.snackbar('Error', 'Please enter valid email');
       return;
     }
 
-    // Store email for OTP verification
-    verificationEmail.value = email;
-
     isLoading.value = true;
     try {
-      final request = ForgotPasswordRequestModel(email: email);
+      final request = ForgotPasswordRequestModel(emailAddress: email);
       final response = await _authRepository.forgotPassword(request);
 
-      if (response.success) {
+      if (response.success && response.data != null) {
+        // Persist user ID for verification
+        await _persistUserId(response.data!.userId);
         Get.toNamed('/otp-verification');
         _startOtpTimer();
       } else {
         Get.snackbar(
-          'error'.tr,
-          response.message.tr,
+          'Error',
+          response.message,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Log.e('Forgot password failed', e);
       Get.snackbar(
-        'error'.tr,
-        'somethingWentWrong'.tr,
+        'Error',
+        'Something went wrong',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -374,12 +455,10 @@ class AuthController extends GetxController {
     }
   }
 
-  // ===== OTP Verification Methods =====
-
   void _startOtpTimer() {
-    otpResendTimer.value = 60; // 60 seconds countdown
+    otpResendTimer.value = 60;
     canResendOtp.value = false;
-    
+
     _otpTimer?.cancel();
     _otpTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (otpResendTimer.value > 0) {
@@ -393,47 +472,77 @@ class AuthController extends GetxController {
 
   Future<void> onVerify() async {
     if (isLoading.value) return;
-    
+
     final otp = otpController.text.trim();
-    if (otp.length < 4) {
-      Get.snackbar('error'.tr, 'pleaseEnterValidOtp'.tr);
+    if (otp.length != 6) {
+      Get.snackbar('Error', 'Please enter valid 6-digit OTP');
       return;
+    }
+
+    // Check if user ID is available
+    if (verificationUserId.value.isEmpty) {
+      await _loadPersistedUserId();
+      if (verificationUserId.value.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User ID not found. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
     }
 
     isLoading.value = true;
     try {
-      final request = OTPVerificationRequestModel(
-        email: verificationEmail.value,
-        otp: otp,
-        purpose: currentAuthFlow.value == 'change-password' 
-            ? 'password_reset' 
-            : 'email_verification',
-      );
+      if (currentAuthFlow.value == 'forgot-password') {
+        final request = VerifyResetCodeRequestModel(
+          userId: verificationUserId.value,
+          verificationCode: otp,
+        );
 
-      final response = await _authRepository.verifyOTP(request);
+        final response = await _authRepository.verifyResetCode(request);
 
-      if (response.success) {
-        _otpTimer?.cancel();
-        
-        // Check if this is a change password flow
-        String? authFlow = Get.parameters['authFlow'];
-        if (authFlow == 'change-password' || currentAuthFlow.value == 'change-password') {
-          Get.toNamed('/congratulations');
-        } else {
+        if (response.success && response.data != null) {
+          _otpTimer?.cancel();
+          resetSecretKey.value = response.data!.secretKey;
           Get.toNamed('/reset-password-new');
+        } else {
+          Get.snackbar(
+            'Error',
+            response.message,
+            snackPosition: SnackPosition.BOTTOM,
+          );
         }
       } else {
-        Get.snackbar(
-          'error'.tr,
-          response.message.tr,
-          snackPosition: SnackPosition.BOTTOM,
+        final request = VerifyEmailRequestModel(
+          userId: verificationUserId.value,
+          verificationCode: otp,
         );
+
+        final response = await _authRepository.verifyEmail(request);
+
+        if (response.success && response.data != null) {
+          _otpTimer?.cancel();
+          _clearPersistedUserId();
+
+          if (response.data!.isProviderPending) {
+            Get.toNamed('/request-sent');
+          } else {
+            Get.offAllNamed(AppRoutes.getStarted);
+          }
+        } else {
+          Get.snackbar(
+            'Error',
+            response.message,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
       }
-    } catch (e) {
-      Log.e('OTP verification failed', e);
+    } catch (e, stackTrace) {
+      Log.e('OTP verification failed', e, stackTrace);
       Get.snackbar(
-        'error'.tr,
-        'verificationFailed'.tr,
+        'Error',
+        'Verification failed: $e',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -443,41 +552,52 @@ class AuthController extends GetxController {
 
   Future<void> onResend() async {
     if (!canResendOtp.value) return;
-    
+
+    if (verificationUserId.value.isEmpty) {
+      await _loadPersistedUserId();
+      if (verificationUserId.value.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'User ID not found. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+    }
+
     isLoading.value = true;
     try {
-      final request = ResendOTPRequestModel(
-        email: verificationEmail.value,
-        purpose: currentAuthFlow.value == 'change-password' 
-            ? 'password_reset' 
-            : 'email_verification',
+      final request = ResendVerificationRequestModel(
+        userId: verificationUserId.value,
       );
 
-      final response = await _authRepository.resendOTP(request);
+      final response = await _authRepository.resendVerificationCode(request);
 
       if (response.success) {
         _startOtpTimer();
-        Get.snackbar("OTP", "otpResent".tr);
+        Get.snackbar(
+          "Success",
+          "OTP resent",
+          snackPosition: SnackPosition.BOTTOM,
+        );
       } else {
         Get.snackbar(
-          'error'.tr,
-          response.message.tr,
+          'Error',
+          response.message,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Log.e('Resend OTP failed', e);
       Get.snackbar(
-        'error'.tr,
-        'somethingWentWrong'.tr,
+        'Error',
+        'Something went wrong',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
       isLoading.value = false;
     }
   }
-
-  // ===== Reset Password Methods =====
 
   void toggleNewPasswordVisibility() {
     obscureNewPassword.value = !obscureNewPassword.value;
@@ -489,25 +609,34 @@ class AuthController extends GetxController {
 
   Future<void> onConfirmReset() async {
     if (isLoading.value) return;
-    
+
     final newPassword = newPasswordController.text;
     final confirmPassword = confirmPasswordController.text;
 
-    if (newPassword.length < 6) {
-      Get.snackbar('error'.tr, 'passwordMinLength'.tr);
+    if (newPassword.length < 8) {
+      Get.snackbar('Error', 'Password must be at least 8 characters');
       return;
     }
 
     if (newPassword != confirmPassword) {
-      Get.snackbar('error'.tr, 'passwordsDoNotMatch'.tr);
+      Get.snackbar('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (verificationUserId.value.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'User ID not found. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
     isLoading.value = true;
     try {
       final request = ResetPasswordRequestModel(
-        email: verificationEmail.value,
-        otp: otpController.text.trim(),
+        userId: verificationUserId.value,
+        secretKey: resetSecretKey.value,
         newPassword: newPassword,
         confirmPassword: confirmPassword,
       );
@@ -515,25 +644,97 @@ class AuthController extends GetxController {
       final response = await _authRepository.resetPassword(request);
 
       if (response.success) {
-        // Clear form
         newPasswordController.clear();
         confirmPasswordController.clear();
         otpController.clear();
         forgotEmailController.clear();
-        
+        resetSecretKey.value = '';
+        _clearPersistedUserId();
         Get.toNamed('/congratulations');
       } else {
         Get.snackbar(
-          'error'.tr,
-          response.message.tr,
+          'Error',
+          response.message,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Log.e('Reset password failed', e);
       Get.snackbar(
-        'error'.tr,
-        'somethingWentWrong'.tr,
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void toggleCurrentPasswordVisibility() {
+    obscureCurrentPassword.value = !obscureCurrentPassword.value;
+  }
+
+  void toggleChangeNewPasswordVisibility() {
+    obscureChangeNewPassword.value = !obscureChangeNewPassword.value;
+  }
+
+  void toggleChangeConfirmPasswordVisibility() {
+    obscureChangeConfirmPassword.value = !obscureChangeConfirmPassword.value;
+  }
+
+  Future<void> onChangePassword() async {
+    if (isLoading.value) return;
+
+    final currentPassword = currentPasswordController.text;
+    final newPassword = changeNewPasswordController.text;
+    final confirmPassword = changeConfirmPasswordController.text;
+
+    if (currentPassword.isEmpty) {
+      Get.snackbar('Error', 'Please enter current password');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      Get.snackbar('Error', 'Password must be at least 8 characters');
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      Get.snackbar('Error', 'Passwords do not match');
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final request = ChangePasswordRequestModel(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      );
+
+      final response = await _authRepository.changePassword(request);
+
+      if (response.success) {
+        currentPasswordController.clear();
+        changeNewPasswordController.clear();
+        changeConfirmPasswordController.clear();
+        Get.snackbar(
+          'Success',
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Log.e('Change password failed', e);
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -542,7 +743,6 @@ class AuthController extends GetxController {
   }
 
   void onGoToLogin() {
-    // Navigate based on auth flow
     if (currentAuthFlow.value == 'change-password') {
       currentAuthFlow.value = '';
       Get.offAllNamed('/profile');
@@ -550,8 +750,6 @@ class AuthController extends GetxController {
       Get.offAllNamed(AppRoutes.login);
     }
   }
-
-  // ===== Get Started =====
 
   Future<void> onGetStarted() async {
     String userType = await UserPreferences.getUserType();
@@ -563,7 +761,30 @@ class AuthController extends GetxController {
     }
   }
 
-  // ===== Shared Methods =====
+  Future<void> logout() async {
+    isLoading.value = true;
+    try {
+      await _authRepository.logout();
+      _clearPersistedUserId();
+      // Clear user type on logout so user can select again
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('user_type');
+      // Dispose controllers
+      disposeAllControllers();
+      // Navigate to onboarding after logout
+      Get.offAllNamed(AppRoutes.onboarding);
+    } catch (e) {
+      Log.e('Logout failed', e);
+      // Still clear user type and go to onboarding
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('user_type');
+      } catch (_) {}
+      Get.offAllNamed(AppRoutes.onboarding);
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void goBack() {
     Get.back();

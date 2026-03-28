@@ -62,9 +62,12 @@ class ForgotPasswordView extends GetView<AuthController> {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 40.h),
-                PrimaryTextButton(
-                  text: "resetPassword".tr,
-                  onPressed: controller.onResetPassword,
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "resetPassword".tr,
+                    onPressed: controller.onResetPassword,
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h),
               ],

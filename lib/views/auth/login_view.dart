@@ -14,6 +14,12 @@ class LoginView extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
 
+    // Restore user type from SharedPreferences when login page is loaded
+    // This ensures user type is restored even after password reset flow
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.restoreUserType();
+    });
+
     return Scaffold(
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -145,13 +151,16 @@ class LoginView extends GetView<AuthController> {
                   ],
                 ),
                 SizedBox(height: 30.h),
-                PrimaryTextButton(
-                  text: "login".tr,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      controller.onLogin();
-                    }
-                  },
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "login".tr,
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        controller.onLogin();
+                      }
+                    },
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h),
                 Center(

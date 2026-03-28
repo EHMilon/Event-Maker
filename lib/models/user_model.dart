@@ -8,6 +8,7 @@
 /// - userType: 'customer' or 'provider'
 /// - nationality: User's nationality (optional)
 /// - isVerified: Whether email is verified
+/// - avatar: User's profile picture URL (optional)
 class UserModel {
   final String id;
   final String name;
@@ -16,6 +17,7 @@ class UserModel {
   final String userType;
   final String? nationality;
   final bool isVerified;
+  final String? avatar;
 
   const UserModel({
     required this.id,
@@ -25,6 +27,7 @@ class UserModel {
     required this.userType,
     this.nationality,
     this.isVerified = false,
+    this.avatar,
   });
 
   /// Check if user is a service provider
@@ -37,12 +40,13 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'],
-      userType: json['user_type'] ?? json['userType'] ?? 'customer',
+      name: json['name'] ?? json['full_name'] ?? json['fullName'] ?? '',
+      email: json['email'] ?? json['email_address'] ?? json['emailAddress'] ?? '',
+      phone: json['phone'] ?? json['phone_number'] ?? json['phoneNumber'],
+      userType: json['user_type'] ?? json['userType'] ?? json['role'] ?? 'customer',
       nationality: json['nationality'],
       isVerified: json['is_verified'] ?? json['isVerified'] ?? false,
+      avatar: json['avatar'],
     );
   }
 

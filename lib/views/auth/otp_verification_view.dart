@@ -86,44 +86,49 @@ class OtpVerificationView extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 20.h),
-                Obx(() => Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "didntGetOtp".tr,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
+                Obx(
+                  () => Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "didntGetOtp".tr,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 4.w),
-                      controller.canResendOtp.value
-                          ? GestureDetector(
-                              onTap: controller.onResend,
-                              child: Text(
-                                "resend".tr,
+                        SizedBox(width: 4.w),
+                        controller.canResendOtp.value
+                            ? GestureDetector(
+                                onTap: controller.onResend,
+                                child: Text(
+                                  "resend".tr,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            : Text(
+                                "${controller.otpResendTimer.value}s",
                                 style: TextStyle(
                                   fontSize: 14.sp,
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                            )
-                          : Text(
-                              "${controller.otpResendTimer.value}s",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                    ],
+                      ],
+                    ),
                   ),
-                )),
+                ),
                 SizedBox(height: 40.h),
-                PrimaryTextButton(
-                  text: "verify".tr,
-                  onPressed: controller.onVerify,
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "verify".tr,
+                    onPressed: controller.onVerify,
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h),
               ],

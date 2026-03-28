@@ -87,9 +87,12 @@ class ProviderDetailsView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 60.h),
-              PrimaryTextButton(
-                text: "Continue",
-                onPressed: controller.onContinueProviderDetails,
+              Obx(
+                () => PrimaryTextButton(
+                  text: "Continue",
+                  onPressed: controller.onContinueProviderDetails,
+                  isLoading: controller.isLoading.value,
+                ),
               ),
               SizedBox(height: 40.h),
             ],

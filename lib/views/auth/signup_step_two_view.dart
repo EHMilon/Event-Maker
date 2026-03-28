@@ -58,33 +58,47 @@ class SignupStepTwoView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 8.h),
-              DropdownButtonFormField<String>(
-                initialValue: controller.selectedNationality.value,
-                style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 12.h,
+              Obx(
+                () => DropdownButtonFormField<String>(
+                  value: controller.selectedNationality.value,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.textPrimary,
                   ),
-                  filled: true,
-                  fillColor: AppColors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: AppColors.lightGrey),
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.lightGrey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.lightGrey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: AppColors.lightGrey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: AppColors.primary),
-                  ),
+                  items:
+                      [
+                            'Emirati',
+                            'American',
+                            'British',
+                            'Indian',
+                            'Bangladeshi',
+                          ]
+                          .map(
+                            (e) => DropdownMenuItem(value: e, child: Text(e)),
+                          )
+                          .toList(),
+                  onChanged: controller.updateNationality,
                 ),
-                items: ['UAE', 'USA', 'UK', 'India', 'Bangladesh']
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: controller.updateNationality,
               ),
               SizedBox(height: 20.h),
               Text(
@@ -125,9 +139,12 @@ class SignupStepTwoView extends GetView<AuthController> {
                 },
               ),
               SizedBox(height: 100.h), // Space for button
-              PrimaryTextButton(
-                text: "Continue",
-                onPressed: controller.onContinueSignup,
+              Obx(
+                () => PrimaryTextButton(
+                  text: "Continue",
+                  onPressed: controller.onContinueSignup,
+                  isLoading: controller.isLoading.value,
+                ),
               ),
               SizedBox(height: 40.h),
             ],

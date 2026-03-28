@@ -93,9 +93,12 @@ class ResetPasswordView extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 40.h),
-                PrimaryTextButton(
-                  text: "confirm".tr,
-                  onPressed: controller.onConfirmReset,
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "confirm".tr,
+                    onPressed: controller.onConfirmReset,
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h), // Add some bottom spacing
               ],

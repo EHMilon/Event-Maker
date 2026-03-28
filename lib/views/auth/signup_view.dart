@@ -135,9 +135,12 @@ class SignupView extends GetView<AuthController> {
                 ],
               ),
               SizedBox(height: 30.h),
-              PrimaryTextButton(
-                text: "Create Account",
-                onPressed: controller.onSignup,
+              Obx(
+                () => PrimaryTextButton(
+                  text: "Create Account",
+                  onPressed: controller.onSignup,
+                  isLoading: controller.isLoading.value,
+                ),
               ),
               SizedBox(height: 20.h),
               Center(
@@ -152,7 +155,7 @@ class SignupView extends GetView<AuthController> {
                       ),
                       children: [
                         TextSpan(
-                          text:"login".tr,
+                          text: "login".tr,
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColors.primary,

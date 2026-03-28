@@ -18,15 +18,22 @@ class ApiConstant {
 
   // ===== AUTH ENDPOINTS =====
 
-  static const String login = '/auth/login';
-  static const String register = '/auth/register';
+  static const String signUp = '/auth/sign-up';
+  static const String signIn = '/auth/sign-in';
   static const String logout = '/auth/logout';
   static const String forgotPassword = '/auth/forgot-password';
-  static const String verifyOtp = '/auth/verify-otp';
-  static const String resendOtp = '/auth/resend-otp';
+  static const String verifyEmail = '/auth/verify-email';
+  static const String resendVerificationCode = '/auth/resend-verification-code';
+  static const String verifyResetCode = '/auth/verify-reset-code';
   static const String resetPassword = '/auth/reset-password';
-  static const String refreshToken = '/auth/refresh-token';
+  static const String refreshToken = '/auth/refresh';
   static const String changePassword = '/auth/change-password';
+  
+  // Legacy aliases for backward compatibility
+  static const String login = signIn;
+  static const String register = signUp;
+  static const String verifyOtp = verifyEmail;
+  static const String resendOtp = resendVerificationCode;
 
   // ===== USER ENDPOINTS =====
 

@@ -6,31 +6,16 @@ import '../utils/user_preferences.dart';
 import '../utils/logger.dart';
 import '../constants/api_constant.dart';
 
-/// API Service for handling all HTTP requests.
-///
-/// Features:
-/// - HTTP-based client with interceptors
-/// - Automatic token injection and refresh
-/// - Network connectivity check
-/// - Error handling and parsing
-/// - Request/Response logging
 class ApiService {
-  /// Singleton instance
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
   ApiService._internal();
 
-  // ===== NETWORK CONNECTIVITY =====
-
-  /// Check if device has network connectivity
   Future<bool> hasConnectivity() async {
     final status = await Connectivity().checkConnectivity();
     return !status.contains(ConnectivityResult.none);
   }
 
-  // ===== HEADERS =====
-
-  /// Get default headers
   Map<String, String> _getHeaders({String? token}) {
     final headers = Map<String, String>.from(ApiConstant.defaultHeaders);
     if (token != null) {
@@ -39,98 +24,29 @@ class ApiService {
     return headers;
   }
 
-  /// Check if endpoint is public (doesn't require auth)
   bool _isPublicEndpoint(String endpoint) {
     const publicEndpoints = [
-      ApiConstant.login,
-      ApiConstant.register,
-      ApiConstant.forgotPassword,
-      ApiConstant.verifyOtp,
-      ApiConstant.resendOtp,
-      ApiConstant.resetPassword,
-      ApiConstant.refreshToken,
+      '/auth/sign-in',
+      '/auth/sign-up',
+      '/auth/forgot-password',
+      '/auth/verify-email',
+      '/auth/resend-verification-code',
+      '/auth/verify-reset-code',
+      '/auth/reset-password',
+      '/auth/refresh',
+      '/auth/change-password',
     ];
     return publicEndpoints.any((e) => endpoint.contains(e));
   }
 
-  // ===== HTTP METHODS =====
-
-  /// GET request
-  Future<ApiResponse<T>> get<T>(
-    String endpoint, {
-    Map<String, dynamic>? queryParameters,
-    T Function(Map<String, dynamic>)? fromJson,
-  }) async {
-    return _handleRequest<T>(
-      () => _getRequest(endpoint, queryParameters: queryParameters),
-      fromJson,
-    );
-  }
-
-  /// POST request
-  Future<ApiResponse<T>> post<T>(
+  Future<ApiResponse> post(
     String endpoint, {
     Map<String, dynamic>? data,
-    T Function(Map<String, dynamic>)? fromJson,
   }) async {
-    return _handleRequest<T>(
+    return _handleRequest(
+      endpoint,
       () => _postRequest(endpoint, data: data),
-      fromJson,
     );
-  }
-
-  /// PUT request
-  Future<ApiResponse<T>> put<T>(
-    String endpoint, {
-    Map<String, dynamic>? data,
-    T Function(Map<String, dynamic>)? fromJson,
-  }) async {
-    return _handleRequest<T>(
-      () => _putRequest(endpoint, data: data),
-      fromJson,
-    );
-  }
-
-  /// PATCH request
-  Future<ApiResponse<T>> patch<T>(
-    String endpoint, {
-    Map<String, dynamic>? data,
-    T Function(Map<String, dynamic>)? fromJson,
-  }) async {
-    return _handleRequest<T>(
-      () => _patchRequest(endpoint, data: data),
-      fromJson,
-    );
-  }
-
-  /// DELETE request
-  Future<ApiResponse<T>> delete<T>(
-    String endpoint, {
-    Map<String, dynamic>? data,
-    T Function(Map<String, dynamic>)? fromJson,
-  }) async {
-    return _handleRequest<T>(
-      () => _deleteRequest(endpoint, data: data),
-      fromJson,
-    );
-  }
-
-  // ===== REQUEST IMPLEMENTATIONS =====
-
-  Future<http.Response> _getRequest(
-    String endpoint, {
-    Map<String, dynamic>? queryParameters,
-  }) async {
-    final token = await _getAuthToken(endpoint);
-    final uri = _buildUri(endpoint, queryParameters);
-
-    Log.d('API GET: $uri');
-    final response = await http
-        .get(uri, headers: _getHeaders(token: token))
-        .timeout(const Duration(milliseconds: ApiConstant.connectionTimeout));
-
-    _logResponse(response);
-    return response;
   }
 
   Future<http.Response> _postRequest(
@@ -142,89 +58,27 @@ class ApiService {
     final body = data != null ? jsonEncode(data) : null;
 
     Log.d('API POST: $uri');
-    Log.d('Body: $body');
+    Log.d('Request Body: $body');
 
     final response = await http
         .post(uri, headers: _getHeaders(token: token), body: body)
         .timeout(const Duration(milliseconds: ApiConstant.connectionTimeout));
 
-    _logResponse(response);
+    Log.d('Response Status: ${response.statusCode}');
+    Log.d('Response Body: ${response.body}');
     return response;
   }
 
-  Future<http.Response> _putRequest(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    final token = await _getAuthToken(endpoint);
-    final uri = _buildUri(endpoint);
-    final body = data != null ? jsonEncode(data) : null;
-
-    Log.d('API PUT: $uri');
-    Log.d('Body: $body');
-
-    final response = await http
-        .put(uri, headers: _getHeaders(token: token), body: body)
-        .timeout(const Duration(milliseconds: ApiConstant.connectionTimeout));
-
-    _logResponse(response);
-    return response;
-  }
-
-  Future<http.Response> _patchRequest(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    final token = await _getAuthToken(endpoint);
-    final uri = _buildUri(endpoint);
-    final body = data != null ? jsonEncode(data) : null;
-
-    Log.d('API PATCH: $uri');
-    Log.d('Body: $body');
-
-    final response = await http
-        .patch(uri, headers: _getHeaders(token: token), body: body)
-        .timeout(const Duration(milliseconds: ApiConstant.connectionTimeout));
-
-    _logResponse(response);
-    return response;
-  }
-
-  Future<http.Response> _deleteRequest(
-    String endpoint, {
-    Map<String, dynamic>? data,
-  }) async {
-    final token = await _getAuthToken(endpoint);
-    final uri = _buildUri(endpoint);
-    final body = data != null ? jsonEncode(data) : null;
-
-    Log.d('API DELETE: $uri');
-    Log.d('Body: $body');
-
-    final response = await http
-        .delete(uri, headers: _getHeaders(token: token), body: body)
-        .timeout(const Duration(milliseconds: ApiConstant.connectionTimeout));
-
-    _logResponse(response);
-    return response;
-  }
-
-  // ===== HELPER METHODS =====
-
-  /// Build URI with query parameters
   Uri _buildUri(String endpoint, [Map<String, dynamic>? queryParameters]) {
     final uri = Uri.parse('${ApiConstant.baseUrl}$endpoint');
-
     if (queryParameters == null || queryParameters.isEmpty) {
       return uri;
     }
-
     return uri.replace(queryParameters: queryParameters.map(
       (key, value) => MapEntry(key, value.toString()),
     ));
   }
 
-  /// Get auth token for request
   Future<String?> _getAuthToken(String endpoint) async {
     if (_isPublicEndpoint(endpoint)) {
       return null;
@@ -232,24 +86,14 @@ class ApiService {
     return UserPreferences.getAccessToken();
   }
 
-  /// Log response for debugging
-  void _logResponse(http.Response response) {
-    Log.d('Response Status: ${response.statusCode}');
-    Log.d('Response Body: ${response.body}');
-  }
-
-  // ===== REQUEST HANDLER =====
-
-  /// Handle API request with error handling
-  Future<ApiResponse<T>> _handleRequest<T>(
+  Future<ApiResponse> _handleRequest(
+    String endpoint,
     Future<http.Response> Function() request,
-    T Function(Map<String, dynamic>)? fromJson,
   ) async {
-    // Check connectivity first
     if (!await hasConnectivity()) {
-      return ApiResponse<T>(
+      return ApiResponse(
         success: false,
-        message: 'noInternetConnection',
+        message: 'No internet connection',
         statusCode: 0,
       );
     }
@@ -257,234 +101,138 @@ class ApiService {
     try {
       final response = await request();
 
-      // Handle 401 - try token refresh
-      if (response.statusCode == ApiConstant.codeUnauthorized) {
-        final refreshed = await _refreshToken();
-        if (refreshed) {
-          // Retry request
-          final retryResponse = await request();
-          return _parseResponse<T>(retryResponse, fromJson);
+      // Parse the response body
+      final responseBody = jsonDecode(response.body) as Map<String, dynamic>;
+      final message = responseBody['message']?.toString() ?? '';
+
+      // Handle 401 - check if user was logged in or not
+      if (response.statusCode == 401) {
+        final hasToken = await UserPreferences.hasValidTokens();
+        if (hasToken) {
+          // Try to refresh token
+          final refreshed = await _refreshToken();
+          if (refreshed) {
+            final retryResponse = await request();
+            return _parseResponse(retryResponse);
+          } else {
+            await UserPreferences.clearUserData();
+            return ApiResponse(
+              success: false,
+              message: 'Session expired. Please login again.',
+              statusCode: 401,
+            );
+          }
         } else {
-          // Clear session
-          await UserPreferences.clearUserData();
-          return ApiResponse<T>(
+          // Not logged in - return the actual error from API
+          return ApiResponse(
             success: false,
-            message: 'sessionExpired',
-            statusCode: response.statusCode,
+            message: message.isNotEmpty ? message : 'Invalid credentials',
+            statusCode: 401,
           );
         }
       }
 
-      return _parseResponse<T>(response, fromJson);
+      // Handle 400 (validation errors)
+      if (response.statusCode == 400) {
+        return ApiResponse(
+          success: false,
+          message: message.isNotEmpty ? message : 'Invalid request',
+          statusCode: 400,
+        );
+      }
+
+      return _parseResponse(response);
     } on TimeoutException catch (e) {
       Log.e('Request Timeout', e);
-      return ApiResponse<T>(
+      return ApiResponse(
         success: false,
-        message: 'connectionTimeout',
+        message: 'Connection timeout',
         statusCode: 408,
       );
     } catch (e) {
       Log.e('API Request Error', e);
-      return ApiResponse<T>(
+      return ApiResponse(
         success: false,
-        message: 'somethingWentWrong',
+        message: 'Something went wrong',
         statusCode: 500,
       );
     }
   }
 
-  /// Parse HTTP response
-  ApiResponse<T> _parseResponse<T>(
-    http.Response response,
-    T Function(Map<String, dynamic>)? fromJson,
-  ) {
+  ApiResponse _parseResponse(http.Response response) {
     try {
       final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+      final success = response.statusCode >= 200 && response.statusCode < 300;
+      final message = responseData['message']?.toString() ?? '';
 
-      final success = responseData[ApiConstant.keySuccess] as bool? ??
-          response.statusCode == ApiConstant.codeSuccess;
-      final message = responseData[ApiConstant.keyMessage]?.toString() ??
-          _getStatusMessage(response.statusCode);
-      final data = responseData[ApiConstant.keyData];
-      final errors =
-          responseData[ApiConstant.keyErrors] as Map<String, dynamic>?;
-
-      if (success && data != null && fromJson != null) {
-        if (data is List) {
-          return ApiResponse<T>(
-            success: true,
-            message: message,
-            data: null,
-            dataList: data
-                .map((e) => fromJson(e as Map<String, dynamic>))
-                .toList(),
-            statusCode: response.statusCode,
-          );
-        } else {
-          return ApiResponse<T>(
-            success: true,
-            message: message,
-            data: fromJson(data as Map<String, dynamic>),
-            statusCode: response.statusCode,
-          );
-        }
+      // Always include the full response data on success
+      if (success) {
+        return ApiResponse(
+          success: true,
+          message: message,
+          data: responseData,
+          statusCode: response.statusCode,
+        );
       }
 
-      return ApiResponse<T>(
-        success: success,
-        message: message,
-        errors: _parseErrors(errors),
+      return ApiResponse(
+        success: false,
+        message: message.isNotEmpty ? message : 'Request failed',
         statusCode: response.statusCode,
       );
     } catch (e) {
       Log.e('Response Parse Error', e);
-      return ApiResponse<T>(
+      return ApiResponse(
         success: false,
-        message: 'parseError',
+        message: 'Failed to parse response',
         statusCode: response.statusCode,
       );
     }
   }
 
-  /// Refresh access token
   Future<bool> _refreshToken() async {
     try {
-      final refreshToken = await UserPreferences.getRefreshToken();
-      if (refreshToken == null) return false;
+      final storedRefreshToken = await UserPreferences.getRefreshToken();
+      if (storedRefreshToken == null) return false;
 
       final uri = _buildUri(ApiConstant.refreshToken);
       final response = await http.post(
         uri,
         headers: ApiConstant.defaultHeaders,
-        body: jsonEncode({'refresh_token': refreshToken}),
+        body: jsonEncode({'refresh_token': storedRefreshToken}),
       );
 
-      if (response.statusCode == ApiConstant.codeSuccess) {
+      if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final tokenData = data[ApiConstant.keyData] as Map<String, dynamic>;
+        final accessToken = data['access_token'] as String?;
+        final expiresIn = data['expires_in'] as int?;
 
-        await UserPreferences.saveTokens(
-          accessToken: tokenData[ApiConstant.keyAccessToken] as String,
-          refreshToken: tokenData[ApiConstant.keyRefreshToken] as String,
-          expiresIn: tokenData[ApiConstant.keyExpiresIn] as int,
-        );
-
-        return true;
+        if (accessToken != null) {
+          await UserPreferences.saveTokens(
+            accessToken: accessToken,
+            refreshToken: storedRefreshToken,
+            expiresIn: expiresIn ?? 864000000,
+          );
+          return true;
+        }
       }
     } catch (e) {
       Log.e('Token Refresh Error', e);
     }
     return false;
   }
-
-  /// Get status message from code
-  String _getStatusMessage(int statusCode) {
-    switch (statusCode) {
-      case ApiConstant.codeSuccess:
-      case ApiConstant.codeCreated:
-        return 'success';
-      case ApiConstant.codeBadRequest:
-        return 'badRequest';
-      case ApiConstant.codeUnauthorized:
-        return 'unauthorized';
-      case ApiConstant.codeForbidden:
-        return 'forbidden';
-      case ApiConstant.codeNotFound:
-        return 'notFound';
-      case ApiConstant.codeValidationError:
-        return 'validationError';
-      case ApiConstant.codeServerError:
-        return 'serverError';
-      case ApiConstant.codeServiceUnavailable:
-        return 'serviceUnavailable';
-      default:
-        return 'somethingWentWrong';
-    }
-  }
-
-  /// Parse validation errors
-  Map<String, String>? _parseErrors(Map<String, dynamic>? errors) {
-    if (errors == null) return null;
-
-    final result = <String, String>{};
-    errors.forEach((key, value) {
-      if (value is List && value.isNotEmpty) {
-        result[key] = value.first.toString();
-      } else if (value is String) {
-        result[key] = value;
-      }
-    });
-
-    return result.isNotEmpty ? result : null;
-  }
-
-  // ===== MULTIPART UPLOAD =====
-
-  /// Upload file with multipart request
-  Future<ApiResponse<T>> uploadFile<T>(
-    String endpoint, {
-    required String fieldName,
-    required String filePath,
-    Map<String, dynamic>? fields,
-    T Function(Map<String, dynamic>)? fromJson,
-  }) async {
-    if (!await hasConnectivity()) {
-      return ApiResponse<T>(
-        success: false,
-        message: 'noInternetConnection',
-        statusCode: 0,
-      );
-    }
-
-    try {
-      final token = await _getAuthToken(endpoint);
-      final uri = _buildUri(endpoint);
-
-      final request = http.MultipartRequest('POST', uri)
-        ..headers.addAll(_getHeaders(token: token))
-        ..files.add(await http.MultipartFile.fromPath(fieldName, filePath));
-
-      if (fields != null) {
-        fields.forEach((key, value) {
-          request.fields[key] = value.toString();
-        });
-      }
-
-      final streamedResponse = await request.send().timeout(
-        const Duration(milliseconds: ApiConstant.connectionTimeout),
-      );
-
-      final response = await http.Response.fromStream(streamedResponse);
-      return _parseResponse<T>(response, fromJson);
-    } catch (e) {
-      Log.e('Upload Error', e);
-      return ApiResponse<T>(
-        success: false,
-        message: 'uploadFailed',
-        statusCode: 500,
-      );
-    }
-  }
 }
 
-/// Generic API Response wrapper
-class ApiResponse<T> {
+class ApiResponse {
   final bool success;
   final String message;
-  final T? data;
-  final List<dynamic>? dataList;
-  final Map<String, String>? errors;
+  final Map<String, dynamic>? data;
   final int? statusCode;
 
   ApiResponse({
     required this.success,
     required this.message,
     this.data,
-    this.dataList,
-    this.errors,
     this.statusCode,
   });
-
-  bool get hasErrors => errors != null && errors!.isNotEmpty;
-  bool get hasData => data != null || dataList != null;
 }
