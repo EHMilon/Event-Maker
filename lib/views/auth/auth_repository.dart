@@ -1,21 +1,22 @@
 import '../../models/auth_models.dart';
 import '../../models/user_model.dart';
+import '../../models/api_result.dart';
 import '../../utils/user_preferences.dart';
 import '../../utils/logger.dart';
 import '../../services/api_service.dart';
 import '../../constants/api_constant.dart';
 
 /// Repository for handling all authentication-related API operations.
+/// 
+/// Uses [Result<T>] pattern for type-safe response handling with
+/// comprehensive error management.
 class AuthRepository {
   final ApiService _apiService = ApiService();
 
-  String _handleError(dynamic error) {
-    Log.e('AuthRepository Error', error);
-    return 'Something went wrong';
-  }
+  // ===== SIGN UP =====
 
   /// Register new user
-  Future<AuthApiResponse<SignUpResponseModel>> signUp(
+  Future<Result<SignUpResponseModel>> signUp(
     SignUpRequestModel request,
   ) async {
     try {
@@ -25,27 +26,38 @@ class AuthRepository {
       );
 
       if (response.success && response.data != null) {
-        final signUpResponse = SignUpResponseModel.fromJson(response.data!);
-        return AuthApiResponse(
-          success: true,
-          message: response.message,
-          data: signUpResponse,
-          statusCode: response.statusCode,
-        );
+        try {
+          final signUpResponse = SignUpResponseModel.fromJson(response.data!);
+          return Success(signUpResponse);
+        } catch (e, stackTrace) {
+          Log.e('Failed to parse sign up response', e, stackTrace);
+          return Error(
+            'Failed to process registration response.',
+            statusCode: response.statusCode,
+            errorType: ErrorType.parseError,
+          );
+        }
       }
 
-      return AuthApiResponse(
-        success: false,
-        message: response.message,
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Sign up error', e, stackTrace);
+      return Error(
+        'Registration failed. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
+  // ===== SIGN IN =====
+
   /// Sign in user
-  Future<AuthApiResponse<SignInResponseModel>> signIn(
+  Future<Result<SignInResponseModel>> signIn(
     SignInRequestModel request,
   ) async {
     try {
@@ -55,29 +67,39 @@ class AuthRepository {
       );
 
       if (response.success && response.data != null) {
-        final signInResponse = SignInResponseModel.fromJson(response.data!);
-        await _saveSession(signInResponse);
-
-        return AuthApiResponse(
-          success: true,
-          message: response.message,
-          data: signInResponse,
-          statusCode: response.statusCode,
-        );
+        try {
+          final signInResponse = SignInResponseModel.fromJson(response.data!);
+          await _saveSession(signInResponse);
+          return Success(signInResponse);
+        } catch (e, stackTrace) {
+          Log.e('Failed to parse sign in response', e, stackTrace);
+          return Error(
+            'Failed to process login response.',
+            statusCode: response.statusCode,
+            errorType: ErrorType.parseError,
+          );
+        }
       }
 
-      return AuthApiResponse(
-        success: false,
-        message: response.message,
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Sign in error', e, stackTrace);
+      return Error(
+        'Login failed. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
+  // ===== EMAIL VERIFICATION =====
+
   /// Verify email with OTP
-  Future<AuthApiResponse<VerifyEmailResponseModel>> verifyEmail(
+  Future<Result<VerifyEmailResponseModel>> verifyEmail(
     VerifyEmailRequestModel request,
   ) async {
     try {
@@ -87,32 +109,41 @@ class AuthRepository {
       );
 
       if (response.success && response.data != null) {
-        final verifyResponse = VerifyEmailResponseModel.fromJson(response.data!);
-        
-        if (verifyResponse.tokens != null) {
-          await _saveTokensFromVerify(verifyResponse);
-        }
+        try {
+          final verifyResponse = VerifyEmailResponseModel.fromJson(response.data!);
+          
+          if (verifyResponse.tokens != null) {
+            await _saveTokensFromVerify(verifyResponse);
+          }
 
-        return AuthApiResponse(
-          success: true,
-          message: response.message,
-          data: verifyResponse,
-          statusCode: response.statusCode,
-        );
+          return Success(verifyResponse);
+        } catch (e, stackTrace) {
+          Log.e('Failed to parse verify email response', e, stackTrace);
+          return Error(
+            'Failed to process verification response.',
+            statusCode: response.statusCode,
+            errorType: ErrorType.parseError,
+          );
+        }
       }
 
-      return AuthApiResponse(
-        success: false,
-        message: response.message,
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Verify email error', e, stackTrace);
+      return Error(
+        'Verification failed. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
   /// Resend verification code
-  Future<AuthApiResponse<void>> resendVerificationCode(
+  Future<Result<void>> resendVerificationCode(
     ResendVerificationRequestModel request,
   ) async {
     try {
@@ -121,18 +152,29 @@ class AuthRepository {
         data: request.toJson(),
       );
 
-      return AuthApiResponse(
-        success: response.success,
-        message: response.message,
+      if (response.success) {
+        return const Success(null);
+      }
+
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Resend verification error', e, stackTrace);
+      return Error(
+        'Failed to resend code. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
+  // ===== PASSWORD RESET =====
+
   /// Request password reset
-  Future<AuthApiResponse<ForgotPasswordResponseModel>> forgotPassword(
+  Future<Result<ForgotPasswordResponseModel>> forgotPassword(
     ForgotPasswordRequestModel request,
   ) async {
     try {
@@ -142,27 +184,36 @@ class AuthRepository {
       );
 
       if (response.success && response.data != null) {
-        final forgotResponse = ForgotPasswordResponseModel.fromJson(response.data!);
-        return AuthApiResponse(
-          success: true,
-          message: response.message,
-          data: forgotResponse,
-          statusCode: response.statusCode,
-        );
+        try {
+          final forgotResponse = ForgotPasswordResponseModel.fromJson(response.data!);
+          return Success(forgotResponse);
+        } catch (e, stackTrace) {
+          Log.e('Failed to parse forgot password response', e, stackTrace);
+          return Error(
+            'Failed to process response.',
+            statusCode: response.statusCode,
+            errorType: ErrorType.parseError,
+          );
+        }
       }
 
-      return AuthApiResponse(
-        success: false,
-        message: response.message,
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Forgot password error', e, stackTrace);
+      return Error(
+        'Failed to send reset link. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
   /// Verify reset code
-  Future<AuthApiResponse<VerifyResetCodeResponseModel>> verifyResetCode(
+  Future<Result<VerifyResetCodeResponseModel>> verifyResetCode(
     VerifyResetCodeRequestModel request,
   ) async {
     try {
@@ -172,27 +223,36 @@ class AuthRepository {
       );
 
       if (response.success && response.data != null) {
-        final verifyResponse = VerifyResetCodeResponseModel.fromJson(response.data!);
-        return AuthApiResponse(
-          success: true,
-          message: response.message,
-          data: verifyResponse,
-          statusCode: response.statusCode,
-        );
+        try {
+          final verifyResponse = VerifyResetCodeResponseModel.fromJson(response.data!);
+          return Success(verifyResponse);
+        } catch (e, stackTrace) {
+          Log.e('Failed to parse verify reset code response', e, stackTrace);
+          return Error(
+            'Failed to process response.',
+            statusCode: response.statusCode,
+            errorType: ErrorType.parseError,
+          );
+        }
       }
 
-      return AuthApiResponse(
-        success: false,
-        message: response.message,
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Verify reset code error', e, stackTrace);
+      return Error(
+        'Verification failed. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
   /// Reset password
-  Future<AuthApiResponse<void>> resetPassword(
+  Future<Result<void>> resetPassword(
     ResetPasswordRequestModel request,
   ) async {
     try {
@@ -201,18 +261,29 @@ class AuthRepository {
         data: request.toJson(),
       );
 
-      return AuthApiResponse(
-        success: response.success,
-        message: response.message,
+      if (response.success) {
+        return const Success(null);
+      }
+
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Reset password error', e, stackTrace);
+      return Error(
+        'Failed to reset password. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
-  /// Change password
-  Future<AuthApiResponse<void>> changePassword(
+  // ===== CHANGE PASSWORD =====
+
+  /// Change password (for logged in users)
+  Future<Result<void>> changePassword(
     ChangePasswordRequestModel request,
   ) async {
     try {
@@ -221,22 +292,46 @@ class AuthRepository {
         data: request.toJson(),
       );
 
-      return AuthApiResponse(
-        success: response.success,
-        message: response.message,
+      if (response.success) {
+        return const Success(null);
+      }
+
+      // Handle session expired
+      if (response.isAuthError) {
+        await UserPreferences.clearUserData();
+        return Error(
+          'Session expired. Please login again.',
+          statusCode: response.statusCode,
+          errorType: ErrorType.sessionExpired,
+        );
+      }
+
+      return Error(
+        response.message,
         statusCode: response.statusCode,
+        validationErrors: response.errors,
+        errorType: response.errorType ?? ErrorType.unknown,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Change password error', e, stackTrace);
+      return Error(
+        'Failed to change password. Please try again.',
+        errorType: ErrorType.unknown,
+      );
     }
   }
 
+  // ===== TOKEN MANAGEMENT =====
+
   /// Refresh access token
-  Future<AuthApiResponse<RefreshTokenResponseModel>> refreshToken() async {
+  Future<Result<RefreshTokenResponseModel>> refreshToken() async {
     try {
       final refreshToken = await UserPreferences.getRefreshToken();
       if (refreshToken == null) {
-        return const AuthApiResponse(success: false, message: 'Session expired');
+        return const Error(
+          'Session expired. Please login again.',
+          errorType: ErrorType.sessionExpired,
+        );
       }
 
       final request = RefreshTokenRequestModel(refreshToken: refreshToken);
@@ -246,42 +341,67 @@ class AuthRepository {
       );
 
       if (response.success && response.data != null) {
-        final refreshResponse = RefreshTokenResponseModel.fromJson(response.data!);
-        
-        await UserPreferences.saveTokens(
-          accessToken: refreshResponse.accessToken,
-          refreshToken: refreshToken,
-          expiresIn: refreshResponse.expiresIn,
-        );
+        try {
+          final refreshResponse = RefreshTokenResponseModel.fromJson(response.data!);
+          
+          await UserPreferences.saveTokens(
+            accessToken: refreshResponse.accessToken,
+            refreshToken: refreshToken,
+            expiresIn: refreshResponse.expiresIn,
+          );
 
-        return AuthApiResponse(
-          success: true,
-          message: response.message,
-          data: refreshResponse,
-          statusCode: response.statusCode,
-        );
+          return Success(refreshResponse);
+        } catch (e, stackTrace) {
+          Log.e('Failed to parse refresh token response', e, stackTrace);
+          return Error(
+            'Failed to process token refresh.',
+            statusCode: response.statusCode,
+            errorType: ErrorType.parseError,
+          );
+        }
       }
 
-      return AuthApiResponse(
-        success: false,
-        message: response.message,
+      // Token refresh failed - clear session
+      await UserPreferences.clearUserData();
+      return Error(
+        response.message.isNotEmpty 
+            ? response.message 
+            : 'Session expired. Please login again.',
         statusCode: response.statusCode,
+        errorType: ErrorType.sessionExpired,
       );
-    } catch (e) {
-      return AuthApiResponse(success: false, message: _handleError(e));
+    } catch (e, stackTrace) {
+      Log.e('Refresh token error', e, stackTrace);
+      await UserPreferences.clearUserData();
+      return Error(
+        'Session expired. Please login again.',
+        errorType: ErrorType.sessionExpired,
+      );
     }
   }
 
+  // ===== LOGOUT =====
+
   /// Logout user
-  Future<AuthApiResponse<void>> logout() async {
+  Future<Result<void>> logout() async {
     try {
-      await _apiService.post(ApiConstant.logout);
-      await _clearSession();
-      return const AuthApiResponse(success: true, message: 'Logout successful');
+      // Try to notify server, but don't wait for response
+      await _apiService.post(ApiConstant.logout).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => ApiResponse(
+          success: true,
+          message: 'Logout successful',
+          statusCode: 200,
+        ),
+      );
     } catch (e) {
-      await _clearSession();
-      return const AuthApiResponse(success: true, message: 'Logout successful');
+      Log.e('Logout API call failed', e);
+      // Continue with local logout even if API call fails
     }
+
+    // Always clear local session
+    await _clearSession();
+    return const Success(null);
   }
 
   // ===== SESSION MANAGEMENT =====
@@ -324,12 +444,16 @@ class AuthRepository {
     await UserPreferences.clearUserData();
   }
 
+  // ===== SESSION CHECKS =====
+
+  /// Check if user has a valid session
   Future<bool> hasValidSession() async {
     final isLoggedIn = await UserPreferences.isLoggedIn();
     final accessToken = await UserPreferences.getAccessToken();
     return isLoggedIn && accessToken != null;
   }
 
+  /// Get current user from local storage
   Future<UserModel?> getCurrentUser() async {
     final details = await UserPreferences.getUserDetails();
     if (details == null) return null;
@@ -342,15 +466,20 @@ class AuthRepository {
     );
   }
 
+  // ===== LEGACY COMPATIBILITY =====
+  // These methods maintain backward compatibility with the old AuthApiResponse pattern
+
   /// Use signIn instead
-  Future<AuthApiResponse<SignInResponseModel>> login(
+  @Deprecated('Use signIn instead')
+  Future<Result<SignInResponseModel>> login(
     SignInRequestModel request,
   ) async {
     return signIn(request);
   }
 
   /// Use signUp instead
-  Future<AuthApiResponse<SignUpResponseModel>> signup(
+  @Deprecated('Use signUp instead')
+  Future<Result<SignUpResponseModel>> signup(
     SignUpRequestModel request,
   ) async {
     return signUp(request);
