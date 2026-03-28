@@ -1,9 +1,9 @@
-import '../models/auth_models.dart';
-import '../models/user_model.dart';
-import '../utils/user_preferences.dart';
-import '../utils/logger.dart';
-import '../services/api_service.dart';
-import '../constants/api_constant.dart';
+import '../../models/auth_models.dart';
+import '../../models/user_model.dart';
+import '../../utils/user_preferences.dart';
+import '../../utils/logger.dart';
+import '../../services/api_service.dart';
+import '../../constants/api_constant.dart';
 
 /// Repository for handling all authentication-related API operations.
 class AuthRepository {

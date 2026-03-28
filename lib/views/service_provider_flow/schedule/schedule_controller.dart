@@ -1,5 +1,5 @@
 import 'package:event_maker/models/schedule_model.dart';
-import 'package:event_maker/repository/schedule_repository.dart';
+import 'package:event_maker/views/service_provider_flow/schedule/schedule_repository.dart';
 import 'package:event_maker/services/connectivity_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

@@ -1,5 +1,5 @@
 import 'dart:async';
-import '../models/chat_model.dart';
+import '../../models/chat_model.dart';
 
 /// Repository abstraction for chat-related data operations.
 /// Currently returns mock data but maintains the same contract

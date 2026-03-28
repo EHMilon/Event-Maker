@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:event_maker/models/chat_model.dart';
-import 'package:event_maker/repository/chat_repository.dart';
+import 'package:event_maker/views/chats/chat_repository.dart';
 
 /// Controller for the chat detail / conversation screen.
 /// Uses [ChatRepository] for data fetching with backend-compatible patterns.

@@ -1,4 +1,4 @@
-import '../models/schedule_model.dart';
+import '../../../models/schedule_model.dart';
 
 /// Repository abstraction for schedule-related data operations.
 /// Currently returns mock data but maintains the same contract

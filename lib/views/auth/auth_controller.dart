@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/auth_models.dart';
-import '../../repository/auth_repository.dart';
+import 'auth_repository.dart';
 import '../../utils/logger.dart';
 import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
