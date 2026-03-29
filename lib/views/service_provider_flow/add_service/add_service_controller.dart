@@ -261,6 +261,7 @@ class AddServiceController extends GetxController {
 
   // Step 2: Packages
   var packages = <PackageFormData>[].obs;
+  var needsConfirmationBeforePayment = false.obs;
 
   // Step 3: Timings
   var timings =
@@ -280,13 +281,19 @@ class AddServiceController extends GetxController {
     selectedServiceType.value = service.type;
     selectedCategory.value = _categoryFromServiceType(service.type);
     if (service.packages != null) {
+      // Clear existing packages first
+      for (var pkg in packages) {
+        pkg.dispose();
+      }
       packages.clear();
       for (var package in service.packages!) {
         final sp = PackageFormData();
         sp.nameController.text = package.name;
         sp.priceController.text = package.price.toString();
-        sp.features.clear();
-        sp.features.addAll(package.features);
+        // Add each feature with initial value using feature controllers
+        for (var feature in package.features) {
+          sp.addFeature(feature);
+        }
         packages.add(sp);
       }
     }
@@ -561,6 +568,10 @@ class AddServiceController extends GetxController {
     for (var card in additionalAvailabilityCards) {
       card.dispose();
     }
+    // Dispose all package controllers
+    for (var pkg in packages) {
+      pkg.dispose();
+    }
     super.onClose();
   }
 
@@ -611,12 +622,40 @@ class AddServiceController extends GetxController {
   }
 }
 
+/// Form data class for packages with proper controller management
+/// Uses TextEditingControllers for features to maintain text field state
 class PackageFormData {
   final nameController = TextEditingController();
   final priceController = TextEditingController();
-  var features = <String>[].obs;
+  final featureControllers = <TextEditingController>[].obs;
 
   PackageFormData() {
-    features.add(''); // Start with one empty feature
+    addFeature(); // Start with one empty feature
+  }
+
+  /// Add a new feature controller
+  void addFeature([String initialValue = '']) {
+    featureControllers.add(TextEditingController(text: initialValue));
+  }
+
+  /// Remove a feature controller at the given index
+  void removeFeature(int index) {
+    if (index >= 0 && index < featureControllers.length) {
+      featureControllers[index].dispose();
+      featureControllers.removeAt(index);
+    }
+  }
+
+  /// Get feature values as strings
+  List<String> get features =>
+      featureControllers.map((c) => c.text).where((f) => f.isNotEmpty).toList();
+
+  /// Dispose all controllers
+  void dispose() {
+    nameController.dispose();
+    priceController.dispose();
+    for (var controller in featureControllers) {
+      controller.dispose();
+    }
   }
 }

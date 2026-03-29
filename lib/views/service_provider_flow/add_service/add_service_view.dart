@@ -263,6 +263,40 @@ class _AddServiceViewState extends State<AddServiceView> {
                 _buildAdditionalAvailabilitySection(),
 
                 SizedBox(height: 16.h),
+
+                // Need confirmation before payment toggle
+                Obx(() => Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'needConfirmationBeforePayment'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Switch(
+                        value: controller.needsConfirmationBeforePayment.value,
+                        onChanged: (value) {
+                          controller.needsConfirmationBeforePayment.value = value;
+                        },
+                        activeColor: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                )),
+
+                SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -358,8 +392,10 @@ class _AddServiceViewState extends State<AddServiceView> {
     }
   }
 
-  void _openPackages(BuildContext context) {
-    Get.to(() => const PackagesPricingsView());
+  void _openPackages(BuildContext context) async {
+    await Get.to(() => const PackagesPricingsView());
+    // Force refresh after returning from packages view
+    setState(() {});
   }
 
   Widget _buildAdditionalAvailabilitySection() {
@@ -459,6 +495,12 @@ class _AddServiceViewState extends State<AddServiceView> {
   }
 
   Widget _buildPackageSummaryCard(int index, PackageFormData package) {
+    // Get features from controllers (called during build, not inside Obx)
+    final features = package.featureControllers
+        .map((c) => c.text)
+        .where((f) => f.isNotEmpty)
+        .toList();
+
     return GestureDetector(
       onTap: () => _openPackages(context),
       child: Container(
@@ -509,7 +551,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                     ),
                     SizedBox(width: 8.w),
                     GestureDetector(
-                      onTap: () => controller.removePackage(index),
+                      onTap: () {
+                        controller.removePackage(index);
+                        setState(() {});
+                      },
                       child: Container(
                         padding: EdgeInsets.all(4.r),
                         decoration: BoxDecoration(
@@ -527,46 +572,42 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ),
               ],
             ),
-            if (package.features.isNotEmpty &&
-                package.features.any((f) => f.isNotEmpty)) ...[
+            // Features display - rebuilt via setState when returning from packages view
+            if (features.isNotEmpty) ...[
               SizedBox(height: 8.h),
-              Column(
+              Wrap(
                 spacing: 8.w,
-                // runSpacing: 4.h,
-                children: package.features
-                    .where((f) => f.isNotEmpty)
-                    .take(3)
-                    .map(
-                      (feature) => Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
+                runSpacing: 4.h,
+                children: features.map((feature) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check,
+                          size: 12.r,
+                          color: AppColors.primary,
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.r),
+                        SizedBox(width: 4.w),
+                        Text(
+                          feature,
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            color: AppColors.primary,
+                          ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check,
-                              size: 12.r,
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              feature,
-                              style: GoogleFonts.inter(
-                                fontSize: 11.sp,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ],

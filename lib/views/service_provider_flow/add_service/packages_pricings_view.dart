@@ -214,7 +214,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                 ),
               ),
               TextButton.icon(
-                onPressed: () => package.features.add(''),
+                onPressed: () => package.addFeature(),
                 icon: Icon(Icons.add, size: 18.r, color: AppColors.primary),
                 label: Text(
                   'addFeature'.tr,
@@ -225,82 +225,79 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
           ),
           SizedBox(height: 8.h),
 
-          // Features list
-          ...List.generate(package.features.length, (featureIndex) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 20.r,
-                    color: AppColors.primary,
-                  ),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: TextField(
-                      onChanged: (value) {
-                        package.features[featureIndex] = value;
-                      },
-                      controller: TextEditingController(
-                        text: package.features[featureIndex],
-                      ),
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: AppColors.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'enterFeatureHint'.tr,
-                        hintStyle: GoogleFonts.inter(
+          // Features list - uses Obx to listen to featureControllers changes
+          Obx(() => Column(
+            children: List.generate(package.featureControllers.length, (featureIndex) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 8.h),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 20.r,
+                      color: AppColors.primary,
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: TextField(
+                        controller: package.featureControllers[featureIndex],
+                        style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textPrimary,
                         ),
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 10.h,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                          borderSide: BorderSide(color: AppColors.borderLight),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                          borderSide: BorderSide(color: AppColors.borderLight),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                          borderSide: BorderSide(color: AppColors.primary),
-                        ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            package.features.removeAt(featureIndex);
-                            setState(() {});
-                          },
-                          icon: Icon(
-                            Icons.close,
-                            size: 18.r,
-                            color: AppColors.grey,
+                        decoration: InputDecoration(
+                          hintText: 'enterFeatureHint'.tr,
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: AppColors.textSecondary,
+                          ),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 10.h,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                            borderSide: BorderSide(color: AppColors.borderLight),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                            borderSide: BorderSide(color: AppColors.borderLight),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                            borderSide: BorderSide(color: AppColors.primary),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              package.removeFeature(featureIndex);
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              size: 18.r,
+                              color: AppColors.grey,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }),
+                  ],
+                ),
+              );
+            }),
+          )),
 
           // Empty features placeholder
-          if (package.features.isEmpty)
-            Text(
-              'noFeaturesAdded'.tr,
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
-                color: AppColors.textSecondary,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+          Obx(() => package.featureControllers.isEmpty
+              ? Text(
+                  'noFeaturesAdded'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+              : const SizedBox.shrink()),
         ],
       ),
     );
