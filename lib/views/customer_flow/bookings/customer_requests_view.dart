@@ -3,7 +3,6 @@ import 'package:event_maker/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/views/customer_flow/bookings/customer_bookings_controller.dart';
 import 'package:event_maker/views/customer_flow/bookings/customer_requests_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
-import 'package:event_maker/models/service_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -104,23 +103,17 @@ class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Obx(() {
         if (controller.isLoading.value) {
-          return Skeletonizer(
+          return Obx(() => Skeletonizer(
             enabled: true,
             child: ListView.separated(
-              itemCount: 5,
+              itemCount: controller.skeletonRequests.length,
               separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
-                return _RequestCard(
-                  request: CustomerBookingModel(
-                    image: 'assets/images/catering.jpg',
-                    date: '10th Jan - Fri - 4:00 PM',
-                    title: 'Skeleton Title Loading...',
-                    subtitle: 'Loading Location...',
-                  ),
-                );
+                final item = controller.skeletonRequests[index];
+                return _RequestCard(request: item);
               },
             ),
-          );
+          ));
         }
 
         final list = controller.upcomingRequests;
@@ -148,23 +141,17 @@ class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Obx(() {
         if (controller.isLoading.value) {
-          return Skeletonizer(
+          return Obx(() => Skeletonizer(
             enabled: true,
             child: ListView.separated(
-              itemCount: 5,
+              itemCount: controller.skeletonRequests.length,
               separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
-                return _RequestCard(
-                  request: CustomerBookingModel(
-                    image: 'assets/images/catering.jpg',
-                    date: '10th Jan - Fri - 4:00 PM',
-                    title: 'Skeleton Title Loading...',
-                    subtitle: 'Loading Location...',
-                  ),
-                );
+                final item = controller.skeletonRequests[index];
+                return _RequestCard(request: item);
               },
             ),
-          );
+          ));
         }
 
         final list = controller.pastRequests;
@@ -191,31 +178,12 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final service = request.service;
     return GestureDetector(
       onTap: () {
-        // Navigate to service details with mock service data
-        Get.to(
-          () => ServiceDetailView(
-            service: ServiceModel(
-              id: 'mock_id_${request.title}',
-              title: request.title,
-              description:
-                  'This is a detailed description for ${request.title}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-              images: [request.image],
-              type: ServiceType.event,
-              provider: ServiceProvider(
-                name: 'Professional Provider',
-                role: 'Event Specialist',
-                imageUrl: 'https://i.pravatar.cc/150?u=provider',
-                isVerified: true,
-              ),
-              location: request.subtitle,
-              rating: 4.8,
-              reviewCount: 124,
-              basePrice: 500,
-            ),
-          ),
-        );
+        if (service != null) {
+          Get.to(() => ServiceDetailView(service: service));
+        }
       },
       child: Padding(
         padding: EdgeInsets.only(bottom: 8.h),
@@ -224,9 +192,9 @@ class _RequestCard extends StatelessWidget {
           title: request.title,
           subtitle: request.subtitle,
           location: request.subtitle,
-          price: '500',
-          priceUnit: 'AED',
-          rating: '4.8',
+          price: service?.basePrice?.toString() ?? '',
+          priceUnit: service?.priceUnit ?? 'AED',
+          rating: service?.rating?.toString() ?? '',
           showBookmarkButton: false,
         ),
       ),
