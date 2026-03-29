@@ -1,6 +1,7 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/views/customer_flow/home/widgets/service_section_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/home/customer_home_controller.dart';
@@ -53,7 +54,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                                 width: 2.w,
                               ),
                               image: DecorationImage(
-                                image: AssetImage('assets/images/person.jpg'),
+                                image: AssetImage(controller.userAvatar),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -64,7 +65,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Hi, Shareena!',
+                                'Hi, ${controller.userName}!',
                                 style: GoogleFonts.inter(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
@@ -72,7 +73,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                                 ),
                               ),
                               // SizedBox(height: 4.h),
-                              Row(
+                              Obx(() => Row(
                                 children: [
                                   SvgPicture.asset(
                                     'assets/icons/location.svg',
@@ -81,7 +82,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                                   ),
                                   SizedBox(width: 4.w),
                                   Text(
-                                    'New York, USA', // TODO: Fetch from location service
+                                    controller.userLocation.value,
                                     style: GoogleFonts.inter(
                                       fontSize: 12.sp,
                                       // color: AppColors.grey,
@@ -89,7 +90,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                                     ),
                                   ),
                                 ],
-                              ),
+                              )),
                             ],
                           ),
                         ],
@@ -209,33 +210,18 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                   // SizedBox(height: 16.h),
                   _buildCategories(),
                   SizedBox(height: 24.h),
-                  // Catering Services
-                  _buildSectionHeader(
-                    'cateringServices'.tr,
-                    'catering',
-                    'cateringServices'.tr,
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildHorizontalList('catering'),
-                  SizedBox(height: 24.h),
-                  // Filming Events
-                  _buildSectionHeader(
-                    'filmingEvents'.tr,
-                    'filming',
-                    'filmingEvents'.tr,
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildHorizontalList('filming'),
-                  SizedBox(height: 24.h),
-                  // Cleaning Services
-                  _buildSectionHeader(
-                    'cleaningServices'.tr,
-                    'cleaning',
-                    'cleaningServices'.tr,
-                  ),
-                  SizedBox(height: 16.h),
-                  _buildHorizontalList('cleaning'),
-                  SizedBox(height: 80.h), // Extra space for bottom nav
+                  // Dynamic service sections from controller
+                  ...controller.serviceSections.expand((section) => [
+                        _buildSectionHeader(
+                          section.titleKey.tr,
+                          section.serviceType.name,
+                          section.categoryName.tr,
+                        ),
+                        SizedBox(height: 16.h),
+                        _buildHorizontalList(section),
+                        SizedBox(height: 24.h),
+                      ]),
+                  SizedBox(height: 80.h),
                 ],
               ),
             ),
@@ -321,22 +307,9 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
     );
   }
 
-  Widget _buildHorizontalList(String type) {
+  Widget _buildHorizontalList(ServiceSectionModel section) {
     final HomeController controller = Get.find<HomeController>();
-
-    // Filter services by type from controller's allServices
-    final List<ServiceModel> services = controller.allServices.where((service) {
-      switch (type) {
-        case 'catering':
-          return service.type == ServiceType.catering;
-        case 'cleaning':
-          return service.type == ServiceType.cleaning;
-        case 'filming':
-          return service.type == ServiceType.filming;
-        default:
-          return false;
-      }
-    }).toList();
+    final List<ServiceModel> services = controller.getServicesBySection(section);
 
     // Use filtered services or show placeholder if empty
     if (services.isEmpty) {
