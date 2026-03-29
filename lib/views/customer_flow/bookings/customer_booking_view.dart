@@ -1,7 +1,8 @@
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/widgets/customer_bookmark_card.dart';
+import 'package:event_maker/widgets/empty_widget.dart';
 import 'package:event_maker/views/customer_flow/bookings/customer_bookings_controller.dart';
-import 'package:event_maker/views/customer_flow/bookings/customer_requests_model.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_booking_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,8 +10,8 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class CustomerRequestsView extends GetView<CustomerBookingsController> {
-  const CustomerRequestsView({super.key});
+class CustomerBookingView extends GetView<CustomerBookingsController> {
+  const CustomerBookingView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +119,10 @@ class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
 
         final list = controller.upcomingRequests;
         if (list.isEmpty) {
-          return const _EmptyState(message: 'noUpcomingRequests');
+          return EmptyWidget(
+            message: 'noUpcomingRequests'.tr,
+            icon: Icons.event_available,
+          );
         }
         return ListView.separated(
           itemCount: list.length,
@@ -156,7 +160,10 @@ class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
 
         final list = controller.pastRequests;
         if (list.isEmpty) {
-          return const _EmptyState(message: 'noHistoryRequests');
+          return EmptyWidget(
+            message: 'noHistoryRequests'.tr,
+            icon: Icons.event_available,
+          );
         }
         return ListView.separated(
           itemCount: list.length,
@@ -202,28 +209,4 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.message});
 
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.event_available, size: 48.r, color: AppColors.grey),
-          SizedBox(height: 12.h),
-          Text(
-            message.tr,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

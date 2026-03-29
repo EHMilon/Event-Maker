@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:event_maker/widgets/empty_widget.dart';
 
 class BookmarksView extends GetView<ProfileController> {
   const BookmarksView({super.key});
@@ -41,7 +42,10 @@ class BookmarksView extends GetView<ProfileController> {
         () => Skeletonizer(
           enabled: controller.isLoading.value,
           child: controller.bookmarks.isEmpty && !controller.isLoading.value
-              ? _buildEmptyState()
+              ? EmptyWidget(
+                  message: 'No bookmarks yet'.tr,
+                  icon: Icons.bookmark_border,
+                )
               : ListView.separated(
                   padding: EdgeInsets.symmetric(
                     horizontal: 20.w,
@@ -74,49 +78,6 @@ class BookmarksView extends GetView<ProfileController> {
                     );
                   },
                 ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(20.r),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.bookmark_border,
-                size: 60.sp,
-                color: AppColors.primary,
-              ),
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              'No bookmarks yet',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'Explore services and save your favorites here!',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
         ),
       ),
     );

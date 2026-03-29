@@ -1,5 +1,5 @@
 import 'package:event_maker/models/service_model.dart';
-import 'package:event_maker/views/customer_flow/bookings/customer_requests_model.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_booking_model.dart';
 import 'package:get/get.dart';
 
 class CustomerBookingsController extends GetxController {
