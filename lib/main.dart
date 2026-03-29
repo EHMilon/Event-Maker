@@ -1,16 +1,20 @@
-import 'package:event_maker/services/connectivity_service.dart';
+import 'package:event_maker/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'app_routes.dart';
 import 'constants/app_themes.dart';
-import 'constants/app_colors.dart';
 import 'utils/user_preferences.dart';
 import 'localization/app_localization.dart';
+import 'global/init_binding.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize StorageService before using it
+  await StorageService.init();
+  
   final savedLanguageCode = await UserPreferences.getLanguageCode();
   runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
 }
@@ -62,9 +66,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-class InitialBinding extends Bindings {
-  @override
-  void dependencies() {
-    Get.put(ConnectivityService(), permanent: true);
-  }
-}
+

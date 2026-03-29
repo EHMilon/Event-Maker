@@ -5,6 +5,12 @@ class ConnectivityService extends GetxService {
   final _connectivity = Connectivity();
   final isConnected = true.obs;
 
+  /// Getter for checking connectivity (returns Future<bool>)
+  Future<bool> get hasConnection async {
+    final result = await _connectivity.checkConnectivity();
+    return !result.contains(ConnectivityResult.none);
+  }
+
   @override
   void onInit() {
     super.onInit();

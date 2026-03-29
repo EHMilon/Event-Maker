@@ -2,20 +2,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../models/auth_models.dart';
-import '../../models/api_result.dart';
-import 'auth_repository.dart';
-import '../../controllers/base_controller.dart';
-import '../../utils/logger.dart';
-import '../../utils/user_preferences.dart';
-import '../../app_routes.dart';
+import 'package:event_maker/models/auth_models.dart';
+import 'package:event_maker/global/base_controller.dart';
+import 'package:event_maker/utils/logger.dart';
+import 'package:event_maker/utils/user_preferences.dart';
+import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/services/api_service.dart';
+import 'package:event_maker/services/api_exception.dart';
+import 'package:event_maker/constants/api_constant.dart';
 
 /// Controller for handling authentication state and operations.
 ///
 /// Extends [BaseController] for built-in loading/error state management
-/// and uses [Result<T>] pattern for type-safe API response handling.
+/// and uses try-catch pattern with ApiException for error handling.
 class AuthController extends BaseController {
-  final AuthRepository _authRepository = AuthRepository();
+  final ApiService _apiService = ApiService();
 
   // Controllers - using late to prevent early disposal issues
   late final loginEmailController = TextEditingController();
@@ -99,7 +100,6 @@ class AuthController extends BaseController {
 
   @override
   void onClose() {
-    // Cancel timer only - controllers persist for app lifetime
     _otpTimer?.cancel();
     super.onClose();
   }
@@ -134,7 +134,6 @@ class AuthController extends BaseController {
   }
 
   /// Restore user type from SharedPreferences
-  /// This ensures user type is restored even after password reset flow
   Future<void> restoreUserType() async {
     try {
       final userType = await UserPreferences.getUserType();
@@ -167,7 +166,6 @@ class AuthController extends BaseController {
   Future<void> onLogin() async {
     if (isLoading.value) return;
 
-    // Validate input
     final email = loginEmailController.text.trim();
     final password = loginPasswordController.text;
 
@@ -189,19 +187,15 @@ class AuthController extends BaseController {
     setLoading(true);
 
     try {
-      // Always try to get user type from SharedPreferences first
       var userType = await UserPreferences.getUserType();
 
-      // If SharedPreferences returns default 'customer', check if it was actually set
       if (userType == UserPreferences.USER_TYPE_CUSTOMER) {
         final hasUserType = await UserPreferences.hasUserType();
         if (!hasUserType) {
-          // User type was not explicitly set, check controller state
           if (selectedType.value.isNotEmpty) {
             userType = selectedType.value;
             await UserPreferences.setUserType(userType);
           } else {
-            // No user type found, redirect to user type selection
             showError('Please select user type');
             Get.offAllNamed('/user-type');
             return;
@@ -209,12 +203,10 @@ class AuthController extends BaseController {
         }
       }
 
-      // Also update controller state to match SharedPreferences
       if (selectedType.value.isEmpty && userType.isNotEmpty) {
         selectedType.value = userType;
       }
 
-      // Ensure role is never empty before creating request
       if (userType.isEmpty) {
         showError('Please select user type');
         Get.offAllNamed('/user-type');
@@ -227,42 +219,49 @@ class AuthController extends BaseController {
         password: password,
       );
 
-      final result = await _authRepository.signIn(request);
+      final response = await _apiService.post(
+        ApiConstant.signIn,
+        body: request.toJson(),
+      );
 
-      switch (result) {
-        case Success<SignInResponseModel>(data: final data):
-          loginEmailController.clear();
-          loginPasswordController.clear();
-          clearError();
+      final data = SignInResponseModel.fromJson(response);
 
-          // Check if user is verified
-          if (!data.user.isVerified) {
-            // User is not verified - show message and don't navigate
-            showSuccess('accountCreatedSuccessfully'.tr);
-            return;
-          }
+      // Save session
+      await Future.wait([
+        UserPreferences.saveUserDetails(
+          userId: data.user.id,
+          name: data.user.fullName,
+          email: data.user.emailAddress,
+          userType: data.user.role,
+        ),
+        UserPreferences.saveTokens(
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          expiresIn: data.expiresIn,
+        ),
+        UserPreferences.setLoggedIn(true),
+      ]);
 
-          if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
-            Get.offAllNamed(AppRoutes.serviceProviderHome);
-          } else {
-            Get.offAllNamed(AppRoutes.customerHome);
-          }
+      loginEmailController.clear();
+      loginPasswordController.clear();
+      clearError();
 
-        case Error<SignInResponseModel>(
-          message: final message,
-          errorType: final type,
-          validationErrors: final errors,
-        ):
-          setError(message, type: type, errors: errors);
-          showError(message);
-
-        case Loading<SignInResponseModel>():
-          // Already handled by loading state
-          break;
+      if (!data.user.isVerified) {
+        showSuccess('accountCreatedSuccessfully'.tr);
+        return;
       }
+
+      if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+        Get.offAllNamed(AppRoutes.serviceProviderHome);
+      } else {
+        Get.offAllNamed(AppRoutes.customerHome);
+      }
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Login failed', e, stackTrace);
-      setError('Login failed. Please try again.', type: ErrorType.unknown);
+      setError('Login failed. Please try again.');
       showError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -373,30 +372,24 @@ class AuthController extends BaseController {
         termsAgreed: true,
       );
 
-      final result = await _authRepository.signUp(request);
+      final response = await _apiService.post(
+        ApiConstant.signUp,
+        body: request.toJson(),
+      );
 
-      switch (result) {
-        case Success<SignUpResponseModel>(data: final data):
-          await _persistUserId(data.userId);
-          signupPasswordController.clear();
-          clearError();
-          Get.toNamed('/otp-verification');
-          _startOtpTimer();
+      final data = SignUpResponseModel.fromJson(response);
 
-        case Error<SignUpResponseModel>(
-          message: final message,
-          errorType: final type,
-          validationErrors: final errors,
-        ):
-          setError(message, type: type, errors: errors);
-          showError(message);
-
-        case Loading<SignUpResponseModel>():
-          break;
-      }
+      await _persistUserId(data.userId);
+      signupPasswordController.clear();
+      clearError();
+      Get.toNamed('/otp-verification');
+      _startOtpTimer();
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Customer signup failed', e, stackTrace);
-      setError('Signup failed. Please try again.', type: ErrorType.unknown);
+      setError('Signup failed. Please try again.');
       showError('Signup failed. Please try again.');
     } finally {
       setLoading(false);
@@ -422,30 +415,24 @@ class AuthController extends BaseController {
         serviceCategoryName: selectedServiceCategory.value,
       );
 
-      final result = await _authRepository.signUp(request);
+      final response = await _apiService.post(
+        ApiConstant.signUp,
+        body: request.toJson(),
+      );
 
-      switch (result) {
-        case Success<SignUpResponseModel>(data: final data):
-          await _persistUserId(data.userId);
-          signupPasswordController.clear();
-          clearError();
-          Get.toNamed('/otp-verification');
-          _startOtpTimer();
+      final data = SignUpResponseModel.fromJson(response);
 
-        case Error<SignUpResponseModel>(
-          message: final message,
-          errorType: final type,
-          validationErrors: final errors,
-        ):
-          setError(message, type: type, errors: errors);
-          showError(message);
-
-        case Loading<SignUpResponseModel>():
-          break;
-      }
+      await _persistUserId(data.userId);
+      signupPasswordController.clear();
+      clearError();
+      Get.toNamed('/otp-verification');
+      _startOtpTimer();
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Provider signup failed', e, stackTrace);
-      setError('Signup failed. Please try again.', type: ErrorType.unknown);
+      setError('Signup failed. Please try again.');
       showError('Signup failed. Please try again.');
     } finally {
       setLoading(false);
@@ -478,31 +465,24 @@ class AuthController extends BaseController {
 
     try {
       final request = ForgotPasswordRequestModel(emailAddress: email);
-      final result = await _authRepository.forgotPassword(request);
 
-      switch (result) {
-        case Success<ForgotPasswordResponseModel>(data: final data):
-          await _persistUserId(data.userId);
-          clearError();
-          Get.toNamed('/otp-verification');
-          _startOtpTimer();
+      final response = await _apiService.post(
+        ApiConstant.forgotPassword,
+        body: request.toJson(),
+      );
 
-        case Error<ForgotPasswordResponseModel>(
-          message: final message,
-          errorType: final type,
-        ):
-          setError(message, type: type);
-          showError(message);
+      final data = ForgotPasswordResponseModel.fromJson(response);
 
-        case Loading<ForgotPasswordResponseModel>():
-          break;
-      }
+      await _persistUserId(data.userId);
+      clearError();
+      Get.toNamed('/otp-verification');
+      _startOtpTimer();
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Forgot password failed', e, stackTrace);
-      setError(
-        'Something went wrong. Please try again.',
-        type: ErrorType.unknown,
-      );
+      setError('Something went wrong. Please try again.');
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -533,7 +513,6 @@ class AuthController extends BaseController {
       return;
     }
 
-    // Check if user ID is available
     if (verificationUserId.value.isEmpty) {
       await _loadPersistedUserId();
       if (verificationUserId.value.isEmpty) {
@@ -551,62 +530,62 @@ class AuthController extends BaseController {
           verificationCode: otp,
         );
 
-        final result = await _authRepository.verifyResetCode(request);
+        final response = await _apiService.post(
+          ApiConstant.verifyResetCode,
+          body: request.toJson(),
+        );
 
-        switch (result) {
-          case Success<VerifyResetCodeResponseModel>(data: final data):
-            _otpTimer?.cancel();
-            resetSecretKey.value = data.secretKey;
-            clearError();
-            Get.toNamed('/reset-password-new');
+        final data = VerifyResetCodeResponseModel.fromJson(response);
 
-          case Error<VerifyResetCodeResponseModel>(
-            message: final message,
-            errorType: final type,
-          ):
-            setError(message, type: type);
-            showError(message);
-
-          case Loading<VerifyResetCodeResponseModel>():
-            break;
-        }
+        _otpTimer?.cancel();
+        resetSecretKey.value = data.secretKey;
+        clearError();
+        Get.toNamed('/reset-password-new');
       } else {
         final request = VerifyEmailRequestModel(
           userId: verificationUserId.value,
           verificationCode: otp,
         );
 
-        final result = await _authRepository.verifyEmail(request);
+        final response = await _apiService.post(
+          ApiConstant.verifyEmail,
+          body: request.toJson(),
+        );
 
-        switch (result) {
-          case Success<VerifyEmailResponseModel>(data: final data):
-            _otpTimer?.cancel();
-            _clearPersistedUserId();
-            clearError();
+        final data = VerifyEmailResponseModel.fromJson(response);
 
-            if (data.isProviderPending) {
-              Get.toNamed('/request-sent');
-            } else {
-              Get.offAllNamed(AppRoutes.getStarted);
-            }
+        // Save tokens if present
+        if (data.tokens != null) {
+          await UserPreferences.saveTokens(
+            accessToken: data.tokens!.accessToken,
+            refreshToken: data.tokens!.refreshToken,
+            expiresIn: data.tokens!.expiresIn,
+          );
+          await UserPreferences.saveUserDetails(
+            userId: data.userId,
+            name: '',
+            email: '',
+            userType: data.role,
+          );
+          await UserPreferences.setLoggedIn(true);
+        }
 
-          case Error<VerifyEmailResponseModel>(
-            message: final message,
-            errorType: final type,
-          ):
-            setError(message, type: type);
-            showError(message);
+        _otpTimer?.cancel();
+        _clearPersistedUserId();
+        clearError();
 
-          case Loading<VerifyEmailResponseModel>():
-            break;
+        if (data.isProviderPending) {
+          Get.toNamed('/request-sent');
+        } else {
+          Get.offAllNamed(AppRoutes.getStarted);
         }
       }
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('OTP verification failed', e, stackTrace);
-      setError(
-        'Verification failed. Please try again.',
-        type: ErrorType.unknown,
-      );
+      setError('Verification failed. Please try again.');
       showError('Verification failed. Please try again.');
     } finally {
       setLoading(false);
@@ -631,26 +610,19 @@ class AuthController extends BaseController {
         userId: verificationUserId.value,
       );
 
-      final result = await _authRepository.resendVerificationCode(request);
+      await _apiService.post(
+        ApiConstant.resendVerificationCode,
+        body: request.toJson(),
+      );
 
-      switch (result) {
-        case Success<void>():
-          _startOtpTimer();
-          showSuccess('OTP resent successfully');
-
-        case Error<void>(message: final message, errorType: final type):
-          setError(message, type: type);
-          showError(message);
-
-        case Loading<void>():
-          break;
-      }
+      _startOtpTimer();
+      showSuccess('OTP resent successfully');
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Resend OTP failed', e, stackTrace);
-      setError(
-        'Something went wrong. Please try again.',
-        type: ErrorType.unknown,
-      );
+      setError('Something went wrong. Please try again.');
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -696,32 +668,25 @@ class AuthController extends BaseController {
         confirmPassword: confirmPassword,
       );
 
-      final result = await _authRepository.resetPassword(request);
+      await _apiService.post(
+        ApiConstant.resetPassword,
+        body: request.toJson(),
+      );
 
-      switch (result) {
-        case Success<void>():
-          newPasswordController.clear();
-          confirmPasswordController.clear();
-          otpController.clear();
-          forgotEmailController.clear();
-          resetSecretKey.value = '';
-          _clearPersistedUserId();
-          clearError();
-          Get.toNamed('/congratulations');
-
-        case Error<void>(message: final message, errorType: final type):
-          setError(message, type: type);
-          showError(message);
-
-        case Loading<void>():
-          break;
-      }
+      newPasswordController.clear();
+      confirmPasswordController.clear();
+      otpController.clear();
+      forgotEmailController.clear();
+      resetSecretKey.value = '';
+      _clearPersistedUserId();
+      clearError();
+      Get.toNamed('/congratulations');
+    } on ApiException catch (e) {
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Reset password failed', e, stackTrace);
-      setError(
-        'Something went wrong. Please try again.',
-        type: ErrorType.unknown,
-      );
+      setError('Something went wrong. Please try again.');
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -771,29 +736,25 @@ class AuthController extends BaseController {
         confirmPassword: confirmPassword,
       );
 
-      final result = await _authRepository.changePassword(request);
+      await _apiService.post(
+        ApiConstant.changePassword,
+        body: request.toJson(),
+      );
 
-      switch (result) {
-        case Success<void>():
-          currentPasswordController.clear();
-          changeNewPasswordController.clear();
-          changeConfirmPasswordController.clear();
-          clearError();
-          showSuccess('Password changed successfully');
-
-        case Error<void>(message: final message, errorType: final type):
-          setError(message, type: type);
-          showError(message);
-
-        case Loading<void>():
-          break;
+      currentPasswordController.clear();
+      changeNewPasswordController.clear();
+      changeConfirmPasswordController.clear();
+      clearError();
+      showSuccess('Password changed successfully');
+    } on ApiException catch (e) {
+      if (e.isUnauthorized) {
+        await UserPreferences.clearUserData();
       }
+      setError(e.message);
+      showError(e.message);
     } catch (e, stackTrace) {
       Log.e('Change password failed', e, stackTrace);
-      setError(
-        'Something went wrong. Please try again.',
-        type: ErrorType.unknown,
-      );
+      setError('Something went wrong. Please try again.');
       showError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
@@ -825,22 +786,22 @@ class AuthController extends BaseController {
     setLoading(true);
 
     try {
-      await _authRepository.logout();
+      await _apiService.post(ApiConstant.logout).timeout(
+        const Duration(seconds: 5),
+      );
+    } catch (e) {
+      Log.e('Logout API call failed', e);
+    }
+
+    try {
       _clearPersistedUserId();
-      // Clear user type on logout so user can select again
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('user_type');
-      // Dispose controllers
+      await UserPreferences.clearUserData();
       disposeAllControllers();
-      // Navigate to onboarding after logout
       Get.offAllNamed(AppRoutes.onboarding);
     } catch (e) {
-      Log.e('Logout failed', e);
-      // Still clear user type and go to onboarding
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('user_type');
-      } catch (_) {}
+      Log.e('Logout cleanup failed', e);
       Get.offAllNamed(AppRoutes.onboarding);
     } finally {
       setLoading(false);
