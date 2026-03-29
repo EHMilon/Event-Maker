@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:event_maker/widgets/order_card.dart';
-import 'package:event_maker/views/service_provider_flow/active_orders/sp_service_orders_view.dart';
+import 'package:event_maker/views/service_provider_flow/active_orders/active_orders_details_view.dart';
 
 class SPHomeView extends GetView<SPHomeController> {
   const SPHomeView({super.key});
@@ -105,7 +105,11 @@ class SPHomeView extends GetView<SPHomeController> {
             Row(
               children: [
                 Text(
-                  'Fresh Food L.L.C',
+                  controller.businessName.value.isEmpty 
+                    ? (controller.userName.value.isEmpty 
+                        ? 'Good morning' 
+                        : controller.userName.value)
+                    : controller.businessName.value,
                   style: GoogleFonts.inter(
                     fontSize: 24.sp,
                     fontWeight: FontWeight.w600,
@@ -415,7 +419,7 @@ class SPHomeView extends GetView<SPHomeController> {
             ),
             SizedBox(height: 12.h), // Spacing between header and amount
             Text(
-              '\$2,788 USD', // Ensure _buildBalanceText() returns this style
+              controller.stats.value.totalBalance, // Use dynamic balance from controller
               style: GoogleFonts.inter(
                 fontSize: 26.sp, // Large, bold balance text
                 color: AppColors.textPrimary,
@@ -429,16 +433,7 @@ class SPHomeView extends GetView<SPHomeController> {
     );
   }
 
-  Widget _buildBalanceText() {
-    return Text(
-      controller.stats.value.totalBalance,
-      style: GoogleFonts.inter(
-        fontSize: 24.sp,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
+
 
   Widget _buildQuickActions(BuildContext context) {
     return Row(

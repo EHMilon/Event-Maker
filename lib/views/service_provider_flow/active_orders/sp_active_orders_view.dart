@@ -1,5 +1,5 @@
 import 'package:event_maker/widgets/order_card.dart';
-import 'package:event_maker/views/service_provider_flow/active_orders/sp_service_orders_view.dart';
+import 'package:event_maker/views/service_provider_flow/active_orders/active_orders_details_view.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

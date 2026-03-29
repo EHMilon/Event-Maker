@@ -49,6 +49,8 @@ class ApiConstant {
   static const String providerEarnings = '/provider/earnings';
   static const String providerReviews = '/provider/reviews';
   static const String providerAvailability = '/provider/availability';
+  static const String providerDashboard = '/provider/dashboard';
+  static const String providerActiveOrders = '/provider/orders/active';
 
   // ===== CUSTOMER ENDPOINTS =====
 
