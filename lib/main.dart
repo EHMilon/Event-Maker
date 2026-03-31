@@ -1,3 +1,4 @@
+import 'package:event_maker/global/loading_overlay.dart';
 import 'package:event_maker/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,24 +44,27 @@ class MyApp extends StatelessWidget {
           initialBinding: InitialBinding(),
           initialRoute: AppRoutes.splash,
           getPages: AppRoutes.routes,
-          builder: (context, child) {
-            final brightness = Theme.of(context).brightness;
-            final overlayStyle = SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
-              statusBarIconBrightness:
-                  brightness == Brightness.dark ? Brightness.light : Brightness.dark,
-              statusBarBrightness:
-                  brightness == Brightness.dark ? Brightness.dark : Brightness.light,
-            );
+           builder: (context, child) => LoadingOverlay(
+            child: child ?? const SizedBox.shrink(),
+          ),
+          // builder: (context, child) {
+          //   final brightness = Theme.of(context).brightness;
+          //   final overlayStyle = SystemUiOverlayStyle(
+          //     statusBarColor: Colors.transparent,
+          //     statusBarIconBrightness:
+          //         brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          //     statusBarBrightness:
+          //         brightness == Brightness.dark ? Brightness.dark : Brightness.light,
+          //   );
 
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: overlayStyle,
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: child!,
-              ),
-            );
-          },
+          //   return AnnotatedRegion<SystemUiOverlayStyle>(
+          //     value: overlayStyle,
+          //     child: Directionality(
+          //       textDirection: TextDirection.ltr,
+          //       child: child!,
+          //     ),
+          //   );
+          // },
         );
       },
     );

@@ -1,3 +1,6 @@
+import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/app_constants.dart';
+import 'package:event_maker/global/data_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -5,8 +8,9 @@ import 'auth_controller.dart';
 import '../../constants/app_colors.dart';
 import '../../widgets/primary_text_button.dart';
 
-class UserTypeView extends GetView<AuthController> {
-  const UserTypeView({super.key});
+class UserTypeView extends StatelessWidget {
+  UserTypeView({super.key});
+  final controller = Get.put(DataController());
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +46,10 @@ class UserTypeView extends GetView<AuthController> {
                   padding: EdgeInsets.symmetric(horizontal: 40.w),
                   child: Column(
                     children: [
-                      _imageButton('customer', 'assets/images/as_customer.png'),
+                      _imageButton(UserType.customer, 'assets/images/as_customer.png'),
                       SizedBox(height: 24.h),
                       _imageButton(
-                        'provider',
+                        UserType.provider,
                         'assets/images/as_service_provider.png',
                       ),
                     ],
@@ -59,7 +63,9 @@ class UserTypeView extends GetView<AuthController> {
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
               child: PrimaryTextButton(
                 text: 'continueText'.tr,
-                onPressed: controller.onContinueUserType,
+                onPressed: () {
+                  Get.toNamed(AppRoutes.login);
+                },
               ),
             ),
           ],
@@ -68,11 +74,11 @@ class UserTypeView extends GetView<AuthController> {
     );
   }
 
-  Widget _imageButton(String type, String imagePath) {
+  Widget _imageButton(UserType type, String imagePath) {
     return GestureDetector(
-      onTap: () => controller.selectType(type),
+      onTap: () => controller.setUserType(type),
       child: Obx(() {
-        final isSelected = controller.selectedType.value == type;
+        final isSelected = controller.userType.value == type;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,

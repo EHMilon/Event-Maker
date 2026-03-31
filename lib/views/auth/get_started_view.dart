@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
-class GetStartedView extends GetView<AuthController> {
+class GetStartedView extends GetView {
   const GetStartedView({super.key});
 
   @override

@@ -1,3 +1,4 @@
+import 'package:event_maker/constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageKeys {
@@ -9,6 +10,7 @@ class StorageKeys {
   static const String themeMode = 'theme_mode';
   static const String locale = 'locale';
   static const String isFirstTime = 'is_first_time';
+  static const String userType = 'user_type';
 }
 
 class StorageService {
@@ -50,6 +52,12 @@ class StorageService {
 
   Future<void> saveLanguageCode(String code) =>
       _prefs.setString(StorageKeys.locale, code);
+
+  // user type
+  String getUserType() => _prefs.getString(StorageKeys.userType) ?? UserType.customer.toString();
+
+  Future<void> saveUserType(String userType) =>
+      _prefs.setString(StorageKeys.userType, userType);    
 
   // Auth
   bool get isLoggedIn {
