@@ -114,7 +114,7 @@ class PaymentView extends StatelessWidget {
                       SizedBox(height: 16.h),
                       _buildSummaryRow(
                         controller.selectedPackage?.name.tr ?? 'standard'.tr,
-                        '${(controller.selectedPackage?.price ?? controller.service.basePrice ?? 0).toInt()} ${controller.service.priceUnit}',
+                        '${_parsePrice(controller.selectedPackage?.price) ?? controller.service.basePrice} ${controller.service.priceUnit}',
                       ),
                       SizedBox(height: 8.h),
                       _buildSummaryRow(
@@ -134,7 +134,7 @@ class PaymentView extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${(controller.selectedPackage?.price ?? controller.service.basePrice ?? 0).toInt()} ${controller.service.priceUnit}',
+                            '${_parsePrice(controller.selectedPackage?.price) ?? controller.service.basePrice} ${controller.service.priceUnit}',
                             style: GoogleFonts.inter(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w700,
@@ -186,7 +186,6 @@ class PaymentView extends StatelessWidget {
 
                 SizedBox(height: 40.h),
 
-                
                 SizedBox(height: 20.h),
               ],
             ),
@@ -196,9 +195,9 @@ class PaymentView extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: PrimaryTextButton(
-                    onPressed: () => controller.processPayment(),
-                    text: 'payNow'.tr,
-                  ),
+          onPressed: () => controller.processPayment(),
+          text: 'payNow'.tr,
+        ),
       ),
     );
   }
@@ -224,6 +223,14 @@ class PaymentView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Parses price from String or num type
+  String? _parsePrice(dynamic price) {
+    if (price == null) return null;
+    if (price is num) return price.toString();
+    if (price is String) return price;
+    return null;
   }
 
   Widget _buildPaymentMethodOption(

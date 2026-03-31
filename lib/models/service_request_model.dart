@@ -1,42 +1,40 @@
 /// Request model for creating/updating services - backend compatible
 /// Follows clean architecture with proper serialization
 class ServiceRequestModel {
-  final String? id; // Only for updates
+  final int? id; // Only for updates
   final String title;
   final String description;
-  final String location;
-  final String category; // hospitality, event, trainer
-  final String providerRole; // freelancer, business, productiveFamily
-  final String? serviceAs; // Optional - enum value or custom string
+  final String serviceTypeName; // Event, Professional Trainer, Photography, etc.
+  final String roleName; // Business, Freelancer, Productive Family
+  final String? serviceAsName; // Decoration, Fitness Trainer, etc.
   final String? eventVenue; // Optional - for event category
-  final List<String>? subOptions; // Optional - sub-options for specific service types
+  final String? options; // Optional - sub-options like "Indoor"
   final int? attendanceCapacity; // Optional - for event/trainer categories
   final List<PackageRequestModel> packages;
-  final List<AvailabilityRequestModel> availability;
-  final AvailabilityRequestModel? primaryAvailability;
-  final bool? canGoOutside;
-  final bool? cannotGoOutside;
-  final bool needsConfirmationBeforePayment;
-  final String? imagePath; // For multipart upload
+  final List<AvailabilityRequestModel> availabilities;
+  final bool canGoOutsideLocation;
+  final bool cannotGoOutsideLocation;
+  final bool requiresConfirmation;
+  final String currency;
+  final String? coverImage; // For multipart upload path
 
   ServiceRequestModel({
     this.id,
     required this.title,
     required this.description,
-    required this.location,
-    required this.category,
-    required this.providerRole,
-    this.serviceAs,
+    required this.serviceTypeName,
+    required this.roleName,
+    this.serviceAsName,
     this.eventVenue,
-    this.subOptions,
+    this.options,
     this.attendanceCapacity,
     this.packages = const [],
-    this.availability = const [],
-    this.primaryAvailability,
-    this.canGoOutside,
-    this.cannotGoOutside,
-    this.needsConfirmationBeforePayment = false,
-    this.imagePath,
+    this.availabilities = const [],
+    this.canGoOutsideLocation = false,
+    this.cannotGoOutsideLocation = false,
+    this.requiresConfirmation = false,
+    this.currency = 'AED',
+    this.coverImage,
   });
 
   Map<String, dynamic> toJson() {
@@ -44,87 +42,93 @@ class ServiceRequestModel {
       if (id != null) 'id': id,
       'title': title,
       'description': description,
-      'location': location,
-      'category': category,
-      'provider_role': providerRole,
-      if (serviceAs != null) 'service_as': serviceAs,
-      if (eventVenue != null) 'event_venue': eventVenue,
-      if (subOptions != null && subOptions!.isNotEmpty) 'sub_options': subOptions,
+      'service_type_name': serviceTypeName,
+      'role_name': roleName,
+      if (serviceAsName != null) 'service_as_name': serviceAsName,
+      if (eventVenue != null) 'event_vanue': eventVenue, // Note: backend typo
+      if (options != null) 'options': options,
       if (attendanceCapacity != null) 'attendance_capacity': attendanceCapacity,
-      if (packages.isNotEmpty) 'packages': packages.map((p) => p.toJson()).toList(),
-      if (availability.isNotEmpty) 'availability': availability.map((a) => a.toJson()).toList(),
-      if (primaryAvailability != null) 'primary_availability': primaryAvailability!.toJson(),
-      if (canGoOutside != null) 'can_go_outside': canGoOutside,
-      if (cannotGoOutside != null) 'cannot_go_outside': cannotGoOutside,
-      'needs_confirmation_before_payment': needsConfirmationBeforePayment,
+      if (packages.isNotEmpty)
+        'packages': packages.map((p) => p.toJson()).toList(),
+      if (availabilities.isNotEmpty)
+        'availabilities': availabilities.map((a) => a.toJson()).toList(),
+      'can_go_outside_location': canGoOutsideLocation,
+      'can_not_go_outside_location': cannotGoOutsideLocation,
+      'requires_confirmation': requiresConfirmation,
+      'currency': currency,
     };
   }
 
   /// For multipart requests with image upload
   Map<String, String> toMultipartFields() {
     final fields = <String, String>{
-      if (id != null) 'id': id!,
+      if (id != null) 'id': id.toString(),
       'title': title,
       'description': description,
-      'location': location,
-      'category': category,
-      'provider_role': providerRole,
-      if (serviceAs != null) 'service_as': serviceAs!,
-      if (eventVenue != null) 'event_venue': eventVenue!,
-      if (subOptions != null && subOptions!.isNotEmpty) 'sub_options': subOptions!.join(','),
-      if (attendanceCapacity != null) 'attendance_capacity': attendanceCapacity.toString(),
-      if (canGoOutside != null) 'can_go_outside': canGoOutside.toString(),
-      if (cannotGoOutside != null) 'cannot_go_outside': cannotGoOutside.toString(),
-      'needs_confirmation_before_payment': needsConfirmationBeforePayment.toString(),
+      'service_type_name': serviceTypeName,
+      'role_name': roleName,
+      if (serviceAsName != null) 'service_as_name': serviceAsName!,
+      if (eventVenue != null) 'event_vanue': eventVenue!,
+      if (options != null) 'options': options!,
+      if (attendanceCapacity != null)
+        'attendance_capacity': attendanceCapacity.toString(),
+      'can_go_outside_location': canGoOutsideLocation.toString(),
+      'can_not_go_outside_location': cannotGoOutsideLocation.toString(),
+      'requires_confirmation': requiresConfirmation.toString(),
+      'currency': currency,
       'packages': _encodePackages(packages),
-      if (primaryAvailability != null) 'primary_availability': _encodeAvailability(primaryAvailability!),
+      'availabilities': _encodeAvailabilities(availabilities),
+      // Include cover_image if available (required by backend for updates)
+      if (coverImage != null && coverImage!.isNotEmpty)
+        'cover_image': coverImage!,
     };
     return fields;
   }
 
   String _encodePackages(List<PackageRequestModel> packages) {
-    return packages.map((p) => p.toJson()).toList().toString();
+    return jsonEncode(packages.map((p) => p.toJson()).toList());
   }
 
-  String _encodeAvailability(AvailabilityRequestModel availability) {
-    return availability.toJson().toString();
+  String _encodeAvailabilities(List<AvailabilityRequestModel> availabilities) {
+    return jsonEncode(availabilities.map((a) => a.toJson()).toList());
   }
 
   ServiceRequestModel copyWith({
-    String? id,
+    int? id,
     String? title,
     String? description,
-    String? location,
-    String? category,
-    String? providerRole,
-    String? serviceAs,
+    String? serviceTypeName,
+    String? roleName,
+    String? serviceAsName,
     String? eventVenue,
-    List<String>? subOptions,
+    String? options,
     int? attendanceCapacity,
     List<PackageRequestModel>? packages,
-    List<AvailabilityRequestModel>? availability,
-    AvailabilityRequestModel? primaryAvailability,
-    bool? canGoOutside,
-    bool? cannotGoOutside,
-    String? imagePath,
+    List<AvailabilityRequestModel>? availabilities,
+    bool? canGoOutsideLocation,
+    bool? cannotGoOutsideLocation,
+    bool? requiresConfirmation,
+    String? currency,
+    String? coverImage,
   }) {
     return ServiceRequestModel(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      location: location ?? this.location,
-      category: category ?? this.category,
-      providerRole: providerRole ?? this.providerRole,
-      serviceAs: serviceAs ?? this.serviceAs,
+      serviceTypeName: serviceTypeName ?? this.serviceTypeName,
+      roleName: roleName ?? this.roleName,
+      serviceAsName: serviceAsName ?? this.serviceAsName,
       eventVenue: eventVenue ?? this.eventVenue,
-      subOptions: subOptions ?? this.subOptions,
+      options: options ?? this.options,
       attendanceCapacity: attendanceCapacity ?? this.attendanceCapacity,
       packages: packages ?? this.packages,
-      availability: availability ?? this.availability,
-      primaryAvailability: primaryAvailability ?? this.primaryAvailability,
-      canGoOutside: canGoOutside ?? this.canGoOutside,
-      cannotGoOutside: cannotGoOutside ?? this.cannotGoOutside,
-      imagePath: imagePath ?? this.imagePath,
+      availabilities: availabilities ?? this.availabilities,
+      canGoOutsideLocation: canGoOutsideLocation ?? this.canGoOutsideLocation,
+      cannotGoOutsideLocation:
+          cannotGoOutsideLocation ?? this.cannotGoOutsideLocation,
+      requiresConfirmation: requiresConfirmation ?? this.requiresConfirmation,
+      currency: currency ?? this.currency,
+      coverImage: coverImage ?? this.coverImage,
     );
   }
 }
@@ -132,73 +136,121 @@ class ServiceRequestModel {
 /// Package request model for service packages
 class PackageRequestModel {
   final String name;
-  final double price;
+  final String price;
   final List<String> features;
+  final int sortOrder;
 
   PackageRequestModel({
     required this.name,
     required this.price,
     this.features = const [],
+    this.sortOrder = 1,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
       'price': price,
-      'features': features,
+      'sort_order': sortOrder,
+      'features': features
+          .map((f) => {'title': f, 'sort_order': 0})
+          .toList(),
     };
   }
 
   factory PackageRequestModel.fromJson(Map<String, dynamic> json) {
     return PackageRequestModel(
       name: json['name'] as String,
-      price: (json['price'] as num).toDouble(),
+      price: json['price'].toString(),
       features: (json['features'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ?? [],
+              ?.map((e) =>
+                  e is Map<String, dynamic> ? e['title'] as String : e.toString())
+              .toList() ??
+          [],
+      sortOrder: json['sort_order'] as int? ?? 1,
     );
   }
 }
 
 /// Availability request model for service availability
 class AvailabilityRequestModel {
-  final String id;
-  final List<String> selectedDays;
-  final String? startTime;
-  final String? endTime;
-  final bool canGoOutside;
-  final bool cannotGoOutside;
+  final int? id;
+  final List<String> weekDays;
+  final String startTime;
+  final String endTime;
+  final String address;
+  final String latitude;
+  final String longitude;
+  final int sortOrder;
 
   AvailabilityRequestModel({
-    required this.id,
-    this.selectedDays = const [],
-    this.startTime,
-    this.endTime,
-    this.canGoOutside = false,
-    this.cannotGoOutside = false,
+    this.id,
+    required this.weekDays,
+    required this.startTime,
+    required this.endTime,
+    required this.address,
+    required this.latitude,
+    required this.longitude,
+    this.sortOrder = 1,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'selected_days': selectedDays,
-      if (startTime != null) 'start_time': startTime,
-      if (endTime != null) 'end_time': endTime,
-      'can_go_outside': canGoOutside,
-      'cannot_go_outside': cannotGoOutside,
+      if (id != null) 'id': id,
+      'week_days': weekDays,
+      'start_time': startTime,
+      'end_time': endTime,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'sort_order': sortOrder,
     };
   }
 
   factory AvailabilityRequestModel.fromJson(Map<String, dynamic> json) {
     return AvailabilityRequestModel(
-      id: json['id'] as String,
-      selectedDays: (json['selected_days'] as List<dynamic>?)
-          ?.map((e) => e.toString())
-          .toList() ?? [],
-      startTime: json['start_time'] as String?,
-      endTime: json['end_time'] as String?,
-      canGoOutside: json['can_go_outside'] as bool? ?? false,
-      cannotGoOutside: json['cannot_go_outside'] as bool? ?? false,
+      id: json['id'] as int?,
+      weekDays: (json['week_days'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      startTime: json['start_time'] as String? ?? '09:00:00',
+      endTime: json['end_time'] as String? ?? '17:00:00',
+      address: json['address'] as String? ?? '',
+      latitude: json['latitude'] as String? ?? '0.0',
+      longitude: json['longitude'] as String? ?? '0.0',
+      sortOrder: json['sort_order'] as int? ?? 1,
     );
+  }
+}
+
+// Helper function for JSON encoding
+String jsonEncode(dynamic value) {
+  return _JsonEncoder().convert(value);
+}
+
+class _JsonEncoder {
+  String convert(dynamic value) {
+    if (value == null) return 'null';
+    if (value is String) return '"${_escapeString(value)}"';
+    if (value is num || value is bool) return value.toString();
+    if (value is List) {
+      return '[${value.map(convert).join(',')}]';
+    }
+    if (value is Map) {
+      final entries =
+          value.entries.map((e) => '"${e.key}":${convert(e.value)}').join(',');
+      return '{$entries}';
+    }
+    return '"$value"';
+  }
+
+  String _escapeString(String s) {
+    return s
+        .replaceAll('\\', '\\\\')
+        .replaceAll('"', '\\"')
+        .replaceAll('\n', '\\n')
+        .replaceAll('\r', '\\r')
+        .replaceAll('\t', '\\t');
   }
 }

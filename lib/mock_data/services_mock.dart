@@ -133,7 +133,7 @@ class ServicesMock {
   static final Map<String, List<ServicePackage>> _packagesDb = {
     // Photography packages
     'photo-pkg-individual': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Individual Portrait',
         price: 150,
         features: [
@@ -144,7 +144,7 @@ class ServicesMock {
       ),
     ],
     'photo-pkg-family': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Family Session',
         price: 350,
         features: [
@@ -157,7 +157,7 @@ class ServicesMock {
     ],
     // Wedding packages (shared between photo and film)
     'wedding-pkg-basic': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Basic',
         price: 120,
         features: [
@@ -169,7 +169,7 @@ class ServicesMock {
       ),
     ],
     'wedding-pkg-standard': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Standard',
         price: 299,
         features: [
@@ -182,7 +182,7 @@ class ServicesMock {
       ),
     ],
     'wedding-pkg-premium': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Premium',
         price: 499,
         features: [
@@ -197,7 +197,7 @@ class ServicesMock {
     ],
     // Music video packages
     'music-video-pkg-social': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Social Media Edit',
         price: 400,
         features: [
@@ -209,7 +209,7 @@ class ServicesMock {
       ),
     ],
     'music-video-pkg-pro': [
-      ServicePackage(
+      ServicePackage.legacy(
         name: 'Professional Video',
         price: 1200,
         features: [

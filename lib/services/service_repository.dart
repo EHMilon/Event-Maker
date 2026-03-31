@@ -1,8 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
 import '../mock_data/mock_data.dart';
+import '../utils/user_preferences.dart';
+import '../utils/logger.dart';
 import '../mock_data/review_mock.dart';
 import '../models/service_model.dart';
+import '../models/my_service_model.dart';
+import '../models/service_request_model.dart';
 import '../models/service_response_model.dart';
 import '../models/vendor_profile_model.dart';
+import 'api_service.dart';
+import 'api_exception.dart';
+import '../constants/api_constant.dart';
 
 /// Repository abstraction for fetching services data.
 /// Currently returns mock data but keeps the contract identical to what a backend
@@ -92,5 +101,142 @@ class ServiceRepository {
       services: providerServices,
       reviews: reviews,
     );
+  }
+
+  /// Create a new service via API
+  Future<ServiceModel> createService(ServiceRequestModel request) async {
+    final api = ApiService();
+
+    // Check authentication before making API call
+    final token = await UserPreferences.getAccessToken();
+    Log.d(
+      '=======> createService - Token check: ${token != null ? "EXISTS (${token.length} chars)" : "NULL"}',
+    );
+
+    if (token == null || token.isEmpty) {
+      throw ApiException(
+        message: 'Authentication required. Please log in again.',
+      );
+    }
+
+    try {
+      // Check if we have a cover image to upload
+      if (request.coverImage != null && request.coverImage!.isNotEmpty) {
+        // Use multipart request for image upload
+        final response = await api.multipart(
+          'POST',
+          ApiConstant.services,
+          fields: request.toMultipartFields(),
+          files: {'cover_image': File(request.coverImage!)},
+        );
+        return ServiceModel.fromJson(response['data']);
+      } else {
+        // Use regular POST request without image
+        final response = await api.post(
+          ApiConstant.services,
+          body: request.toJson(),
+        );
+        return ServiceModel.fromJson(response['data']);
+      }
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to create service: $e');
+    }
+  }
+
+  /// Update an existing service via API using PATCH with multipart/form-data
+  /// Backend expects PATCH method for update endpoint
+  Future<ServiceModel> updateService(ServiceRequestModel request) async {
+    final api = ApiService();
+
+    if (request.id == null) {
+      throw ApiException(message: 'Service ID is required for update');
+    }
+
+    // Check authentication before making API call
+    final token = await UserPreferences.getAccessToken();
+    Log.d(
+      '=======> updateService - Token check: ${token != null ? "EXISTS (${token.length} chars)" : "NULL"}',
+    );
+
+    if (token == null || token.isEmpty) {
+      throw ApiException(
+        message: 'Authentication required. Please log in again.',
+      );
+    }
+
+    try {
+      // Check if cover image is a new local file (not an existing API path)
+      final coverImage = request.coverImage;
+      final isNewImage =
+          coverImage != null &&
+          coverImage.isNotEmpty &&
+          !coverImage.startsWith('/media/') &&
+          !coverImage.startsWith('http://') &&
+          !coverImage.startsWith('https://');
+
+      Log.d(
+        '=======> updateService - ID: ${request.id}, isNewImage: $isNewImage',
+      );
+      Log.d('=======> updateService - coverImage: $coverImage');
+
+      // Backend expects PATCH method with multipart/form-data for update
+      Map<String, File> files = {};
+      if (isNewImage) {
+        files = {'cover_image': File(coverImage!)};
+        Log.d('=======> updateService - Using multipart PATCH with new image');
+      } else {
+        Log.d('=======> updateService - Using multipart PATCH without image');
+      }
+
+      final response = await api.multipart(
+        'PATCH',
+        ApiConstant.serviceUpdate(request.id!),
+        fields: request.toMultipartFields(),
+        files: files,
+      );
+
+      // Handle response - might be wrapped in 'data' or direct object
+      final data = response is Map ? (response['data'] ?? response) : response;
+      Log.d('=======> updateService - Response data: $data');
+      return ServiceModel.fromJson(data);
+    } on ApiException catch (e) {
+      Log.e('=======> updateService - ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> updateService - Error: $e');
+      throw ApiException(message: 'Failed to update service: $e');
+    }
+  }
+
+  /// Fetch service provider's own services (My Services)
+  /// Uses: api/services endpoint with lightweight MyServiceModel
+  Future<MyServiceListResponse> fetchMyServices() async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(ApiConstant.services);
+      return MyServiceListResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch services: $e');
+    }
+  }
+
+  /// Fetch a single service detail by ID
+  /// Uses: api/services/detail/{id} endpoint
+  Future<ServiceModel> fetchServiceDetail(int serviceId) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(ApiConstant.serviceDetail(serviceId));
+      return ServiceModel.fromJson(response['data']);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch service detail: $e');
+    }
   }
 }

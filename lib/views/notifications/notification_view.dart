@@ -77,7 +77,7 @@ class NotificationView extends GetView<NotificationController> {
       date: request.date,
       basePrice: request.price,
       priceUnit: request.priceUnit,
-      packages: null,
+          packages: [],
       isBookmarked: false,
     );
   }

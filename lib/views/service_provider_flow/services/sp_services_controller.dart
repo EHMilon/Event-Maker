@@ -1,15 +1,15 @@
-import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/models/my_service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SPServicesController extends GetxController {
   var isLoading = true.obs;
-  var services = <ServiceModel>[].obs;
+  var services = <MyServiceModel>[].obs;
 
   // Search state
   var searchQuery = ''.obs;
-  var filteredServices = <ServiceModel>[].obs;
+  var filteredServices = <MyServiceModel>[].obs;
   final TextEditingController searchTextController = TextEditingController();
 
   @override
@@ -33,17 +33,15 @@ class SPServicesController extends GetxController {
 
   final ServiceRepository _repository = const ServiceRepository();
 
-  /// TODO: Integrate with backend API
-  /// Replace loadMockData with actual API call
+  /// Fetch services from real API endpoint
   Future<void> fetchServices() async {
     isLoading.value = true;
 
     try {
-      final response = await _repository.fetchServices();
+      final response = await _repository.fetchMyServices();
       services.value = response.services;
       _filterServices();
     } catch (e) {
-      // TODO: Handle API error
       Get.snackbar('Error', 'Failed to fetch services: $e');
     } finally {
       isLoading.value = false;
@@ -61,9 +59,6 @@ class SPServicesController extends GetxController {
       filteredServices.value = services.where((service) {
         return service.title.toLowerCase().contains(
               searchQuery.value.toLowerCase(),
-            ) ||
-            service.type.name.toLowerCase().contains(
-              searchQuery.value.toLowerCase(),
             );
       }).toList();
     }
@@ -73,14 +68,14 @@ class SPServicesController extends GetxController {
     await fetchServices();
   }
 
-  /// TODO: Implement backend integration for adding service
-  void addService(ServiceModel service) {
+  /// Add a new service to the list (called after successful creation)
+  void addService(MyServiceModel service) {
     services.insert(0, service);
     _filterServices();
   }
 
-  /// TODO: Implement backend integration for updating service
-  void updateService(ServiceModel updatedService) {
+  /// Update an existing service in the list
+  void updateService(MyServiceModel updatedService) {
     final index = services.indexWhere((s) => s.id == updatedService.id);
     if (index != -1) {
       services[index] = updatedService;
@@ -88,8 +83,8 @@ class SPServicesController extends GetxController {
     }
   }
 
-  /// TODO: Implement backend integration for deleting service
-  void deleteService(String serviceId) {
+  /// Delete a service from the list
+  void deleteService(int serviceId) {
     services.removeWhere((s) => s.id == serviceId);
     _filterServices();
   }

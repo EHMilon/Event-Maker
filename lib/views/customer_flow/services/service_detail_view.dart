@@ -484,8 +484,7 @@ class ServiceDetailView extends StatelessWidget {
                         SizedBox(height: 24.h),
 
                         // Pricing / Packages
-                        if (service.packages != null &&
-                            service.packages!.isNotEmpty) ...[
+                        if (service.packages.isNotEmpty) ...[
                           Text(
                             'packagesPricings'.tr,
                             style: GoogleFonts.inter(
@@ -497,10 +496,10 @@ class ServiceDetailView extends StatelessWidget {
                           SizedBox(height: 16.h),
                           Obx(
                             () => Column(
-                              children: List.generate(service.packages!.length, (
+                              children: List.generate(service.packages.length, (
                                 index,
                               ) {
-                                final package = service.packages![index];
+                                final package = service.packages[index];
                                 final isSelected =
                                     selectedPackageIndex.value == index;
                                 return GestureDetector(
@@ -571,7 +570,7 @@ class ServiceDetailView extends StatelessWidget {
                                         ),
                                         SizedBox(height: 4.h),
                                         Text(
-                                          '${package.price.toInt()} ${service.priceUnit}',
+                                          '${package.price} ${service.priceUnit}',
                                           style: GoogleFonts.inter(
                                             fontSize: 22.sp,
                                             fontWeight: FontWeight.w700,
@@ -579,8 +578,8 @@ class ServiceDetailView extends StatelessWidget {
                                           ),
                                         ),
                                         SizedBox(height: 20.h),
-                                        ...package.features.map(
-                                          (feature) => Padding(
+                                        ...package.featureTitles.map(
+                                          (featureTitle) => Padding(
                                             padding: EdgeInsets.only(
                                               bottom: 12.h,
                                             ),
@@ -595,7 +594,7 @@ class ServiceDetailView extends StatelessWidget {
                                                 ),
                                                 SizedBox(width: 12.w),
                                                 Text(
-                                                  feature,
+                                                  featureTitle,
                                                   style: GoogleFonts.inter(
                                                     fontSize: 14.sp,
                                                     color:
@@ -704,8 +703,8 @@ class ServiceDetailView extends StatelessWidget {
                             AppRoutes.bookServiceDate,
                             arguments: {
                               'service': service,
-                              'package': service.packages != null
-                                  ? service.packages![selectedPackageIndex
+                              'package': service.packages.isNotEmpty
+                                  ? service.packages[selectedPackageIndex
                                         .value]
                                   : null,
                             },
@@ -715,8 +714,8 @@ class ServiceDetailView extends StatelessWidget {
                             AppRoutes.payment,
                             arguments: {
                               'service': service,
-                              'package': service.packages != null
-                                  ? service.packages![selectedPackageIndex
+                              'package': service.packages.isNotEmpty
+                                  ? service.packages[selectedPackageIndex
                                         .value]
                                   : null,
                             },

@@ -95,7 +95,7 @@ class MockData {
       basePrice: 120,
       priceUnit: 'AED',
       packages: [
-        ServicePackage(
+        ServicePackage.legacy(
           name: 'Basic',
           price: 120,
           features: [

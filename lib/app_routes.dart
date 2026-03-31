@@ -57,6 +57,8 @@ import 'package:event_maker/views/customer_flow/service_booking/payment_view.dar
 import 'package:event_maker/views/customer_flow/service_booking/booking_request_sent_view.dart';
 import 'package:event_maker/views/customer_flow/service_booking/booking_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_decision_view.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_view.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_controller.dart';
 import 'package:event_maker/views/service_provider_flow/documents/documents_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/add_document_view.dart';
 import 'package:event_maker/views/service_provider_flow/documents/documents_binding.dart';
@@ -132,6 +134,7 @@ class AppRoutes {
   static const String chatDetail = '/chat-detail';
   static const String search = '/search';
   static const String categories = '/categories';
+  static const String spServiceDetail = '/sp-service-detail';
 
   static final routes = [
     GetPage(
@@ -382,6 +385,14 @@ class AppRoutes {
       name: categories,
       page: () => const CategoriesView(),
       binding: CategoriesBinding(),
+    ),
+    // Service Provider - Service Detail route
+    GetPage(
+      name: spServiceDetail,
+      page: () => const SPServiceDetailView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<SPServicedetailController>(() => SPServicedetailController());
+      }),
     ),
     // Customer flow - vendor profile related routes
     GetPage(name: addReview, page: () => const AddReviewView()),

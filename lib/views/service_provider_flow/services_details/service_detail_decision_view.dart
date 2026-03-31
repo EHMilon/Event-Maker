@@ -1,3 +1,4 @@
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/views/notifications/notification_controller.dart';
@@ -162,11 +163,23 @@ class ServiceDetailDecisionView extends StatelessWidget {
           height: 45.w,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
-            image: DecorationImage(
-              image: NetworkImage(request?.customerImage ?? ''),
-              fit: BoxFit.cover,
-            ),
+            color: AppColors.lightGrey,
+            image:
+                (request?.customerImage != null &&
+                    request!.customerImage!.isNotEmpty)
+                ? DecorationImage(
+                    image: NetworkImage(
+                      ApiConstant.getFullMediaUrl(request.customerImage),
+                    ),
+                    fit: BoxFit.cover,
+                  )
+                : null,
           ),
+          child:
+              (request?.customerImage == null ||
+                  request!.customerImage!.isEmpty)
+              ? Icon(Icons.person, color: AppColors.textSecondary, size: 24.r)
+              : null,
         ),
         SizedBox(width: 12.w),
         Column(

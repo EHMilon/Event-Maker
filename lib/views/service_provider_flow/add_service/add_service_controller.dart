@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../models/service_model.dart';
+import '../../../models/my_service_model.dart';
+import '../../../models/service_request_model.dart';
+import '../../../services/service_repository.dart';
 import '../services/sp_services_controller.dart';
 import '../../../widgets/availability_widget_card.dart';
 
@@ -103,11 +106,16 @@ class AddServiceController extends GetxController {
   final selectedServiceType = ServiceType.catering.obs;
   final selectedRole = ProviderRole.freelancer.obs;
   final selectedServiceAs = Rxn<ServiceAs>();
-  final selectedServiceAsItems = <dynamic>[].obs; // Can hold ServiceAs enum or String
+  
+  // Preserve original service type name from API for edit mode
+  String? originalServiceTypeName;
+  final selectedServiceAsItems =
+      <dynamic>[].obs; // Can hold ServiceAs enum or String
 
   final selectedEventVenue = Rxn<EventVenue>();
   final selectedSubOptions = <ServiceSubOption>[].obs;
-  final selectedSubOptionsItems = <dynamic>[].obs; // Can hold ServiceSubOption enum or String
+  final selectedSubOptionsItems =
+      <dynamic>[].obs; // Can hold ServiceSubOption enum or String
 
   /// Returns available ServiceAs options based on current selected role and category
   List<ServiceAs> get availableServiceAsOptions =>
@@ -150,7 +158,8 @@ class AddServiceController extends GetxController {
       selectedCategory.value == ServiceCategory.trainer;
 
   /// Returns true if Service As can be added dynamically
-  bool get canAddMoreServiceAs => true; // Enabled for all categories per user request
+  bool get canAddMoreServiceAs =>
+      true; // Enabled for all categories per user request
 
   /// Controller for the new Service As text input
   final newServiceAsController = TextEditingController();
@@ -272,45 +281,202 @@ class AddServiceController extends GetxController {
 
   /// Initialize controller with existing service data for editing
   void initWithService(ServiceModel service) {
+    // Basic fields
     titleController.text = service.title;
     descriptionController.text = service.description;
-    locationController.text = service.location;
-    if (service.images.isNotEmpty) {
+
+    // Preserve original service type name from API for edit mode
+    originalServiceTypeName = service.serviceTypeName;
+
+    // Location - use first availability address or fallback to service.location
+    // Set both locationController and primaryAvailabilityCard.locationController for UI consistency
+    String locationValue = '';
+    if (service.availabilities.isNotEmpty &&
+        service.availabilities[0].address.isNotEmpty) {
+      locationValue = service.availabilities[0].address;
+    } else if (service.location.isNotEmpty) {
+      locationValue = service.location;
+    }
+    locationController.text = locationValue;
+    // Important: The widget uses locationController, not addressController
+    primaryAvailabilityCard.locationController.text = locationValue;
+    primaryAvailabilityCard.addressController.text = locationValue;
+
+    // Cover image
+    if (service.coverImage.isNotEmpty) {
+      selectedImagePath.value = service.coverImage;
+    } else if (service.images.isNotEmpty) {
       selectedImagePath.value = service.images.first;
     }
+
+    // Service type and category
     selectedServiceType.value = service.type;
     selectedCategory.value = _categoryFromServiceType(service.type);
-    if (service.packages != null) {
+
+    // Role - map from roleName string
+    if (service.roleName.isNotEmpty) {
+      selectedRole.value = _roleFromString(service.roleName);
+    }
+
+    // ServiceAs - map from serviceAsName string
+    if (service.serviceAsName.isNotEmpty) {
+      final serviceAs = _serviceAsFromString(service.serviceAsName);
+      if (serviceAs != null) {
+        selectedServiceAs.value = serviceAs;
+        selectedServiceAsItems.clear();
+        selectedServiceAsItems.add(serviceAs);
+      }
+    }
+
+    // Event Venue
+    if (service.eventVenue != null) {
+      selectedEventVenue.value = _eventVenueFromString(service.eventVenue);
+    }
+
+    // Attendance Capacity
+    if (service.attendanceCapacity != null) {
+      attendanceCapacityController.text = service.attendanceCapacity.toString();
+    }
+
+    // Outside location settings
+    if (service.canGoOutsideLocation) {
+      primaryAvailabilityCard.canGoOutside.value = true;
+    }
+    if (service.canNotGoOutsideLocation) {
+      primaryAvailabilityCard.cannotGoOutside.value = true;
+    }
+
+    // Requires confirmation
+    needsConfirmationBeforePayment.value = service.requiresConfirmation;
+
+    // Options (sub-options)
+    if (service.options != null && service.options!.isNotEmpty) {
+      selectedSubOptionsItems.clear();
+      selectedSubOptionsItems.add(service.options!);
+    }
+
+    // Packages
+    if (service.packages.isNotEmpty) {
       // Clear existing packages first
       for (var pkg in packages) {
         pkg.dispose();
       }
       packages.clear();
-      for (var package in service.packages!) {
+      for (var package in service.packages) {
         final sp = PackageFormData();
         sp.nameController.text = package.name;
-        sp.priceController.text = package.price.toString();
-        // Add each feature with initial value using feature controllers
+        sp.priceController.text = package.price;
+        // Clear default empty feature first
+        sp.featureControllers.clear();
+        // Add each feature title with initial value using feature controllers
         for (var feature in package.features) {
-          sp.addFeature(feature);
+          // Extract the title string from the PackageFeature object
+          final featureTitle = feature.title;
+          if (featureTitle.isNotEmpty) {
+            sp.addFeature(featureTitle);
+          }
         }
         packages.add(sp);
       }
     }
-    // Set role if available (mocking logic here)
-    if (service.provider.role.isNotEmpty) {
-      selectedRole.value = _roleFromString(service.provider.role);
-    }
-    // Set serviceAs if available
-    if (service.serviceAs != null) {
-      selectedServiceAs.value = service.serviceAs;
-      if (!selectedServiceAsItems.contains(service.serviceAs)) {
-        selectedServiceAsItems.add(service.serviceAs);
+
+    // Availabilities
+    if (service.availabilities.isNotEmpty) {
+      // First availability goes to primary card
+      final firstAvailability = service.availabilities[0];
+      primaryAvailabilityCard.selectedDays.value = firstAvailability.weekDays;
+      primaryAvailabilityCard.addressController.text =
+          firstAvailability.address;
+      primaryAvailabilityCard.latitude.value = firstAvailability.latitude;
+      primaryAvailabilityCard.longitude.value = firstAvailability.longitude;
+      // Parse time strings to TimeOfDay
+      primaryAvailabilityCard.startTime.value = _parseTimeString(
+        firstAvailability.startTime,
+      );
+      primaryAvailabilityCard.endTime.value = _parseTimeString(
+        firstAvailability.endTime,
+      );
+
+      // Additional availabilities
+      for (var i = 1; i < service.availabilities.length; i++) {
+        final availability = service.availabilities[i];
+        final card = AvailabilityCardModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+        );
+        card.selectedDays.value = availability.weekDays;
+        card.addressController.text = availability.address;
+        card.latitude.value = availability.latitude;
+        card.longitude.value = availability.longitude;
+        card.startTime.value = _parseTimeString(availability.startTime);
+        card.endTime.value = _parseTimeString(availability.endTime);
+        additionalAvailabilityCards.add(card);
       }
     }
-    // Set eventVenue if available
-    if (service.eventVenue != null) {
-      selectedEventVenue.value = service.eventVenue;
+  }
+
+  /// Parse time string (HH:MM:SS) to TimeOfDay
+  TimeOfDay _parseTimeString(String time) {
+    if (time.isEmpty) return const TimeOfDay(hour: 9, minute: 0);
+    final parts = time.split(':');
+    if (parts.length >= 2) {
+      return TimeOfDay(
+        hour: int.tryParse(parts[0]) ?? 9,
+        minute: int.tryParse(parts[1]) ?? 0,
+      );
+    }
+    return const TimeOfDay(hour: 9, minute: 0);
+  }
+
+  /// Map serviceAsName string to ServiceAs enum
+  ServiceAs? _serviceAsFromString(String name) {
+    if (name.isEmpty) return null;
+    final lowerName = name.toLowerCase().trim();
+    for (final serviceAs in ServiceAs.values) {
+      if (serviceAs.label.toLowerCase() == lowerName) {
+        return serviceAs;
+      }
+    }
+    // Try partial matches
+    switch (lowerName) {
+      case 'waitress':
+        return ServiceAs.waitress;
+      case 'barista':
+      case 'barista (hot drinks)':
+        return ServiceAs.barista;
+      case 'juice maker':
+        return ServiceAs.juiceMaker;
+      case 'sandwich maker':
+        return ServiceAs.sandwichMaker;
+      case 'burger maker':
+        return ServiceAs.burgerMaker;
+      case 'shawarma maker':
+        return ServiceAs.shawarmaMaker;
+      case 'chef':
+        return ServiceAs.chef;
+      case 'catering':
+        return ServiceAs.cateringBusiness;
+      case 'buffet':
+        return ServiceAs.buffet;
+      case 'live cooking':
+        return ServiceAs.liveCooking;
+      case 'outdoor cafe kiosk':
+        return ServiceAs.outdoorCafeKiosk;
+      case 'coffee hospitality service':
+        return ServiceAs.coffeeHospitalityService;
+      case 'decoration':
+        return ServiceAs.decoration;
+      case 'villas':
+        return ServiceAs.villas;
+      case 'farms':
+        return ServiceAs.farms;
+      case 'lands':
+        return ServiceAs.lands;
+      case 'furniture':
+        return ServiceAs.furniture;
+      case 'fitness trainer':
+        return ServiceAs.fitnessTrainer;
+      default:
+        return null;
     }
   }
 
@@ -319,11 +485,7 @@ class AddServiceController extends GetxController {
     super.onInit();
     // Initialize primary availability card
     primaryAvailabilityCard = AvailabilityCardModel(id: 'primary');
-
-    // Initialize with one empty package
-    if (packages.isEmpty) {
-      addPackage();
-    }
+    // Do NOT create default package - let user add packages explicitly
     // Ensures category selection is initialized for new entries
     selectedCategory.value = ServiceCategory.hospitality;
     selectedServiceType.value = ServiceType.catering;
@@ -492,70 +654,251 @@ class AddServiceController extends GetxController {
     ServiceModel? existingService,
   }) async {
     isLoading.value = true;
-    // Network Rules: 2s delay for shimmer/loading state visibility
-    await Future.delayed(const Duration(seconds: 2));
 
-    // TODO: Validate required fields (title, description, location)
-    // TODO: Call Backend API to save/update service
-    // Example:
-    // try {
-    //   final response = await _apiService.post('/services', data: newService.toJson());
-    //   if (response.statusCode == 200) { ... }
-    // } catch (e) { ... }
+    try {
+      // Validate required fields
+      if (titleController.text.trim().isEmpty) {
+        Get.snackbar('Error', 'Title is required');
+        isLoading.value = false;
+        return false;
+      }
+      if (descriptionController.text.trim().isEmpty) {
+        Get.snackbar('Error', 'Description is required');
+        isLoading.value = false;
+        return false;
+      }
 
-    // Create the service model from form data (Placeholder until Backend)
-    final newService = ServiceModel(
-      id:
-          existingService?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
-      title: titleController.text,
-      description: descriptionController.text,
-      location: locationController.text,
-      images:
-          selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty
-          ? [selectedImagePath.value!]
-          : existingService?.images ?? [],
-      type: selectedServiceType.value,
-      provider:
-          existingService?.provider ??
-          ServiceProvider(
-            name: 'Current User',
-            role: _roleLabel(selectedRole.value),
-            imageUrl: 'https://i.pravatar.cc/150?u=user',
-          ),
-      basePrice: 0,
-      priceUnit: 'AED',
-      packages: packages
-          .map(
-            (p) => ServicePackage(
-              name: p.nameController.text,
-              price: double.tryParse(p.priceController.text) ?? 0,
-              features: p.features.where((f) => f.isNotEmpty).toList(),
+      // Build packages for API
+      final apiPackages = packages.asMap().entries.map((entry) {
+        final index = entry.key;
+        final p = entry.value;
+        return PackageRequestModel(
+          name: p.nameController.text.trim(),
+          price: p.priceController.text.trim(),
+          features: p.features.where((f) => f.isNotEmpty).toList(),
+          sortOrder: index + 1,
+        );
+      }).toList();
+
+      // Build availabilities for API (combine primary + additional)
+      final apiAvailabilities = <AvailabilityRequestModel>[];
+
+      // Primary availability
+      if (primaryAvailabilityCard.selectedDays.isNotEmpty) {
+        apiAvailabilities.add(
+          AvailabilityRequestModel(
+            id: null,
+            weekDays: _mapDayNames(primaryAvailabilityCard.selectedDays),
+            startTime: _formatTimeOfDayForApi(
+              primaryAvailabilityCard.startTime.value,
+              isEndTime: false,
             ),
-          )
-          .toList(),
-      serviceAs: selectedServiceAs.value,
-      eventVenue: selectedEventVenue.value,
-      subOptions: selectedSubOptions.isNotEmpty
-          ? selectedSubOptions.toList()
-          : null,
-    );
+            endTime: _formatTimeOfDayForApi(
+              primaryAvailabilityCard.endTime.value,
+              isEndTime: true,
+            ),
+            address: primaryAvailabilityCard.addressController.text.trim(),
+            latitude: primaryAvailabilityCard.latitude.value,
+            longitude: primaryAvailabilityCard.longitude.value,
+            sortOrder: 1,
+          ),
+        );
+      }
 
-    // Update the services list
-    final spController = Get.find<SPServicesController>();
-    if (isEdit && existingService != null) {
-      spController.updateService(newService);
-    } else {
-      spController.addService(newService);
+      // Additional availabilities
+      for (var i = 0; i < additionalAvailabilityCards.length; i++) {
+        final card = additionalAvailabilityCards[i];
+        if (card.selectedDays.isNotEmpty) {
+          apiAvailabilities.add(
+            AvailabilityRequestModel(
+              id: null,
+              weekDays: _mapDayNames(card.selectedDays),
+              startTime: _formatTimeOfDayForApi(
+                card.startTime.value,
+                isEndTime: false,
+              ),
+              endTime: _formatTimeOfDayForApi(
+                card.endTime.value,
+                isEndTime: true,
+              ),
+              address: card.addressController.text.trim(),
+              latitude: card.latitude.value,
+              longitude: card.longitude.value,
+              sortOrder: i + 2,
+            ),
+          );
+        }
+      }
+
+      // Get service type name for API
+      // In edit mode, preserve the original service type name from API to avoid enum conversion issues
+      final serviceTypeName = (isEdit && originalServiceTypeName != null && originalServiceTypeName!.isNotEmpty)
+          ? originalServiceTypeName!
+          : _getServiceTypeName(selectedServiceType.value);
+
+      // Get role name for API
+      final roleName = _getRoleName(selectedRole.value);
+
+      // Get service as name if selected
+      String? serviceAsName;
+      if (selectedServiceAsItems.isNotEmpty) {
+        final item = selectedServiceAsItems.first;
+        if (item is ServiceAs) {
+          serviceAsName = item.label;
+        } else if (item is String) {
+          serviceAsName = item;
+        }
+      }
+
+      // Build the request model
+      final request = ServiceRequestModel(
+        id: existingService != null ? int.tryParse(existingService.id) : null,
+        title: titleController.text.trim(),
+        description: descriptionController.text.trim(),
+        serviceTypeName: serviceTypeName,
+        roleName: roleName,
+        serviceAsName: serviceAsName,
+        eventVenue: selectedEventVenue.value?.label,
+        options: selectedSubOptionsItems.isNotEmpty
+            ? selectedSubOptionsItems.first.toString()
+            : null,
+        attendanceCapacity: attendanceCapacityController.text.trim().isNotEmpty
+            ? int.tryParse(attendanceCapacityController.text.trim())
+            : null,
+        packages: apiPackages,
+        availabilities: apiAvailabilities,
+        canGoOutsideLocation: primaryAvailabilityCard.canGoOutside.value,
+        cannotGoOutsideLocation: primaryAvailabilityCard.cannotGoOutside.value,
+        requiresConfirmation: needsConfirmationBeforePayment.value,
+        currency: 'AED',
+        coverImage: selectedImagePath.value,
+      );
+
+      // Call the API
+      final repository = const ServiceRepository();
+      ServiceModel savedService;
+
+      if (isEdit && existingService != null) {
+        savedService = await repository.updateService(request);
+      } else {
+        savedService = await repository.createService(request);
+      }
+
+      // Update the services list
+      final spController = Get.find<SPServicesController>();
+      // Convert ServiceModel to MyServiceModel for the list
+      final myService = MyServiceModel(
+        id: savedService.apiId,
+        providerId: savedService.providerId,
+        title: savedService.title,
+        coverImage: savedService.coverImage,
+        createdAt:
+            '${savedService.createdAt.day}${_getDaySuffix(savedService.createdAt.day)} ${_getMonthShort(savedService.createdAt.month)} - ${_getWeekdayShort(savedService.createdAt.weekday)} - ${savedService.createdAt.hour > 12 ? savedService.createdAt.hour - 12 : (savedService.createdAt.hour == 0 ? 12 : savedService.createdAt.hour)}:${savedService.createdAt.minute.toString().padLeft(2, '0')} ${savedService.createdAt.hour >= 12 ? 'PM' : 'AM'}',
+      );
+      if (isEdit && existingService != null) {
+        spController.updateService(myService);
+      } else {
+        spController.addService(myService);
+      }
+
+      isLoading.value = false;
+      Get.back(result: true);
+      Get.snackbar(
+        'Success',
+        isEdit ? 'Service updated successfully' : 'Service added successfully',
+      );
+      return true;
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar('Error', 'Failed to save service: $e');
+      return false;
     }
+  }
 
-    isLoading.value = false;
-    Get.back(result: true);
-    Get.snackbar(
-      'Success',
-      isEdit ? 'Service updated successfully' : 'Service added successfully',
-    );
-    return true;
+  /// Map day names from display format to API format
+  List<String> _mapDayNames(List<String> days) {
+    return days.map((day) {
+      switch (day.toLowerCase()) {
+        case 'mon':
+        case 'monday':
+          return 'Mon';
+        case 'tue':
+        case 'tuesday':
+          return 'Tue';
+        case 'wed':
+        case 'wednesday':
+          return 'Wed';
+        case 'thu':
+        case 'thursday':
+          return 'Thu';
+        case 'fri':
+        case 'friday':
+          return 'Fri';
+        case 'sat':
+        case 'saturday':
+          return 'Sat';
+        case 'sun':
+        case 'sunday':
+          return 'Sun';
+        default:
+          return day;
+      }
+    }).toList();
+  }
+
+  /// Format time for API (HH:MM:SS format)
+  String _formatTimeForApi(String time) {
+    if (time.isEmpty) return '09:00:00';
+    // If already in correct format, return as is
+    if (time.contains(':') && time.split(':').length == 3) {
+      return time;
+    }
+    // Convert HH:MM to HH:MM:SS
+    if (time.contains(':') && time.split(':').length == 2) {
+      return '$time:00';
+    }
+    return time;
+  }
+
+  /// Format TimeOfDay for API (HH:MM:SS format)
+  String _formatTimeOfDayForApi(TimeOfDay? time, {bool isEndTime = false}) {
+    if (time == null) {
+      // Default: start_time = 09:00:00, end_time = 17:00:00
+      return isEndTime ? '17:00:00' : '09:00:00';
+    }
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute:00';
+  }
+
+  /// Get service type name for API
+  String _getServiceTypeName(ServiceType type) {
+    switch (type) {
+      case ServiceType.catering:
+        return 'Hospitality';
+      case ServiceType.filming:
+        return 'Filming';
+      case ServiceType.cleaning:
+        return 'Cleaning';
+      case ServiceType.photography:
+        return 'Photography';
+      case ServiceType.event:
+        return 'Event';
+      case ServiceType.training:
+        return 'Professional Trainer';
+    }
+  }
+
+  /// Get role name for API
+  String _getRoleName(ProviderRole role) {
+    switch (role) {
+      case ProviderRole.freelancer:
+        return 'Freelancer';
+      case ProviderRole.business:
+        return 'Business';
+      case ProviderRole.productiveFamily:
+        return 'Productive Family';
+    }
   }
 
   @override
@@ -620,18 +963,77 @@ class AddServiceController extends GetxController {
         return ProviderRole.freelancer;
     }
   }
+
+  EventVenue? _eventVenueFromString(String? venue) {
+    if (venue == null) return null;
+    switch (venue.toLowerCase()) {
+      case 'hotel venues':
+        return EventVenue.hotelVenues;
+      case 'mall venues':
+        return EventVenue.mallVenues;
+      case 'restaurant venues':
+        return EventVenue.restaurantVenues;
+      case 'event halls':
+        return EventVenue.eventHalls;
+      default:
+        return null;
+    }
+  }
+
+  /// Get day suffix for date formatting (1st, 2nd, 3rd, etc.)
+  String _getDaySuffix(int day) {
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1:
+        return 'st';
+      case 2:
+        return 'nd';
+      case 3:
+        return 'rd';
+      default:
+        return 'th';
+    }
+  }
+
+  /// Get short month name
+  String _getMonthShort(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return months[month - 1];
+  }
+
+  /// Get short weekday name
+  String _getWeekdayShort(int weekday) {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[weekday - 1];
+  }
 }
 
 /// Form data class for packages with proper controller management
 /// Uses TextEditingControllers for features to maintain text field state
+/// Also maintains reactive name and price for UI updates
 class PackageFormData {
   final nameController = TextEditingController();
   final priceController = TextEditingController();
   final featureControllers = <TextEditingController>[].obs;
+  
+  // Reactive properties for UI updates when returning from packages view
+  final name = ''.obs;
+  final price = ''.obs;
 
-  PackageFormData() {
-    addFeature(); // Start with one empty feature
-  }
+  PackageFormData(); // No default empty feature - user adds explicitly
 
   /// Add a new feature controller
   void addFeature([String initialValue = '']) {
@@ -646,9 +1048,15 @@ class PackageFormData {
     }
   }
 
-  /// Get feature values as strings
+  /// Sync controllers to reactive properties (call before returning from packages view)
+  void syncToReactive() {
+    name.value = nameController.text;
+    price.value = priceController.text;
+  }
+
+  /// Get feature values as strings (only non-empty values)
   List<String> get features =>
-      featureControllers.map((c) => c.text).where((f) => f.isNotEmpty).toList();
+      featureControllers.map((c) => c.text.trim()).where((f) => f.isNotEmpty).toList();
 
   /// Dispose all controllers
   void dispose() {

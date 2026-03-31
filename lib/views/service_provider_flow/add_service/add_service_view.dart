@@ -37,16 +37,18 @@ class _AddServiceViewState extends State<AddServiceView> {
     {'key': 'Sun', 'label': 'sun'.tr},
   ];
 
+  // Flag to track if edit data has been initialized
+  bool _isEditInitialized = false;
+
   @override
   void initState() {
     super.initState();
     controller = Get.find<AddServiceController>();
-    // Initialize with service data if editing
-    Future.delayed(Duration.zero, () {
-      if (widget.isEdit && widget.service != null) {
-        controller.initWithService(widget.service!);
-      }
-    });
+    // Initialize with service data if editing - do synchronously before first build
+    if (widget.isEdit && widget.service != null) {
+      controller.initWithService(widget.service!);
+      _isEditInitialized = true;
+    }
   }
 
   @override
@@ -196,9 +198,11 @@ class _AddServiceViewState extends State<AddServiceView> {
                       items: subOptions,
                       selectedItems: controller.selectedSubOptionsItems,
                       label: 'selectOptions'.tr,
-                      hintText: 'selectOptions'.tr, // Using same key as label for now
+                      hintText:
+                          'selectOptions'.tr, // Using same key as label for now
                       itemBuilder: (option) => option.label,
-                      onSelected: (item) => controller.toggleSubOptionItem(item),
+                      onSelected: (item) =>
+                          controller.toggleSubOptionItem(item),
                       onRemoved: (item) => controller.removeSubOptionItem(item),
                       onAddPressed: controller.addCustomSubOptionDirectly,
                       isAdding: controller.showAddSubOptionField,
@@ -265,36 +269,43 @@ class _AddServiceViewState extends State<AddServiceView> {
                 SizedBox(height: 16.h),
 
                 // Need confirmation before payment toggle
-                Obx(() => Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColors.borderLight),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'needConfirmationBeforePayment'.tr,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
+                Obx(
+                  () => Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'needConfirmationBeforePayment'.tr,
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ),
-                      ),
-                      Switch(
-                        value: controller.needsConfirmationBeforePayment.value,
-                        onChanged: (value) {
-                          controller.needsConfirmationBeforePayment.value = value;
-                        },
-                        activeColor: AppColors.primary,
-                      ),
-                    ],
+                        Switch(
+                          value:
+                              controller.needsConfirmationBeforePayment.value,
+                          onChanged: (value) {
+                            controller.needsConfirmationBeforePayment.value =
+                                value;
+                          },
+                          activeColor: AppColors.primary,
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
 
                 SizedBox(height: 16.h),
                 Row(
@@ -324,31 +335,8 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ),
                 SizedBox(height: 8.h),
 
-                // Display added packages
-                Obx(() {
-                  if (controller.packages.isEmpty) {
-                    return Container(
-                      padding: EdgeInsets.symmetric(vertical: 24.h),
-                      child: Center(
-                        child: Text(
-                          'noPackagesAdded'.tr,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return Column(
-                    children: controller.packages.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final package = entry.value;
-                      return _buildPackageSummaryCard(index, package);
-                    }).toList(),
-                  );
-                }),
+                // Display added packages - rebuilds when setState is called after returning from packages view
+                _buildPackagesList(),
 
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
@@ -393,9 +381,43 @@ class _AddServiceViewState extends State<AddServiceView> {
   }
 
   void _openPackages(BuildContext context) async {
-    await Get.to(() => const PackagesPricingsView());
-    // Force refresh after returning from packages view
-    setState(() {});
+    final result = await Get.to(() => const PackagesPricingsView());
+    // If result is true, packages were modified - force a complete UI refresh
+    if (result == true) {
+      // Force the packages list to notify listeners
+      controller.packages.refresh();
+      // Force rebuild the entire widget to show updated packages
+      setState(() {});
+    }
+  }
+
+  Widget _buildPackagesList() {
+    // Access the length to trigger reactivity when packages are added/removed
+    return Obx(() {
+      final packageCount = controller.packages.length;
+      
+      if (packageCount == 0) {
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 24.h),
+          child: Center(
+            child: Text(
+              'noPackagesAdded'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: List.generate(packageCount, (index) {
+          final package = controller.packages[index];
+          return _buildPackageSummaryCard(index, package);
+        }),
+      );
+    });
   }
 
   Widget _buildAdditionalAvailabilitySection() {
@@ -495,124 +517,148 @@ class _AddServiceViewState extends State<AddServiceView> {
   }
 
   Widget _buildPackageSummaryCard(int index, PackageFormData package) {
-    // Get features from controllers (called during build, not inside Obx)
+    // Read directly from controllers - these are populated when returning from PackagesPricingsView
+    final packageName = package.nameController.text;
+    final packagePrice = package.priceController.text;
     final features = package.featureControllers
-        .map((c) => c.text)
+        .map((c) => c.text.trim())
         .where((f) => f.isNotEmpty)
         .toList();
 
     return GestureDetector(
       onTap: () => _openPackages(context),
       child: Container(
-        margin: EdgeInsets.only(bottom: 12.h),
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.borderLight),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    package.nameController.text.isEmpty
-                        ? 'packageLabel'.trParams({'index': '${index + 1}'})
-                        : package.nameController.text,
-                    style: GoogleFonts.inter(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      package.priceController.text.isEmpty
-                          ? '0.00'
-                          : '${package.priceController.text} AED',
+          margin: EdgeInsets.only(bottom: 12.h),
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: AppColors.borderLight),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      packageName.isEmpty
+                          ? 'packageLabel'.trParams({'index': '${index + 1}'})
+                          : packageName,
                       style: GoogleFonts.inter(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () {
-                        controller.removePackage(index);
-                        setState(() {});
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close,
-                          size: 16.r,
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            // Features display - rebuilt via setState when returning from packages view
-            if (features.isNotEmpty) ...[
-              SizedBox(height: 8.h),
-              Wrap(
-                spacing: 8.w,
-                runSpacing: 4.h,
-                children: features.map((feature) {
-                  return Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.check,
-                          size: 12.r,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        packagePrice.isEmpty ? '0.00 AED' : '$packagePrice AED',
+                        style: GoogleFonts.inter(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.primary,
                         ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          feature,
-                          style: GoogleFonts.inter(
-                            fontSize: 11.sp,
-                            color: AppColors.primary,
+                      ),
+                      SizedBox(width: 8.w),
+                      GestureDetector(
+                        onTap: () {
+                          controller.removePackage(index);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(4.r),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 16.r,
+                            color: AppColors.error,
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      ),
+                    ],
+                  ),
+                ],
               ),
+              // Features display
+              if (features.isNotEmpty)
+                Padding(
+                  padding: EdgeInsets.only(top: 8.h),
+                  child: Wrap(
+                    spacing: 8.w,
+                    runSpacing: 4.h,
+                    children: features.map((feature) {
+                      // Extract just the title if feature contains JSON
+                      // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
+                      String displayText = feature;
+                      if (feature.contains('title')) {
+                        try {
+                          // Try single-quoted JSON: {'title': 'value', ...}
+                          final singleMatch = RegExp(r"'title'\s*:\s*'([^']+)'").firstMatch(feature);
+                          // Try double-quoted JSON: {"title": "value", ...}
+                          final doubleMatch = RegExp(r'"title"\s*:\s*"([^"]+)"').firstMatch(feature);
+                          
+                          if (singleMatch != null && singleMatch.group(1) != null) {
+                            displayText = singleMatch.group(1)!;
+                          } else if (doubleMatch != null && doubleMatch.group(1) != null) {
+                            displayText = doubleMatch.group(1)!;
+                          }
+                        } catch (_) {
+                          // Fallback to original if regex fails
+                        }
+                      }
+                      
+                      return Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.check,
+                              size: 12.r,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 4.w),
+                            Flexible(
+                              child: Text(
+                                displayText,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11.sp,
+                                  color: AppColors.primary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
             ],
-          ],
+          ),
         ),
-      ),
     );
   }
 }

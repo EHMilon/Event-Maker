@@ -12,6 +12,20 @@ class ApiConstant {
 
   static const String baseUrl = 'http://10.10.12.62:8005/api';
 
+  /// Base URL for serving media files
+  static const String mediaBaseUrl = 'http://10.10.12.62:8005';
+
+  /// Helper to get full URL for media/image paths
+  /// Returns the full URL if path is relative, otherwise returns as-is
+  static String getFullMediaUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    // Prepend media base URL for relative paths
+    return '$mediaBaseUrl$path';
+  }
+
   // ===== WEBSOCKET URLS =====
 
   static const String wsBaseUrl = 'wss://api.eventmaker.com/ws';
@@ -28,7 +42,7 @@ class ApiConstant {
   static const String resetPassword = '/auth/reset-password';
   static const String refreshToken = '/auth/refresh';
   static const String changePassword = '/auth/change-password';
-  
+
   // Legacy aliases for backward compatibility
   static const String login = signIn;
   static const String register = signUp;
@@ -63,6 +77,13 @@ class ApiConstant {
   static const String services = '/services';
   static const String serviceCategories = '/services/categories';
   static const String serviceSearch = '/services/search';
+
+  /// Get service detail by ID: /services/detail/{id}
+  static String serviceDetail(int id) => '/services/detail/$id';
+
+  /// Update service by ID: /services/update/{id}
+  /// Note: Uses POST with multipart/form-data for update
+  static String serviceUpdate(int id) => '/services/update/$id';
 
   // ===== BOOKING ENDPOINTS =====
 

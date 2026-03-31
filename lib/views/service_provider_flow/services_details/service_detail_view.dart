@@ -1,4 +1,5 @@
 import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/models/vendor_profile_model.dart';
@@ -137,9 +138,12 @@ class ServiceDetailView extends StatelessWidget {
             right: 0,
             height: 250.h,
             child: service.images.isNotEmpty
-                ? (service.images.first.startsWith('http')
-                      ? Image.network(service.images.first, fit: BoxFit.cover)
-                      : Image.asset(service.images.first, fit: BoxFit.cover))
+                ? Image.network(
+                      ApiConstant.getFullMediaUrl(service.images.first),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Container(color: AppColors.lightGrey),
+                    )
                 : Container(color: AppColors.lightGrey),
           ),
 
@@ -238,13 +242,23 @@ class ServiceDetailView extends StatelessWidget {
                                 height: 45.w,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(12.r),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      service.provider.imageUrl,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  color: AppColors.lightGrey,
+                                  image: service.provider.imageUrl.isNotEmpty
+                                      ? DecorationImage(
+                                          image: NetworkImage(
+                                            ApiConstant.getFullMediaUrl(service.provider.imageUrl),
+                                          ),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
                                 ),
+                                child: service.provider.imageUrl.isEmpty
+                                    ? Icon(
+                                        Icons.person,
+                                        color: AppColors.textSecondary,
+                                        size: 24.r,
+                                      )
+                                    : null,
                               ),
                               SizedBox(width: 12.w),
                               Column(
@@ -372,7 +386,7 @@ class ServiceDetailView extends StatelessWidget {
                         ],
                         _buildInfoRow(
                           Icons.location_on_outlined,
-                          service.location,
+                          service.displayLocation,
                         ),
 
                         if (service.type == ServiceType.event ||
@@ -402,7 +416,7 @@ class ServiceDetailView extends StatelessWidget {
                         ),
                         SizedBox(height: 10.h),
                         Text(
-                          service.location, // Or more detailed address
+                          service.displayLocation,
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
                             color: AppColors.textSecondary,
@@ -554,8 +568,7 @@ class ServiceDetailView extends StatelessWidget {
                         // Pricing / Packages
                         if (!isRequest &&
                             !isOrder &&
-                            service.packages != null &&
-                            service.packages!.isNotEmpty) ...[
+                            service.packages.isNotEmpty) ...[
                           Text(
                             'packagesPricings'.tr,
                             style: GoogleFonts.inter(
@@ -567,10 +580,10 @@ class ServiceDetailView extends StatelessWidget {
                           SizedBox(height: 16.h),
                           Obx(
                             () => Column(
-                              children: List.generate(service.packages!.length, (
+                              children: List.generate(service.packages.length, (
                                 index,
                               ) {
-                                final package = service.packages![index];
+                                final package = service.packages[index];
                                 final isSelected =
                                     selectedPackageIndex.value == index;
                                 return GestureDetector(
@@ -643,7 +656,7 @@ class ServiceDetailView extends StatelessWidget {
                                         ),
                                         SizedBox(height: 4.h),
                                         Text(
-                                          '${package.price.toInt()} ${service.priceUnit}',
+                                          '${package.price} ${service.priceUnit}',
                                           style: GoogleFonts.inter(
                                             fontSize: 22.sp,
                                             fontWeight: FontWeight.w700,
@@ -651,32 +664,56 @@ class ServiceDetailView extends StatelessWidget {
                                           ),
                                         ),
                                         SizedBox(height: 20.h),
-                                        ...package.features.map(
-                                          (feature) => Padding(
-                                            padding: EdgeInsets.only(
-                                              bottom: 12.h,
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.check,
-                                                  size: 18.r,
-                                                  color: const Color(
-                                                    0xFF00C566,
-                                                  ), // Green check
-                                                ),
-                                                SizedBox(width: 12.w),
-                                                Text(
-                                                  feature,
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 14.sp,
-                                                    color:
-                                                        AppColors.textSecondary,
+                                        ...package.featureTitles.map(
+                                          (featureTitle) {
+                                            // Parse JSON if the feature contains JSON format
+                                            // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
+                                            String displayText = featureTitle;
+                                            if (featureTitle.contains('title')) {
+                                              try {
+                                                // Try single-quoted JSON: {'title': 'value', ...}
+                                                final singleMatch = RegExp(r"'title'\s*:\s*'([^']+)'").firstMatch(featureTitle);
+                                                // Try double-quoted JSON: {"title": "value", ...}
+                                                final doubleMatch = RegExp(r'"title"\s*:\s*"([^"]+)"').firstMatch(featureTitle);
+                                                
+                                                if (singleMatch != null && singleMatch.group(1) != null) {
+                                                  displayText = singleMatch.group(1)!;
+                                                } else if (doubleMatch != null && doubleMatch.group(1) != null) {
+                                                  displayText = doubleMatch.group(1)!;
+                                                }
+                                              } catch (_) {
+                                                // Fallback to original
+                                              }
+                                            }
+                                            return Padding(
+                                              padding: EdgeInsets.only(
+                                                bottom: 12.h,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.check,
+                                                    size: 18.r,
+                                                    color: const Color(
+                                                      0xFF00C566,
+                                                    ), // Green check
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                                  SizedBox(width: 12.w),
+                                                  Flexible(
+                                                    child: Text(
+                                                      displayText,
+                                                      style: GoogleFonts.inter(
+                                                        fontSize: 14.sp,
+                                                        color: AppColors.textSecondary,
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                      maxLines: 2,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
                                         ),
                                       ],
                                     ),
@@ -810,8 +847,8 @@ class ServiceDetailView extends StatelessWidget {
                                   AppRoutes.bookServiceDate,
                                   arguments: {
                                     'service': service,
-                                    'package': service.packages != null
-                                        ? service.packages![selectedPackageIndex
+                                    'package': service.packages.isNotEmpty
+                                        ? service.packages[selectedPackageIndex
                                               .value]
                                         : null,
                                   },
@@ -821,8 +858,8 @@ class ServiceDetailView extends StatelessWidget {
                                   AppRoutes.payment,
                                   arguments: {
                                     'service': service,
-                                    'package': service.packages != null
-                                        ? service.packages![selectedPackageIndex
+                                    'package': service.packages.isNotEmpty
+                                        ? service.packages[selectedPackageIndex
                                               .value]
                                         : null,
                                   },

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../constants/api_constant.dart';
 import '../../constants/app_colors.dart';
 
 class UploadWidget extends StatefulWidget {
@@ -26,6 +27,15 @@ class _UploadWidgetState extends State<UploadWidget> {
   void initState() {
     super.initState();
     _selectedImagePath = widget.imagePath;
+  }
+
+  @override
+  void didUpdateWidget(UploadWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update the selected image path when the widget receives a new imagePath prop
+    if (oldWidget.imagePath != widget.imagePath) {
+      _selectedImagePath = widget.imagePath;
+    }
   }
 
   bool _isPickingImage = false;
@@ -76,13 +86,23 @@ class _UploadWidgetState extends State<UploadWidget> {
     );
   }
 
+  /// Check if the image path is a network URL
+  bool _isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  /// Check if the image path is a relative media path (starts with /media/)
+  bool _isRelativeMediaPath(String path) {
+    return path.startsWith('/media/') || path.startsWith('media/');
+  }
+
   Widget _buildImagePreview() {
     return Stack(
       fit: StackFit.expand,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(11.r),
-          child: Image.file(File(_selectedImagePath!), fit: BoxFit.cover),
+          child: _buildImage(),
         ),
         Positioned(
           top: 8.h,
@@ -123,6 +143,51 @@ class _UploadWidgetState extends State<UploadWidget> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Build the appropriate image widget based on path type
+  Widget _buildImage() {
+    final path = _selectedImagePath!;
+    
+    // Handle network URLs
+    if (_isNetworkImage(path)) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      );
+    }
+    
+    // Handle relative media paths (from API)
+    if (_isRelativeMediaPath(path)) {
+      final fullUrl = ApiConstant.getFullMediaUrl(path);
+      return Image.network(
+        fullUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      );
+    }
+    
+    // Handle local files
+    return Image.file(
+      File(path),
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+    );
+  }
+
+  /// Build a placeholder when image fails to load
+  Widget _buildPlaceholder() {
+    return Container(
+      color: AppColors.lightGrey,
+      child: Center(
+        child: Icon(
+          Icons.broken_image_outlined,
+          size: 40.sp,
+          color: Colors.grey[400],
+        ),
+      ),
     );
   }
 

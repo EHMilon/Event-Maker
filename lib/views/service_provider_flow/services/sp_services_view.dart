@@ -1,9 +1,9 @@
+import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/widgets/request_card.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
-import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:event_maker/views/service_provider_flow/services/sp_services_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -122,16 +122,13 @@ class ServicesView extends GetView<SPServicesController> {
           itemBuilder: (context, index) {
             final service = services[index];
             return RequestCard(
-              image: service.images.isNotEmpty ? service.images.first : '',
-              date: _formatDateTime(service.date),
+              image: ApiConstant.getFullMediaUrl(service.coverImage),
+              date: service.createdAt,
               title: service.title,
-              subtitle: service.location,
-              onTap: () => Get.to(
-                () => ServiceDetailView(
-                  service: service,
-                  showEditButton: true, // Show edit button for service provider
-                ),
-              ),
+              subtitle: '', // Location not available in lightweight model
+              onTap: () {
+                Get.toNamed(AppRoutes.spServiceDetail, arguments: {'serviceId': service.id});
+              },
             );
           },
         ),
@@ -187,42 +184,5 @@ class ServicesView extends GetView<SPServicesController> {
         ],
       ),
     );
-  }
-
-  /// Formats DateTime to display format (e.g., "15th Mar - Mon - 2:30 PM")
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return '';
-    final day = dateTime.day;
-    final suffix = _getDaySuffix(day);
-    final month = _getMonthShort(dateTime.month);
-    final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : (dateTime.hour == 0 ? 12 : dateTime.hour);
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
-    return '$day$suffix $month - $weekday - $hour:$minute $period';
-  }
-
-  String _getDaySuffix(int day) {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1:
-        return 'st';
-      case 2:
-        return 'nd';
-      case 3:
-        return 'rd';
-      default:
-        return 'th';
-    }
-  }
-
-  String _getMonthShort(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[month - 1];
-  }
-
-  String _getWeekdayShort(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
   }
 }

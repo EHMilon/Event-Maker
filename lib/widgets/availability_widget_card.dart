@@ -9,8 +9,13 @@ class AvailabilityCardModel {
   final String id;
   final RxList<String> selectedDays;
   final TextEditingController locationController;
+  final TextEditingController addressController;
   final Rxn<TimeOfDay> startTime;
   final Rxn<TimeOfDay> endTime;
+  final RxString startTimeString;
+  final RxString endTimeString;
+  final RxString latitude;
+  final RxString longitude;
   final RxBool cannotGoOutside;
   final RxBool canGoOutside;
 
@@ -18,19 +23,30 @@ class AvailabilityCardModel {
     required this.id,
     List<String>? days,
     String? location,
+    String? address,
     TimeOfDay? startTimeVal,
     TimeOfDay? endTimeVal,
+    String? startTimeStr,
+    String? endTimeStr,
+    String? latitudeVal,
+    String? longitudeVal,
     bool cannotGoOutsideVal = false,
     bool canGoOutsideVal = false,
   }) : selectedDays = RxList<String>(days ?? []),
        locationController = TextEditingController(text: location),
+       addressController = TextEditingController(text: address ?? location ?? ''),
        startTime = Rxn<TimeOfDay>(startTimeVal),
        endTime = Rxn<TimeOfDay>(endTimeVal),
+       startTimeString = RxString(startTimeStr ?? '09:00:00'),
+       endTimeString = RxString(endTimeStr ?? '17:00:00'),
+       latitude = RxString(latitudeVal ?? '0.0'),
+       longitude = RxString(longitudeVal ?? '0.0'),
        cannotGoOutside = RxBool(cannotGoOutsideVal),
        canGoOutside = RxBool(canGoOutsideVal);
 
   void dispose() {
     locationController.dispose();
+    addressController.dispose();
   }
 }
 
@@ -140,7 +156,7 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
             IgnorePointer(
               ignoring: !widget.isEnabled,
               child: CustomTextField(
-                controller: widget.card.locationController,
+                controller: widget.card.addressController,
                 hintText: 'selectAddressHint'.tr,
                 prefixIcon: Icon(
                   Icons.location_on_outlined,

@@ -27,7 +27,14 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(),
+          onPressed: () {
+            // Sync all packages' controller values to reactive properties before closing
+            for (var package in controller.packages) {
+              package.syncToReactive();
+            }
+            // Return true to indicate changes were made
+            Get.back(result: true);
+          },
         ),
         title: Text(
           'packagesPricings'.tr,
@@ -109,14 +116,13 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
               PrimaryTextButton(
                 text: 'savePackages'.tr,
                 onPressed: () {
+                  // Sync all packages' controller values to reactive properties
+                  // This ensures the AddServiceView will display updated values
+                  for (var package in controller.packages) {
+                    package.syncToReactive();
+                  }
+                  // Return true to indicate packages were saved/updated
                   Get.back(result: true);
-                  Get.snackbar(
-                    'success'.tr,
-                    'packagesSaved'.tr,
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.primary,
-                    colorText: Colors.white,
-                  );
                 },
               ),
               SizedBox(height: 20.h),
@@ -245,6 +251,10 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,
                         ),
+                        maxLines: 3,
+                        minLines: 1,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
                         decoration: InputDecoration(
                           hintText: 'enterFeatureHint'.tr,
                           hintStyle: GoogleFonts.inter(
@@ -269,6 +279,10 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                             borderSide: BorderSide(color: AppColors.primary),
                           ),
                           suffixIcon: IconButton(
+                            constraints: const BoxConstraints(
+                              minWidth: 32,
+                              minHeight: 32,
+                            ),
                             onPressed: () {
                               package.removeFeature(featureIndex);
                             },
