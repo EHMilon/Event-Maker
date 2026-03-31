@@ -1,13 +1,20 @@
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/service_model.dart';
 import '../../models/review_model.dart';
+import '../../models/service_provider_profile_model.dart';
+import '../../models/service_provider_review_model.dart';
+import '../../models/personal_info_model.dart';
 import '../../mock_data/mock_data.dart';
 import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/api_constant.dart';
 import '../customer_flow/home/customer_home_controller.dart';
 import '../../services/connectivity_service.dart';
+import '../../services/api_service.dart';
 import '../../localization/app_localization.dart';
 
 /// Controller for managing profile and settings related logic.
@@ -40,7 +47,7 @@ class ProfileController extends GetxController {
 
   final RxString userName = 'John Doe'.obs;
   final RxString userEmail = 'example@gmail.com'.obs;
-  final RxString profileImage = 'assets/images/person.jpg'.obs;
+  final RxString profileImage = ''.obs; // Backend avatar URL only
   final RxBool isLoading = false.obs;
   final RxBool isServiceProvider = false.obs;
   final RxBool isAvailable = true.obs;
@@ -63,6 +70,54 @@ class ProfileController extends GetxController {
 
   final RxDouble rating = 4.9.obs;
   final RxInt reviewCount = 3657.obs;
+
+  // ===== SERVICE PROVIDER PROFILE API STATE =====
+  final _apiService = ApiService();
+
+  /// Provider profile data from API (about section)
+  final Rx<ServiceProviderProfileModel?> providerProfile =
+      Rx<ServiceProviderProfileModel?>(null);
+
+  /// Provider reviews data from API (reviews section)
+  final Rx<ProviderReviewInfo?> providerReviewInfo = Rx<ProviderReviewInfo?>(
+    null,
+  );
+
+  /// Provider reviews list from API
+  final RxList<ServiceProviderReview> providerApiReviews =
+      <ServiceProviderReview>[].obs;
+
+  /// Loading state for profile API calls
+  final RxBool isProfileLoading = false.obs;
+
+  /// Loading state for reviews API calls
+  final RxBool isReviewsLoading = false.obs;
+
+  /// Error message for profile API calls
+  final RxString profileError = ''.obs;
+
+  /// Error message for reviews API calls
+  final RxString reviewsError = ''.obs;
+
+  // ===== PERSONAL INFO API STATE =====
+
+  /// Personal info data from API
+  final Rx<PersonalInfoModel?> personalInfo = Rx<PersonalInfoModel?>(null);
+
+  /// Loading state for personal info API calls
+  final RxBool isPersonalInfoLoading = false.obs;
+
+  /// Error message for personal info API calls
+  final RxString personalInfoError = ''.obs;
+
+  /// Bio controller for providers only
+  final TextEditingController bioController = TextEditingController();
+
+  /// Selected profile image file (for local picker)
+  final Rxn<File> selectedProfileImage = Rxn<File>();
+
+  /// Flag to prevent multiple image picker calls
+  bool _isPickingImage = false;
 
   @override
   void onInit() {
@@ -317,6 +372,275 @@ class ProfileController extends GetxController {
       backgroundColor: Colors.red,
       colorText: Colors.white,
     );
+  }
+
+  // ===== SERVICE PROVIDER PROFILE API METHODS =====
+
+  /// Fetches service provider profile data (about section) from API
+  /// API Endpoint: /providers/my-profile?section=about
+  Future<void> fetchProviderProfile() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    isProfileLoading.value = true;
+    profileError.value = '';
+
+    try {
+      final response = await _apiService.get(
+        ApiConstant.providerMyProfile,
+        queryParams: {'section': 'about'},
+      );
+
+      final profileResponse = ServiceProviderProfileResponse.fromJson(response);
+      if (profileResponse.success) {
+        providerProfile.value = profileResponse.data;
+        // Update legacy fields for backward compatibility
+        userName.value = profileResponse.data.name;
+        bio.value = profileResponse.data.bio;
+        rating.value = profileResponse.data.ratingValue;
+        reviewCount.value = profileResponse.data.totalReviews;
+        if (profileResponse.data.avatar != null &&
+            profileResponse.data.avatar!.isNotEmpty) {
+          profileImage.value = profileResponse.data.fullAvatarUrl ?? '';
+        }
+      } else {
+        profileError.value = profileResponse.message;
+      }
+    } catch (e) {
+      profileError.value = e.toString();
+      debugPrint('Error fetching provider profile: $e');
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  /// Fetches service provider reviews from API
+  /// API Endpoint: /providers/my-profile?section=reviews
+  Future<void> fetchProviderReviews() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    isReviewsLoading.value = true;
+    reviewsError.value = '';
+
+    try {
+      final response = await _apiService.get(
+        ApiConstant.providerMyProfile,
+        queryParams: {'section': 'reviews'},
+      );
+
+      final reviewsResponse = ServiceProviderReviewsResponse.fromJson(response);
+      if (reviewsResponse.success) {
+        providerReviewInfo.value = reviewsResponse.provider;
+        providerApiReviews.assignAll(reviewsResponse.data);
+        // Update legacy fields for backward compatibility
+        rating.value = reviewsResponse.provider.ratingValue;
+        reviewCount.value = reviewsResponse.provider.totalReviews;
+      } else {
+        reviewsError.value = reviewsResponse.message;
+      }
+    } catch (e) {
+      reviewsError.value = e.toString();
+      debugPrint('Error fetching provider reviews: $e');
+    } finally {
+      isReviewsLoading.value = false;
+    }
+  }
+
+  /// Fetches both profile and reviews data
+  /// Useful for initial load or refresh
+  Future<void> fetchAllProviderData() async {
+    await Future.wait([fetchProviderProfile(), fetchProviderReviews()]);
+  }
+
+  /// Refreshes provider profile data
+  Future<void> refreshProviderProfile() async {
+    await fetchProviderProfile();
+  }
+
+  /// Refreshes provider reviews data
+  Future<void> refreshProviderReviews() async {
+    await fetchProviderReviews();
+  }
+
+  // ===== PERSONAL INFO API METHODS =====
+
+  /// Fetches personal info from API
+  /// API Endpoint: GET /settings/personal-info/me
+  Future<void> fetchPersonalInfo() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    isPersonalInfoLoading.value = true;
+    personalInfoError.value = '';
+
+    try {
+      final response = await _apiService.get(ApiConstant.personalInfoMe);
+
+      final personalInfoResponse = PersonalInfoResponse.fromJson(response);
+      if (personalInfoResponse.success) {
+        personalInfo.value = personalInfoResponse.data;
+
+        // Update controllers with fetched data
+        nameController.text = personalInfoResponse.data.fullName;
+        emailController.text = personalInfoResponse.data.email;
+        phoneController.text = personalInfoResponse.data.phoneNumber ?? '';
+        nationalityController.text = personalInfoResponse.data.nationality ?? '';
+        
+        // Set bio only for providers
+        if (personalInfoResponse.data.isProvider) {
+          bioController.text = personalInfoResponse.data.bio ?? '';
+        }
+
+        // Update legacy fields
+        userName.value = personalInfoResponse.data.fullName;
+        userEmail.value = personalInfoResponse.data.email;
+        isServiceProvider.value = personalInfoResponse.data.isProvider;
+
+        // Update avatar if available
+        if (personalInfoResponse.data.avatar != null &&
+            personalInfoResponse.data.avatar!.isNotEmpty) {
+          profileImage.value = personalInfoResponse.data.fullAvatarUrl ?? '';
+        }
+      } else {
+        personalInfoError.value = personalInfoResponse.message;
+      }
+    } catch (e) {
+      personalInfoError.value = e.toString();
+      debugPrint('Error fetching personal info: $e');
+    } finally {
+      isPersonalInfoLoading.value = false;
+    }
+  }
+
+  /// Picks profile image from device gallery
+  /// Opens image picker directly without navigating to another screen
+  Future<void> pickProfileImage() async {
+    if (_isPickingImage) return;
+    _isPickingImage = true;
+
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        selectedProfileImage.value = File(image.path);
+        // Upload image to server immediately
+        await uploadAvatar();
+      }
+    } finally {
+      _isPickingImage = false;
+    }
+  }
+
+  /// Uploads avatar image to server via multipart/form-data
+  /// Uses PATCH /settings/personal-info/me with avatar file
+  Future<void> uploadAvatar() async {
+    if (selectedProfileImage.value == null) return;
+
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    try {
+      final response = await _apiService.multipart(
+        'PATCH',
+        ApiConstant.uploadAvatar,
+        files: {'avatar': selectedProfileImage.value!},
+      );
+
+      if (response['success'] == true) {
+        final data = response['data'] as Map<String, dynamic>?;
+        if (data != null && data['avatar'] != null) {
+          // Update profile image with the URL from server
+          final avatarPath = data['avatar'] as String;
+          profileImage.value = ApiConstant.getFullMediaUrl(avatarPath);
+          
+          Get.snackbar(
+            'success'.tr,
+            'avatarUploaded'.tr.isNotEmpty ? 'avatarUploaded'.tr : 'Avatar uploaded successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green[700],
+            colorText: Colors.white,
+          );
+        }
+      } else {
+        final message = response['message'] ?? 'Failed to upload avatar';
+        Get.snackbar('error'.tr, message);
+      }
+    } catch (e) {
+      debugPrint('Error uploading avatar: $e');
+      Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
+    }
+  }
+
+  /// Updates personal info via API
+  /// API Endpoint: PATCH /settings/personal-info/me
+  /// Note: Email cannot be changed (read-only on backend)
+  Future<void> updatePersonalInfo() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    isPersonalInfoLoading.value = true;
+
+    try {
+      final requestBody = <String, dynamic>{
+        'full_name': nameController.text.trim(),
+        'nationality': nationalityController.text.trim(),
+        'phone_number': phoneController.text.trim(),
+      };
+
+      // Include bio only for providers
+      if (isServiceProvider.value) {
+        requestBody['bio'] = bioController.text.trim();
+      }
+
+      final response = await _apiService.patch(
+        ApiConstant.personalInfoMe,
+        body: requestBody,
+      );
+
+      final personalInfoResponse = PersonalInfoResponse.fromJson(response);
+      if (personalInfoResponse.success) {
+        personalInfo.value = personalInfoResponse.data;
+
+        // Update legacy fields
+        userName.value = personalInfoResponse.data.fullName;
+        bio.value = personalInfoResponse.data.bio ?? '';
+
+        Get.back();
+        Get.snackbar(
+          'success'.tr,
+          'profileUpdatedSuccessfully'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[700],
+          colorText: Colors.white,
+        );
+      } else {
+        personalInfoError.value = personalInfoResponse.message;
+        Get.snackbar('error'.tr, personalInfoResponse.message);
+      }
+    } catch (e) {
+      personalInfoError.value = e.toString();
+      debugPrint('Error updating personal info: $e');
+      Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
+    } finally {
+      isPersonalInfoLoading.value = false;
+    }
   }
 
   // NOTE: TextEditingControllers are NOT disposed here because this controller

@@ -137,7 +137,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                 SizedBox(height: 24.h),
                 Obx(
                   () => CustomDropdownField<ProviderRole>(
-                    value: controller.selectedRole.value,
+                    value: controller.availableRoleOptions.contains(
+                            controller.selectedRole.value)
+                        ? controller.selectedRole.value
+                        : null,
                     labelText: 'whatIsYourRole'.tr,
                     hintText: 'selectRole'.tr,
                     items: controller.availableRoleOptions.map((role) {

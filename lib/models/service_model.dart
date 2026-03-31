@@ -174,7 +174,8 @@ class ServiceAvailability {
   factory ServiceAvailability.fromJson(Map<String, dynamic> json) {
     return ServiceAvailability(
       id: json['id'] as int? ?? 0,
-      weekDays: (json['week_days'] as List<dynamic>?)
+      weekDays:
+          (json['week_days'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -222,11 +223,7 @@ class PackageFeature {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'sort_order': sortOrder,
-    };
+    return {'id': id, 'title': title, 'sort_order': sortOrder};
   }
 
   /// Convert to string for display
@@ -262,13 +259,12 @@ class ServicePackage {
       price: price.toStringAsFixed(2),
       features: features
           .asMap()
-          .map((index, title) => MapEntry(
+          .map(
+            (index, title) => MapEntry(
               index,
-              PackageFeature(
-                id: index,
-                title: title,
-                sortOrder: index,
-              )))
+              PackageFeature(id: index, title: title, sortOrder: index),
+            ),
+          )
           .values
           .toList(),
     );
@@ -290,26 +286,29 @@ class ServicePackage {
           String extractedTitle = feature;
           if (feature.trim().startsWith('{') && feature.contains('title')) {
             // Try to extract title from single-quoted JSON: {'title': 'value', ...}
-            final singleQuoteMatch = RegExp(r"'title'\s*:\s*'([^']+)'").firstMatch(feature);
+            final singleQuoteMatch = RegExp(
+              r"'title'\s*:\s*'([^']+)'",
+            ).firstMatch(feature);
             // Try to extract title from double-quoted JSON: {"title": "value", ...}
-            final doubleQuoteMatch = RegExp(r'"title"\s*:\s*"([^"]+)"').firstMatch(feature);
-            
+            final doubleQuoteMatch = RegExp(
+              r'"title"\s*:\s*"([^"]+)"',
+            ).firstMatch(feature);
+
             if (singleQuoteMatch != null && singleQuoteMatch.group(1) != null) {
               extractedTitle = singleQuoteMatch.group(1)!;
-            } else if (doubleQuoteMatch != null && doubleQuoteMatch.group(1) != null) {
+            } else if (doubleQuoteMatch != null &&
+                doubleQuoteMatch.group(1) != null) {
               extractedTitle = doubleQuoteMatch.group(1)!;
             }
           }
-          
-          featuresList.add(PackageFeature(
-            id: 0,
-            title: extractedTitle,
-            sortOrder: 0,
-          ));
+
+          featuresList.add(
+            PackageFeature(id: 0, title: extractedTitle, sortOrder: 0),
+          );
         }
       }
     }
-    
+
     return ServicePackage(
       id: json['id'] as int? ?? 0,
       name: json['name'] as String? ?? '',
@@ -410,11 +409,7 @@ class ServiceModel {
     this.packages = const [],
     // Legacy fields
     this.type = ServiceType.catering,
-    this.provider = const ServiceProvider(
-      name: '',
-      role: '',
-      imageUrl: '',
-    ),
+    this.provider = const ServiceProvider(name: '', role: '', imageUrl: ''),
     this.images = const [],
     this.location = '',
     this.rating,
@@ -426,9 +421,9 @@ class ServiceModel {
     this.serviceAs,
     this.eventVenueEnum,
     this.subOptions,
-  })  : id = id?.toString() ?? apiId.toString(),
-        createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : id = id?.toString() ?? apiId.toString(),
+       createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   /// Factory constructor from API response
   factory ServiceModel.fromJson(Map<String, dynamic> json) {
@@ -463,30 +458,36 @@ class ServiceModel {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : DateTime.now(),
-      availabilities: (json['availabilities'] as List<dynamic>?)
+      availabilities:
+          (json['availabilities'] as List<dynamic>?)
               ?.map(
-                  (e) => ServiceAvailability.fromJson(e as Map<String, dynamic>))
+                (e) => ServiceAvailability.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      packages: (json['packages'] as List<dynamic>?)
+      packages:
+          (json['packages'] as List<dynamic>?)
               ?.map((e) => ServicePackage.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       // Map serviceTypeName to ServiceType enum
       type: _parseServiceType(json['service_type_name'] as String?),
-      // Map roleName to provider role
-      provider: ServiceProvider(
-        name: '', // Will be populated from provider endpoint
-        role: json['role_name'] as String? ?? '',
-        imageUrl: '',
+      // Parse provider data from nested provider object
+      provider: _parseProvider(
+        json['provider'] as Map<String, dynamic>?,
+        json['role_name'] as String?,
       ),
       // Use coverImage for images list
-      images:
-          json['cover_image'] != null ? [json['cover_image'] as String] : [],
+      images: json['cover_image'] != null
+          ? [json['cover_image'] as String]
+          : [],
       // Get location from first availability
       location: _extractLocation(json['availabilities'] as List<dynamic>?),
-      rating: double.tryParse(json['average_rating'] as String? ?? '0'),
-      reviewCount: json['total_reviews'] as int?,
+      // Use provider's rating if service-level rating is not available
+      rating: double.tryParse(json['average_rating'] as String? ?? 
+          (json['provider'] as Map<String, dynamic>?)?['average_rating'] as String? ?? '0'),
+      reviewCount: json['total_reviews'] as int? ?? 
+          (json['provider'] as Map<String, dynamic>?)?['total_reviews'] as int?,
     );
   }
 
@@ -516,6 +517,27 @@ class ServiceModel {
     if (availabilities == null || availabilities.isEmpty) return '';
     final firstAvailability = availabilities.first as Map<String, dynamic>?;
     return firstAvailability?['address'] as String? ?? '';
+  }
+
+  /// Parse provider data from API response
+  /// API returns: {"id": 4, "name": "Abdul ALi", "avatar": "/media/users/avatar/...", "average_rating": "4.50", "total_reviews": 2}
+  static ServiceProvider _parseProvider(
+    Map<String, dynamic>? providerJson,
+    String? roleName,
+  ) {
+    if (providerJson == null) {
+      return ServiceProvider(
+        name: '',
+        role: roleName ?? '',
+        imageUrl: '',
+      );
+    }
+
+    return ServiceProvider(
+      name: providerJson['name'] as String? ?? '',
+      role: roleName ?? '',
+      imageUrl: providerJson['avatar'] as String? ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -603,8 +625,7 @@ class ServiceModel {
       attendanceCapacity: attendanceCapacity ?? this.attendanceCapacity,
       options: options ?? this.options,
       coverImage: coverImage ?? this.coverImage,
-      canGoOutsideLocation:
-          canGoOutsideLocation ?? this.canGoOutsideLocation,
+      canGoOutsideLocation: canGoOutsideLocation ?? this.canGoOutsideLocation,
       canNotGoOutsideLocation:
           canNotGoOutsideLocation ?? this.canNotGoOutsideLocation,
       requiresConfirmation: requiresConfirmation ?? this.requiresConfirmation,

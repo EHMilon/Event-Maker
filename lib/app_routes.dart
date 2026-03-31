@@ -29,6 +29,7 @@ import 'package:event_maker/views/customer_flow/categories/categories_binding.da
 import 'package:event_maker/views/profile/faq_view.dart';
 import 'package:event_maker/views/profile/contact_us_view.dart';
 import 'package:event_maker/views/profile/profile_binding.dart';
+import 'package:event_maker/views/profile/profile_settings_binding.dart';
 import 'package:event_maker/views/customer_flow/customer_flow_scaffold.dart';
 import 'package:event_maker/views/customer_flow/home/customer_home_binding.dart';
 import 'package:event_maker/views/service_provider_flow/service_provider_controller.dart';
@@ -242,7 +243,11 @@ class AppRoutes {
       page: () => const ProfileView(),
       binding: ProfileBinding(),
     ),
-    GetPage(name: profileSettings, page: () => const ProfileSettingsView()),
+    GetPage(
+      name: profileSettings,
+      page: () => const ProfileSettingsView(),
+      binding: ProfileSettingsBinding(),
+    ),
     GetPage(name: addImage, page: () => const AddImageView()),
     GetPage(
       name: changePassword,

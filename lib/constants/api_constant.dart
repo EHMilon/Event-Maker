@@ -55,6 +55,12 @@ class ApiConstant {
   static const String updateProfile = '/user/profile/update';
   static const String deleteAccount = '/user/account/delete';
 
+  /// Personal info endpoints for settings
+  static const String personalInfoMe = '/settings/personal-info/me';
+  
+  /// Upload avatar image (uses PATCH personal-info with multipart)
+  static const String uploadAvatar = '/settings/personal-info/me';
+
   // ===== SERVICE PROVIDER ENDPOINTS =====
 
   static const String providerProfile = '/provider/profile';
@@ -65,6 +71,10 @@ class ApiConstant {
   static const String providerAvailability = '/provider/availability';
   static const String providerDashboard = '/provider/dashboard';
   static const String providerActiveOrders = '/provider/orders/active';
+
+  /// Service provider's own profile with section-based data
+  /// Query params: section=about | section=reviews
+  static const String providerMyProfile = '/providers/my-profile';
 
   // ===== CUSTOMER ENDPOINTS =====
 

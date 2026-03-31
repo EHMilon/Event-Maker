@@ -1,17 +1,47 @@
 import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/widgets/review_card.dart';
+import 'package:event_maker/models/service_provider_profile_model.dart';
+import 'package:event_maker/models/service_provider_review_model.dart';
 import 'package:event_maker/widgets/services_card.dart';
+import 'package:event_maker/widgets/user_avatar.dart';
 import 'package:event_maker/views/profile/profile_controller.dart';
-import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ServiceProviderProfileView extends GetView<ProfileController> {
+class ServiceProviderProfileView extends StatefulWidget {
   const ServiceProviderProfileView({super.key});
+
+  @override
+  State<ServiceProviderProfileView> createState() =>
+      _ServiceProviderProfileViewState();
+}
+
+class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final controller = Get.find<ProfileController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    // Fetch profile data from API on init
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    await controller.fetchAllProviderData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,15 +104,10 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                             ),
                           ),
                           child: Obx(
-                            () => CircleAvatar(
-                              radius: 50.r,
-                              backgroundImage:
-                                  controller.profileImage.value.startsWith(
-                                    'http',
-                                  )
-                                  ? NetworkImage(controller.profileImage.value)
-                                  : AssetImage(controller.profileImage.value)
-                                        as ImageProvider,
+                            () => UserAvatar(
+                              imageUrl: controller.profileImage.value,
+                              localFile: controller.selectedProfileImage.value,
+                              radius: 50,
                             ),
                           ),
                         ),
@@ -102,7 +127,11 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SvgPicture.asset("assets/icons/star_fill.svg", height: 18.h, width: 18.w,),
+                          SvgPicture.asset(
+                            "assets/icons/star_fill.svg",
+                            height: 18.h,
+                            width: 18.w,
+                          ),
                           SizedBox(width: 4.w),
                           Obx(
                             () => Text(
@@ -140,7 +169,6 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
                     padding: EdgeInsets.only(bottom: 8.h),
                     child: Center(
                       child: TabBar(
-                        
                         // dividerColor: Colors.transparent,
                         dividerHeight: 0,
                         splashFactory: NoSplash.splashFactory,
@@ -169,45 +197,92 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
               ),
             ];
           },
-          body: TabBarView(children: [_buildAboutTab(), _buildReviewsTab()]
-          ),
+          body: TabBarView(children: [_buildAboutTab(), _buildReviewsTab()]),
         ),
-        
       ),
     );
   }
 
   Widget _buildAboutTab() {
-    return Obx(
-      () => ListView(
+    return Obx(() {
+      final profile = controller.providerProfile.value;
+      final isLoading = controller.isProfileLoading.value;
+      final error = controller.profileError.value;
+
+      // Show loading indicator while fetching data
+      if (isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      // Show error state if API failed
+      if (error.isNotEmpty && profile == null) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'errorLoadingProfile'.tr,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              ElevatedButton(
+                onPressed: () => controller.fetchProviderProfile(),
+                child: Text('retry'.tr),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // No data state
+      if (profile == null) {
+        return Center(
+          child: Text(
+            'noProfileData'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        );
+      }
+
+      return ListView(
         physics: const ClampingScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 24.w),
         children: [
           SizedBox(height: 16.h),
           _buildSectionTitle('certifications'.tr),
           SizedBox(height: 16.h),
-          ...controller.certifications
-              .map(
-                (cert) => Padding(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  child: _buildCertificationItem(
-                    cert['title'] ?? '',
-                    cert['date'] ?? '',
-                    cert['school'] ?? '',
-                  ),
-                ),
-              )
-              .toList(),
+          // Use only API certificates
+          if (profile.certificates.isNotEmpty)
+            ...profile.certificates.map(
+              (cert) => Padding(
+                padding: EdgeInsets.only(bottom: 16.h),
+                child: _buildApiCertificationItem(cert),
+              ),
+            )
+          else
+            Text(
+              'noCertificates'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
           SizedBox(height: 8.h),
           _buildSectionTitle('bio'.tr),
           SizedBox(height: 12.h),
           Text(
-            controller.bio.value,
+            profile.bio.isNotEmpty ? profile.bio : 'noBio'.tr,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               color: AppColors.textSecondary,
               height: 1.5,
-              fontWeight: FontWeight.w500
+              fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(height: 16.h),
@@ -215,51 +290,203 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           SizedBox(height: 16.h),
           SizedBox(
             height: 250.h,
-            child: Obx(
-              () => ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: controller.providerServices.length,
-                itemBuilder: (context, index) {
-                  final service = controller.providerServices[index];
-                  return ServicesCard(
-                    imagePath: service.images.first,
-                    title: service.title,
-                    location: service.location,
-                    price: service.basePrice?.toString() ?? '0',
-                    rating: service.rating?.toString() ?? '0',
-                    isBookmarked: service.isBookmarked,
-                    onTap: () {
-                      Get.to(
-                        () => ServiceDetailView(
-                          service: service,
-                          showEditButton: true,
+            child: profile.approvedServices.isNotEmpty
+                ? ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: profile.approvedServices.length,
+                    itemBuilder: (context, index) {
+                      final service = profile.approvedServices[index];
+                      return ServicesCard(
+                        imagePath: ApiConstant.getFullMediaUrl(
+                          service.coverImage,
                         ),
+                        title: service.title,
+                        location: '', // API doesn't provide location
+                        price: service.startingPrice,
+                        rating: service.ratingValue.toString(),
+                        isBookmarked: false,
+                        onTap: () {
+                          // TODO: Navigate to service detail with API service model
+                        },
                       );
                     },
-                  );
-                }, 
-              ),
-            ),
+                  )
+                : Center(
+                    child: Text(
+                      'noServices'.tr,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
           ),
           SizedBox(height: 16.h),
         ],
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildReviewsTab() {
-    return Obx(
-      () => ListView.builder(
+    return Obx(() {
+      final apiReviews = controller.providerApiReviews;
+      final isLoading = controller.isReviewsLoading.value;
+      final error = controller.reviewsError.value;
+
+      // Show loading indicator while fetching data
+      if (isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      // Show error state if API failed
+      if (error.isNotEmpty && apiReviews.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'errorLoadingReviews'.tr,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              ElevatedButton(
+                onPressed: () => controller.fetchProviderReviews(),
+                child: Text('retry'.tr),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // No reviews state
+      if (apiReviews.isEmpty) {
+        return Center(
+          child: Text(
+            'noReviews'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        );
+      }
+
+      // Display API reviews
+      return ListView.builder(
         physics: const ClampingScrollPhysics(),
         padding: EdgeInsets.all(24.w),
-        itemCount: controller.providerReviews.length,
+        itemCount: apiReviews.length,
         itemBuilder: (context, index) {
-          final review = controller.providerReviews[index];
+          final review = apiReviews[index];
           return Padding(
             padding: EdgeInsets.only(bottom: 16.h),
-            child: ReviewCard(review: review, useFullWidth: true),
+            child: _buildApiReviewCard(review),
           );
         },
+      );
+    });
+  }
+
+  /// Build review card from API model
+  Widget _buildApiReviewCard(ServiceProviderReview review) {
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20.r,
+                backgroundImage: review.customer.fullAvatarUrl != null
+                    ? NetworkImage(review.customer.fullAvatarUrl!)
+                    : null,
+                child: review.customer.fullAvatarUrl == null
+                    ? Text(
+                        review.customer.name.isNotEmpty
+                            ? review.customer.name[0].toUpperCase()
+                            : '?',
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : null,
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      review.customer.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      review.createdAt,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.star, size: 16.r, color: Colors.amber),
+                  SizedBox(width: 4.w),
+                  Text(
+                    review.rating.toString(),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            review.serviceTitle,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.primary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            review.comment,
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -275,21 +502,39 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildCertificationItem(String title, String date, String school) {  
+  /// Build certification item from API model
+  Widget _buildApiCertificationItem(ProviderCertificate cert) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                cert.title,
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (cert.file != null && cert.file!.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  // TODO: Open certificate file/image
+                },
+                child: Icon(
+                  Icons.visibility_outlined,
+                  size: 20.r,
+                  color: AppColors.primary,
+                ),
+              ),
+          ],
         ),
         SizedBox(height: 4.h),
         Text(
-          date,
+          cert.institute,
           style: GoogleFonts.inter(
             fontSize: 12.sp,
             fontWeight: FontWeight.w400,
@@ -297,7 +542,7 @@ class ServiceProviderProfileView extends GetView<ProfileController> {
           ),
         ),
         Text(
-          school,
+          'Issued: ${cert.issueDate}',
           style: GoogleFonts.inter(
             fontSize: 12.sp,
             fontWeight: FontWeight.w400,

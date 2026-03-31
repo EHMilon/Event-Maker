@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../widgets/app_custom_dialog.dart';
 import '../../../widgets/language_bottom_sheet.dart';
+import '../../../widgets/user_avatar.dart';
 import '../../../constants/app_colors.dart';
 import '../../../app_routes.dart';
 import '../../profile/profile_controller.dart';
@@ -54,11 +55,10 @@ class ProfileView extends GetView<ProfileController> {
                               width: 2.w,
                             ),
                           ),
-                          child: CircleAvatar(
-                            radius: 50.r,
-                            backgroundImage: AssetImage(
-                              controller.profileImage.value,
-                            ),
+                          child: UserAvatar(
+                            imageUrl: controller.profileImage.value,
+                            localFile: controller.selectedProfileImage.value,
+                            radius: 50,
                           ),
                         ),
                         SizedBox(height: 12.h),
