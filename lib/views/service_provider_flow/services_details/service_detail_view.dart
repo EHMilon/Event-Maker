@@ -9,6 +9,7 @@ import 'package:event_maker/models/review_model.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_controller.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart' hide Path;
@@ -75,11 +76,21 @@ class ServiceDetailView extends StatelessWidget {
     );
   }
 
-  void _onEditPressed() {
-    Get.to(
+  Future<void> _onEditPressed() async {
+    final result = await Get.to(
       () => AddServiceView(service: service, isEdit: true),
       binding: AddScreensBinding(),
     );
+
+    // If edit was successful, refresh the service detail
+    if (result == true) {
+      try {
+        final controller = Get.find<SPServicedetailController>();
+        await controller.refresh();
+      } catch (_) {
+        // Controller not found, ignore
+      }
+    }
   }
 
   void _showAcceptDialog(BuildContext context) {
@@ -139,11 +150,11 @@ class ServiceDetailView extends StatelessWidget {
             height: 250.h,
             child: service.images.isNotEmpty
                 ? Image.network(
-                      ApiConstant.getFullMediaUrl(service.images.first),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(color: AppColors.lightGrey),
-                    )
+                    ApiConstant.getFullMediaUrl(service.images.first),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Container(color: AppColors.lightGrey),
+                  )
                 : Container(color: AppColors.lightGrey),
           ),
 
@@ -246,7 +257,9 @@ class ServiceDetailView extends StatelessWidget {
                                   image: service.provider.imageUrl.isNotEmpty
                                       ? DecorationImage(
                                           image: NetworkImage(
-                                            ApiConstant.getFullMediaUrl(service.provider.imageUrl),
+                                            ApiConstant.getFullMediaUrl(
+                                              service.provider.imageUrl,
+                                            ),
                                           ),
                                           fit: BoxFit.cover,
                                         )
@@ -664,57 +677,71 @@ class ServiceDetailView extends StatelessWidget {
                                           ),
                                         ),
                                         SizedBox(height: 20.h),
-                                        ...package.featureTitles.map(
-                                          (featureTitle) {
-                                            // Parse JSON if the feature contains JSON format
-                                            // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
-                                            String displayText = featureTitle;
-                                            if (featureTitle.contains('title')) {
-                                              try {
-                                                // Try single-quoted JSON: {'title': 'value', ...}
-                                                final singleMatch = RegExp(r"'title'\s*:\s*'([^']+)'").firstMatch(featureTitle);
-                                                // Try double-quoted JSON: {"title": "value", ...}
-                                                final doubleMatch = RegExp(r'"title"\s*:\s*"([^"]+)"').firstMatch(featureTitle);
-                                                
-                                                if (singleMatch != null && singleMatch.group(1) != null) {
-                                                  displayText = singleMatch.group(1)!;
-                                                } else if (doubleMatch != null && doubleMatch.group(1) != null) {
-                                                  displayText = doubleMatch.group(1)!;
-                                                }
-                                              } catch (_) {
-                                                // Fallback to original
+                                        ...package.featureTitles.map((
+                                          featureTitle,
+                                        ) {
+                                          // Parse JSON if the feature contains JSON format
+                                          // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
+                                          String displayText = featureTitle;
+                                          if (featureTitle.contains('title')) {
+                                            try {
+                                              // Try single-quoted JSON: {'title': 'value', ...}
+                                              final singleMatch = RegExp(
+                                                r"'title'\s*:\s*'([^']+)'",
+                                              ).firstMatch(featureTitle);
+                                              // Try double-quoted JSON: {"title": "value", ...}
+                                              final doubleMatch = RegExp(
+                                                r'"title"\s*:\s*"([^"]+)"',
+                                              ).firstMatch(featureTitle);
+
+                                              if (singleMatch != null &&
+                                                  singleMatch.group(1) !=
+                                                      null) {
+                                                displayText = singleMatch.group(
+                                                  1,
+                                                )!;
+                                              } else if (doubleMatch != null &&
+                                                  doubleMatch.group(1) !=
+                                                      null) {
+                                                displayText = doubleMatch.group(
+                                                  1,
+                                                )!;
                                               }
+                                            } catch (_) {
+                                              // Fallback to original
                                             }
-                                            return Padding(
-                                              padding: EdgeInsets.only(
-                                                bottom: 12.h,
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.check,
-                                                    size: 18.r,
-                                                    color: const Color(
-                                                      0xFF00C566,
-                                                    ), // Green check
-                                                  ),
-                                                  SizedBox(width: 12.w),
-                                                  Flexible(
-                                                    child: Text(
-                                                      displayText,
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 14.sp,
-                                                        color: AppColors.textSecondary,
-                                                      ),
-                                                      overflow: TextOverflow.ellipsis,
-                                                      maxLines: 2,
+                                          }
+                                          return Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom: 12.h,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.check,
+                                                  size: 18.r,
+                                                  color: const Color(
+                                                    0xFF00C566,
+                                                  ), // Green check
+                                                ),
+                                                SizedBox(width: 12.w),
+                                                Flexible(
+                                                  child: Text(
+                                                    displayText,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 14.sp,
+                                                      color: AppColors
+                                                          .textSecondary,
                                                     ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 2,
                                                   ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }),
                                       ],
                                     ),
                                   ),

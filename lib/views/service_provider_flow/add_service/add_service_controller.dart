@@ -106,9 +106,7 @@ class AddServiceController extends GetxController {
   final selectedServiceType = ServiceType.catering.obs;
   final selectedRole = ProviderRole.freelancer.obs;
   final selectedServiceAs = Rxn<ServiceAs>();
-  
-  // Preserve original service type name from API for edit mode
-  String? originalServiceTypeName;
+
   final selectedServiceAsItems =
       <dynamic>[].obs; // Can hold ServiceAs enum or String
 
@@ -284,9 +282,6 @@ class AddServiceController extends GetxController {
     // Basic fields
     titleController.text = service.title;
     descriptionController.text = service.description;
-
-    // Preserve original service type name from API for edit mode
-    originalServiceTypeName = service.serviceTypeName;
 
     // Location - use first availability address or fallback to service.location
     // Set both locationController and primaryAvailabilityCard.locationController for UI consistency
@@ -731,10 +726,8 @@ class AddServiceController extends GetxController {
       }
 
       // Get service type name for API
-      // In edit mode, preserve the original service type name from API to avoid enum conversion issues
-      final serviceTypeName = (isEdit && originalServiceTypeName != null && originalServiceTypeName!.isNotEmpty)
-          ? originalServiceTypeName!
-          : _getServiceTypeName(selectedServiceType.value);
+      // Always use the currently selected service type (user can change it in edit mode)
+      final serviceTypeName = _getServiceTypeName(selectedServiceType.value);
 
       // Get role name for API
       final roleName = _getRoleName(selectedRole.value);
@@ -760,7 +753,7 @@ class AddServiceController extends GetxController {
         serviceAsName: serviceAsName,
         eventVenue: selectedEventVenue.value?.label,
         options: selectedSubOptionsItems.isNotEmpty
-            ? selectedSubOptionsItems.first.toString()
+            ? _getSubOptionLabel(selectedSubOptionsItems.first)
             : null,
         attendanceCapacity: attendanceCapacityController.text.trim().isNotEmpty
             ? int.tryParse(attendanceCapacityController.text.trim())
@@ -901,6 +894,16 @@ class AddServiceController extends GetxController {
     }
   }
 
+  /// Get sub-option label for API (converts enum or string to label)
+  String _getSubOptionLabel(dynamic item) {
+    if (item is ServiceSubOption) {
+      return item.label;
+    } else if (item is String) {
+      return item;
+    }
+    return item.toString();
+  }
+
   @override
   void onClose() {
     titleController.dispose();
@@ -1009,7 +1012,7 @@ class AddServiceController extends GetxController {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return months[month - 1];
   }
@@ -1028,7 +1031,7 @@ class PackageFormData {
   final nameController = TextEditingController();
   final priceController = TextEditingController();
   final featureControllers = <TextEditingController>[].obs;
-  
+
   // Reactive properties for UI updates when returning from packages view
   final name = ''.obs;
   final price = ''.obs;
@@ -1055,8 +1058,10 @@ class PackageFormData {
   }
 
   /// Get feature values as strings (only non-empty values)
-  List<String> get features =>
-      featureControllers.map((c) => c.text.trim()).where((f) => f.isNotEmpty).toList();
+  List<String> get features => featureControllers
+      .map((c) => c.text.trim())
+      .where((f) => f.isNotEmpty)
+      .toList();
 
   /// Dispose all controllers
   void dispose() {

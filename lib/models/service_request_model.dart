@@ -152,9 +152,8 @@ class PackageRequestModel {
       'name': name,
       'price': price,
       'sort_order': sortOrder,
-      'features': features
-          .map((f) => {'title': f, 'sort_order': 0})
-          .toList(),
+      // Send features as simple strings, not as objects
+      'features': features,
     };
   }
 
