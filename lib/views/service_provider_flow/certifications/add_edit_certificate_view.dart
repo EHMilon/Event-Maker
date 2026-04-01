@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AddEditCertificateView extends GetView<CertificationController> {
   final bool isEdit;
-  final String? certificateId;
+  final int? certificateId;
 
   const AddEditCertificateView({
     super.key,

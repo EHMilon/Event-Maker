@@ -1,10 +1,15 @@
 import 'dart:io';
 import 'package:event_maker/models/certification_model.dart';
+import 'package:event_maker/constants/api_constant.dart';
+import 'package:event_maker/services/certification_repository.dart';
+import 'package:event_maker/services/api_exception.dart';
+import 'package:event_maker/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CertificationController extends GetxController {
+  final CertificationRepository _repository = CertificationRepository();
   final RxList<CertificationModel> certifications = <CertificationModel>[].obs;
   final RxBool isLoading = false.obs;
 
@@ -18,30 +23,37 @@ class CertificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadMockCertifications();
+    fetchCertificates();
   }
 
-  void _loadMockCertifications() {
-    isLoading.value = true;
-    Future.delayed(const Duration(seconds: 2), () {
-      certifications.assignAll([
-        CertificationModel(
-          id: '1',
-          title: 'Professional Chef',
-          date: 'July, 2025',
-          school: 'Sonargaon Cooking School',
-          imageUrl: 'assets/images/certificate.png',
-        ),
-        CertificationModel(
-          id: '2',
-          title: 'Pizza Artisan',
-          date: 'August, 2025',
-          school: 'Lorenzo\'s Pizza',
-          imageUrl: 'assets/images/certificate.png',
-        ),
-      ]);
+  /// Fetch all certificates from API
+  Future<void> fetchCertificates() async {
+    try {
+      isLoading.value = true;
+      Log.d('=======> CertificationController: Fetching certificates');
+      final response = await _repository.fetchCertifications();
+      certifications.assignAll(response.data);
+    } on ApiException catch (e) {
+      Log.e('=======> CertificationController: ApiException: ${e.message}');
+      Get.snackbar(
+        'error'.tr,
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Log.e('=======> CertificationController: Error fetching certificates: $e');
+      Get.snackbar(
+        'error'.tr,
+        'failedToFetchCertificates'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } finally {
       isLoading.value = false;
-    });
+    }
   }
 
   bool _isPickingImage = false;
@@ -63,9 +75,9 @@ class CertificationController extends GetxController {
 
   void prepareEdit(CertificationModel cert) {
     titleController.text = cert.title;
-    instituteController.text = cert.school;
-    dateController.text = cert.date;
-    imageUrl.value = cert.imageUrl;
+    instituteController.text = cert.institute;
+    dateController.text = cert.issueDateForForm;
+    imageUrl.value = ApiConstant.getFullMediaUrl(cert.file);
     selectedImage.value = null;
   }
 
@@ -77,23 +89,38 @@ class CertificationController extends GetxController {
     imageUrl.value = null;
   }
 
-  void addCertification() {
-    if (titleController.text.isEmpty || instituteController.text.isEmpty) {
+  /// Add new certificate via API
+  Future<void> addCertification() async {
+    if (titleController.text.isEmpty || instituteController.text.isEmpty || dateController.text.isEmpty) {
       Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
       return;
     }
 
-    isLoading.value = true;
-    Future.delayed(const Duration(seconds: 1), () {
-      final newCert = CertificationModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+    if (selectedImage.value == null) {
+      Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      // Convert date from DD/MM/YYYY to YYYY-MM-DD for API
+      final dateParts = dateController.text.split('/');
+      String issueDate = dateController.text;
+      if (dateParts.length == 3) {
+        issueDate = '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
+      }
+
+      Log.d('=======> CertificationController: Creating certificate');
+      final newCert = await _repository.createCertification(
         title: titleController.text,
-        school: instituteController.text,
-        date: dateController.text,
-        imageUrl: selectedImage.value?.path ?? 'assets/icons/scroll-text.svg',
+        institute: instituteController.text,
+        issueDate: issueDate,
+        file: selectedImage.value!,
       );
+
       certifications.insert(0, newCert);
-      isLoading.value = false;
+
       Get.back();
       Get.snackbar(
         'success'.tr,
@@ -103,36 +130,128 @@ class CertificationController extends GetxController {
         colorText: Colors.white,
       );
       clearFields();
-    });
+    } on ApiException catch (e) {
+      Log.e('=======> CertificationController: ApiException: ${e.message}');
+      Get.snackbar(
+        'error'.tr,
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Log.e('=======> CertificationController: Error creating certificate: $e');
+      Get.snackbar(
+        'error'.tr,
+        'failedToCreateCertificate'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void updateCertification(String id) {
-    if (titleController.text.isEmpty || instituteController.text.isEmpty) {
+  /// Update certificate via API
+  Future<void> updateCertification(int id) async {
+    if (titleController.text.isEmpty || instituteController.text.isEmpty || dateController.text.isEmpty) {
       Get.snackbar('error'.tr, 'pleaseSelectAllFields'.tr);
       return;
     }
 
-    final index = certifications.indexWhere((c) => c.id == id);
-    if (index != -1) {
+    try {
       isLoading.value = true;
-      Future.delayed(const Duration(seconds: 1), () {
-        certifications[index] = certifications[index].copyWith(
-          title: titleController.text,
-          school: instituteController.text,
-          date: dateController.text,
-          imageUrl: selectedImage.value?.path ?? imageUrl.value,
-        );
-        isLoading.value = false;
-        Get.back(); // Back to list view
-        Get.snackbar(
-          'success'.tr,
-          'certUpdatedSuccess'.tr,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.8),
-          colorText: Colors.white,
-        );
-        clearFields();
-      });
+
+      // Convert date from DD/MM/YYYY to YYYY-MM-DD for API
+      final dateParts = dateController.text.split('/');
+      String issueDate = dateController.text;
+      if (dateParts.length == 3) {
+        issueDate = '${dateParts[2]}-${dateParts[1].padLeft(2, '0')}-${dateParts[0].padLeft(2, '0')}';
+      }
+
+      Log.d('=======> CertificationController: Updating certificate $id');
+      final updatedCert = await _repository.updateCertification(
+        certificationId: id,
+        title: titleController.text,
+        institute: instituteController.text,
+        issueDate: issueDate,
+        file: selectedImage.value,
+      );
+
+      final index = certifications.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        certifications[index] = updatedCert;
+      }
+
+      Get.back();
+      Get.snackbar(
+        'success'.tr,
+        'certUpdatedSuccess'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      clearFields();
+    } on ApiException catch (e) {
+      Log.e('=======> CertificationController: ApiException: ${e.message}');
+      Get.snackbar(
+        'error'.tr,
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Log.e('=======> CertificationController: Error updating certificate: $e');
+      Get.snackbar(
+        'error'.tr,
+        'failedToUpdateCertificate'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Delete certificate via API
+  Future<void> deleteCertificate(int id) async {
+    try {
+      isLoading.value = true;
+      Log.d('=======> CertificationController: Deleting certificate $id');
+      await _repository.deleteCertification(id);
+
+      certifications.removeWhere((c) => c.id == id);
+
+      Get.snackbar(
+        'success'.tr,
+        'certDeletedSuccess'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } on ApiException catch (e) {
+      Log.e('=======> CertificationController: ApiException: ${e.message}');
+      Get.snackbar(
+        'error'.tr,
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Log.e('=======> CertificationController: Error deleting certificate: $e');
+      Get.snackbar(
+        'error'.tr,
+        'failedToDeleteCertificate'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 

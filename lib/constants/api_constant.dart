@@ -106,6 +106,34 @@ class ApiConstant {
   static const String reviews = '/reviews';
   static const String createReview = '/reviews/create';
 
+  // ===== DOCUMENT ENDPOINTS =====
+
+  /// Provider documents: GET, POST
+  static const String providerDocuments = '/providers/documents';
+
+  /// Get single document detail: /providers/documents/detail/{id}
+  static String providerDocumentDetail(int id) => '/providers/documents/detail/$id';
+
+  /// Update document: /providers/documents/update/{id}
+  static String providerDocumentUpdate(int id) => '/providers/documents/update/$id';
+
+  /// Delete document: /providers/documents/delete/{id}
+  static String providerDocumentDelete(int id) => '/providers/documents/delete/$id';
+
+  // ===== CERTIFICATE ENDPOINTS =====
+
+  /// Provider certificates: GET, POST
+  static const String providerCertificates = '/providers/certificates';
+
+  /// Get single certificate detail: /providers/certificates/detail/{id}
+  static String providerCertificateDetail(int id) => '/providers/certificates/detail/$id';
+
+  /// Update certificate: /providers/certificates/update/{id}
+  static String providerCertificateUpdate(int id) => '/providers/certificates/update/$id';
+
+  /// Delete certificate: /providers/certificates/delete/{id}
+  static String providerCertificateDelete(int id) => '/providers/certificates/delete/$id';
+
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';

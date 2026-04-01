@@ -5,10 +5,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AddDocumentView extends GetView<DocumentsController> {
-  AddDocumentView({super.key});
+class AddDocumentView extends StatefulWidget {
+  const AddDocumentView({super.key});
 
+  @override
+  State<AddDocumentView> createState() => _AddDocumentViewState();
+}
+
+class _AddDocumentViewState extends State<AddDocumentView> {
   final TextEditingController _titleController = TextEditingController();
+  final DocumentsController controller = Get.find<DocumentsController>();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +47,7 @@ class AddDocumentView extends GetView<DocumentsController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // File picker area
             GestureDetector(
               onTap: () => controller.pickDocument(),
               child: Obx(
@@ -45,9 +58,11 @@ class AddDocumentView extends GetView<DocumentsController> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
-                      color: const Color(0xFFE5E7EB),
+                      color: controller.selectedFile.value == null
+                          ? const Color(0xFFE5E7EB)
+                          : AppColors.primary,
                       style: BorderStyle.solid,
-                      width: 1,
+                      width: controller.selectedFile.value == null ? 1 : 2,
                     ),
                   ),
                   child: controller.selectedFile.value == null
@@ -56,8 +71,8 @@ class AddDocumentView extends GetView<DocumentsController> {
                           children: [
                             Container(
                               padding: EdgeInsets.all(12.w),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF3F4F6),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -84,13 +99,22 @@ class AddDocumentView extends GetView<DocumentsController> {
                                 color: AppColors.textSecondary,
                               ),
                             ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'PDF, DOC, DOCX, PNG, JPG',
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textSecondary.withOpacity(0.7),
+                              ),
+                            ),
                           ],
                         )
                       : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.description,
+                            Icon(
+                              _getFileIcon(controller.fileName.value),
                               color: AppColors.primary,
                               size: 48,
                             ),
@@ -103,7 +127,10 @@ class AddDocumentView extends GetView<DocumentsController> {
                                 color: AppColors.textPrimary,
                               ),
                               textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
+                            SizedBox(height: 4.h),
                             Text(
                               controller.fileSize.value,
                               style: GoogleFonts.inter(
@@ -116,7 +143,7 @@ class AddDocumentView extends GetView<DocumentsController> {
                               onPressed: () => controller.pickDocument(),
                               child: Text(
                                 'changeFile'.tr,
-                                style: TextStyle(color: AppColors.primary),
+                                style: const TextStyle(color: AppColors.primary),
                               ),
                             ),
                           ],
@@ -125,6 +152,7 @@ class AddDocumentView extends GetView<DocumentsController> {
               ),
             ),
             SizedBox(height: 30.h),
+            // Title input
             Text(
               'documentTitleLabel'.tr,
               style: GoogleFonts.inter(
@@ -137,7 +165,7 @@ class AddDocumentView extends GetView<DocumentsController> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                hintText: 'serviceTitleHint'.tr,
+                hintText: 'documentTitleHint'.tr,
                 hintStyle: GoogleFonts.inter(
                   fontSize: 14.sp,
                   color: AppColors.textSecondary.withOpacity(0.5),
@@ -163,56 +191,89 @@ class AddDocumentView extends GetView<DocumentsController> {
               ),
             ),
             SizedBox(height: 100.h),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Get.back(),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      side: const BorderSide(color: Color(0xFFE5E7EB)),
-                    ),
-                    child: Text(
-                      'cancel'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 25),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Get.back(),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  side: const BorderSide(color: Color(0xFFE5E7EB)),
+                ),
+                child: Text(
+                  'cancel'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () =>
-                        controller.addDocument(_titleController.text),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      elevation: 0,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Obx(
+                () => ElevatedButton(
+                  onPressed: controller.isUploading.value
+                      ? null
+                      : () => controller.addDocument(_titleController.text),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: Text(
-                      'add'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                    elevation: 0,
                   ),
+                  child: controller.isUploading.value
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          'upload'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  IconData _getFileIcon(String fileName) {
+    final extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+        return Icons.image;
+      default:
+        return Icons.insert_drive_file;
+    }
   }
 }

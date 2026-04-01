@@ -1,5 +1,6 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/certification_model.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -91,14 +92,14 @@ class CertificationListView extends GetView<CertificationController> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        cert.date,
+                        cert.formattedIssueDate,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
                         ),
                       ),
                       Text(
-                        cert.school,
+                        cert.institute,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,

@@ -371,7 +371,7 @@ class AppRoutes {
     GetPage(
       name: spEditCertification,
       page: () {
-        final certId = Get.arguments as String;
+        final certId = Get.arguments as int;
         return AddEditCertificateView(isEdit: true, certificateId: certId);
       },
     ),
