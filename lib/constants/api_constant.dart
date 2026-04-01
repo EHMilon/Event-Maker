@@ -101,6 +101,17 @@ class ApiConstant {
   static const String createBooking = '/bookings/create';
   static const String cancelBooking = '/bookings/cancel';
 
+  /// Provider booking requests: GET api/bookings/provider/booking-request
+  /// Query params: tab=upcoming (default) | tab=past
+  static const String providerBookingRequests = '/bookings/provider/booking-request';
+
+  /// Get single booking request detail: /bookings/provider/booking-request/{id}
+  static String providerBookingRequestDetail(int id) => '/bookings/provider/booking-request/$id';
+
+  /// Accept or reject booking request: POST /bookings/provider/booking-request-decision/{id}
+  /// Body: {"action": "accepted"} or {"action": "rejected"}
+  static String providerBookingRequestDecision(int id) => '/bookings/provider/booking-request-decision/$id';
+
   // ===== REVIEW ENDPOINTS =====
 
   static const String reviews = '/reviews';
@@ -145,6 +156,9 @@ class ApiConstant {
 
   static const String notifications = '/notifications';
   static const String markNotificationRead = '/notifications/read';
+
+  /// Provider booking notifications: GET api/bookings/provider/booking-notification
+  static const String providerBookingNotifications = '/bookings/provider/booking-notification';
 
   // ===== TIMEOUTS (in milliseconds) =====
 

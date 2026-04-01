@@ -43,7 +43,7 @@ class NotificationView extends GetView<NotificationController> {
                 name: _formatName(request.customerName),
                 action: _formatAction(request.status),
                 detail: 'booking request'.tr,
-                timeAgo: '9 hr ago',
+                timeAgo: request.createdAt,
                 onTap: () => _handleNotificationClick(request),
               );
             },
@@ -54,8 +54,17 @@ class NotificationView extends GetView<NotificationController> {
   }
 
   void _handleNotificationClick(ServiceRequest request) {
-    final serviceModel = _convertToServiceModel(request);
-    Get.to(() => ServiceDetailView(service: serviceModel, isRequest: true));
+    // Navigate with booking ID to fetch real data from API
+    final bookingId = int.tryParse(request.id);
+    if (bookingId != null) {
+      Get.to(() => ServiceDetailView(
+        service: _convertToServiceModel(request),
+        isRequest: true,
+        bookingId: bookingId,
+      ));
+    } else {
+      Get.to(() => ServiceDetailView(service: _convertToServiceModel(request), isRequest: true));
+    }
   }
 
   ServiceModel _convertToServiceModel(ServiceRequest request) {

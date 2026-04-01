@@ -3,7 +3,6 @@ import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
-import 'package:event_maker/models/review_model.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
@@ -11,92 +10,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:event_maker/widgets/app_custom_dialog.dart';
-import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ServiceDetailView extends StatelessWidget {
   final ServiceModel service;
   final bool showEditButton;
-  final bool isRequest;
 
   const ServiceDetailView({
     super.key,
     required this.service,
     this.showEditButton = false,
-    this.isRequest = false,
   });
   ServiceRepository get _repository => const ServiceRepository();
-
-  void _showRejectDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AppCustomDialog(
-        iconPath: 'assets/images/reject.svg',
-        title: 'confirmRejectTitle'.tr,
-        subTitle: 'confirmRejectSubtitle'.tr,
-        mainButtonText: 'reject'.tr,
-        mainButtonColor: AppColors.error,
-        mainButtonCallback: () {
-          final controller = Get.find<RequestsController>();
-          controller.rejectRequest(service);
-          Get.back(); // Close dialog
-          Get.back(); // Go back to list
-          Get.snackbar(
-            'success'.tr,
-            'rejectSuccessSubtitle'.tr,
-            backgroundColor: AppColors.error.withOpacity(0.1),
-            colorText: AppColors.error,
-          );
-        },
-        secondaryButtonText: 'cancel'.tr,
-        secondaryButtonCallback: () => Get.back(),
-      ),
-    );
-  }
-
-  // void _onEditPressed() {
-  //   // Navigate to the appropriate edit screen based on service type
-  //   switch (service.type) {
-  //     case ServiceType.event:
-  //       Get.to(
-  //         () => AddEventView(service: service, isEdit: true),
-  //         binding: AddScreensBinding(),
-  //       );
-  //       break;
-  //     case ServiceType.training:
-  //       Get.to(
-  //         () => AddTrainingView(service: service, isEdit: true),
-  //         binding: AddScreensBinding(),
-  //       );
-  //       break;
-  //     default:
-  //       // For service types: photography, catering, cleaning, music, filming
-  //       Get.to(
-  //         () => AddServiceView(service: service, isEdit: true),
-  //         binding: AddScreensBinding(),
-  //       );
-  //       break;
-  //   }
-  // }
-
-  void _showAcceptDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AppCustomDialog(
-        iconPath: 'assets/images/accept.svg',
-        title: 'acceptSuccessTitle'.tr,
-        subTitle: 'acceptSuccessSubtitle'.tr,
-        mainButtonText: 'done'.tr,
-        mainButtonCallback: () {
-          final controller = Get.find<RequestsController>();
-          controller.acceptRequest(service);
-          Get.back(); // Close dialog
-          Get.back(); // Go back to list
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -663,67 +588,32 @@ class ServiceDetailView extends StatelessWidget {
               bottom: 30.h,
               left: 24.w,
               right: 24.w,
-              child: isRequest
-                  ? Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => _showRejectDialog(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.white,
-                              padding: EdgeInsets.symmetric(vertical: 16.h),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              'Reject',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: PrimaryTextButton(
-                            onPressed: () => _showAcceptDialog(context),
-                            text: 'Accept',
-                          ),
-                        ),
-                      ],
-                    )
-                  : PrimaryTextButton(
-                      onPressed: () {
-                        if (isHospitality) {
-                          Get.toNamed(
-                            AppRoutes.bookServiceDate,
-                            arguments: {
-                              'service': service,
-                              'package': service.packages.isNotEmpty
-                                  ? service.packages[selectedPackageIndex
-                                        .value]
-                                  : null,
-                            },
-                          );
-                        } else {
-                          Get.toNamed(
-                            AppRoutes.payment,
-                            arguments: {
-                              'service': service,
-                              'package': service.packages.isNotEmpty
-                                  ? service.packages[selectedPackageIndex
-                                        .value]
-                                  : null,
-                            },
-                          );
-                        }
+              child: PrimaryTextButton(
+                onPressed: () {
+                  if (isHospitality) {
+                    Get.toNamed(
+                      AppRoutes.bookServiceDate,
+                      arguments: {
+                        'service': service,
+                        'package': service.packages.isNotEmpty
+                            ? service.packages[selectedPackageIndex.value]
+                            : null,
                       },
-                      text: 'bookNow'.tr,
-                    ),
+                    );
+                  } else {
+                    Get.toNamed(
+                      AppRoutes.payment,
+                      arguments: {
+                        'service': service,
+                        'package': service.packages.isNotEmpty
+                            ? service.packages[selectedPackageIndex.value]
+                            : null,
+                      },
+                    );
+                  }
+                },
+                text: 'bookNow'.tr,
+              ),
             ),
         ],
       ),

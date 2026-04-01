@@ -1,9 +1,11 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/booking_request_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/models/vendor_profile_model.dart';
 import 'package:event_maker/services/service_repository.dart';
+import 'package:event_maker/services/booking_request_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
 import 'package:event_maker/models/review_model.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
@@ -27,17 +29,21 @@ class ServiceDetailView extends StatelessWidget {
     this.showEditButton = false,
     this.isRequest = false,
     this.isOrder = false,
+    this.isPastRequest = false,
     bool? hideActionButtons,
+    this.bookingId,
   }) : hideActionButtons = hideActionButtons ?? false;
 
   final bool isOrder;
   final bool isRequest;
+  final bool isPastRequest;
   final ServiceModel service;
   final bool showEditButton;
   final bool hideActionButtons;
+  final int? bookingId;
   final ServiceRepository _repository = const ServiceRepository();
 
-  void _showRejectDialog(BuildContext context) {
+  void _showRejectDialog(BuildContext context, int bookingId) {
     showDialog(
       context: context,
       builder: (context) => AppCustomDialog(
@@ -48,7 +54,7 @@ class ServiceDetailView extends StatelessWidget {
         mainButtonColor: AppColors.error,
         mainButtonCallback: () {
           Get.back(); // Close confirmation dialog
-          _showRejectSuccessDialog(context);
+          _showRejectSuccessDialog(context, bookingId);
         },
         secondaryButtonText: 'cancel'.tr,
         secondaryButtonCallback: () => Get.back(),
@@ -56,7 +62,7 @@ class ServiceDetailView extends StatelessWidget {
     );
   }
 
-  void _showRejectSuccessDialog(BuildContext context) {
+  void _showRejectSuccessDialog(BuildContext context, int bookingId) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -68,7 +74,7 @@ class ServiceDetailView extends StatelessWidget {
         mainButtonColor: AppColors.error,
         mainButtonCallback: () {
           final controller = Get.find<RequestsController>();
-          controller.rejectRequest(service);
+          controller.rejectRequest(bookingId);
           Get.back(); // Close success dialog
           Get.back(); // Go back to list
         },
@@ -93,7 +99,7 @@ class ServiceDetailView extends StatelessWidget {
     }
   }
 
-  void _showAcceptDialog(BuildContext context) {
+  void _showAcceptDialog(BuildContext context, int bookingId) {
     showDialog(
       context: context,
       builder: (context) => AppCustomDialog(
@@ -103,7 +109,7 @@ class ServiceDetailView extends StatelessWidget {
         mainButtonText: 'accept'.tr,
         mainButtonCallback: () {
           Get.back(); // Close confirmation dialog
-          _showAcceptSuccessDialog(context);
+          _showAcceptSuccessDialog(context, bookingId);
         },
         secondaryButtonText: 'cancel'.tr,
         secondaryButtonCallback: () => Get.back(),
@@ -111,7 +117,7 @@ class ServiceDetailView extends StatelessWidget {
     );
   }
 
-  void _showAcceptSuccessDialog(BuildContext context) {
+  void _showAcceptSuccessDialog(BuildContext context, int bookingId) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -122,7 +128,7 @@ class ServiceDetailView extends StatelessWidget {
         mainButtonText: 'done'.tr,
         mainButtonCallback: () {
           final controller = Get.find<RequestsController>();
-          controller.acceptRequest(service);
+          controller.acceptRequest(bookingId);
           Get.back(); // Close success dialog
           Get.back(); // Go back to list
         },
@@ -137,6 +143,17 @@ class ServiceDetailView extends StatelessWidget {
     final isHospitality =
         service.type == ServiceType.cleaning ||
         service.type == ServiceType.catering;
+
+    // If this is a request with bookingId, fetch and show real booking data
+    if (isRequest && bookingId != null) {
+      return _BookingRequestDetailView(
+        bookingId: bookingId!,
+        service: service,
+        isPastRequest: isPastRequest,
+        onAccept: () => _showAcceptDialog(context, bookingId!),
+        onReject: () => _showRejectDialog(context, bookingId!),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -478,106 +495,6 @@ class ServiceDetailView extends StatelessWidget {
                         ),
                         SizedBox(height: 24.h),
 
-                        if (isRequest || isOrder) ...[
-                          Text(
-                            'customer'.tr,
-                            style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(50.r),
-                                child: Image.network(
-                                  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop',
-                                  width: 45.w,
-                                  height: 45.w,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              SizedBox(width: 12.w),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Jenny Smith',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Jenny@gmail.com',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 24.h),
-                          Text(
-                            'details'.tr,
-                            style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          _buildDetailRow('name'.tr, 'Jenny'),
-                          _buildDetailRow(
-                            'mobileNumber'.tr,
-                            '+971 5X xxx xxxx',
-                          ),
-                          _buildDetailRow('email'.tr, 'jenny@gmail.com'),
-                          _buildDetailRow(
-                            'dateTime'.tr,
-                            '8PM - 11PM, 21 Nov',
-                            isLast: true,
-                          ),
-                          SizedBox(height: 24.h),
-                          Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 20.w,
-                              vertical: 13.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE5E7FF),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'subTotal'.tr,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                Text(
-                                  '\$46',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-
                         // Pricing / Packages
                         if (!isRequest &&
                             !isOrder &&
@@ -826,75 +743,34 @@ class ServiceDetailView extends StatelessWidget {
                       text: 'markAsComplete'.tr,
                     )
                   else
-                    isRequest
-                        ? Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () => _showRejectDialog(context),
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColors.white,
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 16.h,
-                                    ),
-                                    side: const BorderSide(
-                                      color: AppColors.lightGrey,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.r),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: Text(
-                                    'reject'.tr,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.black,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              Expanded(
-                                child: PrimaryTextButton(
-                                  onPressed: () {
-                                    // TODO: Integrate backend for accepting request
-                                    _showAcceptDialog(context);
-                                  },
-                                  text: 'accept'.tr,
-                                ),
-                              ),
-                            ],
-                          )
-                        : PrimaryTextButton(
-                            onPressed: () {
-                              if (isHospitality) {
-                                Get.toNamed(
-                                  AppRoutes.bookServiceDate,
-                                  arguments: {
-                                    'service': service,
-                                    'package': service.packages.isNotEmpty
-                                        ? service.packages[selectedPackageIndex
-                                              .value]
-                                        : null,
-                                  },
-                                );
-                              } else {
-                                Get.toNamed(
-                                  AppRoutes.payment,
-                                  arguments: {
-                                    'service': service,
-                                    'package': service.packages.isNotEmpty
-                                        ? service.packages[selectedPackageIndex
-                                              .value]
-                                        : null,
-                                  },
-                                );
-                              }
+                    PrimaryTextButton(
+                      onPressed: () {
+                        if (isHospitality) {
+                          Get.toNamed(
+                            AppRoutes.bookServiceDate,
+                            arguments: {
+                              'service': service,
+                              'package': service.packages.isNotEmpty
+                                  ? service.packages[
+                                        selectedPackageIndex.value]
+                                  : null,
                             },
-                            text: 'bookNow'.tr,
-                          ),
+                          );
+                        } else {
+                          Get.toNamed(
+                            AppRoutes.payment,
+                            arguments: {
+                              'service': service,
+                              'package': service.packages.isNotEmpty
+                                  ? service.packages[
+                                        selectedPackageIndex.value]
+                                  : null,
+                            },
+                          );
+                        }
+                      },
+                      text: 'bookNow'.tr,
+                    ),
                 ],
               ),
             ),
@@ -959,6 +835,621 @@ class ServiceDetailView extends StatelessWidget {
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
     return '$dayName, $day $monthName, $year $hour.$minute$period';
+  }
+}
+
+/// Widget to display booking request details fetched from backend
+class _BookingRequestDetailView extends StatefulWidget {
+  final int bookingId;
+  final ServiceModel service;
+  final bool isPastRequest;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+
+  const _BookingRequestDetailView({
+    required this.bookingId,
+    required this.service,
+    required this.isPastRequest,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  @override
+  State<_BookingRequestDetailView> createState() =>
+      _BookingRequestDetailViewDetailState();
+}
+
+class _BookingRequestDetailViewDetailState
+    extends State<_BookingRequestDetailView> {
+  final BookingRequestRepository _repository = BookingRequestRepository();
+  BookingRequestDetailModel? _bookingDetail;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBookingDetail();
+  }
+
+  Future<void> _fetchBookingDetail() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+
+      final response = await _repository.fetchBookingRequestDetail(
+        widget.bookingId,
+      );
+      
+      setState(() {
+        _bookingDetail = response.data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      body: _isLoading
+          ? _buildLoadingState()
+          : _error != null
+              ? _buildErrorState()
+              : _buildContent(),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Stack(
+      children: [
+        // Background skeleton
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 250.h,
+          child: Container(color: AppColors.lightGrey),
+        ),
+        Positioned.fill(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                backgroundColor: Colors.transparent,
+                expandedHeight: 220.h,
+                leading: IconButton(
+                  icon: CircleAvatar(
+                    backgroundColor: AppColors.white,
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: AppColors.black,
+                      size: 20.r,
+                    ),
+                  ),
+                  onPressed: () => Get.back(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30.r),
+                      topRight: Radius.circular(30.r),
+                    ),
+                  ),
+                  padding: EdgeInsets.all(24.r),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 200.w, height: 24.h, color: AppColors.lightGrey),
+                      SizedBox(height: 16.h),
+                      Row(
+                        children: [
+                          Container(width: 45.w, height: 45.w, color: AppColors.lightGrey),
+                          SizedBox(width: 12.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(width: 120.w, height: 16.h, color: AppColors.lightGrey),
+                              SizedBox(height: 8.h),
+                              Container(width: 80.w, height: 12.h, color: AppColors.lightGrey),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Scaffold(
+      backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        leading: IconButton(
+          icon: CircleAvatar(
+            backgroundColor: AppColors.lightGrey,
+            child: Icon(Icons.arrow_back, color: AppColors.black),
+          ),
+          onPressed: () => Get.back(),
+        ),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64.r, color: AppColors.error),
+            SizedBox(height: 16.h),
+            Text(
+              'failedToLoadBookingDetails'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton(
+              onPressed: _fetchBookingDetail,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Text('retry'.tr),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    final detail = _bookingDetail!;
+    final imageUrl = detail.service.coverImage.isNotEmpty
+        ? ApiConstant.getFullMediaUrl(detail.service.coverImage)
+        : '';
+
+    return Stack(
+      children: [
+        // Background Image
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 250.h,
+          child: imageUrl.isNotEmpty
+              ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Container(color: AppColors.lightGrey),
+                )
+              : Container(color: AppColors.lightGrey),
+        ),
+
+        // Content
+        Positioned.fill(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                backgroundColor: Colors.transparent,
+                expandedHeight: 220.h,
+                leading: IconButton(
+                  icon: CircleAvatar(
+                    backgroundColor: AppColors.white,
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: AppColors.black,
+                      size: 20.r,
+                    ),
+                  ),
+                  onPressed: () => Get.back(),
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.3),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30.r),
+                      topRight: Radius.circular(30.r),
+                    ),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 24.h,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        detail.title,
+                        style: GoogleFonts.inter(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                          height: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // Provider info
+                      Row(
+                        children: [
+                          Container(
+                            width: 45.w,
+                            height: 45.w,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.r),
+                              color: AppColors.lightGrey,
+                              image: detail.provider.avatar != null &&
+                                      detail.provider.avatar!.isNotEmpty
+                                  ? DecorationImage(
+                                      image: NetworkImage(
+                                        ApiConstant.getFullMediaUrl(
+                                          detail.provider.avatar!,
+                                        ),
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                            ),
+                            child: detail.provider.avatar == null ||
+                                    detail.provider.avatar!.isEmpty
+                                ? Icon(
+                                    Icons.person,
+                                    color: AppColors.textSecondary,
+                                    size: 24.r,
+                                  )
+                                : null,
+                          ),
+                          SizedBox(width: 12.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                detail.provider.fullName,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    color: Colors.amber,
+                                    size: 14.r,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '${detail.provider.ratingAvg} (${'reviewsCount'.trParams({'count': detail.provider.totalReviews.toString()})})',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 24.h),
+
+                      // Date & Time
+                      _buildInfoRow(
+                        Icons.calendar_today_outlined,
+                        detail.displayDateTime,
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildInfoRow(
+                        Icons.location_on_outlined,
+                        detail.location,
+                      ),
+                      if (detail.guestCount != null) ...[
+                        SizedBox(height: 12.h),
+                        _buildInfoRow(
+                          Icons.people_outline,
+                          '${detail.guestCount}',
+                        ),
+                      ],
+
+                      SizedBox(height: 24.h),
+
+                      // Customer Section
+                      Text(
+                        'customer'.tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50.r),
+                            child: detail.customer.avatar != null &&
+                                    detail.customer.avatar!.isNotEmpty
+                                ? Image.network(
+                                    ApiConstant.getFullMediaUrl(
+                                      detail.customer.avatar!,
+                                    ),
+                                    width: 45.w,
+                                    height: 45.w,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      width: 45.w,
+                                      height: 45.w,
+                                      color: AppColors.lightGrey,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    width: 45.w,
+                                    height: 45.w,
+                                    color: AppColors.lightGrey,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                detail.customer.fullName,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                detail.customer.email,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 24.h),
+
+                      // Details Section
+                      Text(
+                        'details'.tr,
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildDetailRow('name'.tr, detail.customer.fullName),
+                      _buildDetailRow(
+                        'mobileNumber'.tr,
+                        detail.customer.phone,
+                      ),
+                      _buildDetailRow('email'.tr, detail.customer.email),
+                      _buildDetailRow(
+                        'dateTime'.tr,
+                        detail.displayDateTime,
+                        isLast: true,
+                      ),
+
+                      // Special Request
+                      if (detail.specialRequest != null &&
+                          detail.specialRequest!.isNotEmpty) ...[
+                        SizedBox(height: 24.h),
+                        Text(
+                          'specialRequest'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+                        Text(
+                          detail.specialRequest!,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: AppColors.textSecondary,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+
+                      // Selected Package
+                      if (detail.selectedPackage != null) ...[
+                        SizedBox(height: 24.h),
+                        Text(
+                          'selectedPackage'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+                        Container(
+                          padding: EdgeInsets.all(16.r),
+                          decoration: BoxDecoration(
+                            color: AppColors.lightGrey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                detail.selectedPackage!.name,
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '${detail.selectedPackage!.price} ${detail.currency}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+
+                      SizedBox(height: 24.h),
+
+                      // Subtotal
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 13.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE5E7FF),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'subTotal'.tr,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              detail.displaySubtotal,
+                              style: GoogleFonts.inter(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 120.h), // Space for bottom button
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom Buttons - only for upcoming requests (not past)
+        if (!widget.isPastRequest)
+          Positioned(
+            bottom: 30.h,
+            left: 24.w,
+            right: 24.w,
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: widget.onReject,
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      side: const BorderSide(color: AppColors.lightGrey),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'reject'.tr,
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: PrimaryTextButton(
+                    onPressed: widget.onAccept,
+                    text: 'accept'.tr,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 18.r, color: AppColors.primary),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildDetailRow(String label, String value, {bool isLast = false}) {

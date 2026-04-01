@@ -1,126 +1,90 @@
 import 'package:get/get.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:event_maker/models/booking_notification_model.dart';
+import 'package:event_maker/services/booking_notification_repository.dart';
+import 'package:event_maker/services/api_exception.dart';
 
 class NotificationController extends GetxController {
+  final BookingNotificationRepository _repository =
+      BookingNotificationRepository();
+
+  // Loading states
+  final isLoading = false.obs;
+  final hasError = false.obs;
+  final errorMessage = ''.obs;
+
+  // Data - using real booking notifications from API
+  final RxList<BookingNotificationModel> bookingNotifications =
+      <BookingNotificationModel>[].obs;
+
+  // Legacy support for existing UI
   final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
   final RxList<ServiceRequest> serviceRequests = <ServiceRequest>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadNotifications();
-    _loadServiceRequests();
+    fetchNotifications();
   }
 
-  void _loadNotifications() {
-    // TODO: Replace with actual API call
-    notifications.addAll([
-      NotificationModel(
-        id: '1',
-        title: 'Clara Tolson',
-        body: 'Accepted your booking request',
-        timeAgo: '9 hr ago',
-        isRead: false,
-        type: NotificationType.booking,
-      ),
-      NotificationModel(
-        id: '2',
-        title: 'Clara Tolson',
-        body: 'Accepted your booking request',
-        timeAgo: '9 hr ago',
-        isRead: false,
-        type: NotificationType.booking,
-      ),
-      NotificationModel(
-        id: '3',
-        title: 'Clara Tolson',
-        body: 'Accepted your booking request',
-        timeAgo: '9 hr ago',
-        isRead: true,
-        type: NotificationType.booking,
-      ),
-      NotificationModel(
-        id: '4',
-        title: 'Clara Tolson',
-        body: 'Accepted your booking request',
-        timeAgo: '9 hr ago',
-        isRead: true,
-        type: NotificationType.booking,
-      ),
-      NotificationModel(
-        id: '5',
-        title: 'Clara Tolson',
-        body: 'Rejected your booking request',
-        timeAgo: '9 hr ago',
-        isRead: true,
-        type: NotificationType.booking,
-      ),
-      NotificationModel(
-        id: '6',
-        title: 'Clara Tolson',
-        body: 'Rejected your booking request',
-        timeAgo: '9 hr ago',
-        isRead: true,
-        type: NotificationType.booking,
-      ),
-    ]);
+  /// Fetch booking notifications from API
+  Future<void> fetchNotifications() async {
+    // Check connectivity first
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      hasError.value = true;
+      errorMessage.value = 'noInternet'.tr;
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      hasError.value = false;
+      errorMessage.value = '';
+
+      final response = await _repository.fetchBookingNotifications();
+
+      if (response.success) {
+        bookingNotifications.assignAll(response.data);
+        // Also populate legacy serviceRequests for backward compatibility
+        _convertToServiceRequests(response.data);
+      } else {
+        hasError.value = true;
+        errorMessage.value = response.message;
+      }
+    } on ApiException catch (e) {
+      hasError.value = true;
+      errorMessage.value = e.message;
+      Log.e('Notification fetch error: ${e.message}');
+    } catch (e) {
+      hasError.value = true;
+      errorMessage.value = 'serverError'.tr;
+      Log.e('Notification fetch error: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void _loadServiceRequests() {
-    serviceRequests.addAll([
-      ServiceRequest(
-        id: 'req-1',
-        customerName: 'Clara Tolson',
-        customerImage:
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop',
-        serviceTitle: 'Wedding Photography',
-        serviceDescription:
-            'Full day wedding photography coverage with 500+ edited photos',
-        date: DateTime.now().add(const Duration(days: 2)),
-        location: 'Grand Hyatt, Dubai',
-        price: 2500,
-        priceUnit: 'AED',
-        status: RequestStatus.pending,
-      ),
-      ServiceRequest(
-        id: 'req-2',
-        customerName: 'John Smith',
-        customerImage:
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop',
-        serviceTitle: 'Catering Service',
-        serviceDescription: 'Buffet style catering for 100 guests',
-        date: DateTime.now().add(const Duration(days: 5)),
-        location: 'Marina Mall, Abu Dhabi',
-        price: 3500,
-        priceUnit: 'AED',
-        status: RequestStatus.pending,
-      ),
-      ServiceRequest(
-        id: 'req-3',
-        customerName: 'Emily Johnson',
-        customerImage:
-            'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop',
-        serviceTitle: 'Live Music Band',
-        serviceDescription: 'Jazz band performance for 4 hours',
-        date: DateTime.now().add(const Duration(days: 7)),
-        location: 'Emirates Palace',
-        price: 2000,
-        priceUnit: 'AED',
-        status: RequestStatus.pending,
-      ),
-      ServiceRequest(
-        id: 'req-4',
-        customerName: 'Michael Brown',
-        customerImage:
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop',
-        serviceTitle: 'Video Production',
-        serviceDescription: 'Cinematic wedding video with highlight reel',
-        date: DateTime.now().add(const Duration(days: 10)),
-        location: 'Burj Al Arab',
-        price: 4500,
-        priceUnit: 'AED',
-        status: RequestStatus.pending,
-      ),
-    ]);
+  /// Convert booking notifications to legacy ServiceRequest format
+  void _convertToServiceRequests(List<BookingNotificationModel> notifications) {
+    serviceRequests.clear();
+    for (final notification in notifications) {
+      serviceRequests.add(
+        ServiceRequest(
+          id: notification.id.toString(),
+          customerName: notification.customer.fullName,
+          customerImage: notification.customer.avatar ?? '',
+          serviceTitle: notification.title,
+          serviceDescription: '',
+          date: DateTime.now(),
+          location: '',
+          price: 0,
+          priceUnit: 'AED',
+          status: RequestStatus.pending,
+          createdAt: notification.createdAt,
+        ),
+      );
+    }
   }
 
   void markAsRead(String id) {
@@ -215,6 +179,7 @@ class ServiceRequest {
   final double price;
   final String priceUnit;
   final RequestStatus status;
+  final String createdAt;
 
   ServiceRequest({
     required this.id,
@@ -227,8 +192,21 @@ class ServiceRequest {
     required this.price,
     required this.priceUnit,
     required this.status,
+    this.createdAt = '',
   });
 }
 
 enum RequestStatus { pending, accepted, rejected }
+
 enum NotificationType { booking, payment, review, reminder }
+
+/// Simple logger for this controller
+class Log {
+  static void d(String message) {
+    print('[NotificationController] $message');
+  }
+
+  static void e(String message) {
+    print('[NotificationController ERROR] $message');
+  }
+}

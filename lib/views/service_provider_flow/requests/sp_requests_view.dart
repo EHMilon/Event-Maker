@@ -1,4 +1,7 @@
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/booking_request_model.dart';
+import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/widgets/request_card.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
@@ -46,8 +49,7 @@ class SPRequestsView extends GetView<RequestsController> {
                   indicatorSize: TabBarIndicatorSize.tab,
                   labelPadding: EdgeInsets.only(right: 8.w),
                   labelColor: AppColors.textPrimary,
-                  unselectedLabelColor: AppColors
-                      .textSecondary, // Use textSecondary for unselected
+                  unselectedLabelColor: AppColors.textSecondary,
                   labelStyle: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -100,13 +102,14 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // TODO: Integrate with real backend API
-      if (controller.isLoading.value && controller.upcomingRequests.isEmpty) {
+      if (controller.isLoadingUpcoming.value &&
+          controller.upcomingRequests.isEmpty) {
         return _buildSkeleton();
       }
 
-      if (controller.hasError.value) {
-        return _buildErrorState();
+      if (controller.upcomingError.isNotEmpty &&
+          controller.upcomingRequests.isEmpty) {
+        return _buildErrorState(controller.upcomingError.value);
       }
 
       if (controller.upcomingRequests.isEmpty) {
@@ -114,29 +117,56 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
       }
 
       return RefreshIndicator(
-        onRefresh: controller.fetchRequests,
+        onRefresh: controller.fetchUpcomingRequests,
         color: AppColors.primary,
         child: ListView.separated(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           itemCount: controller.upcomingRequests.length,
           separatorBuilder: (_, __) => SizedBox(height: 16.h),
           itemBuilder: (_, index) {
-            final service = controller.upcomingRequests[index];
-            return RequestCard(
-              image: service.images.isNotEmpty ? service.images.first : '',
-              date: _formatDateTime(service.date),
-              title: service.title,
-              subtitle: service.location,
-              onTap: () {
-                Get.to(
-                  () => ServiceDetailView(service: service, isRequest: true),
-                );
-              },
-            );
+            final request = controller.upcomingRequests[index];
+            return _buildRequestCard(request);
           },
         ),
       );
     });
+  }
+
+  Widget _buildRequestCard(BookingRequestModel request) {
+    final imageUrl = request.service.coverImage.isNotEmpty
+        ? ApiConstant.getFullMediaUrl(request.service.coverImage)
+        : '';
+
+    return RequestCard(
+      image: imageUrl,
+      date: request.displayDateTime,
+      title: request.title,
+      subtitle: request.servicesDuration,
+      onTap: () {
+        // Convert BookingRequestModel to ServiceModel for ServiceDetailView
+        final service = _convertToServiceModel(request);
+        Get.to(
+          () => ServiceDetailView(
+            service: service,
+            isRequest: true,
+            bookingId: request.id,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Convert BookingRequestModel to ServiceModel for display
+  ServiceModel _convertToServiceModel(BookingRequestModel request) {
+    return ServiceModel(
+      id: request.service.id,
+      title: request.title,
+      description: '',
+      type: ServiceType.event,
+      provider: const ServiceProvider(name: '', role: '', imageUrl: ''),
+      images: [request.service.coverImage],
+      packages: [],
+    );
   }
 
   Widget _buildSkeleton() {
@@ -172,7 +202,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
     );
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(String error) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -180,15 +210,16 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
           Icon(Icons.error_outline, size: 64.r, color: AppColors.error),
           SizedBox(height: 16.h),
           Text(
-            controller.errorMessage.value,
+            error,
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               color: AppColors.textSecondary,
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
-            onPressed: controller.fetchRequests,
+            onPressed: controller.fetchUpcomingRequests,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
@@ -223,57 +254,6 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
       ),
     );
   }
-
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return '';
-    final day = dateTime.day;
-    final suffix = _getDaySuffix(day);
-    final month = _getMonthShort(dateTime.month);
-    final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12
-        ? dateTime.hour - 12
-        : (dateTime.hour == 0 ? 12 : dateTime.hour);
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
-    return '$day$suffix $month - $weekday - $hour:$minute $period';
-  }
-
-  String _getDaySuffix(int day) {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1:
-        return 'st';
-      case 2:
-        return 'nd';
-      case 3:
-        return 'rd';
-      default:
-        return 'th';
-    }
-  }
-
-  String _getMonthShort(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
-  }
-
-  String _getWeekdayShort(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
-  }
 }
 
 /// Past requests tab widget
@@ -281,12 +261,12 @@ class _PastRequestsTab extends GetView<RequestsController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value && controller.pastRequests.isEmpty) {
+      if (controller.isLoadingPast.value && controller.pastRequests.isEmpty) {
         return _buildSkeleton();
       }
 
-      if (controller.hasError.value) {
-        return _buildErrorState();
+      if (controller.pastError.isNotEmpty && controller.pastRequests.isEmpty) {
+        return _buildErrorState(controller.pastError.value);
       }
 
       if (controller.pastRequests.isEmpty) {
@@ -294,29 +274,57 @@ class _PastRequestsTab extends GetView<RequestsController> {
       }
 
       return RefreshIndicator(
-        onRefresh: controller.fetchRequests,
+        onRefresh: controller.fetchPastRequests,
         color: AppColors.primary,
         child: ListView.separated(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           itemCount: controller.pastRequests.length,
           separatorBuilder: (_, __) => SizedBox(height: 16.h),
           itemBuilder: (_, index) {
-            final service = controller.pastRequests[index];
-            return RequestCard(
-              image: service.images.isNotEmpty ? service.images.first : '',
-              date: _formatDateTime(service.date),
-              title: service.title,
-              subtitle: service.location,
-              onTap: () {
-                Get.to(
-                  () => ServiceDetailView(service: service, isRequest: true),
-                );
-              },
-            );
+            final request = controller.pastRequests[index];
+            return _buildRequestCard(request);
           },
         ),
       );
     });
+  }
+
+  Widget _buildRequestCard(BookingRequestModel request) {
+    final imageUrl = request.service.coverImage.isNotEmpty
+        ? ApiConstant.getFullMediaUrl(request.service.coverImage)
+        : '';
+
+    return RequestCard(
+      image: imageUrl,
+      date: request.displayDateTime,
+      title: request.title,
+      subtitle: request.servicesDuration,
+      onTap: () {
+        // Convert BookingRequestModel to ServiceModel for ServiceDetailView
+        final service = _convertToServiceModel(request);
+        Get.to(
+          () => ServiceDetailView(
+            service: service,
+            isRequest: true,
+            bookingId: request.id,
+            isPastRequest: true,
+          ),
+        );
+      },
+    );
+  }
+
+  /// Convert BookingRequestModel to ServiceModel for display
+  ServiceModel _convertToServiceModel(BookingRequestModel request) {
+    return ServiceModel(
+      id: request.service.id,
+      title: request.title,
+      description: '',
+      type: ServiceType.event,
+      provider: const ServiceProvider(name: '', role: '', imageUrl: ''),
+      images: [request.service.coverImage],
+      packages: [],
+    );
   }
 
   Widget _buildSkeleton() {
@@ -352,7 +360,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
     );
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(String error) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -360,15 +368,16 @@ class _PastRequestsTab extends GetView<RequestsController> {
           Icon(Icons.error_outline, size: 64.r, color: AppColors.error),
           SizedBox(height: 16.h),
           Text(
-            controller.errorMessage.value,
+            error,
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               color: AppColors.textSecondary,
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 16.h),
           ElevatedButton(
-            onPressed: controller.fetchRequests,
+            onPressed: controller.fetchPastRequests,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
@@ -399,56 +408,5 @@ class _PastRequestsTab extends GetView<RequestsController> {
         ],
       ),
     );
-  }
-
-  String _formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) return '';
-    final day = dateTime.day;
-    final suffix = _getDaySuffix(day);
-    final month = _getMonthShort(dateTime.month);
-    final weekday = _getWeekdayShort(dateTime.weekday);
-    final hour = dateTime.hour > 12
-        ? dateTime.hour - 12
-        : (dateTime.hour == 0 ? 12 : dateTime.hour);
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
-    return '$day$suffix $month - $weekday - $hour:$minute $period';
-  }
-
-  String _getDaySuffix(int day) {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1:
-        return 'st';
-      case 2:
-        return 'nd';
-      case 3:
-        return 'rd';
-      default:
-        return 'th';
-    }
-  }
-
-  String _getMonthShort(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
-  }
-
-  String _getWeekdayShort(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
   }
 }
