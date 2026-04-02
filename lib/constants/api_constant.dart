@@ -76,6 +76,10 @@ class ApiConstant {
   /// Query params: section=about | section=reviews
   static const String providerMyProfile = '/providers/my-profile';
 
+  /// Provider schedule endpoint
+  /// Query params: date={yyyy-MM-dd}
+  static const String providerSchedule = '/bookings/provider/schedule';
+
   // ===== CUSTOMER ENDPOINTS =====
 
   static const String customerBookings = '/customer/bookings';

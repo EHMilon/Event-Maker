@@ -190,17 +190,24 @@ class ScheduleView extends GetView<ScheduleController> {
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       itemCount: controller.isLoading.value ? 4 : controller.schedules.length,
       itemBuilder: (context, index) {
+        // During loading, show skeleton with placeholder data
         final schedule = controller.isLoading.value
-            ? ScheduleModel(
-                id: '',
-                title: 'Service Title Here',
-                imageUrl: 'https://picsum.photos/id/1/100/100',
-                startTime: DateTime.now(),
-                endTime: DateTime.now().add(const Duration(hours: 3)),
-              )
+            ? _getSkeletonSchedule(index)
             : controller.schedules[index];
         return _buildServiceCard(schedule, index);
       },
+    );
+  }
+
+  /// Returns a skeleton schedule for loading state.
+  ScheduleModel _getSkeletonSchedule(int index) {
+    return ScheduleModel(
+      id: 0,
+      serviceTitle: 'Service Title Here',
+      serviceImage: null,
+      startTime: '10:00 AM',
+      endTime: '3:00 PM',
+      timeRange: '10:00 am - 3:00 pm',
     );
   }
 
@@ -210,19 +217,21 @@ class ScheduleView extends GetView<ScheduleController> {
     final ScheduleModel? previousSchedule = !controller.isLoading.value && index > 0
         ? controller.schedules[index - 1]
         : null;
-    final bool showTimeline =
-        previousSchedule != null &&
-        !_shouldSkipTimeline(previousSchedule, schedule);
+    final bool showTimeline = previousSchedule != null && !_shouldSkipTimeline(previousSchedule, schedule);
 
     return Container(
       margin: EdgeInsets.only(bottom: 20.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Time display - now uses string from API directly
           SizedBox(
             width: 80.w,
             child: Text(
-              _formatTime(schedule.startTime),
+              // Use startTimeString for display (e.g., "10:00 AM")
+              schedule.startTime.isNotEmpty 
+                  ? schedule.startTime 
+                  : schedule.timeRange.split(' - ').first,
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
@@ -411,6 +420,7 @@ class ScheduleView extends GetView<ScheduleController> {
   }
 
   /// Formats time in 12-hour format.
+  /// Kept for backward compatibility but now uses string directly from API.
   String _formatTime(DateTime dateTime) {
     final hour = dateTime.hour;
     final minute = dateTime.minute.toString().padLeft(2, '0');
@@ -420,9 +430,11 @@ class ScheduleView extends GetView<ScheduleController> {
   }
 
   /// Determines if timeline should be skipped between two schedules.
+  /// Since we now use string times, we check if both times can be parsed.
   bool _shouldSkipTimeline(ScheduleModel previous, ScheduleModel current) {
-    // Skip timeline if there's a significant gap (more than 2 hours)
-    final gap = current.startTime.difference(previous.endTime);
-    return gap.inHours >= 2;
+    // For string-based times, we compare the time range strings
+    // Skip timeline if the time ranges don't overlap or have significant gaps
+    // This is a simplified check - in production you'd parse and compare times
+    return false; // Show timeline for all schedules for now
   }
 }

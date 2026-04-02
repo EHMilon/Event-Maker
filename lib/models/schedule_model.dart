@@ -1,42 +1,58 @@
-// No imports needed - model uses only Dart core types
+import 'package:event_maker/constants/api_constant.dart';
 
 /// Model class representing a scheduled service/event for a provider.
 ///
 /// Backend API contract:
 /// ```
-/// GET /api/v1/provider/schedule?date=2024-01-15
+/// GET api/bookings/provider/schedule?date=2026-04-10
 /// Response: {
-///   "schedules": [ScheduleModel.toJson()],
-///   "has_more": false,
-///   "next_cursor": "xxx"
+///   "success": true,
+///   "message": "Provider schedule retrieved successfully.",
+///   "date": "2026-04-10",
+///   "total": 3,
+///   "data": [
+///     {
+///       "id": 6,
+///       "service_title": "Homemade Food Service",
+///       "service_image": "/media/services/covers/g17922.png",
+///       "booking_date": "10th Apr - Fri",
+///       "start_time": "10:00 AM",
+///       "end_time": "3:00 PM",
+///       "time_range": "10:00 am - 3:00 pm",
+///     }
+///   ]
 /// }
 /// ```
 class ScheduleModel {
-  final String id;
-  final String title;
-  final String? imageUrl;
-  final DateTime startTime;
-  final DateTime endTime;
+  final int id;
+  final String serviceTitle;
+  final String? serviceImage;
+  final String? bookingDate;
+  final String startTime;
+  final String endTime;
+  final String timeRange;
 
   const ScheduleModel({
     required this.id,
-    required this.title,
-    this.imageUrl,
+    required this.serviceTitle,
+    this.serviceImage,
+    this.bookingDate,
     required this.startTime,
     required this.endTime,
+    required this.timeRange,
   });
 
   /// Factory constructor for creating a ScheduleModel from backend JSON response.
-  ///
-  /// Backend developer: Ensure the API returns fields matching these keys.
-  /// All datetime fields should be in ISO 8601 format.
+  /// API returns time as string (e.g., "10:00 AM") instead of ISO datetime.
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
     return ScheduleModel(
-      id: json['id']?.toString() ?? '',
-      title: json['title'] ?? '',
-      imageUrl: json['image_url'],
-      startTime: _parseDateTime(json['start_time']),
-      endTime: _parseDateTime(json['end_time']),
+      id: json['id'] as int? ?? 0,
+      serviceTitle: json['service_title'] as String? ?? json['title'] as String? ?? '',
+      serviceImage: json['service_image'] as String?,
+      bookingDate: json['booking_date'] as String?,
+      startTime: json['start_time'] as String? ?? json['startTime'] as String? ?? '',
+      endTime: json['end_time'] as String? ?? json['endTime'] as String? ?? '',
+      timeRange: json['time_range'] as String? ?? json['timeRange'] as String? ?? '',
     );
   }
 
@@ -44,83 +60,67 @@ class ScheduleModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'title': title,
-      'image_url': imageUrl,
-      'start_time': startTime.toIso8601String(),
-      'end_time': endTime.toIso8601String(),
+      'service_title': serviceTitle,
+      'service_image': serviceImage,
+      'booking_date': bookingDate,
+      'start_time': startTime,
+      'end_time': endTime,
+      'time_range': timeRange,
     };
   }
 
   /// Creates a copy of this model with the given fields replaced.
   ScheduleModel copyWith({
-    String? id,
-    String? title,
-    String? imageUrl,
-    DateTime? startTime,
-    DateTime? endTime,
+    int? id,
+    String? serviceTitle,
+    String? serviceImage,
+    String? bookingDate,
+    String? startTime,
+    String? endTime,
+    String? timeRange,
   }) {
     return ScheduleModel(
       id: id ?? this.id,
-      title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
+      serviceTitle: serviceTitle ?? this.serviceTitle,
+      serviceImage: serviceImage ?? this.serviceImage,
+      bookingDate: bookingDate ?? this.bookingDate,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
+      timeRange: timeRange ?? this.timeRange,
     );
   }
 
-  /// Returns the duration of the scheduled service.
-  Duration get duration => endTime.difference(startTime);
-
-  /// Returns true if the schedule is for today.
-  bool get isToday {
-    final now = DateTime.now();
-    return startTime.year == now.year &&
-        startTime.month == now.month &&
-        startTime.day == now.day;
+  /// Returns the full image URL by prepending media base URL if needed.
+  String? get fullImageUrl {
+    if (serviceImage == null || serviceImage!.isEmpty) return null;
+    return ApiConstant.getFullMediaUrl(serviceImage!);
   }
 
-  /// Returns true if the schedule is in the past.
-  bool get isPast => endTime.isBefore(DateTime.now());
+  /// Legacy getter for backward compatibility with UI
+  /// Returns serviceTitle for title display
+  String get title => serviceTitle;
 
-  /// Returns true if the schedule is currently active (in progress).
-  bool get isActive {
-    final now = DateTime.now();
-    return now.isAfter(startTime) && now.isBefore(endTime);
-  }
+  /// Legacy getter for backward compatibility with UI
+  /// Returns fullImageUrl for image display
+  String? get imageUrl => fullImageUrl;
 
-  /// Returns a display-friendly time range string.
-  String get timeRangeString {
-    final startStr = _formatTime(startTime);
-    final endStr = _formatTime(endTime);
-    return '$startStr - $endStr';
-  }
+  /// Legacy getter - returns startTime string
+  /// Used in UI as _formatTime(schedule.startTime) expects DateTime
+  /// We store as string but UI needs conversion
+  String get startTimeString => startTime;
 
-  /// Helper method to parse datetime from various formats.
-  static DateTime _parseDateTime(dynamic value) {
-    if (value == null) return DateTime.now();
-    if (value is DateTime) return value;
-    if (value is String) {
-      try {
-        return DateTime.parse(value);
-      } catch (_) {
-        return DateTime.now();
-      }
-    }
-    return DateTime.now();
-  }
+  /// Legacy getter - returns endTime string
+  String get endTimeString => endTime;
 
-  /// Helper to format time in 12-hour format.
-  static String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour;
-    final minute = dateTime.minute.toString().padLeft(2, '0');
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '$displayHour:$minute $period';
-  }
+  /// Legacy getter - returns timeRange for display
+  String get timeRangeString => timeRange;
+
+  /// Returns a display-friendly time range string (same as timeRange).
+  String get displayTimeRange => timeRange;
 
   @override
   String toString() {
-    return 'ScheduleModel(id: $id, title: $title, startTime: $startTime, endTime: $endTime)';
+    return 'ScheduleModel(id: $id, serviceTitle: $serviceTitle, startTime: $startTime, endTime: $endTime)';
   }
 
   @override
@@ -137,18 +137,46 @@ class ScheduleModel {
 ///
 /// Backend API contract:
 /// ```
-/// GET /api/v1/provider/schedule?date=2024-01-15
-/// Response: { "schedules": [...] }
+/// GET api/bookings/provider/schedule?date=2026-04-10
+/// Response: {
+///   "success": true,
+///   "message": "Provider schedule retrieved successfully.",
+///   "date": "2026-04-10",
+///   "total": 3,
+///   "data": [...]
+/// }
 /// ```
 class ScheduleResponse {
+  final bool success;
+  final String message;
+  final String? date;
+  final int total;
   final List<ScheduleModel> schedules;
 
-  const ScheduleResponse({required this.schedules});
+  const ScheduleResponse({
+    required this.success,
+    required this.message,
+    this.date,
+    required this.total,
+    required this.schedules,
+  });
 
   /// Factory constructor for parsing backend response.
+  /// API response structure: { "success": true, "data": [...], "total": 3, ... }
   factory ScheduleResponse.fromJson(Map<String, dynamic> json) {
-    final schedulesList = json['schedules'] as List<dynamic>? ?? [];
+    // Handle both "data" and "schedules" keys for backward compatibility
+    List<dynamic> schedulesList = [];
+    if (json['data'] != null) {
+      schedulesList = json['data'] as List<dynamic>? ?? [];
+    } else if (json['schedules'] != null) {
+      schedulesList = json['schedules'] as List<dynamic>? ?? [];
+    }
+
     return ScheduleResponse(
+      success: json['success'] as bool? ?? true,
+      message: json['message'] as String? ?? '',
+      date: json['date'] as String?,
+      total: json['total'] as int? ?? schedulesList.length,
       schedules: schedulesList
           .map((item) => ScheduleModel.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -157,7 +185,12 @@ class ScheduleResponse {
 
   /// Factory for creating mock responses during development.
   factory ScheduleResponse.mock(List<ScheduleModel> schedules) {
-    return ScheduleResponse(schedules: schedules);
+    return ScheduleResponse(
+      success: true,
+      message: 'Mock response',
+      total: schedules.length,
+      schedules: schedules,
+    );
   }
 
   /// Returns true if the response has no schedules.
@@ -168,7 +201,11 @@ class ScheduleResponse {
 
   Map<String, dynamic> toJson() {
     return {
-      'schedules': schedules.map((s) => s.toJson()).toList(),
+      'success': success,
+      'message': message,
+      'date': date,
+      'total': total,
+      'data': schedules.map((s) => s.toJson()).toList(),
     };
   }
 }
