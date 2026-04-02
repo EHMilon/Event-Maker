@@ -22,6 +22,11 @@ class ApiService {
   final StorageService _storage = StorageService();
   final ConnectivityService _connectivity = ConnectivityService();
 
+  // Flag to prevent concurrent refresh attempts
+  bool _isRefreshing = false;
+  // Completer to queue requests waiting for token refresh
+  Completer<bool>? _refreshCompleter;
+
   // Synchronous headers getter - uses StorageService for backward compatibility
   // For multipart requests, use _getAuthHeader() instead
   Map<String, String> get _headers {
@@ -36,6 +41,112 @@ class ApiService {
     return headers;
   }
 
+  /// Ensures the token is valid, refreshing if necessary.
+  /// Returns true if a valid token is available, false otherwise.
+  Future<bool> _ensureValidToken() async {
+    // Check if token is expired
+    final isExpired = await UserPreferences.isTokenExpired();
+    if (!isExpired) {
+      return true;
+    }
+
+    Log.d('=======> Token expired, attempting refresh...');
+
+    // If already refreshing, wait for it to complete
+    if (_isRefreshing) {
+      Log.d('=======> Token refresh already in progress, waiting...');
+      return _refreshCompleter?.future ?? Future.value(false);
+    }
+
+    _isRefreshing = true;
+    _refreshCompleter = Completer<bool>();
+
+    try {
+      final refreshed = await _refreshToken();
+      _refreshCompleter?.complete(refreshed);
+      return refreshed;
+    } catch (e) {
+      Log.e('=======> Token refresh failed', e);
+      _refreshCompleter?.complete(false);
+      return false;
+    } finally {
+      _isRefreshing = false;
+      _refreshCompleter = null;
+    }
+  }
+
+  /// Attempts to refresh the access token using the refresh token.
+  /// Returns true if successful, false otherwise.
+  Future<bool> _refreshToken() async {
+    try {
+      final refreshToken = await UserPreferences.getRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        Log.e('=======> No refresh token available');
+        await _handleAuthFailure();
+        return false;
+      }
+
+      Log.d('=======> Calling refresh token endpoint...');
+
+      final response = await _client
+          .post(
+            _buildUri(ApiConstant.refreshToken),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'refresh_token': refreshToken}),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      Log.d(
+        '=======> Refresh token response: ${response.statusCode} ${response.body}',
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final body = jsonDecode(response.body);
+        final newAccessToken = body['access_token'] ?? body['accessToken'];
+        final newRefreshToken = body['refresh_token'] ?? body['refreshToken'];
+        final expiresIn = body['expires_in'] ?? body['expiresIn'] ?? 3600;
+
+        if (newAccessToken != null && newAccessToken.isNotEmpty) {
+          await UserPreferences.saveTokens(
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken ?? refreshToken,
+            expiresIn: expiresIn is int ? expiresIn : int.tryParse(expiresIn.toString()) ?? 3600,
+          );
+          Log.d('=======> Token refreshed successfully');
+          return true;
+        }
+      }
+
+      // Refresh failed - clear user data
+      Log.e('=======> Token refresh failed with status ${response.statusCode}');
+      await _handleAuthFailure();
+      return false;
+    } on TimeoutException {
+      Log.e('=======> Token refresh timed out');
+      await _handleAuthFailure();
+      return false;
+    } on SocketException {
+      Log.e('=======> Token refresh network error');
+      // Don't clear auth on network errors - user might be offline temporarily
+      return false;
+    } catch (e) {
+      Log.e('=======> Token refresh error', e);
+      await _handleAuthFailure();
+      return false;
+    }
+  }
+
+  /// Handles authentication failure by clearing user data.
+  /// Subclasses or listeners can override this behavior.
+  Future<void> _handleAuthFailure() async {
+    Log.e('=======> Authentication failed - clearing user data');
+    await UserPreferences.clearUserData();
+    await _storage.removeToken();
+  }
+
   // Async headers getter using UserPreferences (correct token source)
   Future<Map<String, String>> _getHeadersAsync() async {
     final headers = <String, String>{
@@ -43,8 +154,16 @@ class ApiService {
       'Accept': 'application/json',
     };
     final token = await UserPreferences.getAccessToken();
+    Log.d(
+      '=======> _getHeadersAsync - Token retrieved: ${token != null ? "exists (${token.length} chars)" : "NULL"}',
+    );
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
+      Log.d(
+        '=======> _getHeadersAsync - Authorization header set: Bearer ${token.substring(0, token.length > 20 ? 20 : token.length)}...',
+      );
+    } else {
+      Log.e('=======> _getHeadersAsync - WARNING: No token available for authenticated request!');
     }
     return headers;
   }
@@ -84,6 +203,8 @@ class ApiService {
     Map<String, dynamic>? queryParams,
     Map<String, String>? extraHeaders,
   }) async {
+    // Ensure token is valid before making request
+    await _ensureValidToken();
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.get(
@@ -98,6 +219,8 @@ class ApiService {
     dynamic body,
     Map<String, String>? extraHeaders,
   }) async {
+    // Ensure token is valid before making request
+    await _ensureValidToken();
     final headers = await _getHeadersAsync();
     debugPrint(
       "POST Request to ${_buildUri(endpoint)} with body: ${jsonEncode(body)} and headers: ${{...headers, ...?extraHeaders}}",
@@ -116,6 +239,8 @@ class ApiService {
     dynamic body,
     Map<String, String>? extraHeaders,
   }) async {
+    // Ensure token is valid before making request
+    await _ensureValidToken();
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.put(
@@ -131,6 +256,8 @@ class ApiService {
     dynamic body,
     Map<String, String>? extraHeaders,
   }) async {
+    // Ensure token is valid before making request
+    await _ensureValidToken();
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.patch(
@@ -145,6 +272,8 @@ class ApiService {
     String endpoint, {
     Map<String, String>? extraHeaders,
   }) async {
+    // Ensure token is valid before making request
+    await _ensureValidToken();
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.delete(
@@ -163,6 +292,10 @@ class ApiService {
     if (!await _connectivity.hasConnection) {
       throw ApiException.noInternet();
     }
+
+    // Ensure token is valid before making request
+    await _ensureValidToken();
+
     try {
       final request = http.MultipartRequest(method, _buildUri(endpoint));
       // Add headers (async token retrieval)
@@ -226,6 +359,26 @@ class ApiService {
       Log.d(
         '=======>  Method: ${response.request?.method} URL: ${response.request?.url} Status: ${response.statusCode} Body: ${response.body}',
       );
+      Log.d(
+        '=======>  Request Headers: ${response.request?.headers}',
+      );
+
+      // If we get a 401, try to refresh the token and retry once
+      if (response.statusCode == 401) {
+        Log.d('=======> Received 401, attempting token refresh...');
+        final refreshed = await _refreshToken();
+        if (refreshed) {
+          // Retry the request with the new token
+          Log.d('=======> Token refreshed, retrying request...');
+          final retryResponse = await request().timeout(
+            Duration(seconds: AppConstants.connectTimeout),
+          );
+          Log.d(
+            '=======>  Retry Method: ${retryResponse.request?.method} URL: ${retryResponse.request?.url} Status: ${retryResponse.statusCode} Body: ${retryResponse.body}',
+          );
+          return _processResponse(retryResponse);
+        }
+      }
 
       return _processResponse(response);
     } on TimeoutException {

@@ -5,9 +5,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../constants/app_colors.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/primary_text_button.dart';
-import 'profile_controller.dart';
+import '../auth/auth_controller.dart';
 
-class ChangePasswordView extends GetView<ProfileController> {
+class ChangePasswordView extends GetView<AuthController> {
   const ChangePasswordView({super.key});
 
   @override
@@ -26,7 +26,7 @@ class ChangePasswordView extends GetView<ProfileController> {
           'changePassword'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 20  .sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -52,12 +52,12 @@ class ChangePasswordView extends GetView<ProfileController> {
                 CustomTextField(
                   controller: controller.currentPasswordController,
                   hintText: '********',
-                  obscureText: !controller.isCurrentPasswordVisible.value,
+                  obscureText: controller.obscureCurrentPassword.value,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      controller.isCurrentPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                      controller.obscureCurrentPassword.value
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: AppColors.grey,
                     ),
                     onPressed: controller.toggleCurrentPasswordVisibility,
@@ -74,17 +74,17 @@ class ChangePasswordView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 8.h),
                 CustomTextField(
-                  controller: controller.newPasswordController,
+                  controller: controller.changeNewPasswordController,
                   hintText: '********',
-                  obscureText: !controller.isNewPasswordVisible.value,
+                  obscureText: controller.obscureChangeNewPassword.value,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      controller.isNewPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                      controller.obscureChangeNewPassword.value
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: AppColors.grey,
                     ),
-                    onPressed: controller.toggleNewPasswordVisibility,
+                    onPressed: controller.toggleChangeNewPasswordVisibility,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -98,22 +98,22 @@ class ChangePasswordView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 8.h),
                 CustomTextField(
-                  controller: controller.confirmPasswordController,
+                  controller: controller.changeConfirmPasswordController,
                   hintText: '********',
-                  obscureText: !controller.isConfirmPasswordVisible.value,
+                  obscureText: controller.obscureChangeConfirmPassword.value,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      controller.isConfirmPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                      controller.obscureChangeConfirmPassword.value
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: AppColors.grey,
                     ),
-                    onPressed: controller.toggleConfirmPasswordVisibility,
+                    onPressed: controller.toggleChangeConfirmPasswordVisibility,
                   ),
                 ),
                 Spacer(),
                 PrimaryTextButton(
-                  onPressed: () => controller.changePassword(),
+                  onPressed: controller.onChangePassword,
                   text: 'update'.tr,
                 ),
                 SizedBox(height: 24.h),

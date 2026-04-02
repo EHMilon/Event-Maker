@@ -257,8 +257,9 @@ class AuthController extends BaseController {
         Get.offAllNamed(AppRoutes.customerHome);
       }
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseLoginError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Login failed', e, stackTrace);
       setError('Login failed. Please try again.');
@@ -385,8 +386,9 @@ class AuthController extends BaseController {
       Get.toNamed('/otp-verification');
       _startOtpTimer();
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseSignupError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Customer signup failed', e, stackTrace);
       setError('Signup failed. Please try again.');
@@ -428,8 +430,9 @@ class AuthController extends BaseController {
       Get.toNamed('/otp-verification');
       _startOtpTimer();
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseSignupError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Provider signup failed', e, stackTrace);
       setError('Signup failed. Please try again.');
@@ -478,8 +481,9 @@ class AuthController extends BaseController {
       Get.toNamed('/otp-verification');
       _startOtpTimer();
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseForgotPasswordError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Forgot password failed', e, stackTrace);
       setError('Something went wrong. Please try again.');
@@ -581,8 +585,9 @@ class AuthController extends BaseController {
         }
       }
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseOtpError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('OTP verification failed', e, stackTrace);
       setError('Verification failed. Please try again.');
@@ -618,8 +623,9 @@ class AuthController extends BaseController {
       _startOtpTimer();
       showSuccess('OTP resent successfully');
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseResendOtpError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Resend OTP failed', e, stackTrace);
       setError('Something went wrong. Please try again.');
@@ -668,10 +674,7 @@ class AuthController extends BaseController {
         confirmPassword: confirmPassword,
       );
 
-      await _apiService.post(
-        ApiConstant.resetPassword,
-        body: request.toJson(),
-      );
+      await _apiService.post(ApiConstant.resetPassword, body: request.toJson());
 
       newPasswordController.clear();
       confirmPasswordController.clear();
@@ -682,8 +685,9 @@ class AuthController extends BaseController {
       clearError();
       Get.toNamed('/congratulations');
     } on ApiException catch (e) {
-      setError(e.message);
-      showError(e.message);
+      final errorMessage = _parseResetPasswordError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Reset password failed', e, stackTrace);
       setError('Something went wrong. Please try again.');
@@ -712,18 +716,29 @@ class AuthController extends BaseController {
     final newPassword = changeNewPasswordController.text;
     final confirmPassword = changeConfirmPasswordController.text;
 
+    // Validation with user-friendly messages
     if (currentPassword.isEmpty) {
       showWarning('Please enter your current password');
       return;
     }
 
+    if (newPassword.isEmpty) {
+      showWarning('Please enter a new password');
+      return;
+    }
+
     if (newPassword.length < 8) {
-      showWarning('Password must be at least 8 characters');
+      showWarning('New password must be at least 8 characters');
+      return;
+    }
+
+    if (confirmPassword.isEmpty) {
+      showWarning('Please confirm your new password');
       return;
     }
 
     if (newPassword != confirmPassword) {
-      showWarning('Passwords do not match');
+      showError('New password and confirm password do not match');
       return;
     }
 
@@ -745,13 +760,17 @@ class AuthController extends BaseController {
       changeNewPasswordController.clear();
       changeConfirmPasswordController.clear();
       clearError();
-      showSuccess('Password changed successfully');
+      // Show congratulations view then navigate to home
+      currentAuthFlow.value = 'change-password';
+      Get.offAllNamed('/congratulations');
     } on ApiException catch (e) {
       if (e.isUnauthorized) {
         await UserPreferences.clearUserData();
       }
-      setError(e.message);
-      showError(e.message);
+      // Parse backend error message for user-friendly feedback
+      final errorMessage = _parseChangePasswordError(e);
+      setError(errorMessage);
+      showError(errorMessage);
     } catch (e, stackTrace) {
       Log.e('Change password failed', e, stackTrace);
       setError('Something went wrong. Please try again.');
@@ -761,11 +780,82 @@ class AuthController extends BaseController {
     }
   }
 
+  /// Parses API exceptions into user-friendly error messages for change password
+  String _parseChangePasswordError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final errors = data['errors'];
+
+      // Handle validation errors
+      if (errors != null && errors is Map<String, dynamic>) {
+        if (errors.containsKey('current_password')) {
+          return 'Current password is incorrect';
+        }
+        if (errors.containsKey('new_password')) {
+          return errors['new_password'].toString();
+        }
+        if (errors.containsKey('confirm_password')) {
+          return 'Passwords do not match';
+        }
+      }
+
+      // Match common backend messages
+      if (backendMessage.contains('current password') ||
+          backendMessage.contains('incorrect') ||
+          backendMessage.contains('wrong')) {
+        return 'Current password is incorrect';
+      }
+      if (backendMessage.contains('match') ||
+          backendMessage.contains('confirm')) {
+        return 'New password and confirm password do not match';
+      }
+      if (backendMessage.contains('new password') ||
+          backendMessage.contains('weak') ||
+          backendMessage.contains('stronger')) {
+        return 'New password is too weak. Use at least 8 characters';
+      }
+    }
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 400:
+        return 'Invalid request. Please check your password and try again';
+      case 401:
+        return 'Session expired. Please login again';
+      case 403:
+        return 'You do not have permission to change password';
+      case 422:
+        return 'Invalid password format. Please check all fields';
+      default:
+        return 'Failed to change password. Please try again';
+    }
+  }
+
   void onGoToLogin() {
     if (currentAuthFlow.value == 'change-password') {
       currentAuthFlow.value = '';
-      Get.offAllNamed('/profile');
+      // Navigate to appropriate home screen based on user type
+      _navigateToHome();
     } else {
+      Get.offAllNamed(AppRoutes.login);
+    }
+  }
+
+  /// Navigate to appropriate home screen based on user type
+  void _navigateToHome() async {
+    try {
+      final userType = await UserPreferences.getUserType();
+      if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+        Get.offAllNamed(AppRoutes.serviceProviderHome);
+      } else {
+        Get.offAllNamed(AppRoutes.customerHome);
+      }
+    } catch (e) {
+      // Fallback to login if user type not found
       Get.offAllNamed(AppRoutes.login);
     }
   }
@@ -786,9 +876,9 @@ class AuthController extends BaseController {
     setLoading(true);
 
     try {
-      await _apiService.post(ApiConstant.logout).timeout(
-        const Duration(seconds: 5),
-      );
+      await _apiService
+          .post(ApiConstant.logout)
+          .timeout(const Duration(seconds: 5));
     } catch (e) {
       Log.e('Logout API call failed', e);
     }
@@ -805,6 +895,253 @@ class AuthController extends BaseController {
       Get.offAllNamed(AppRoutes.onboarding);
     } finally {
       setLoading(false);
+    }
+  }
+
+  /// Parses API exceptions into user-friendly error messages for login
+  String _parseLoginError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final errors = data['errors'];
+
+      // Handle validation errors
+      if (errors != null && errors is Map<String, dynamic>) {
+        if (errors.containsKey('email_address') || errors.containsKey('email')) {
+          return 'Please enter a valid email address';
+        }
+        if (errors.containsKey('password')) {
+          return 'Please enter your password';
+        }
+        if (errors.containsKey('role')) {
+          return 'Please select a user type';
+        }
+      }
+
+      // Match common backend messages
+      if (backendMessage.contains('invalid') ||
+          backendMessage.contains('credentials') ||
+          backendMessage.contains('password')) {
+        return 'Incorrect email or password';
+      }
+      if (backendMessage.contains('not found') ||
+          backendMessage.contains('does not exist')) {
+        return 'No account found with this email';
+      }
+      if (backendMessage.contains('verified') ||
+          backendMessage.contains('verify')) {
+        return 'Please verify your email before logging in';
+      }
+      if (backendMessage.contains('active') ||
+          backendMessage.contains('disabled') ||
+          backendMessage.contains('suspended')) {
+        return 'Your account has been disabled. Please contact support';
+      }
+    }
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 400:
+        return 'Invalid login credentials';
+      case 401:
+        return 'Incorrect email or password';
+      case 403:
+        return 'Your account is not authorized to login';
+      case 404:
+        return 'No account found with this email';
+      case 422:
+        return 'Invalid login information. Please check your details';
+      default:
+        return 'Login failed. Please try again';
+    }
+  }
+
+  /// Parses API exceptions into user-friendly error messages for signup
+  String _parseSignupError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final errors = data['errors'];
+
+      // Handle validation errors
+      if (errors != null && errors is Map<String, dynamic>) {
+        if (errors.containsKey('full_name') || errors.containsKey('name')) {
+          return 'Please enter your full name';
+        }
+        if (errors.containsKey('email_address') || errors.containsKey('email')) {
+          final emailError = errors['email_address'] ?? errors['email'];
+          if (emailError.toString().contains('taken') ||
+              emailError.toString().contains('exists')) {
+            return 'This email is already registered. Please use a different email';
+          }
+          return 'Please enter a valid email address';
+        }
+        if (errors.containsKey('password')) {
+          return 'Password must be at least 8 characters';
+        }
+        if (errors.containsKey('phone_number') || errors.containsKey('phone')) {
+          return 'Please enter a valid phone number';
+        }
+        if (errors.containsKey('nationality')) {
+          return 'Please select your nationality';
+        }
+        if (errors.containsKey('terms_agreed')) {
+          return 'You must accept the terms and conditions';
+        }
+      }
+
+      // Match common backend messages
+      if (backendMessage.contains('already') ||
+          backendMessage.contains('exists') ||
+          backendMessage.contains('taken')) {
+        if (backendMessage.contains('email')) {
+          return 'This email is already registered. Please login instead';
+        }
+        if (backendMessage.contains('phone')) {
+          return 'This phone number is already registered';
+        }
+      }
+    }
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 400:
+        return 'Invalid registration information';
+      case 409:
+        return 'Account already exists with this email';
+      case 422:
+        return 'Please check your information and try again';
+      default:
+        return 'Registration failed. Please try again';
+    }
+  }
+
+  /// Parses API exceptions into user-friendly error messages for forgot password
+  String _parseForgotPasswordError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final errors = data['errors'];
+
+      // Handle validation errors
+      if (errors != null && errors is Map<String, dynamic>) {
+        if (errors.containsKey('email_address') || errors.containsKey('email')) {
+          return 'Please enter a valid email address';
+        }
+      }
+    }
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 404:
+        return 'No account found with this email address';
+      case 400:
+        return 'Invalid email address. Please check and try again';
+      default:
+        return 'Failed to send reset link. Please try again';
+    }
+  }
+
+  /// Parses API exceptions into user-friendly error messages for reset password
+  String _parseResetPasswordError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final errors = data['errors'];
+
+      // Handle validation errors
+      if (errors != null && errors is Map<String, dynamic>) {
+        if (errors.containsKey('new_password')) {
+          return 'New password must be at least 8 characters';
+        }
+        if (errors.containsKey('confirm_password')) {
+          return 'Passwords do not match';
+        }
+      }
+
+      // Match common backend messages
+      if (backendMessage.contains('match') || backendMessage.contains('confirm')) {
+        return 'New password and confirm password do not match';
+      }
+      if (backendMessage.contains('expired') ||
+          backendMessage.contains('invalid') ||
+          backendMessage.contains('secret')) {
+        return 'Reset link has expired. Please request a new one';
+      }
+    }
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 400:
+        return 'Invalid password reset request';
+      case 401:
+        return 'Reset session expired. Please request a new link';
+      case 422:
+        return 'Invalid password format. Please check your password';
+      default:
+        return 'Failed to reset password. Please try again';
+    }
+  }
+
+  /// Parses API exceptions into user-friendly error messages for OTP verification
+  String _parseOtpError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+
+      // Match common backend messages
+      if (backendMessage.contains('invalid') ||
+          backendMessage.contains('incorrect') ||
+          backendMessage.contains('wrong')) {
+        return 'Invalid code. Please check and try again';
+      }
+      if (backendMessage.contains('expired') || backendMessage.contains('timeout')) {
+        return 'Code has expired. Please request a new code';
+      }
+      if (backendMessage.contains('attempt') || backendMessage.contains('limit')) {
+        return 'Too many attempts. Please try again later';
+      }
+    }
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 400:
+        return 'Invalid verification code';
+      case 401:
+        return 'Code expired or invalid. Please request a new one';
+      case 403:
+        return 'Too many failed attempts. Please try again later';
+      default:
+        return 'Verification failed. Please try again';
+    }
+  }
+
+  /// Parses API exceptions into user-friendly error messages for resend OTP
+  String _parseResendOtpError(ApiException exception) {
+    final int? statusCode = exception.statusCode;
+
+    // Fallback to status code based messages
+    switch (statusCode) {
+      case 429:
+        return 'Please wait a moment before requesting a new code';
+      case 400:
+        return 'Unable to resend code. Please try again';
+      default:
+        return 'Failed to resend code. Please try again';
     }
   }
 

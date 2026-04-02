@@ -17,9 +17,11 @@ class SplashController extends GetxController {
     final isFirstTime = await UserPreferences.isFirstTime();
     final hasCompletedOnboarding = await UserPreferences.hasCompletedOnboarding();
     final isLoggedIn = await UserPreferences.isLoggedIn();
+    final hasValidTokens = await UserPreferences.hasValidTokens();
+    final isTokenExpired = await UserPreferences.isTokenExpired();
 
     Log.i(
-      "Splash navigation state -> firstTime: $isFirstTime, onboardingDone: $hasCompletedOnboarding, loggedIn: $isLoggedIn",
+      "Splash navigation state -> firstTime: $isFirstTime, onboardingDone: $hasCompletedOnboarding, loggedIn: $isLoggedIn, hasValidTokens: $hasValidTokens, tokenExpired: $isTokenExpired",
     );
 
     if (!hasCompletedOnboarding) {
@@ -34,7 +36,8 @@ class SplashController extends GetxController {
       return;
     }
 
-    if (isLoggedIn) {
+    // Check if user is logged in AND has valid (non-expired) tokens
+    if (isLoggedIn && hasValidTokens && !isTokenExpired) {
       final userType = await UserPreferences.getUserType();
       Log.i("User type: $userType, navigating to home");
 
@@ -44,6 +47,19 @@ class SplashController extends GetxController {
         Get.offAllNamed(AppRoutes.customerHome);
       }
       return;
+    }
+
+    // User was logged in but token is expired/invalid - redirect to login
+    if (isLoggedIn && (!hasValidTokens || isTokenExpired)) {
+      Log.i("Token expired or invalid, redirecting to Login");
+      // Clear stale login state
+      await UserPreferences.setLoggedIn(false);
+      final hasUserType = await UserPreferences.hasUserType();
+
+      if (hasUserType) {
+        Get.offAllNamed(AppRoutes.login);
+        return;
+      }
     }
 
     final hasUserType = await UserPreferences.hasUserType();

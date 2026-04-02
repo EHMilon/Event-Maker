@@ -9,7 +9,6 @@
 /// - WebSocket URLs and event types
 class ApiConstant {
   // ===== BASE URLS =====
-
   static const String baseUrl = 'http://10.10.12.62:8005/api';
 
   /// Base URL for serving media files
@@ -241,6 +240,50 @@ class ApiConstant {
   static const String keyErrors = 'errors';
   static const String keyStatusCode = 'status_code';
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /// WebSocket event types for chat functionality.
 ///

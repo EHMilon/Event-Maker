@@ -252,7 +252,7 @@ class AppRoutes {
     GetPage(
       name: changePassword,
       page: () => const ChangePasswordView(),
-      binding: ProfileBinding(),
+      binding: AuthBinding(),
     ),
     GetPage(name: transactions, page: () => const TransactionsView()),
     GetPage(name: spWallet, page: () => const WalletView()),
