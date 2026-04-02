@@ -56,9 +56,13 @@ class ApiConstant {
 
   /// Personal info endpoints for settings
   static const String personalInfoMe = '/settings/personal-info/me';
-  
+
   /// Upload avatar image (uses PATCH personal-info with multipart)
   static const String uploadAvatar = '/settings/personal-info/me';
+
+  /// Delete account endpoint
+  /// DELETE /settings/personal-info/me (same as GET/PATCH personal info)
+  static const String deleteAccountV1 = '/settings/personal-info/me';
 
   // ===== SERVICE PROVIDER ENDPOINTS =====
 
@@ -78,6 +82,12 @@ class ApiConstant {
   /// Provider schedule endpoint
   /// Query params: date={yyyy-MM-dd}
   static const String providerSchedule = '/bookings/provider/schedule';
+
+  /// Provider availability toggle endpoint
+  /// POST /providers/availability-toggle
+  /// Response: { "success": true, "message": "...", "data": { "provider_id": 4, "is_available": false } }
+  static const String providerAvailabilityToggle =
+      '/providers/availability-toggle';
 
   // ===== CUSTOMER ENDPOINTS =====
 
@@ -106,14 +116,17 @@ class ApiConstant {
 
   /// Provider booking requests: GET api/bookings/provider/booking-request
   /// Query params: tab=upcoming (default) | tab=past
-  static const String providerBookingRequests = '/bookings/provider/booking-request';
+  static const String providerBookingRequests =
+      '/bookings/provider/booking-request';
 
   /// Get single booking request detail: /bookings/provider/booking-request/{id}
-  static String providerBookingRequestDetail(int id) => '/bookings/provider/booking-request/$id';
+  static String providerBookingRequestDetail(int id) =>
+      '/bookings/provider/booking-request/$id';
 
   /// Accept or reject booking request: POST /bookings/provider/booking-request-decision/{id}
   /// Body: {"action": "accepted"} or {"action": "rejected"}
-  static String providerBookingRequestDecision(int id) => '/bookings/provider/booking-request-decision/$id';
+  static String providerBookingRequestDecision(int id) =>
+      '/bookings/provider/booking-request-decision/$id';
 
   // ===== REVIEW ENDPOINTS =====
 
@@ -126,13 +139,16 @@ class ApiConstant {
   static const String providerDocuments = '/providers/documents';
 
   /// Get single document detail: /providers/documents/detail/{id}
-  static String providerDocumentDetail(int id) => '/providers/documents/detail/$id';
+  static String providerDocumentDetail(int id) =>
+      '/providers/documents/detail/$id';
 
   /// Update document: /providers/documents/update/{id}
-  static String providerDocumentUpdate(int id) => '/providers/documents/update/$id';
+  static String providerDocumentUpdate(int id) =>
+      '/providers/documents/update/$id';
 
   /// Delete document: /providers/documents/delete/{id}
-  static String providerDocumentDelete(int id) => '/providers/documents/delete/$id';
+  static String providerDocumentDelete(int id) =>
+      '/providers/documents/delete/$id';
 
   // ===== CERTIFICATE ENDPOINTS =====
 
@@ -140,13 +156,16 @@ class ApiConstant {
   static const String providerCertificates = '/providers/certificates';
 
   /// Get single certificate detail: /providers/certificates/detail/{id}
-  static String providerCertificateDetail(int id) => '/providers/certificates/detail/$id';
+  static String providerCertificateDetail(int id) =>
+      '/providers/certificates/detail/$id';
 
   /// Update certificate: /providers/certificates/update/{id}
-  static String providerCertificateUpdate(int id) => '/providers/certificates/update/$id';
+  static String providerCertificateUpdate(int id) =>
+      '/providers/certificates/update/$id';
 
   /// Delete certificate: /providers/certificates/delete/{id}
-  static String providerCertificateDelete(int id) => '/providers/certificates/delete/$id';
+  static String providerCertificateDelete(int id) =>
+      '/providers/certificates/delete/$id';
 
   // ===== CHAT ENDPOINTS =====
 
@@ -161,7 +180,8 @@ class ApiConstant {
   static const String markNotificationRead = '/notifications/read';
 
   /// Provider booking notifications: GET api/bookings/provider/booking-notification
-  static const String providerBookingNotifications = '/bookings/provider/booking-notification';
+  static const String providerBookingNotifications =
+      '/bookings/provider/booking-notification';
 
   // ===== TIMEOUTS (in milliseconds) =====
 
@@ -240,50 +260,6 @@ class ApiConstant {
   static const String keyErrors = 'errors';
   static const String keyStatusCode = 'status_code';
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /// WebSocket event types for chat functionality.
 ///

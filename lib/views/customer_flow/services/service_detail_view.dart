@@ -54,7 +54,7 @@ class ServiceDetailView extends StatelessWidget {
               slivers: [
                 SliverAppBar(
                   backgroundColor: Colors.transparent,
-                  expandedHeight: 220.h,
+                  expandedHeight: 180.h,
                   leading: IconButton(
                     icon: CircleAvatar(
                       backgroundColor: Colors.white,

@@ -107,6 +107,9 @@ class ProfileController extends GetxController {
   /// Loading state for personal info API calls
   final RxBool isPersonalInfoLoading = false.obs;
 
+  /// Loading state for availability toggle API call
+  final RxBool isTogglingAvailability = false.obs;
+
   /// Error message for personal info API calls
   final RxString personalInfoError = ''.obs;
 
@@ -147,6 +150,7 @@ class ProfileController extends GetxController {
 
   Future<void> _initialize() async {
     await loadUserData();
+    await fetchPersonalInfo(); // Fetch personal info including availability status
     loadMockData();
   }
 
@@ -329,40 +333,140 @@ class ProfileController extends GetxController {
   }
 
   /// Logic for logging out and clearing preferences.
+  /// Backend: Calls logout endpoint and clears local auth data
   Future<void> logOut() async {
+    try {
+      // Call logout API endpoint to invalidate token on server
+      await _apiService.post(ApiConstant.logout);
+    } catch (e) {
+      // Log error but continue with local logout even if API fails
+      debugPrint('Logout API error: $e');
+    }
+
+    // Clear all user data and tokens from local storage
     await UserPreferences.clearUserData();
     await UserPreferences.resetOnboarding();
+    
+    // Navigate to onboarding screen and clear navigation stack
     Get.offAllNamed(AppRoutes.onboarding);
   }
 
-  /// Handles account deletion confirmation and backend request if needed.
+  /// Handles account deletion confirmation and backend request.
+  /// API Endpoint: DELETE /settings/personal-info/me
   Future<void> deleteAccount() async {
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
       return;
     }
 
-    // TODO: Integrate delete account API
-    Get.snackbar(
-      'success'.tr,
-      'accountDeletionSuccess'.tr,
-      backgroundColor: AppColors.success,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-    );
-    await UserPreferences.clearUserData();
-    await UserPreferences.resetOnboarding();
-    Get.offAllNamed(AppRoutes.onboarding);
+    isLoading.value = true;
+
+    try {
+      // Call delete account API on the personal info endpoint
+      final response = await _apiService.delete(ApiConstant.deleteAccountV1);
+
+      if (response['success'] == true) {
+        Get.snackbar(
+          'success'.tr,
+          response['message'] ?? 'accountDeletionSuccess'.tr,
+          backgroundColor: AppColors.success,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        
+        // Clear all user data and tokens
+        await UserPreferences.clearUserData();
+        await UserPreferences.resetOnboarding();
+        
+        // Navigate to onboarding screen
+        Get.offAllNamed(AppRoutes.onboarding);
+      } else {
+        Get.snackbar(
+          'error'.tr,
+          response['message'] ?? 'accountDeletionFailed'.tr,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      debugPrint('Delete account error: $e');
+      Get.snackbar(
+        'error'.tr,
+        'somethingWentWrong'.tr,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   /// Backend Integration for availability toggle.
-  void toggleAvailability(bool value) {
+  /// API Endpoint: POST /providers/availability-toggle
+  /// Only for service providers
+  Future<void> toggleAvailability(bool value) async {
+    // Prevent concurrent calls
+    if (isTogglingAvailability.value) return;
+
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
       return;
     }
-    isAvailable.value = value;
-    // TODO: Update availability via Backend API
+
+    // Only allow for service providers
+    if (!isServiceProvider.value) {
+      Get.snackbar(
+        'error'.tr,
+        'availabilityToggleNotAllowed'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    isTogglingAvailability.value = true;
+
+    try {
+      final response = await _apiService.post(ApiConstant.providerAvailabilityToggle);
+
+      if (response['success'] == true) {
+        final data = response['data'] as Map<String, dynamic>?;
+        final apiIsAvailable = data?['is_available'] as bool?;
+
+        if (apiIsAvailable != null) {
+          isAvailable.value = apiIsAvailable;
+        } else {
+          // Fallback to local value if API doesn't return the status
+          isAvailable.value = value;
+        }
+      } else {
+        // Revert local state on failure - fetch fresh data from server
+        await fetchPersonalInfo();
+        Get.snackbar(
+          'error'.tr,
+          response['message'] ?? 'failedToUpdateAvailability'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error toggling availability: $e');
+      // On error, fetch fresh data from server to ensure sync
+      await fetchPersonalInfo();
+      Get.snackbar(
+        'error'.tr,
+        'somethingWentWrong'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isTogglingAvailability.value = false;
+    }
   }
 
   void _showConnectivityError() {
@@ -491,8 +595,9 @@ class ProfileController extends GetxController {
         nameController.text = personalInfoResponse.data.fullName;
         emailController.text = personalInfoResponse.data.email;
         phoneController.text = personalInfoResponse.data.phoneNumber ?? '';
-        nationalityController.text = personalInfoResponse.data.nationality ?? '';
-        
+        nationalityController.text =
+            personalInfoResponse.data.nationality ?? '';
+
         // Set bio only for providers
         if (personalInfoResponse.data.isProvider) {
           bioController.text = personalInfoResponse.data.bio ?? '';
@@ -502,6 +607,11 @@ class ProfileController extends GetxController {
         userName.value = personalInfoResponse.data.fullName;
         userEmail.value = personalInfoResponse.data.email;
         isServiceProvider.value = personalInfoResponse.data.isProvider;
+        
+        // Update availability status for service providers
+        if (personalInfoResponse.data.isProvider) {
+          isAvailable.value = personalInfoResponse.data.isAvailable;
+        }
 
         // Update avatar if available
         if (personalInfoResponse.data.avatar != null &&
@@ -567,10 +677,12 @@ class ProfileController extends GetxController {
           // Update profile image with the URL from server
           final avatarPath = data['avatar'] as String;
           profileImage.value = ApiConstant.getFullMediaUrl(avatarPath);
-          
+
           Get.snackbar(
             'success'.tr,
-            'avatarUploaded'.tr.isNotEmpty ? 'avatarUploaded'.tr : 'Avatar uploaded successfully',
+            'avatarUploaded'.tr.isNotEmpty
+                ? 'avatarUploaded'.tr
+                : 'Avatar uploaded successfully',
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green[700],
             colorText: Colors.white,
