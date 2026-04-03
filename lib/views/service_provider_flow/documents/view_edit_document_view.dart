@@ -75,7 +75,7 @@ class _ViewEditDocumentViewState extends State<ViewEditDocumentView> {
                     child: Obx(
                       () => Container(
                         width: double.infinity,
-                        height: 180.h,
+                        height: 250.h,
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(12.r),

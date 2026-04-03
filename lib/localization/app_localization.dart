@@ -197,6 +197,8 @@ class AppLocalization extends Translations {
 
     // Service Provider Home
     'goodMorning': 'Good Morning',
+    'goodAfternoon': 'Good Afternoon',
+    'goodEvening': 'Good Evening',
     'analytics': 'Analytics',
     'basedOnLast30Days': 'Based on last 30 days',
     'totalEarnings': 'Total Earnings',
@@ -656,6 +658,8 @@ class AppLocalization extends Translations {
 
     // Service Provider Home
     'goodMorning': 'صباح الخير',
+    'goodAfternoon': 'مساء الخير',
+    'goodEvening': 'مساء الخير',
     'analytics': 'التحليلات',
     'basedOnLast30Days': 'بناءً على آخر 30 يومًا',
     'totalEarnings': 'إجمالي الأرباح',

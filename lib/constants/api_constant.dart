@@ -89,6 +89,12 @@ class ApiConstant {
   static const String providerAvailabilityToggle =
       '/providers/availability-toggle';
 
+  /// Get vendor profile by provider ID
+  /// GET /providers/vendor-info/{id}
+  /// Response: { "success": true, "message": "...", "data": { "id": 4, "name": "...", ... } }
+  static String vendorProfile(int providerId) =>
+      '/providers/vendor-info/$providerId';
+
   // ===== CUSTOMER ENDPOINTS =====
 
   static const String customerBookings = '/customer/bookings';

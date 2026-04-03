@@ -132,7 +132,10 @@ class ServiceDetailView extends StatelessWidget {
                               child: GestureDetector(
                                 onTap: () async {
                                   final profile = await _repository
-                                      .fetchVendorProfile(service.provider);
+                                      .fetchVendorProfile(
+                                    service.provider,
+                                    providerId: service.providerId > 0 ? service.providerId : null,
+                                  );
                                   Get.to(
                                     () => VendorProfileView(
                                       vendor: profile,

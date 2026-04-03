@@ -63,12 +63,7 @@ class ScheduleView extends GetView<ScheduleController> {
       children: [
         Row(
           children: [
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: const Icon(Icons.chevron_left, size: 20),
-              onPressed: () => controller.prevYear(),
-            ),
+            SizedBox(width: 20.w),
             Obx(
               () => Text(
                 controller.currentYear.value,
@@ -78,12 +73,6 @@ class ScheduleView extends GetView<ScheduleController> {
                   color: AppColors.darkGrey,
                 ),
               ),
-            ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: const Icon(Icons.chevron_right, size: 20),
-              onPressed: () => controller.nextYear(),
             ),
           ],
         ),

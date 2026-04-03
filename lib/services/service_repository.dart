@@ -75,9 +75,38 @@ class ServiceRepository {
     }
   }
 
+  /// Fetch vendor profile by provider ID from API
+  /// Uses: GET /providers/vendor-info/{id}
+  Future<VendorProfileModel> fetchVendorProfileById(int providerId) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(ApiConstant.vendorProfile(providerId));
+      Log.d('=======> fetchVendorProfileById - Response: $response');
+      
+      // Handle nested response structure
+      final data = response is Map ? (response['data'] ?? response) : response;
+      return VendorProfileModel.fromJson(data as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      Log.e('=======> fetchVendorProfileById - ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> fetchVendorProfileById - Error: $e');
+      throw ApiException(message: 'Failed to fetch vendor profile: $e');
+    }
+  }
+
+  /// Fetch vendor profile by provider ID (alias for backward compatibility)
   Future<VendorProfileModel> fetchVendorProfile(
-    ServiceProvider provider,
-  ) async {
+    ServiceProvider provider, {
+    int? providerId,
+  }) async {
+    // If providerId is provided, use API
+    if (providerId != null) {
+      return fetchVendorProfileById(providerId);
+    }
+    
+    // Fallback to mock data for backward compatibility
     await Future.delayed(const Duration(milliseconds: 300));
     final providerServices = MockData.homeServices
         .where((service) => service.provider.name == provider.name)
@@ -88,18 +117,25 @@ class ServiceRepository {
         : providerServices.map((s) => s.rating ?? 0).reduce((a, b) => a + b) /
               providerServices.length;
 
+    // Return mock data using legacy format
     return VendorProfileModel(
-      provider: provider,
+      id: 0,
       name: provider.name,
+      avatar: provider.imageUrl ?? '',
+      ratingAvg: rating.toStringAsFixed(2),
+      totalReviews: reviews.length,
+      isAvailable: true,
+      services: const [],
+      reviews: const [],
+      provider: provider,
       bannerUrl:
           'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
       certifications: ['Professional Chef', 'Pizza Artisan'],
       bio:
           'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
       rating: rating,
-      reviewCount: reviews.length,
-      services: providerServices,
-      reviews: reviews,
+      serviceModels: providerServices,
+      reviewModels: reviews,
     );
   }
 

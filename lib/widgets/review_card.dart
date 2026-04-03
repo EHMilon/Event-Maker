@@ -1,12 +1,28 @@
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/models/review_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Generic review data holder for both API and legacy models
+class ReviewData {
+  final String userName;
+  final String userImageUrl;
+  final String date;
+  final double rating;
+  final String reviewText;
+
+  const ReviewData({
+    required this.userName,
+    required this.userImageUrl,
+    required this.date,
+    required this.rating,
+    required this.reviewText,
+  });
+}
+
 class ReviewCard extends StatelessWidget {
-  final ReviewModel review;
+  final ReviewData review;
   final bool useFullWidth;
 
   const ReviewCard({
@@ -44,7 +60,12 @@ class ReviewCard extends StatelessWidget {
                 radius: 18.r,
                 backgroundImage: review.userImageUrl.startsWith('http')
                     ? NetworkImage(review.userImageUrl)
-                    : AssetImage(review.userImageUrl) as ImageProvider,
+                    : (review.userImageUrl.isEmpty
+                        ? null
+                        : AssetImage(review.userImageUrl) as ImageProvider),
+                child: review.userImageUrl.isEmpty
+                    ? Icon(Icons.person, size: 18.r, color: AppColors.grey)
+                    : null,
               ),
               SizedBox(width: 8.w),
               Expanded(

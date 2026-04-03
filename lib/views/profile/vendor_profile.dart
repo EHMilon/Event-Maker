@@ -1,10 +1,9 @@
 import 'package:event_maker/app_routes.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/vendor_profile_model.dart';
 import 'package:event_maker/widgets/review_card.dart';
 import 'package:event_maker/widgets/services_card.dart';
-import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart'
-    as sp;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -20,6 +19,24 @@ class VendorProfileView extends StatelessWidget {
     required this.vendor,
     this.showCustomerActions = false,
   });
+
+  /// Get avatar image provider based on URL
+  ImageProvider _getAvatarImage(String avatarPath) {
+    if (avatarPath.isEmpty) {
+      return const AssetImage('assets/images/default_avatar.png');
+    }
+    final fullUrl = ApiConstant.getFullMediaUrl(avatarPath);
+    if (fullUrl.startsWith('http://') || fullUrl.startsWith('https://')) {
+      return NetworkImage(fullUrl);
+    }
+    return AssetImage(fullUrl);
+  }
+
+  /// Get cover image URL for services
+  String _getCoverImageUrl(String coverPath) {
+    if (coverPath.isEmpty) return '';
+    return ApiConstant.getFullMediaUrl(coverPath);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,16 +92,7 @@ class VendorProfileView extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 4),
                             image: DecorationImage(
-                              image:
-                                  vendor.provider.imageUrl.startsWith(
-                                        'http://',
-                                      ) ||
-                                      vendor.provider.imageUrl.startsWith(
-                                        'https://',
-                                      )
-                                  ? NetworkImage(vendor.provider.imageUrl)
-                                  : AssetImage(vendor.provider.imageUrl)
-                                        as ImageProvider,
+                              image: _getAvatarImage(vendor.avatar),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -109,6 +117,27 @@ class VendorProfileView extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 8.h),
+                      // Availability badge
+                      if (vendor.isAvailable)
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Text(
+                            'Available',
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: Colors.green,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      SizedBox(height: 8.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -119,7 +148,7 @@ class VendorProfileView extends StatelessWidget {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '4.9',
+                            vendor.ratingAvg,
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -128,7 +157,7 @@ class VendorProfileView extends StatelessWidget {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '(3,657)',
+                            '(${vendor.totalReviews})',
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
                               color: AppColors.textSecondary,
@@ -137,45 +166,6 @@ class VendorProfileView extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 32.h),
-                      _buildSectionTitle('Certifications'),
-                      SizedBox(height: 16.h),
-                      ...?vendor.certifications?.map(
-                        (cert) => Padding(
-                          padding: EdgeInsets.only(bottom: 16.h),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  cert,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                Text(
-                                  'Institution Name',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12.sp,
-                                    color: AppColors.darkGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (vendor.certifications == null ||
-                          vendor.certifications!.isEmpty)
-                        Text(
-                          'No certifications listed',
-                          style: GoogleFonts.inter(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      SizedBox(height: 18.h),
                       _buildSectionTitle('Bio'),
                       SizedBox(height: 12.h),
                       Text(
@@ -188,65 +178,67 @@ class VendorProfileView extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 32.h),
-                      _buildSectionTitle('${vendor.name}\'s Services'),
+                      _buildSectionTitle("${vendor.name}'s Services"),
                       SizedBox(height: 16.h),
                       SizedBox(
                         height: 230.h,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: vendor.services?.length ?? 0,
-                          itemBuilder: (context, index) {
-                            final service = vendor.services![index];
-                            return ServicesCard(
-                              imagePath: service.images.isNotEmpty
-                                  ? service.images.first
-                                  : '',
-                              title: service.title,
-                              location: service.location,
-                              price: service.basePrice?.toString() ?? '0',
-                              rating: service.rating?.toString() ?? '0',
-                              isBookmarked: service.isBookmarked,
-                              onTap: () {
-                                Get.to(
-                                  () => sp.ServiceDetailView(
-                                    service: service,
-                                    showEditButton: true,
-                                    hideActionButtons: true,
+                        child: vendor.services.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No services listed',
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.textSecondary,
                                   ),
-                                );
-                              },
-                            );
-                          },
-                        ),
+                                ),
+                              )
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: vendor.services.length,
+                                itemBuilder: (context, index) {
+                                  final service = vendor.services[index];
+                                  return ServicesCard(
+                                    imagePath: _getCoverImageUrl(
+                                      service.coverImage,
+                                    ),
+                                    title: service.title,
+                                    location:
+                                        '', // API doesn't provide location
+                                    price: service.startingPrice,
+                                    rating: vendor.ratingAvg,
+                                    isBookmarked: false,
+                                    onTap: () {
+                                      // TODO: Navigate to service detail
+                                      // Get.to(() => sp.ServiceDetailView(service: service));
+                                    },
+                                  );
+                                },
+                              ),
                       ),
-                      if (vendor.services == null || vendor.services!.isEmpty)
-                        Text(
-                          'No services listed',
-                          style: GoogleFonts.inter(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
                       SizedBox(height: 32.h),
                       _buildSectionTitle('Reviews'),
                       SizedBox(height: 16.h),
                       SizedBox(
                         height: 120.h,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: vendor.reviews?.length ?? 0,
-                          itemBuilder: (context, index) {
-                            final review = vendor.reviews![index];
-                            return ReviewCard(review: review);
-                          },
-                        ),
+                        child: vendor.reviews.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No reviews yet',
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              )
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: vendor.reviews.length,
+                                itemBuilder: (context, index) {
+                                  final review = vendor.reviews[index];
+                                  return ReviewCard(
+                                    review: _toReviewData(review),
+                                  );
+                                },
+                              ),
                       ),
-                      if (vendor.reviews == null || vendor.reviews!.isEmpty)
-                        Text(
-                          'No reviews yet',
-                          style: GoogleFonts.inter(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
                       SizedBox(height: 50.h),
                     ],
                   ),
@@ -280,7 +272,7 @@ class VendorProfileView extends StatelessWidget {
                       AppRoutes.addReview,
                       arguments: {
                         'vendorName': vendor.name,
-                        'vendorLogo': vendor.provider.imageUrl,
+                        'vendorLogo': vendor.avatar,
                       },
                     );
                   } else if (value == 'certification') {
@@ -315,6 +307,17 @@ class VendorProfileView extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+
+  /// Convert VendorReviewModel to ReviewData for ReviewCard widget
+  ReviewData _toReviewData(VendorReviewModel review) {
+    return ReviewData(
+      userName: review.customerName,
+      userImageUrl: '',
+      date: review.createdAt,
+      rating: review.rating.toDouble(),
+      reviewText: review.comment,
     );
   }
 

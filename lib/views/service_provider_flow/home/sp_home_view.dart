@@ -76,7 +76,37 @@ class SPHomeView extends GetView<SPHomeController> {
     );
   }
 
+  // Returns the appropriate greeting key and icon based on current time
+  ({String greetingKey, IconData icon, Color iconColor}) _getGreetingData() {
+    final hour = DateTime.now().hour;
+    
+    if (hour >= 5 && hour < 12) {
+      // Morning: 5 AM - 11:59 AM
+      return (
+        greetingKey: 'goodMorning',
+        icon: Icons.wb_sunny_outlined,
+        iconColor: Colors.orange,
+      );
+    } else if (hour >= 12 && hour < 17) {
+      // Afternoon: 12 PM - 4:59 PM
+      return (
+        greetingKey: 'goodAfternoon',
+        icon: Icons.wb_sunny,
+        iconColor: Colors.orange.shade700,
+      );
+    } else {
+      // Evening: 5 PM - 4:59 AM
+      return (
+        greetingKey: 'goodEvening',
+        icon: Icons.nights_stay_outlined,
+        iconColor: Colors.indigo,
+      );
+    }
+  }
+
   Widget _buildHeader() {
+    final greetingData = _getGreetingData();
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -85,14 +115,14 @@ class SPHomeView extends GetView<SPHomeController> {
           children: [
             Row(
               children: [
-                const Icon(
-                  Icons.wb_sunny_outlined,
+                Icon(
+                  greetingData.icon,
                   size: 19,
-                  color: Colors.orange,
+                  color: greetingData.iconColor,
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  'goodMorning'.tr,
+                  greetingData.greetingKey.tr,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     color: AppColors.textPrimary,

@@ -260,7 +260,10 @@ class ServiceDetailView extends StatelessWidget {
                         GestureDetector(
                           onTap: () async {
                             final profile = await _repository
-                                .fetchVendorProfile(service.provider);
+                                .fetchVendorProfile(
+                              service.provider,
+                              providerId: service.providerId > 0 ? service.providerId : null,
+                            );
                             Get.to(() => VendorProfileView(vendor: profile));
                           },
                           child: Row(
@@ -882,16 +885,21 @@ class _BookingRequestDetailViewDetailState
       final response = await _repository.fetchBookingRequestDetail(
         widget.bookingId,
       );
-      
-      setState(() {
-        _bookingDetail = response.data;
-        _isLoading = false;
-      });
+
+      // ignore: unnecessary_set_state
+      if (mounted) {
+        setState(() {
+          _bookingDetail = response.data;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 

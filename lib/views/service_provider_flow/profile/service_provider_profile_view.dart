@@ -29,7 +29,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Fetch profile data from API on init
     _loadProfileData();
   }
 
@@ -62,7 +61,8 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
             ),
           ),
           actions: [
-            PopupMenuButton<String>(
+            IconButton(
+              onPressed: () => Get.toNamed(AppRoutes.profile),
               icon: SvgPicture.asset(
                 'assets/images/setting_fill.svg',
                 width: 24.r,
@@ -72,14 +72,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                   BlendMode.srcIn,
                 ),
               ),
-              onSelected: (value) {
-                if (value == 'settings') {
-                  Get.toNamed(AppRoutes.profile);
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(value: 'settings', child: Text('settings'.tr)),
-              ],
             ),
           ],
         ),
@@ -169,7 +161,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                     padding: EdgeInsets.only(bottom: 8.h),
                     child: Center(
                       child: TabBar(
-                        // dividerColor: Colors.transparent,
                         dividerHeight: 0,
                         splashFactory: NoSplash.splashFactory,
                         tabAlignment: TabAlignment.center,
@@ -209,12 +200,10 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
       final isLoading = controller.isProfileLoading.value;
       final error = controller.profileError.value;
 
-      // Show loading indicator while fetching data
       if (isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      // Show error state if API failed
       if (error.isNotEmpty && profile == null) {
         return Center(
           child: Column(
@@ -237,7 +226,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
         );
       }
 
-      // No data state
       if (profile == null) {
         return Center(
           child: Text(
@@ -257,7 +245,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
           SizedBox(height: 16.h),
           _buildSectionTitle('certifications'.tr),
           SizedBox(height: 16.h),
-          // Use only API certificates
           if (profile.certificates.isNotEmpty)
             ...profile.certificates.map(
               (cert) => Padding(
@@ -301,13 +288,11 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                           service.coverImage,
                         ),
                         title: service.title,
-                        location: '', // API doesn't provide location
+                        location: '',
                         price: service.startingPrice,
                         rating: service.ratingValue.toString(),
                         isBookmarked: false,
-                        onTap: () {
-                          // TODO: Navigate to service detail with API service model
-                        },
+                        onTap: () {},
                       );
                     },
                   )
@@ -333,12 +318,10 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
       final isLoading = controller.isReviewsLoading.value;
       final error = controller.reviewsError.value;
 
-      // Show loading indicator while fetching data
       if (isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      // Show error state if API failed
       if (error.isNotEmpty && apiReviews.isEmpty) {
         return Center(
           child: Column(
@@ -361,7 +344,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
         );
       }
 
-      // No reviews state
       if (apiReviews.isEmpty) {
         return Center(
           child: Text(
@@ -374,7 +356,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
         );
       }
 
-      // Display API reviews
       return ListView.builder(
         physics: const ClampingScrollPhysics(),
         padding: EdgeInsets.all(24.w),
@@ -390,7 +371,7 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
     });
   }
 
-  /// Build review card from API model
+  /// Build review card from API model - Matches design: Avatar, Name, 5-star rating, Date, Comment
   Widget _buildApiReviewCard(ServiceProviderReview review) {
     return Container(
       padding: EdgeInsets.all(16.r),
@@ -410,8 +391,9 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
         children: [
           Row(
             children: [
+              // Avatar
               CircleAvatar(
-                radius: 20.r,
+                radius: 24.r,
                 backgroundImage: review.customer.fullAvatarUrl != null
                     ? NetworkImage(review.customer.fullAvatarUrl!)
                     : null,
@@ -429,6 +411,7 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                     : null,
               ),
               SizedBox(width: 12.w),
+              // Name and Rating
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,53 +419,49 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                     Text(
                       review.customer.name,
                       style: GoogleFonts.inter(
-                        fontSize: 14.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      review.createdAt,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
+                    SizedBox(height: 4.h),
+                    // 5-star rating row
+                    Row(
+                      children: List.generate(5, (index) {
+                        return SvgPicture.asset(
+                          "assets/icons/star_fill.svg",
+                          height: 18.h,
+                          width: 18.w,
+                          colorFilter: ColorFilter.mode(
+                            index < review.rating
+                                ? Colors.amber
+                                : AppColors.grey300,
+                            BlendMode.srcIn,
+                          ),
+                        );
+                      }),
                     ),
                   ],
                 ),
               ),
-              Row(
-                children: [
-                  Icon(Icons.star, size: 16.r, color: Colors.amber),
-                  SizedBox(width: 4.w),
-                  Text(
-                    review.rating.toString(),
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
+              // Date
+              Text(
+                review.createdAt,
+                style: GoogleFonts.inter(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
           SizedBox(height: 12.h),
-          Text(
-            review.serviceTitle,
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.primary,
-            ),
-          ),
-          SizedBox(height: 8.h),
+          // Comment
           Text(
             review.comment,
             style: GoogleFonts.inter(
-              fontSize: 13.sp,
-              color: AppColors.textSecondary,
+              fontSize: 14.sp,
+              color: AppColors.textPrimary,
               height: 1.4,
             ),
           ),
@@ -502,7 +481,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
     );
   }
 
-  /// Build certification item from API model
   Widget _buildApiCertificationItem(ProviderCertificate cert) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,17 +497,6 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                 ),
               ),
             ),
-            if (cert.file != null && cert.file!.isNotEmpty)
-              GestureDetector(
-                onTap: () {
-                  // TODO: Open certificate file/image
-                },
-                child: Icon(
-                  Icons.visibility_outlined,
-                  size: 20.r,
-                  color: AppColors.primary,
-                ),
-              ),
           ],
         ),
         SizedBox(height: 4.h),
