@@ -1,5 +1,6 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
@@ -23,6 +24,77 @@ class ServiceDetailView extends StatelessWidget {
   });
   ServiceRepository get _repository => const ServiceRepository();
 
+  /// Get full image URL from relative path
+  String _getFullImageUrl(String path) {
+    if (path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    // Handle relative paths like /media/services/covers/...
+    return '${ApiConstant.mediaBaseUrl}$path';
+  }
+
+  /// Check if image path is a network URL
+  bool _isNetworkImage(String path) {
+    return path.startsWith('http://') || path.startsWith('https://');
+  }
+
+  /// Build cover image - use images array first, then coverImage
+  Widget _buildCoverImage() {
+    // First try to use images from the service
+    if (service.images.isNotEmpty) {
+      final imagePath = service.images.first;
+      final fullUrl = _getFullImageUrl(imagePath);
+      // Check if the full URL is a network URL
+      if (_isNetworkImage(fullUrl) && fullUrl.isNotEmpty) {
+        return Image.network(
+          fullUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildPlaceholderImage(),
+        );
+      } else {
+        // Try as asset
+        return Image.asset(imagePath, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) =>
+            _buildPlaceholderImage());
+      }
+    }
+    
+    // Fall back to coverImage if images is empty
+    if (service.coverImage.isNotEmpty) {
+      final coverPath = service.coverImage;
+      final fullUrl = _getFullImageUrl(coverPath);
+      // Check if the full URL is a network URL
+      if (_isNetworkImage(fullUrl) && fullUrl.isNotEmpty) {
+        return Image.network(
+          fullUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildPlaceholderImage(),
+        );
+      } else {
+        return Image.asset(coverPath, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) =>
+            _buildPlaceholderImage());
+      }
+    }
+    
+    return _buildPlaceholderImage();
+  }
+
+  /// Build placeholder image when no cover is available
+  Widget _buildPlaceholderImage() {
+    return Container(
+      color: AppColors.lightGrey,
+      child: const Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: AppColors.grey,
+          size: 50,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Local state for package selection
@@ -35,17 +107,13 @@ class ServiceDetailView extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background Image
+          // Background Image - use coverImage if images is empty
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             height: 250.h,
-            child: service.images.isNotEmpty
-                ? (service.images.first.startsWith('http')
-                      ? Image.network(service.images.first, fit: BoxFit.cover)
-                      : Image.asset(service.images.first, fit: BoxFit.cover))
-                : Container(color: AppColors.lightGrey),
+            child: _buildCoverImage(),
           ),
 
           // Content
@@ -133,9 +201,11 @@ class ServiceDetailView extends StatelessWidget {
                                 onTap: () async {
                                   final profile = await _repository
                                       .fetchVendorProfile(
-                                    service.provider,
-                                    providerId: service.providerId > 0 ? service.providerId : null,
-                                  );
+                                        service.provider,
+                                        providerId: service.providerId > 0
+                                            ? service.providerId
+                                            : null,
+                                      );
                                   Get.to(
                                     () => VendorProfileView(
                                       vendor: profile,
@@ -154,9 +224,12 @@ class ServiceDetailView extends StatelessWidget {
                                         ),
                                         image: DecorationImage(
                                           image: NetworkImage(
-                                            service.provider.imageUrl,
+                                            _getFullImageUrl(
+                                              service.provider.imageUrl,
+                                            ),
                                           ),
                                           fit: BoxFit.cover,
+                                          onError: (exception, stackTrace) {},
                                         ),
                                       ),
                                     ),
@@ -335,17 +408,23 @@ class ServiceDetailView extends StatelessWidget {
                           service.location,
                         ),
 
-                        if (service.type == ServiceType.event ||
-                            service.type == ServiceType.training) ...[
+                        // Display availability info if available
+                        if (service.availabilities.isNotEmpty) ...[
                           SizedBox(height: 12.h),
-                          if (service.type == ServiceType.event)
-                            _buildInfoRow(
-                              Icons.music_note,
-                              'Mia lachetti + Atlanta\'s best',
-                            ), // Static for now based on image
-                          if (service.type == ServiceType.event) ...[
+                          _buildInfoRow(
+                            Icons.access_time,
+                            '${service.availabilities.first.startTime} - ${service.availabilities.first.endTime}',
+                          ),
+                          if (service
+                              .availabilities
+                              .first
+                              .weekDays
+                              .isNotEmpty) ...[
                             SizedBox(height: 12.h),
-                            _buildInfoRow(Icons.people_outline, '250'),
+                            _buildInfoRow(
+                              Icons.calendar_today_outlined,
+                              service.availabilities.first.weekDays.join(', '),
+                            ),
                           ],
                         ],
 
@@ -560,18 +639,18 @@ class ServiceDetailView extends StatelessWidget {
                                   color: AppColors.primary,
                                 ),
                               ),
-                              if (service.type == ServiceType.event ||
-                                  service.type == ServiceType.training ||
-                                  service.type == ServiceType.cleaning ||
-                                  service.type == ServiceType.filming ||
-                                  service.type == ServiceType.catering)
-                                Text(
-                                  'perHr'.tr,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12.sp,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
+                              // if (service.type == ServiceType.event ||
+                              //     service.type == ServiceType.training ||
+                              //     service.type == ServiceType.cleaning ||
+                              //     service.type == ServiceType.filming ||
+                              //     service.type == ServiceType.catering)
+                              //   Text(
+                              //     'perHr'.tr,
+                              //     style: GoogleFonts.inter(
+                              //       fontSize: 12.sp,
+                              //       color: AppColors.textSecondary,
+                              //     ),
+                              //   ),
                             ],
                           ),
                         ],

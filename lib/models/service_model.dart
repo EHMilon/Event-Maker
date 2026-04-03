@@ -481,13 +481,17 @@ class ServiceModel {
       images: json['cover_image'] != null
           ? [json['cover_image'] as String]
           : [],
-      // Get location from first availability
-      location: _extractLocation(json['availabilities'] as List<dynamic>?),
+      // Get location from address field (grouped services) or first availability
+      location: (json['address'] as String?)?.isNotEmpty == true
+          ? json['address'] as String
+          : _extractLocation(json['availabilities'] as List<dynamic>?),
       // Use provider's rating if service-level rating is not available
       rating: double.tryParse(json['average_rating'] as String? ?? 
           (json['provider'] as Map<String, dynamic>?)?['average_rating'] as String? ?? '0'),
       reviewCount: json['total_reviews'] as int? ?? 
           (json['provider'] as Map<String, dynamic>?)?['total_reviews'] as int?,
+      // Map starting_price from API to basePrice
+      basePrice: double.tryParse(json['starting_price'] as String? ?? '0'),
     );
   }
 

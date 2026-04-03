@@ -107,8 +107,19 @@ class ApiConstant {
   static const String serviceCategories = '/services/categories';
   static const String serviceSearch = '/services/search';
 
+  /// Get customer services grouped by service_as_name
+  /// Query params: service_type_name (required), service_as_name (optional)
+  static const String customerServices = '/services/customer-services';
+
+  /// Get subcategories (unique service_as_name list) by service_type_name
+  /// Query params: service_type_name (required)
+  static const String subcategories = '/services/subcategories';
+
   /// Get service detail by ID: /services/detail/{id}
   static String serviceDetail(int id) => '/services/detail/$id';
+
+  /// Get customer service detail by ID: /services/customer-services/{id}
+  static String customerServiceDetail(int id) => '/services/customer-services/$id';
 
   /// Update service by ID: /services/update/{id}
   /// Note: Uses POST with multipart/form-data for update

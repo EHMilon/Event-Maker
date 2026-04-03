@@ -1,4 +1,5 @@
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,6 +29,16 @@ class ServicesCard extends StatelessWidget {
     this.onBookmarkTap,
   });
 
+  /// Get full image URL from relative path
+  String _getFullImageUrl(String path) {
+    if (path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    // Handle relative paths like /media/services/covers/...
+    return '${ApiConstant.mediaBaseUrl}$path';
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardWidth = useFullWidth ? double.infinity : 230.w;
@@ -35,6 +46,25 @@ class ServicesCard extends StatelessWidget {
         ? EdgeInsets.only(bottom: 16.h)
         : EdgeInsets.only(right: 16.w);
     final imageHeight = useFullWidth ? 230.h : 120.h;
+
+    // Get full image URL
+    final fullImageUrl = _getFullImageUrl(imagePath);
+    // Determine if it's a network image
+    final isNetworkImage =
+        fullImageUrl.startsWith('http://') ||
+        fullImageUrl.startsWith('https://');
+
+    /// Build placeholder image widget
+    Widget _buildPlaceholderImage(double height) {
+      return Container(
+        height: height,
+        width: double.infinity,
+        color: AppColors.lightGrey,
+        child: const Center(
+          child: Icon(Icons.image_not_supported, size: 40, color: AppColors.grey),
+        ),
+      );
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -63,18 +93,14 @@ class ServicesCard extends StatelessWidget {
                   borderRadius: BorderRadius.vertical(
                     top: Radius.circular(16.r),
                   ),
-                  child: imagePath.startsWith('http')
+                  child: isNetworkImage && fullImageUrl.isNotEmpty
                       ? Image.network(
-                          imagePath,
+                          fullImageUrl,
                           height: imageHeight,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                height: imageHeight,
-                                color: AppColors.lightGrey,
-                                child: const Icon(Icons.broken_image),
-                              ),
+                              _buildPlaceholderImage(imageHeight),
                         )
                       : Image.asset(
                           imagePath,
@@ -82,11 +108,7 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                height: imageHeight,
-                                color: AppColors.lightGrey,
-                                child: const Icon(Icons.broken_image),
-                              ),
+                              _buildPlaceholderImage(imageHeight),
                         ),
                 ),
                 Positioned(
@@ -167,13 +189,13 @@ class ServicesCard extends StatelessWidget {
                                 color: AppColors.black,
                               ),
                             ),
-                            TextSpan(
-                              text: '/hr',
-                              style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                color: AppColors.grey,
-                              ),
-                            ),
+                            // TextSpan(
+                            //   text: '/hr',
+                            //   style: GoogleFonts.inter(
+                            //     fontSize: 12.sp,
+                            //     color: AppColors.grey,
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),

@@ -1,7 +1,7 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/service_model.dart';
-import 'package:event_maker/views/customer_flow/home/widgets/service_section_model.dart';
+import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/widgets/services_card.dart';
 import 'package:event_maker/views/customer_flow/home/customer_home_controller.dart';
@@ -21,6 +21,8 @@ class CustomerHomeView extends StatefulWidget {
 }
 
 class _CustomerHomeViewState extends State<CustomerHomeView> {
+  final ServiceRepository _serviceRepository = const ServiceRepository();
+
   @override
   Widget build(BuildContext context) {
     final HomeController controller = Get.find<HomeController>();
@@ -73,24 +75,26 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                                 ),
                               ),
                               // SizedBox(height: 4.h),
-                              Obx(() => Row(
-                                children: [
-                                  SvgPicture.asset(
-                                    'assets/icons/location.svg',
-                                    height: 16.h,
-                                    width: 16.w,
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    controller.userLocation.value,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      // color: AppColors.grey,
-                                      fontWeight: FontWeight.w400,
+                              Obx(
+                                () => Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/location.svg',
+                                      height: 16.h,
+                                      width: 16.w,
                                     ),
-                                  ),
-                                ],
-                              )),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      controller.userLocation.value,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.sp,
+                                        // color: AppColors.grey,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -192,7 +196,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                         }).toList(),
                         onChanged: (String? newValue) {
                           if (newValue != null) {
-                            controller.selectedMainCategory.value = newValue;
+                            controller.setMainCategory(newValue);
                           }
                         },
                       ),
@@ -210,17 +214,19 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                   // SizedBox(height: 16.h),
                   _buildCategories(),
                   SizedBox(height: 24.h),
-                  // Dynamic service sections from controller
-                  ...controller.serviceSections.expand((section) => [
-                        _buildSectionHeader(
-                          section.titleKey.tr,
-                          section.serviceType.name,
-                          section.categoryName.tr,
-                        ),
-                        SizedBox(height: 16.h),
-                        _buildHorizontalList(section),
-                        SizedBox(height: 24.h),
-                      ]),
+                  // Dynamic service groups from backend API (grouped by service_as_name)
+                  ...controller.displayServiceGroups.expand(
+                    (group) => [
+                      _buildSectionHeader(
+                        group.serviceAsName,
+                        controller.selectedMainCategory.value,
+                        group.serviceAsName,
+                      ),
+                      SizedBox(height: 16.h),
+                      _buildServiceGroupList(group),
+                      SizedBox(height: 24.h),
+                    ],
+                  ),
                   SizedBox(height: 80.h),
                 ],
               ),
@@ -236,15 +242,26 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
     final HomeController controller = Get.find<HomeController>();
     return Obx(() {
       final subCategories = controller.currentSubCategories;
+      final selectedSubCategory = controller.selectedSubCategory.value;
+
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: subCategories.asMap().entries.map((entry) {
             final index = entry.key;
             final category = entry.value;
+            final isSelected = selectedSubCategory == category;
+
             return Padding(
               padding: EdgeInsets.only(right: 8.w),
-              child: CategoryItem(label: category, onTap: () {}, index: index),
+              child: CategoryItem(
+                label: category,
+                isSelected: isSelected,
+                onTap: () {
+                  controller.selectSubCategory(category);
+                },
+                index: index,
+              ),
             );
           }).toList(),
         ),
@@ -307,13 +324,13 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
     );
   }
 
-  Widget _buildHorizontalList(ServiceSectionModel section) {
+  /// Build horizontal list for service group from backend API
+  Widget _buildServiceGroupList(ServiceGroup group) {
     final HomeController controller = Get.find<HomeController>();
-    final List<ServiceModel> services = controller.getServicesBySection(section);
+    final List<ServiceModel> services = group.services;
 
-    // Use filtered services or show placeholder if empty
+    // Use services or show placeholder if empty
     if (services.isEmpty) {
-      // Return empty container if no services match
       return const SizedBox.shrink();
     }
 
@@ -324,15 +341,31 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
           return Padding(
             padding: EdgeInsets.only(right: 6.w),
             child: ServicesCard(
-              imagePath: service.images.isNotEmpty ? service.images[0] : '',
+              imagePath: service.coverImage,
               title: service.title,
               location: service.location,
               price:
-                  '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.priceUnit}',
-              rating: service.rating?.toString() ?? 'N/A',
+                  '${service.basePrice?.toStringAsFixed(0) ?? 'N/A'} ${service.currency}',
+              rating: service.ratingValue.toStringAsFixed(1),
               isBookmarked: service.isBookmarked,
-              onTap: () {
-                Get.to(() => ServiceDetailView(service: service));
+              onTap: () async {
+                // Show loading indicator while fetching service detail
+                Get.dialog(
+                  const Center(child: CircularProgressIndicator()),
+                  barrierDismissible: false,
+                );
+
+                try {
+                  // Fetch full service details from API
+                  final detailService = await _serviceRepository
+                      .fetchCustomerServiceDetail(service.apiId);
+                  Get.back(); // Close loading dialog
+                  Get.to(() => ServiceDetailView(service: detailService));
+                } catch (e) {
+                  Get.back(); // Close loading dialog
+                  // If API fails, use the current service data
+                  Get.to(() => ServiceDetailView(service: service));
+                }
               },
               onBookmarkTap: () {
                 controller.toggleBookmark(service.id);

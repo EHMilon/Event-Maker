@@ -275,4 +275,159 @@ class ServiceRepository {
       throw ApiException(message: 'Failed to fetch service detail: $e');
     }
   }
+
+  /// Fetch customer services grouped by service_as_name
+  /// Uses: GET api/services/customer-services?service_type_name=Event
+  /// Query params: service_type_name (required), service_as_name (optional for filtering)
+  Future<CustomerServicesResponse> fetchCustomerServices({
+    required String serviceTypeName,
+    String? serviceAsName,
+  }) async {
+    final api = ApiService();
+
+    try {
+      // Build query parameters
+      final queryParams = <String, String>{
+        'service_type_name': serviceTypeName,
+      };
+      if (serviceAsName != null && serviceAsName.isNotEmpty) {
+        queryParams['service_as_name'] = serviceAsName;
+      }
+
+      final response = await api.get(
+        ApiConstant.customerServices,
+        queryParams: queryParams,
+      );
+      return CustomerServicesResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch customer services: $e');
+    }
+  }
+
+  /// Fetch subcategories (unique service_as_name list) by service_type_name
+  /// Uses: GET api/services/subcategories?service_type_name=Event
+  Future<List<String>> fetchSubcategories(String serviceTypeName) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(
+        ApiConstant.subcategories,
+        queryParams: {'service_type_name': serviceTypeName},
+      );
+      return SubcategoriesResponse.fromJson(response).data;
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch subcategories: $e');
+    }
+  }
+
+  /// Fetch customer service detail by ID
+  /// Uses: GET api/services/customer-services/{id}
+  Future<ServiceModel> fetchCustomerServiceDetail(int serviceId) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(ApiConstant.customerServiceDetail(serviceId));
+      return ServiceModel.fromJson(response['data']);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch customer service detail: $e');
+    }
+  }
+}
+
+/// Response model for customer services grouped by service_as_name
+class CustomerServicesResponse {
+  final bool success;
+  final String message;
+  final String serviceTypeName;
+  final int groupPreviewLimit;
+  final int totalGroups;
+  final List<ServiceGroup> data;
+
+  CustomerServicesResponse({
+    required this.success,
+    required this.message,
+    required this.serviceTypeName,
+    required this.groupPreviewLimit,
+    required this.totalGroups,
+    required this.data,
+  });
+
+  factory CustomerServicesResponse.fromJson(Map<String, dynamic> json) {
+    return CustomerServicesResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      serviceTypeName: json['service_type_name'] as String? ?? '',
+      groupPreviewLimit: json['group_preview_limit'] as int? ?? 5,
+      totalGroups: json['total_groups'] as int? ?? 0,
+      data: (json['data'] as List<dynamic>?)
+              ?.map((e) => ServiceGroup.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
+  /// Get all services from all groups (flattened)
+  List<ServiceModel> get allServices {
+    return data.expand((group) => group.services).toList();
+  }
+}
+
+/// Service group model (grouped by service_as_name)
+class ServiceGroup {
+  final String serviceAsName;
+  final int totalServices;
+  final int previewCount;
+  final bool hasMore;
+  final List<ServiceModel> services;
+
+  ServiceGroup({
+    required this.serviceAsName,
+    required this.totalServices,
+    required this.previewCount,
+    required this.hasMore,
+    required this.services,
+  });
+
+  factory ServiceGroup.fromJson(Map<String, dynamic> json) {
+    return ServiceGroup(
+      serviceAsName: json['service_as_name'] as String? ?? '',
+      totalServices: json['total_services'] as int? ?? 0,
+      previewCount: json['preview_count'] as int? ?? 0,
+      hasMore: json['has_more'] as bool? ?? false,
+      services: (json['services'] as List<dynamic>?)
+              ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+/// Response model for subcategories
+class SubcategoriesResponse {
+  final bool success;
+  final String message;
+  final List<String> data;
+
+  SubcategoriesResponse({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory SubcategoriesResponse.fromJson(Map<String, dynamic> json) {
+    return SubcategoriesResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: (json['data'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+    );
+  }
 }
