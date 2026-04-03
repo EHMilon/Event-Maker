@@ -32,28 +32,32 @@ class HomeController extends GetxController {
 
   // For main category selection - Default to "Event"
   final selectedMainCategory = 'Event'.obs;
-  
+
   // For subcategory selection (null means all subcategories)
   final selectedSubCategory = RxnString();
 
-  List<String> get currentSubCategories => subCategoriesMap[selectedMainCategory.value] ?? [];
+  List<String> get currentSubCategories =>
+      subCategoriesMap[selectedMainCategory.value] ?? [];
 
   /// Get services filtered by selected main category and subcategory
   List<ServiceModel> get filteredServices {
     var services = allServices.toList();
-    
+
     // Filter by main category (service_type_name)
     services = services.where((service) {
-      return service.serviceTypeName.toLowerCase() == selectedMainCategory.value.toLowerCase();
+      return service.serviceTypeName.toLowerCase() ==
+          selectedMainCategory.value.toLowerCase();
     }).toList();
-    
+
     // Filter by subcategory (service_as_name) if selected
-    if (selectedSubCategory.value != null && selectedSubCategory.value!.isNotEmpty) {
+    if (selectedSubCategory.value != null &&
+        selectedSubCategory.value!.isNotEmpty) {
       services = services.where((service) {
-        return service.serviceAsName.toLowerCase() == selectedSubCategory.value!.toLowerCase();
+        return service.serviceAsName.toLowerCase() ==
+            selectedSubCategory.value!.toLowerCase();
       }).toList();
     }
-    
+
     return services;
   }
 
@@ -63,10 +67,12 @@ class HomeController extends GetxController {
       // Fallback to local grouping if no backend data
       final grouped = <String, List<ServiceModel>>{};
       for (final service in filteredServices) {
-        final key = service.serviceAsName.isNotEmpty ? service.serviceAsName : 'Other';
+        final key = service.serviceAsName.isNotEmpty
+            ? service.serviceAsName
+            : 'Other';
         grouped.putIfAbsent(key, () => []).add(service);
       }
-      
+
       return grouped.entries.map((entry) {
         return ServiceGroup(
           serviceAsName: entry.key,
@@ -77,14 +83,19 @@ class HomeController extends GetxController {
         );
       }).toList();
     }
-    
+
     // Use backend groups, filter by subcategory if selected
-    if (selectedSubCategory.value != null && selectedSubCategory.value!.isNotEmpty) {
-      return serviceGroups.where((group) => 
-        group.serviceAsName.toLowerCase() == selectedSubCategory.value!.toLowerCase()
-      ).toList();
+    if (selectedSubCategory.value != null &&
+        selectedSubCategory.value!.isNotEmpty) {
+      return serviceGroups
+          .where(
+            (group) =>
+                group.serviceAsName.toLowerCase() ==
+                selectedSubCategory.value!.toLowerCase(),
+          )
+          .toList();
     }
-    
+
     return serviceGroups.toList();
   }
 
@@ -111,16 +122,15 @@ class HomeController extends GetxController {
     try {
       // Set default main categories
       mainCategories.value = ['Event', 'Hospitality', 'Professional Trainer'];
-      
+
       // Set default location - TODO: Get from backend user profile
       userLocation.value = 'New York, USA';
 
       // Fetch subcategories for default main category
       await _fetchSubcategories(selectedMainCategory.value);
-      
+
       // Fetch services for default main category
       await _fetchCustomerServices();
-
     } catch (e) {
       isError.value = true;
       errorMessage.value = 'Failed to load home data. Please try again.';
@@ -134,7 +144,9 @@ class HomeController extends GetxController {
   /// Fetch subcategories from backend API
   Future<void> _fetchSubcategories(String serviceTypeName) async {
     try {
-      final subcategories = await _serviceRepository.fetchSubcategories(serviceTypeName);
+      final subcategories = await _serviceRepository.fetchSubcategories(
+        serviceTypeName,
+      );
       subCategoriesMap[serviceTypeName] = subcategories;
     } catch (e) {
       // Use fallback mock data on error
@@ -150,10 +162,10 @@ class HomeController extends GetxController {
         serviceAsName: serviceAsName,
       );
       serviceGroups.value = response.data;
-      
+
       // Also update allServices with the flattened list for compatibility
       allServices.value = response.allServices;
-      
+
       // Update service sections based on the groups
       _updateServiceSections();
     } catch (e) {
@@ -165,15 +177,15 @@ class HomeController extends GetxController {
   /// Update main category and fetch corresponding data
   Future<void> setMainCategory(String category) async {
     if (selectedMainCategory.value == category) return;
-    
+
     selectedMainCategory.value = category;
     selectedSubCategory.value = null; // Reset subcategory selection
-    
+
     isLoading.value = true;
     try {
       // Fetch subcategories for new main category
       await _fetchSubcategories(category);
-      
+
       // Fetch services for new main category
       await _fetchCustomerServices();
     } catch (e) {
@@ -192,7 +204,7 @@ class HomeController extends GetxController {
     } else {
       selectedSubCategory.value = subCategory;
     }
-    
+
     isLoading.value = true;
     try {
       // Fetch filtered services from backend
@@ -225,7 +237,8 @@ class HomeController extends GetxController {
         id: group.serviceAsName.toLowerCase(),
         titleKey: group.serviceAsName,
         categoryName: group.serviceAsName,
-        serviceType: ServiceType.catering, // Default, will be determined from service
+        serviceType:
+            ServiceType.catering, // Default, will be determined from service
       );
     }).toList();
   }
@@ -234,15 +247,29 @@ class HomeController extends GetxController {
   void _setMockSubCategories(String serviceTypeName) {
     subCategoriesMap.value = {
       'Event': ['Buffet', 'Cleaning', 'Decoration', 'Furniture'],
-      'Hospitality': ['Catering', 'Barista', 'Bakery', 'Waitstaff', 'Host/Hostess'],
-      'Professional Trainer': ['Photographer', 'Videographer', 'Musician', 'DJ', 'MC'],
+      'Hospitality': [
+        'Catering',
+        'Barista',
+        'Bakery',
+        'Waitstaff',
+        'Host/Hostess',
+      ],
+      'Professional Trainer': [
+        'Photographer',
+        'Videographer',
+        'Musician',
+        'DJ',
+        'MC',
+      ],
     };
   }
 
   /// Mock data loader - fallback implementation
   Future<void> _loadMockData() async {
     allServices.value = MockData.homeServices.map((service) {
-      final isBookmarked = _profileController.bookmarks.any((b) => b.id == service.id);
+      final isBookmarked = _profileController.bookmarks.any(
+        (b) => b.id == service.id,
+      );
       return ServiceModel(
         id: service.id,
         title: service.title,
@@ -293,25 +320,71 @@ class HomeController extends GetxController {
   }
 
   /// Toggle bookmark status for a service
-  /// Calls backend API when available
+  /// Calls backend API: POST /services/bookmark-toggle/{serviceId}
   Future<bool> toggleBookmark(String serviceId) async {
-    final serviceIndex = allServices.indexWhere((s) => s.id == serviceId);
+    // Find service by checking both apiId and legacy id
+    final serviceIndex = allServices.indexWhere(
+      (s) => s.apiId.toString() == serviceId || s.id == serviceId,
+    );
     if (serviceIndex == -1) return false;
 
     final service = allServices[serviceIndex];
     final newBookmarkState = !service.isBookmarked;
 
     try {
-      // TODO: Replace with actual API call
-      // await apiService.post('/bookmarks', { 'serviceId': serviceId, 'bookmark': newBookmarkState });
+      // Call backend API to toggle bookmark
+      // Parse service ID as int for API call
+      final serviceIdInt =
+          int.tryParse(
+            serviceId.replaceAll('service-', '').replaceAll('service-cat-', ''),
+          ) ??
+          0;
+      final response = await _serviceRepository.toggleBookmark(serviceIdInt);
 
-      // Optimistic update
-      allServices[serviceIndex] = service.copyWith(isBookmarked: newBookmarkState);
+      // Use actual bookmark status from API response
+      final actualBookmarkState = response.data.isBookmarked;
+
+      // Update local state
+      allServices[serviceIndex] = service.copyWith(
+        isBookmarked: actualBookmarkState,
+      );
+
+      // Also update in serviceGroups if present (for API-sourced services)
+      _updateServiceGroupsBookmark(service.apiId, actualBookmarkState);
+
+      if (searchResults.isNotEmpty) {
+        final searchIndex = searchResults.indexWhere(
+          (s) => s.apiId.toString() == serviceId || s.id == serviceId,
+        );
+        if (searchIndex != -1) {
+          searchResults[searchIndex] = searchResults[searchIndex].copyWith(
+            isBookmarked: actualBookmarkState,
+          );
+        }
+      }
+
+      if (actualBookmarkState) {
+        if (!_profileController.bookmarks.any((b) => b.id == serviceId)) {
+          _profileController.bookmarks.add(allServices[serviceIndex]);
+        }
+      } else {
+        _profileController.bookmarks.removeWhere((b) => b.id == serviceId);
+      }
+
+      return actualBookmarkState;
+    } catch (e) {
+      // On API error, still allow optimistic toggle for better UX
+      // This ensures the UI reflects user action even if API fails
+      allServices[serviceIndex] = service.copyWith(
+        isBookmarked: newBookmarkState,
+      );
 
       if (searchResults.isNotEmpty) {
         final searchIndex = searchResults.indexWhere((s) => s.id == serviceId);
         if (searchIndex != -1) {
-          searchResults[searchIndex] = searchResults[searchIndex].copyWith(isBookmarked: newBookmarkState);
+          searchResults[searchIndex] = searchResults[searchIndex].copyWith(
+            isBookmarked: newBookmarkState,
+          );
         }
       }
 
@@ -324,16 +397,18 @@ class HomeController extends GetxController {
       }
 
       return newBookmarkState;
-    } catch (e) {
-      // Revert on error
-      allServices[serviceIndex] = service;
-      return service.isBookmarked;
     }
   }
 
   bool isBookmarked(String serviceId) {
-    return allServices.any((s) => s.id == serviceId && s.isBookmarked) ||
-           _profileController.bookmarks.any((b) => b.id == serviceId);
+    return allServices.any(
+          (s) =>
+              (s.apiId.toString() == serviceId || s.id == serviceId) &&
+              s.isBookmarked,
+        ) ||
+        _profileController.bookmarks.any(
+          (b) => b.id == serviceId || b.apiId.toString() == serviceId,
+        );
   }
 
   /// Search services - calls backend API when available
@@ -354,8 +429,8 @@ class HomeController extends GetxController {
       final lowercaseQuery = searchQuery.value.toLowerCase();
       searchResults.value = allServices.where((service) {
         return service.title.toLowerCase().contains(lowercaseQuery) ||
-               service.description.toLowerCase().contains(lowercaseQuery) ||
-               service.provider.name.toLowerCase().contains(lowercaseQuery);
+            service.description.toLowerCase().contains(lowercaseQuery) ||
+            service.provider.name.toLowerCase().contains(lowercaseQuery);
       }).toList();
     } catch (e) {
       searchResults.clear();
@@ -372,5 +447,20 @@ class HomeController extends GetxController {
   /// Refresh home data
   Future<void> refreshHomeData() async {
     await fetchHomeData();
+  }
+
+  /// Update bookmark status in serviceGroups
+  /// This ensures the UI updates when using displayServiceGroups
+  void _updateServiceGroupsBookmark(int apiId, bool isBookmarked) {
+    final updatedGroups = serviceGroups.map((group) {
+      final updatedServices = group.services.map((service) {
+        if (service.apiId == apiId) {
+          return service.copyWith(isBookmarked: isBookmarked);
+        }
+        return service;
+      }).toList();
+      return group.copyWith(services: updatedServices);
+    }).toList();
+    serviceGroups.value = updatedGroups;
   }
 }

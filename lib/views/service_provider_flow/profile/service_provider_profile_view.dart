@@ -62,7 +62,7 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
           ),
           actions: [
             IconButton(
-              onPressed: () => Get.toNamed(AppRoutes.profile),
+              onPressed: () => Get.toNamed(AppRoutes.spProfile),
               icon: SvgPicture.asset(
                 'assets/images/setting_fill.svg',
                 width: 24.r,

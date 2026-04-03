@@ -440,7 +440,8 @@ class ServiceModel {
       eventVenue: json['event_vanue'] as String?, // Note: API has typo "vanue"
       attendanceCapacity: json['attendance_capacity'] as int?,
       options: json['options'] as String?,
-      coverImage: json['cover_image'] as String? ?? '',
+      // Convert cover_image to full media URL
+      coverImage: _getFullMediaUrl(json['cover_image'] as String?),
       canGoOutsideLocation: json['can_go_outside_location'] as bool? ?? false,
       canNotGoOutsideLocation:
           json['can_not_go_outside_location'] as bool? ?? false,
@@ -470,6 +471,8 @@ class ServiceModel {
               ?.map((e) => ServicePackage.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      // Parse bookmark status from API - defaults to false if not present
+      isBookmarked: json['is_bookmarked'] as bool? ?? false,
       // Map serviceTypeName to ServiceType enum
       type: _parseServiceType(json['service_type_name'] as String?),
       // Parse provider data from nested provider object
@@ -477,18 +480,23 @@ class ServiceModel {
         json['provider'] as Map<String, dynamic>?,
         json['role_name'] as String?,
       ),
-      // Use coverImage for images list
+      // Use coverImage for images list - convert to full URL
       images: json['cover_image'] != null
-          ? [json['cover_image'] as String]
+          ? [_getFullMediaUrl(json['cover_image'] as String)]
           : [],
       // Get location from address field (grouped services) or first availability
       location: (json['address'] as String?)?.isNotEmpty == true
           ? json['address'] as String
           : _extractLocation(json['availabilities'] as List<dynamic>?),
       // Use provider's rating if service-level rating is not available
-      rating: double.tryParse(json['average_rating'] as String? ?? 
-          (json['provider'] as Map<String, dynamic>?)?['average_rating'] as String? ?? '0'),
-      reviewCount: json['total_reviews'] as int? ?? 
+      rating: double.tryParse(
+        json['average_rating'] as String? ??
+            (json['provider'] as Map<String, dynamic>?)?['average_rating']
+                as String? ??
+            '0',
+      ),
+      reviewCount:
+          json['total_reviews'] as int? ??
           (json['provider'] as Map<String, dynamic>?)?['total_reviews'] as int?,
       // Map starting_price from API to basePrice
       basePrice: double.tryParse(json['starting_price'] as String? ?? '0'),
@@ -530,18 +538,23 @@ class ServiceModel {
     String? roleName,
   ) {
     if (providerJson == null) {
-      return ServiceProvider(
-        name: '',
-        role: roleName ?? '',
-        imageUrl: '',
-      );
+      return ServiceProvider(name: '', role: roleName ?? '', imageUrl: '');
     }
 
     return ServiceProvider(
       name: providerJson['name'] as String? ?? '',
       role: roleName ?? '',
-      imageUrl: providerJson['avatar'] as String? ?? '',
+      imageUrl: _getFullMediaUrl(providerJson['avatar'] as String?),
     );
+  }
+
+  /// Helper to convert relative paths to full media URLs
+  static String _getFullMediaUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    return 'http://10.10.12.62:8005$path';
   }
 
   Map<String, dynamic> toJson() {

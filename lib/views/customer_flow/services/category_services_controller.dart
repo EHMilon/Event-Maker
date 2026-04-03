@@ -52,18 +52,39 @@ class CategoryServicesController extends GetxController {
   }
 
   /// Toggle bookmark status for a service
+  /// Calls backend API: POST /services/bookmark-toggle/{serviceId}
   Future<bool> toggleBookmark(ServiceModel service) async {
+    final newBookmarkState = !service.isBookmarked;
+
     try {
-      // TODO: Implement bookmark API call
-      // For now, just toggle locally
-      final index = services.indexWhere((s) => s.id == service.id);
+      // Parse service ID as int for API call
+      final serviceIdInt = int.tryParse(
+            service.id.replaceAll('service-', '').replaceAll('service-cat-', ''),
+          ) ??
+          0;
+      final response = await _repository.toggleBookmark(serviceIdInt);
+
+      // Use actual bookmark status from API response
+      final actualBookmarkState = response.data.isBookmarked;
+
+      // Update the service in the local list
+      final index = services.indexWhere((s) => s.apiId == service.apiId || s.id == service.id);
       if (index != -1) {
-        services[index] = service.copyWith(isBookmarked: !service.isBookmarked);
+        services[index] = service.copyWith(isBookmarked: actualBookmarkState);
         services.refresh();
       }
-      return !service.isBookmarked;
+
+      return actualBookmarkState;
     } catch (e) {
-      return service.isBookmarked;
+      // On API error, still allow optimistic toggle for better UX
+      // Update the service in the local list
+      final index = services.indexWhere((s) => s.apiId == service.apiId || s.id == service.id);
+      if (index != -1) {
+        services[index] = service.copyWith(isBookmarked: newBookmarkState);
+        services.refresh();
+      }
+
+      return newBookmarkState;
     }
   }
 }

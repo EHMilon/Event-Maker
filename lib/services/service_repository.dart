@@ -83,7 +83,7 @@ class ServiceRepository {
     try {
       final response = await api.get(ApiConstant.vendorProfile(providerId));
       Log.d('=======> fetchVendorProfileById - Response: $response');
-      
+
       // Handle nested response structure
       final data = response is Map ? (response['data'] ?? response) : response;
       return VendorProfileModel.fromJson(data as Map<String, dynamic>);
@@ -105,7 +105,7 @@ class ServiceRepository {
     if (providerId != null) {
       return fetchVendorProfileById(providerId);
     }
-    
+
     // Fallback to mock data for backward compatibility
     await Future.delayed(const Duration(milliseconds: 300));
     final providerServices = MockData.homeServices
@@ -330,12 +330,62 @@ class ServiceRepository {
     final api = ApiService();
 
     try {
-      final response = await api.get(ApiConstant.customerServiceDetail(serviceId));
+      final response = await api.get(
+        ApiConstant.customerServiceDetail(serviceId),
+      );
       return ServiceModel.fromJson(response['data']);
     } on ApiException catch (e) {
       throw ApiException(message: e.message);
     } catch (e) {
-      throw ApiException(message: 'Failed to fetch customer service detail: $e');
+      throw ApiException(
+        message: 'Failed to fetch customer service detail: $e',
+      );
+    }
+  }
+
+  /// Toggle bookmark status for a service
+  /// Uses: POST api/services/bookmark-toggle/{serviceId}
+  /// Response: { "success": true, "message": "Service bookmark status updated successfully.", "data": { "service_id": 16, "is_bookmarked": false } }
+  Future<BookmarkToggleResponse> toggleBookmark(int serviceId) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.post(ApiConstant.bookmarkToggle(serviceId));
+      Log.d('=======> toggleBookmark - Response: $response');
+      return BookmarkToggleResponse.fromJson(response);
+    } on ApiException catch (e) {
+      Log.e('=======> toggleBookmark - ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> toggleBookmark - Error: $e');
+      throw ApiException(message: 'Failed to toggle bookmark: $e');
+    }
+  }
+
+  /// Get user's bookmarked services
+  /// Uses: GET api/services/my-bookmarked?page=1&page_size=10
+  Future<BookmarkedServicesResponse> getMyBookmarkedServices({
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(
+        ApiConstant.myBookmarked,
+        queryParams: {
+          'page': page.toString(),
+          'page_size': pageSize.toString(),
+        },
+      );
+      Log.d('=======> getMyBookmarkedServices - Response: $response');
+      return BookmarkedServicesResponse.fromJson(response);
+    } on ApiException catch (e) {
+      Log.e('=======> getMyBookmarkedServices - ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> getMyBookmarkedServices - Error: $e');
+      throw ApiException(message: 'Failed to fetch bookmarked services: $e');
     }
   }
 }
@@ -365,7 +415,8 @@ class CustomerServicesResponse {
       serviceTypeName: json['service_type_name'] as String? ?? '',
       groupPreviewLimit: json['group_preview_limit'] as int? ?? 5,
       totalGroups: json['total_groups'] as int? ?? 0,
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => ServiceGroup.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -400,10 +451,27 @@ class ServiceGroup {
       totalServices: json['total_services'] as int? ?? 0,
       previewCount: json['preview_count'] as int? ?? 0,
       hasMore: json['has_more'] as bool? ?? false,
-      services: (json['services'] as List<dynamic>?)
+      services:
+          (json['services'] as List<dynamic>?)
               ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+    );
+  }
+
+  ServiceGroup copyWith({
+    String? serviceAsName,
+    int? totalServices,
+    int? previewCount,
+    bool? hasMore,
+    List<ServiceModel>? services,
+  }) {
+    return ServiceGroup(
+      serviceAsName: serviceAsName ?? this.serviceAsName,
+      totalServices: totalServices ?? this.totalServices,
+      previewCount: previewCount ?? this.previewCount,
+      hasMore: hasMore ?? this.hasMore,
+      services: services ?? this.services,
     );
   }
 }
@@ -424,10 +492,100 @@ class SubcategoriesResponse {
     return SubcategoriesResponse(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
+      data:
+          (json['data'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
+          [],
+    );
+  }
+}
+
+/// Response model for bookmark toggle
+/// Response: { "success": true, "message": "Service bookmark status updated successfully.", "data": { "service_id": 16, "is_bookmarked": false } }
+class BookmarkToggleResponse {
+  final bool success;
+  final String message;
+  final BookmarkData data;
+
+  BookmarkToggleResponse({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory BookmarkToggleResponse.fromJson(Map<String, dynamic> json) {
+    return BookmarkToggleResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: BookmarkData.fromJson(json['data'] as Map<String, dynamic>),
+    );
+  }
+}
+
+/// Bookmark data containing service ID and bookmark status
+class BookmarkData {
+  final int serviceId;
+  final bool isBookmarked;
+
+  BookmarkData({required this.serviceId, required this.isBookmarked});
+
+  factory BookmarkData.fromJson(Map<String, dynamic> json) {
+    return BookmarkData(
+      serviceId: json['service_id'] as int? ?? 0,
+      isBookmarked: json['is_bookmarked'] as bool? ?? false,
+    );
+  }
+}
+
+/// Response model for user's bookmarked services
+/// GET /services/my-bookmarked?page=1&page_size=10
+class BookmarkedServicesResponse {
+  final bool success;
+  final String message;
+  final BookmarkedPagination pagination;
+  final List<ServiceModel> data;
+
+  BookmarkedServicesResponse({
+    required this.success,
+    required this.message,
+    required this.pagination,
+    required this.data,
+  });
+
+  factory BookmarkedServicesResponse.fromJson(Map<String, dynamic> json) {
+    return BookmarkedServicesResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      pagination: BookmarkedPagination.fromJson(
+        json['pagination'] as Map<String, dynamic>? ?? {},
+      ),
       data: (json['data'] as List<dynamic>?)
-              ?.map((e) => e.toString())
+              ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+    );
+  }
+}
+
+/// Pagination info for bookmarked services
+class BookmarkedPagination {
+  final int currentPage;
+  final int pageSize;
+  final int totalPages;
+  final int totalItems;
+
+  BookmarkedPagination({
+    required this.currentPage,
+    required this.pageSize,
+    required this.totalPages,
+    required this.totalItems,
+  });
+
+  factory BookmarkedPagination.fromJson(Map<String, dynamic> json) {
+    return BookmarkedPagination(
+      currentPage: json['current_page'] as int? ?? 1,
+      pageSize: json['page_size'] as int? ?? 10,
+      totalPages: json['total_pages'] as int? ?? 1,
+      totalItems: json['total_items'] as int? ?? 0,
     );
   }
 }

@@ -119,8 +119,9 @@ class ServicesCard extends StatelessWidget {
                     child: Container(
                       padding: EdgeInsets.all(6.r),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.black.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8.r),
+                        
                       ),
                       child: Icon(
                         isBookmarked ? Icons.bookmark : Icons.bookmark_border,

@@ -68,7 +68,7 @@ class BookmarksView extends GetView<ProfileController> {
                         subtitle: item.provider.name,
                         location: item.location,
                         price: '${item.basePrice}',
-                        priceUnit: '${item.priceUnit}/hr',
+                        priceUnit: '${item.priceUnit}',
                         rating: '${item.rating}',
                         showBookmarkButton: true,
                         onTap: () =>

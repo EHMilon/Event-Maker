@@ -110,55 +110,61 @@ class SPHomeView extends GetView<SPHomeController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  greetingData.icon,
-                  size: 19,
-                  color: greetingData.iconColor,
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  greetingData.greetingKey.tr,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w400,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    greetingData.icon,
+                    size: 19,
+                    color: greetingData.iconColor,
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 4.h),
-            Row(
-              children: [
-                Text(
-                  controller.businessName.value.isEmpty 
-                    ? (controller.userName.value.isEmpty 
-                        ? 'Good morning' 
-                        : controller.userName.value)
-                    : controller.businessName.value,
-                  style: GoogleFonts.inter(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                  SizedBox(width: 8.w),
+                  Text(
+                    greetingData.greetingKey.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Container(
-                  padding: const EdgeInsets.all(2),
+                ],
+              ),
+              SizedBox(height: 4.h),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      controller.businessName.value.isEmpty 
+                        ? (controller.userName.value.isEmpty 
+                            ? 'Good morning' 
+                            : controller.userName.value)
+                        : controller.businessName.value,
+                      style: GoogleFonts.inter(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Container(
+                    padding: const EdgeInsets.all(2),
 
-                  child: Image.asset(
-                    'assets/icons/completed.png',
-                    height: 24.h,
-                    width: 24.w,
+                    child: Image.asset(
+                      'assets/icons/completed.png',
+                      height: 24.h,
+                      width: 24.w,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
         InkWell(
           onTap: () => Get.toNamed(AppRoutes.serviceProviderNotifications),

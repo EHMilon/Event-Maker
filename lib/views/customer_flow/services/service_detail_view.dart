@@ -600,12 +600,16 @@ class ServiceDetailView extends StatelessWidget {
                                                   ), // Green check
                                                 ),
                                                 SizedBox(width: 12.w),
-                                                Text(
-                                                  featureTitle,
-                                                  style: GoogleFonts.inter(
-                                                    fontSize: 14.sp,
-                                                    color:
-                                                        AppColors.textSecondary,
+                                                Expanded(
+                                                  child: Text(
+                                                    featureTitle,
+                                                    style: GoogleFonts.inter(
+                                                      fontSize: 14.sp,
+                                                      color:
+                                                          AppColors.textSecondary,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                               ],

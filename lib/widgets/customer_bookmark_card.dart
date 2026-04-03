@@ -158,14 +158,6 @@ class CustomerBookmarkCard extends StatelessWidget {
                               height: 1.2.sp,
                             ),
                           ),
-                          Text(
-                            "/hr",
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              color: AppColors.grey400,
-                              height: 1.2.sp,
-                            ),
-                          ),
                         ],
                       ),
                       Row(

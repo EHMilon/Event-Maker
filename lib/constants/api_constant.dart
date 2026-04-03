@@ -125,6 +125,15 @@ class ApiConstant {
   /// Note: Uses POST with multipart/form-data for update
   static String serviceUpdate(int id) => '/services/update/$id';
 
+  /// Toggle bookmark status for a service
+  /// POST /services/bookmark-toggle/{serviceId}
+  /// Response: { "success": true, "message": "Service bookmark status updated successfully.", "data": { "service_id": 16, "is_bookmarked": false } }
+  static String bookmarkToggle(int serviceId) => '/services/bookmark-toggle/$serviceId';
+
+  /// Get user's bookmarked services
+  /// GET /services/my-bookmarked?page=1&page_size=10
+  static const String myBookmarked = '/services/my-bookmarked';
+
   // ===== BOOKING ENDPOINTS =====
 
   static const String bookings = '/bookings';

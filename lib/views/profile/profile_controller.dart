@@ -9,6 +9,7 @@ import '../../models/service_provider_review_model.dart';
 import '../../models/personal_info_model.dart';
 import '../../models/wallet_model.dart';
 import '../../services/wallet_repository.dart';
+import '../../services/service_repository.dart';
 import '../../mock_data/mock_data.dart';
 import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
@@ -129,11 +130,15 @@ class ProfileController extends GetxController {
   /// Wallet repository instance
   final WalletRepository _walletRepository = WalletRepository();
 
+  /// Service repository instance for bookmarks
+  final ServiceRepository _serviceRepository = const ServiceRepository();
+
   /// Wallet summary data from API
   final Rx<WalletSummary?> walletSummary = Rx<WalletSummary?>(null);
 
   /// Wallet transactions from API
-  final RxList<WalletTransaction> walletTransactions = <WalletTransaction>[].obs;
+  final RxList<WalletTransaction> walletTransactions =
+      <WalletTransaction>[].obs;
 
   /// Loading state for wallet API calls
   final RxBool isWalletLoading = false.obs;
@@ -220,14 +225,15 @@ class ProfileController extends GetxController {
 
   /// Populates mock data for UI development.
   /// Backend Compatible: Replace with API calls in the future.
-  void loadMockData() {
+  Future<void> loadMockData() async {
     transactions.assignAll([
       {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
       {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
       {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
     ]);
 
-    bookmarks.assignAll(MockData.bookmarkedServices);
+    // Load bookmarks from API
+    await fetchBookmarks();
 
     faqs.assignAll([
       {
@@ -375,7 +381,7 @@ class ProfileController extends GetxController {
     // Clear all user data and tokens from local storage
     await UserPreferences.clearUserData();
     await UserPreferences.resetOnboarding();
-    
+
     // Navigate to onboarding screen and clear navigation stack
     Get.offAllNamed(AppRoutes.onboarding);
   }
@@ -402,11 +408,11 @@ class ProfileController extends GetxController {
           colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
         );
-        
+
         // Clear all user data and tokens
         await UserPreferences.clearUserData();
         await UserPreferences.resetOnboarding();
-        
+
         // Navigate to onboarding screen
         Get.offAllNamed(AppRoutes.onboarding);
       } else {
@@ -459,7 +465,9 @@ class ProfileController extends GetxController {
     isTogglingAvailability.value = true;
 
     try {
-      final response = await _apiService.post(ApiConstant.providerAvailabilityToggle);
+      final response = await _apiService.post(
+        ApiConstant.providerAvailabilityToggle,
+      );
 
       if (response['success'] == true) {
         final data = response['data'] as Map<String, dynamic>?;
@@ -636,7 +644,7 @@ class ProfileController extends GetxController {
         userName.value = personalInfoResponse.data.fullName;
         userEmail.value = personalInfoResponse.data.email;
         isServiceProvider.value = personalInfoResponse.data.isProvider;
-        
+
         // Update availability status for service providers
         if (personalInfoResponse.data.isProvider) {
           isAvailable.value = personalInfoResponse.data.isAvailable;
@@ -788,7 +796,7 @@ class ProfileController extends GetxController {
 
   /// Fetches provider wallet history from API
   /// API Endpoint: GET /payments/provider-wallet-history
-  /// 
+  ///
   /// [refresh] - If true, resets pagination and fetches from page 1
   Future<void> fetchWalletHistory({bool refresh = false}) async {
     if (!_connectivityService.isConnected.value) {
@@ -814,7 +822,7 @@ class ProfileController extends GetxController {
       if (response.success) {
         // Update summary
         walletSummary.value = response.summary;
-        
+
         // Update wallet balance legacy field
         if (response.summary != null) {
           walletBalance.value = response.summary!.availableBalance;
@@ -851,6 +859,41 @@ class ProfileController extends GetxController {
   /// Refreshes wallet data
   Future<void> refreshWallet() async {
     await fetchWalletHistory(refresh: true);
+  }
+
+  // ===== BOOKMARKS API METHODS =====
+
+  /// Fetches user's bookmarked services from API
+  /// API Endpoint: GET /services/my-bookmarked?page=1&page_size=10
+  Future<void> fetchBookmarks() async {
+    if (!_connectivityService.isConnected.value) {
+      // Fallback to mock data on offline
+      bookmarks.assignAll(MockData.bookmarkedServices);
+      return;
+    }
+
+    try {
+      final response = await _serviceRepository.getMyBookmarkedServices(
+        page: 1,
+        pageSize: 20,
+      );
+
+      if (response.success) {
+        bookmarks.assignAll(response.data);
+      } else {
+        // Fallback to mock data on API error
+        bookmarks.assignAll(MockData.bookmarkedServices);
+      }
+    } catch (e) {
+      debugPrint('Error fetching bookmarks: $e');
+      // Fallback to mock data on error
+      bookmarks.assignAll(MockData.bookmarkedServices);
+    }
+  }
+
+  /// Refreshes bookmarks data
+  Future<void> refreshBookmarks() async {
+    await fetchBookmarks();
   }
 
   /// NOTE: TextEditingControllers are NOT disposed here because this controller

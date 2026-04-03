@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
+import 'package:event_maker/views/customer_flow/profile/profile_view.dart';
 import 'package:event_maker/views/customer_flow/bookings/customer_booking_view.dart';
 import 'package:event_maker/views/chats/chat_view.dart';
 

@@ -18,7 +18,7 @@ class ProfileView extends GetView<ProfileController> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
+        // titleSpacing: (Navigator.of(context).canPop()) ? 10 : 20.w,
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         scrolledUnderElevation: 0,

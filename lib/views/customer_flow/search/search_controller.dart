@@ -1,5 +1,6 @@
 import 'package:event_maker/mock_data/mock_data.dart';
 import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,6 +10,9 @@ class ServiceSearchController extends GetxController {
   final searchQuery = ''.obs;
   final searchResults = <ServiceModel>[].obs;
   final allServices = <ServiceModel>[].obs;
+
+  // ServiceRepository for API calls
+  final ServiceRepository _serviceRepository = const ServiceRepository();
 
   // Get ProfileController to sync bookmarks - will be null if not registered
   ProfileController? profileController;
@@ -89,50 +93,69 @@ class ServiceSearchController extends GetxController {
   }
 
   /// Toggle bookmark status for a service
+  /// Calls backend API: POST /services/bookmark-toggle/{serviceId}
   /// Returns true if bookmarked, false if unbookmarked
-  bool toggleBookmark(String serviceId) {
-    // Find and update in allServices
-    final serviceIndex = allServices.indexWhere((s) => s.id == serviceId);
-    if (serviceIndex != -1) {
-      final service = allServices[serviceIndex];
-      final newBookmarkState = !service.isBookmarked;
+  Future<bool> toggleBookmark(String serviceId) async {
+    // Find and update in allServices - check both apiId and legacy id
+    final serviceIndex = allServices.indexWhere((s) => s.apiId.toString() == serviceId || s.id == serviceId);
+    if (serviceIndex == -1) return false;
+
+    final service = allServices[serviceIndex];
+    final newBookmarkState = !service.isBookmarked;
+
+    try {
+      // Call backend API to toggle bookmark
+      // Parse service ID as int for API call
+      final serviceIdInt = int.tryParse(
+            serviceId.replaceAll('service-', '').replaceAll('service-cat-', ''),
+          ) ??
+          0;
+      final response = await _serviceRepository.toggleBookmark(serviceIdInt);
+
+      // Use actual bookmark status from API response
+      final actualBookmarkState = response.data.isBookmarked;
 
       // Update the service with new bookmark state
-      allServices[serviceIndex] = ServiceModel(
-        id: service.id,
-        title: service.title,
-        description: service.description,
-        images: service.images,
-        type: service.type,
-        provider: service.provider,
-        location: service.location,
-        rating: service.rating,
-        reviewCount: service.reviewCount,
-        date: service.date,
-        basePrice: service.basePrice,
-        priceUnit: service.priceUnit,
-        packages: service.packages,
-        isBookmarked: newBookmarkState,
-      );
+      allServices[serviceIndex] = service.copyWith(isBookmarked: actualBookmarkState);
 
       // Also update searchResults if searching
       if (searchResults.isNotEmpty) {
         final searchIndex = searchResults.indexWhere((s) => s.id == serviceId);
         if (searchIndex != -1) {
-          searchResults[searchIndex] = ServiceModel(
-            id: service.id,
-            title: service.title,
-            description: service.description,
-            images: service.images,
-            type: service.type,
-            provider: service.provider,
-            location: service.location,
-            rating: service.rating,
-            reviewCount: service.reviewCount,
-            date: service.date,
-            basePrice: service.basePrice,
-            priceUnit: service.priceUnit,
-            packages: service.packages,
+          searchResults[searchIndex] = searchResults[searchIndex].copyWith(
+            isBookmarked: actualBookmarkState,
+          );
+        }
+      }
+
+      // Sync with ProfileController bookmarks
+      if (profileController != null) {
+        if (actualBookmarkState) {
+          // Add to bookmarks if not already present
+          if (!profileController!.bookmarks.any((b) => b.id == serviceId)) {
+            profileController!.bookmarks.add(allServices[serviceIndex]);
+          }
+        } else {
+          // Remove from bookmarks
+          profileController!.bookmarks.removeWhere((b) => b.id == serviceId);
+        }
+      }
+
+      // Trigger UI update
+      allServices.refresh();
+      searchResults.refresh();
+
+      return actualBookmarkState;
+    } catch (e) {
+      // On API error, still allow optimistic toggle for better UX
+      // Update the service with new bookmark state
+      allServices[serviceIndex] = service.copyWith(isBookmarked: newBookmarkState);
+
+      // Also update searchResults if searching
+      if (searchResults.isNotEmpty) {
+        final searchIndex = searchResults.indexWhere((s) => s.id == serviceId);
+        if (searchIndex != -1) {
+          searchResults[searchIndex] = searchResults[searchIndex].copyWith(
             isBookmarked: newBookmarkState,
           );
         }
@@ -157,6 +180,5 @@ class ServiceSearchController extends GetxController {
 
       return newBookmarkState;
     }
-    return false;
   }
 }

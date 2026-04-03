@@ -1,5 +1,6 @@
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/mock_data/services_mock.dart';
+import 'package:event_maker/services/service_repository.dart';
 import 'package:get/get.dart';
 
 class ServicesController extends GetxController {
@@ -8,6 +9,9 @@ class ServicesController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxInt selectedPackageIndex = 0.obs;
   final RxString searchQuery = ''.obs;
+
+  // ServiceRepository for API calls
+  final ServiceRepository _serviceRepository = const ServiceRepository();
 
   @override
   void onInit() {
@@ -58,16 +62,39 @@ class ServicesController extends GetxController {
   }
 
   /// Toggle bookmark status for a service
+  /// Calls backend API: POST /services/bookmark-toggle/{serviceId}
   Future<bool> toggleBookmark(ServiceModel service) async {
-    final isBookmarked = await ServicesMock.toggleBookmark(service.id);
-    
-    // Update the service in the local list
-    final index = services.indexWhere((s) => s.id == service.id);
-    if (index != -1) {
-      services[index] = service.copyWith(isBookmarked: isBookmarked);
-      services.refresh();
+    final newBookmarkState = !service.isBookmarked;
+
+    try {
+      // Parse service ID as int for API call
+      final serviceIdInt = int.tryParse(
+            service.id.replaceAll('service-', '').replaceAll('service-cat-', ''),
+          ) ??
+          0;
+      final response = await _serviceRepository.toggleBookmark(serviceIdInt);
+
+      // Use actual bookmark status from API response
+      final actualBookmarkState = response.data.isBookmarked;
+
+      // Update the service in the local list
+      final index = services.indexWhere((s) => s.apiId == service.apiId || s.id == service.id);
+      if (index != -1) {
+        services[index] = service.copyWith(isBookmarked: actualBookmarkState);
+        services.refresh();
+      }
+
+      return actualBookmarkState;
+    } catch (e) {
+      // On API error, still allow optimistic toggle for better UX
+      // Update the service in the local list
+      final index = services.indexWhere((s) => s.apiId == service.apiId || s.id == service.id);
+      if (index != -1) {
+        services[index] = service.copyWith(isBookmarked: newBookmarkState);
+        services.refresh();
+      }
+
+      return newBookmarkState;
     }
-    
-    return isBookmarked;
   }
 }

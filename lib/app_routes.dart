@@ -17,7 +17,8 @@ import 'package:event_maker/views/auth/get_started_view.dart';
 import 'package:event_maker/views/auth/provider_request_sent_view.dart';
 import 'package:event_maker/views/auth/language_selection_view.dart';
 import 'package:event_maker/views/auth/language_selection_controller.dart';
-import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart';
+import 'package:event_maker/views/service_provider_flow/profile/profile_view.dart' as sp_profile;
+import 'package:event_maker/views/customer_flow/profile/profile_view.dart' as customer_profile;
 import 'package:event_maker/views/profile/profile_settings_view.dart';
 import 'package:event_maker/views/profile/add_image_view.dart';
 import 'package:event_maker/views/profile/change_password_view.dart';
@@ -94,7 +95,8 @@ class AppRoutes {
   static const String providerDetails = '/provider-details';
   static const String getStarted = '/get-started';
   static const String providerRequestSent = '/request-sent';
-  static const String profile = '/profile';
+  static const String customerProfile = '/customer-profile';
+  static const String spProfile = '/sp-profile';
   static const String profileSettings = '/profile-settings';
   static const String addImage = '/add-image';
   static const String changePassword = '/change-password';
@@ -239,8 +241,13 @@ class AppRoutes {
       binding: AuthBinding(),
     ),
     GetPage(
-      name: profile,
-      page: () => const ProfileView(),
+      name: customerProfile,
+      page: () => const customer_profile.ProfileView(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: spProfile,
+      page: () => const sp_profile.ProfileView(),
       binding: ProfileBinding(),
     ),
     GetPage(
