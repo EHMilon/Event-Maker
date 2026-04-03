@@ -7,6 +7,8 @@ import '../../models/review_model.dart';
 import '../../models/service_provider_profile_model.dart';
 import '../../models/service_provider_review_model.dart';
 import '../../models/personal_info_model.dart';
+import '../../models/wallet_model.dart';
+import '../../services/wallet_repository.dart';
 import '../../mock_data/mock_data.dart';
 import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
@@ -121,6 +123,33 @@ class ProfileController extends GetxController {
 
   /// Flag to prevent multiple image picker calls
   bool _isPickingImage = false;
+
+  // ===== WALLET API STATE =====
+
+  /// Wallet repository instance
+  final WalletRepository _walletRepository = WalletRepository();
+
+  /// Wallet summary data from API
+  final Rx<WalletSummary?> walletSummary = Rx<WalletSummary?>(null);
+
+  /// Wallet transactions from API
+  final RxList<WalletTransaction> walletTransactions = <WalletTransaction>[].obs;
+
+  /// Loading state for wallet API calls
+  final RxBool isWalletLoading = false.obs;
+
+  /// Error message for wallet API calls
+  final RxString walletError = ''.obs;
+
+  /// Current page for wallet pagination
+  final RxInt walletCurrentPage = 1.obs;
+
+  /// Total pages for wallet pagination
+  final RxInt walletTotalPages = 1.obs;
+
+  /// Whether more transactions can be loaded
+  bool get hasMoreWalletTransactions =>
+      walletCurrentPage.value < walletTotalPages.value;
 
   @override
   void onInit() {
@@ -755,10 +784,79 @@ class ProfileController extends GetxController {
     }
   }
 
-  // NOTE: TextEditingControllers are NOT disposed here because this controller
-  // is a singleton managed by GetX. Disposing them would cause errors when
-  // the controller is reused after navigation (e.g., returning to ChangePasswordView).
-  // For singleton controllers, TextEditingControllers persist for the app's lifetime.
+  // ===== WALLET API METHODS =====
+
+  /// Fetches provider wallet history from API
+  /// API Endpoint: GET /payments/provider-wallet-history
+  /// 
+  /// [refresh] - If true, resets pagination and fetches from page 1
+  Future<void> fetchWalletHistory({bool refresh = false}) async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    // Reset pagination on refresh
+    if (refresh) {
+      walletCurrentPage.value = 1;
+      walletTransactions.clear();
+    }
+
+    isWalletLoading.value = true;
+    walletError.value = '';
+
+    try {
+      final response = await _walletRepository.fetchWalletHistory(
+        page: walletCurrentPage.value,
+        pageSize: 10,
+      );
+
+      if (response.success) {
+        // Update summary
+        walletSummary.value = response.summary;
+        
+        // Update wallet balance legacy field
+        if (response.summary != null) {
+          walletBalance.value = response.summary!.availableBalance;
+        }
+
+        // Update pagination info
+        if (response.history?.pagination != null) {
+          walletTotalPages.value = response.history!.pagination.totalPages;
+        }
+
+        // Append transactions (for load more)
+        if (response.history?.transactions != null) {
+          walletTransactions.addAll(response.history!.transactions);
+        }
+      } else {
+        walletError.value = response.message;
+      }
+    } catch (e) {
+      walletError.value = e.toString();
+      debugPrint('Error fetching wallet history: $e');
+    } finally {
+      isWalletLoading.value = false;
+    }
+  }
+
+  /// Loads more wallet transactions for pagination
+  Future<void> loadMoreWalletTransactions() async {
+    if (!hasMoreWalletTransactions || isWalletLoading.value) return;
+
+    walletCurrentPage.value++;
+    await fetchWalletHistory();
+  }
+
+  /// Refreshes wallet data
+  Future<void> refreshWallet() async {
+    await fetchWalletHistory(refresh: true);
+  }
+
+  /// NOTE: TextEditingControllers are NOT disposed here because this controller
+  /// is a singleton managed by GetX. Disposing them would cause errors when
+  /// the controller is reused after navigation (e.g., returning to ChangePasswordView).
+  /// For singleton controllers, TextEditingControllers persist for the app's lifetime.
   @override
   void onClose() {
     // TextEditingControllers intentionally not disposed for singleton lifecycle

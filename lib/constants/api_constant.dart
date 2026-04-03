@@ -173,6 +173,12 @@ class ApiConstant {
   static String providerCertificateDelete(int id) =>
       '/providers/certificates/delete/$id';
 
+  // ===== PAYMENTS / WALLET ENDPOINTS =====
+
+  /// Provider wallet history endpoint
+  /// Returns wallet summary and transaction history with pagination
+  static const String providerWalletHistory = '/payments/provider-wallet-history';
+
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';
