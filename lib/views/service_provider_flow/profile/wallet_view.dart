@@ -1,6 +1,5 @@
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/models/wallet_model.dart';
-import 'package:event_maker/utils/formatters.dart';
 import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -241,10 +240,8 @@ class WalletView extends GetView<ProfileController> {
 
   /// Builds a single transaction item
   Widget _buildTransactionItem(WalletTransaction transaction) {
-    final date = transaction.parsedDate;
-    final formattedDate = date != null
-        ? Formatters.formatRelativeTime(date)
-        : 'Unknown';
+    // Use displayTime which handles both relative time strings and ISO datetime
+    final formattedDate = transaction.displayTime;
 
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -372,7 +369,6 @@ class WalletView extends GetView<ProfileController> {
                   ),
                 ],
               ),
-  
             ],
           ),
         ],

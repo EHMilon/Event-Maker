@@ -38,7 +38,7 @@ class AuthController extends BaseController {
   final obscurePassword = true.obs;
   final obscureSignupPassword = true.obs;
   final acceptedTerms = false.obs;
-  final selectedNationality = 'Bangladeshi'.obs;
+  final selectedNationality = 'Emirati'.obs;
   final selectedServiceType = ''.obs;
   final selectedRole = ''.obs;
   final selectedServiceCategory = ''.obs;

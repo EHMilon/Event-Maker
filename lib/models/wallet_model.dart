@@ -101,12 +101,41 @@ class WalletTransaction {
     return '$prefix$amount $currency';
   }
 
-  /// Returns formatted date
-  DateTime? get parsedDate {
+  /// Returns the display time - handles both relative time strings and ISO datetime
+  /// API now returns strings like "21 hours ago" directly
+  String get displayTime {
+    // If it's already a relative time string, return as-is
+    if (createdAt.contains('ago') || 
+        createdAt.contains('just') ||
+        createdAt.contains('yesterday') ||
+        createdAt.contains('today')) {
+      return createdAt;
+    }
+    
+    // Try to parse as ISO datetime and format
     try {
-      return DateTime.parse(createdAt);
+      final dt = DateTime.parse(createdAt);
+      // Format to relative time
+      final now = DateTime.now();
+      final diff = now.difference(dt);
+      
+      if (diff.inSeconds < 60) {
+        return 'Just now';
+      } else if (diff.inMinutes < 60) {
+        return '${diff.inMinutes} minutes ago';
+      } else if (diff.inHours < 24) {
+        return '${diff.inHours} hours ago';
+      } else if (diff.inDays == 1) {
+        return 'Yesterday';
+      } else if (diff.inDays < 7) {
+        return '${diff.inDays} days ago';
+      } else {
+        return '${(diff.inDays / 7).floor()} weeks ago';
+      }
     } catch (_) {
-      return null;
+      // If parsing fails, return the string as-is or fallback to paid_at
+      if (createdAt.isNotEmpty) return createdAt;
+      return payment?.paidAt ?? 'Unknown';
     }
   }
 
