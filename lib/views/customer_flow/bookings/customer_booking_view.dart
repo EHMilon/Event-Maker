@@ -60,7 +60,7 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
                   onTap: (index) => controller.selectedTabIndex.value = index,
                   tabs: [
                     _buildTab('upcoming'.tr, 0),
-                    _buildTab('pastEvents'.tr, 1),
+                    _buildTab('history'.tr, 1),
                   ],
                 ),
               ),

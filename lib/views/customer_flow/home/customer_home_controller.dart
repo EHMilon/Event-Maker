@@ -25,10 +25,15 @@ class HomeController extends GetxController {
   final serviceGroups = <ServiceGroup>[].obs;
 
   // User data from ProfileController
+  // Uses API endpoint: GET /settings/personal-info/me
+  // Maps: full_name -> userName, avatar -> userAvatar, nationality -> userLocation
   String get userName => _profileController.userName.value;
   String get userAvatar => _profileController.profileImage.value;
-  // TODO: Get from backend or location service when available
-  final userLocation = ''.obs;
+
+  /// Get user location from nationality in personal info API
+  /// API field: nationality from /settings/personal-info/me
+  /// Uses the text controller populated by fetchPersonalInfo()
+  String get userLocation => _profileController.nationalityController.text;
 
   // For main category selection - Default to "Event"
   final selectedMainCategory = 'Event'.obs;
@@ -123,8 +128,10 @@ class HomeController extends GetxController {
       // Set default main categories
       mainCategories.value = ['Event', 'Hospitality', 'Professional Trainer'];
 
-      // Set default location - TODO: Get from backend user profile
-      userLocation.value = 'New York, USA';
+      // Get user location from nationality in personal info API
+      // API endpoint: GET /settings/personal-info/me
+      // Field: nationality (e.g., "Bangladeshi")
+      // Note: userLocation is now a getter that reads directly from ProfileController
 
       // Fetch subcategories for default main category
       await _fetchSubcategories(selectedMainCategory.value);

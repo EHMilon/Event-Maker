@@ -45,22 +45,8 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                     children: [
                       Row(
                         children: [
-                          // Avatar
-                          Container(
-                            width: 40.w,
-                            height: 40.h,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.primary.withOpacity(0.3),
-                                width: 2.w,
-                              ),
-                              image: DecorationImage(
-                                image: AssetImage(controller.userAvatar),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
+                          // Avatar - uses API endpoint: GET /settings/personal-info/me -> avatar field
+                          _buildAvatar(controller.userAvatar),
                           SizedBox(width: 12.w),
                           // Location and greeting section
                           Column(
@@ -75,25 +61,22 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                                 ),
                               ),
                               // SizedBox(height: 4.h),
-                              Obx(
-                                () => Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/location.svg',
-                                      height: 16.h,
-                                      width: 16.w,
+                              Row(
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/icons/location.svg',
+                                    height: 16.h,
+                                    width: 16.w,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    controller.userLocation,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
                                     ),
-                                    SizedBox(width: 4.w),
-                                    Text(
-                                      controller.userLocation.value,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        // color: AppColors.grey,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -321,6 +304,53 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Build avatar widget using API data from /settings/personal-info/me
+  /// Uses NetworkImage for remote URLs when avatar is available
+  Widget _buildAvatar(String avatarUrl) {
+    return Container(
+      width: 40.w,
+      height: 40.h,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.3),
+          width: 2.w,
+        ),
+        color: AppColors.lightGrey,
+      ),
+      child: ClipOval(
+        child: avatarUrl.isNotEmpty
+            ? Image.network(
+                avatarUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Show initials fallback if image fails to load
+                  return const Center(
+                    child: Icon(
+                      Icons.person,
+                      color: AppColors.grey,
+                      size: 20,
+                    ),
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  );
+                },
+              )
+            : const Center(
+                child: Icon(
+                  Icons.person,
+                  color: AppColors.grey,
+                  size: 20,
+                ),
+              ),
+      ),
     );
   }
 

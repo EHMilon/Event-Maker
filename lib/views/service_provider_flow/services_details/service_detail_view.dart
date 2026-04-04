@@ -1058,7 +1058,7 @@ class _BookingRequestDetailViewDetailState
             slivers: [
               SliverAppBar(
                 backgroundColor: Colors.transparent,
-                expandedHeight: 220.h,
+                expandedHeight: 180.h,
                 leading: IconButton(
                   icon: CircleAvatar(
                     backgroundColor: AppColors.white,
