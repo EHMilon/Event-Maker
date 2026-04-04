@@ -668,15 +668,17 @@ class ServiceDetailView extends StatelessWidget {
             ),
           ),
 
-          // Bottom Buttons
-          if (!showEditButton)
-            Positioned(
-              bottom: 30.h,
-              left: 24.w,
-              right: 24.w,
-              child: PrimaryTextButton(
-                onPressed: () {
-                  if (isHospitality) {
+            // Bottom Buttons
+            if (!showEditButton)
+              Positioned(
+                bottom: 30.h,
+                left: 24.w,
+                right: 24.w,
+                child: PrimaryTextButton(
+                  onPressed: () {
+                    // Use requiresConfirmation to determine flow
+                    // Both hospitality and non-hospitality need to go through date/time selection first
+                    // The routing to payment vs booking request sent happens in ServiceBookingController
                     Get.toNamed(
                       AppRoutes.bookServiceDate,
                       arguments: {
@@ -686,21 +688,10 @@ class ServiceDetailView extends StatelessWidget {
                             : null,
                       },
                     );
-                  } else {
-                    Get.toNamed(
-                      AppRoutes.payment,
-                      arguments: {
-                        'service': service,
-                        'package': service.packages.isNotEmpty
-                            ? service.packages[selectedPackageIndex.value]
-                            : null,
-                      },
-                    );
-                  }
-                },
-                text: 'bookNow'.tr,
+                  },
+                  text: 'bookNow'.tr,
+                ),
               ),
-            ),
         ],
       ),
     );

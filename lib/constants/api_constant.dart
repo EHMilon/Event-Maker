@@ -140,6 +140,24 @@ class ApiConstant {
   static const String createBooking = '/bookings/create';
   static const String cancelBooking = '/bookings/cancel';
 
+  /// ===== CUSTOMER BOOKING ENDPOINTS =====
+
+  /// Send booking request (POST)
+  /// Body: { service_id, selected_package_id, booking_date, start_time, services_duration, special_request, location, latitude, longitude }
+  static const String sendBookingRequest = '/bookings/send-bookings-request';
+
+  /// Get customer booking list
+  /// Query params: tab=upcoming (default) | tab=past
+  static const String customerBookingList = '/bookings/request-list';
+
+  /// Get customer booking detail
+  static String customerBookingDetail(int id) => '/bookings/request/detail/$id';
+
+  /// Get customer booking notifications
+  static const String customerBookingNotifications = '/bookings/notification-list';
+
+  /// ===== PROVIDER BOOKING ENDPOINTS =====
+
   /// Provider booking requests: GET api/bookings/provider/booking-request
   /// Query params: tab=upcoming (default) | tab=past
   static const String providerBookingRequests =

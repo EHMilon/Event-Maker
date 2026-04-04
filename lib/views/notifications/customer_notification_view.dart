@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import 'customer_notification_controller.dart';
+import '../../constants/api_constant.dart';
 import '../../widgets/notification_card.dart';
 
 class CustomerNotificationView extends GetView<CustomerNotificationController> {
@@ -11,26 +12,35 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        // Refresh notifications when navigating back from payment/accept/reject
+        controller.refreshNotifications();
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-        ),
-        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
-        title: Text(
-          'Notification',
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            onPressed: () {
+              controller.refreshNotifications();
+              Get.back();
+            },
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+          ),
+          titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
+          title: Text(
+            'Notification',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
           ),
         ),
-      ),
-      body: Obx(
+        body: Obx(
         () => Skeletonizer(
           enabled: controller.isLoading.value,
           child: Padding(
@@ -53,7 +63,7 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
             ),
           ),
         ),
-      ),
+      ),)
     );
   }
 }
@@ -73,11 +83,17 @@ class _CustomerNotificationCard extends StatelessWidget {
     final action = _formatAction(notification.body);
     final detail = 'booking request'.tr;
 
+    // Get full image URL from the cover_image path
+    final imageUrl = notification.coverImage != null && notification.coverImage!.isNotEmpty
+        ? ApiConstant.getFullMediaUrl(notification.coverImage)
+        : '';
+
     return NotificationCard(
       name: name,
       action: action,
       detail: detail,
       timeAgo: notification.timeAgo,
+      avatarAsset: imageUrl, // Use cover_image from API
       onTap: onTap,
     );
   }

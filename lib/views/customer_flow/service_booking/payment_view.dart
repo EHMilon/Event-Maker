@@ -70,7 +70,7 @@ class PaymentView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        controller.service.title,
+                        controller.service?.title ?? '',
                         style: GoogleFonts.inter(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
@@ -86,27 +86,27 @@ class PaymentView extends StatelessWidget {
                             color: AppColors.textSecondary,
                           ),
                           SizedBox(width: 8.w),
-                          Text(
-                            'Dec 18, 2024', // TODO: Use dynamic date
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          SizedBox(width: 16.w),
-                          Icon(
-                            Icons.access_time,
-                            size: 16.r,
+                        Obx(() => Text(
+                          controller.bookingDate.value.isEmpty ? 'Not selected' : controller.bookingDate.value,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
                             color: AppColors.textSecondary,
                           ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            '10:00 AM', // TODO: Use dynamic time
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: AppColors.textSecondary,
-                            ),
+                        )),
+                        SizedBox(width: 16.w),
+                        Icon(
+                          Icons.access_time,
+                          size: 16.r,
+                          color: AppColors.textSecondary,
+                        ),
+                        SizedBox(width: 8.w),
+                        Obx(() => Text(
+                          controller.bookingTime.value.isEmpty ? 'Not selected' : controller.bookingTime.value,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: AppColors.textSecondary,
                           ),
+                        )),
                         ],
                       ),
                       SizedBox(height: 16.h),
@@ -114,12 +114,12 @@ class PaymentView extends StatelessWidget {
                       SizedBox(height: 16.h),
                       _buildSummaryRow(
                         controller.selectedPackage?.name.tr ?? 'standard'.tr,
-                        '${_parsePrice(controller.selectedPackage?.price) ?? controller.service.basePrice} ${controller.service.priceUnit}',
+                        '${_parsePrice(controller.selectedPackage?.price) ?? controller.service?.basePrice ?? 0} ${controller.service?.priceUnit ?? 'AED'}',
                       ),
                       SizedBox(height: 8.h),
                       _buildSummaryRow(
                         'additionalFee'.tr,
-                        '0 ${controller.service.priceUnit}',
+                        '0 ${controller.service?.priceUnit ?? 'AED'}',
                       ),
                       SizedBox(height: 16.h),
                       Row(
@@ -134,7 +134,7 @@ class PaymentView extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${_parsePrice(controller.selectedPackage?.price) ?? controller.service.basePrice} ${controller.service.priceUnit}',
+                            '${_parsePrice(controller.selectedPackage?.price) ?? controller.service?.basePrice ?? 0} ${controller.service?.priceUnit ?? 'AED'}',
                             style: GoogleFonts.inter(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w700,

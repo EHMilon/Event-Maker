@@ -44,6 +44,7 @@ class NotificationView extends GetView<NotificationController> {
                 action: _formatAction(request.status),
                 detail: 'booking request'.tr,
                 timeAgo: request.createdAt,
+                avatarAsset: request.customerImage ?? '', // Use customer image from API
                 onTap: () => _handleNotificationClick(request),
               );
             },

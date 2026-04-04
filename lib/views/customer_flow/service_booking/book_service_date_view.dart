@@ -1,4 +1,5 @@
 import 'package:event_maker/views/customer_flow/service_booking/booking_controller.dart';
+import 'package:event_maker/views/customer_flow/service_booking/service_booking_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,46 @@ class BookServiceDateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<BookingController>();
+    final bookingController = Get.find<ServiceBookingController>();
+
+    // Load service availability on first build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (bookingController.service != null &&
+          controller.availabilities.isEmpty) {
+        controller.loadFromService(bookingController.service!);
+      }
+    });
+
+    // Initialize the booking controller with current selections
+    void _proceedToNext() {
+      // Get selected date as YYYY-MM-DD format
+      final monthIndex =
+          controller.months.indexOf(controller.selectedMonth.value) + 1;
+      final day = 15 + controller.selectedDateIndex.value;
+      final year = controller.selectedYear.value;
+      final dateStr =
+          '$year-${monthIndex.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+
+      // Get selected time from dynamic times
+      final timeStr = controller.availableTimes.isNotEmpty
+          ? controller.availableTimes[controller.selectedTimeIndex.value]
+          : '10:00 AM';
+      // Get duration index
+      final durationIndex = controller.durations.indexOf(
+        controller.selectedDuration.value,
+      );
+      // Get location
+      final locationStr = controller.selectedLocation.value;
+
+      // Update the ServiceBookingController with values
+      bookingController.selectedDate = dateStr;
+      bookingController.selectedTime = timeStr;
+      bookingController.selectedDurationIndex = durationIndex;
+      bookingController.selectedLocation = locationStr;
+
+      // Navigate to additional request screen
+      Get.toNamed(AppRoutes.bookServiceRequest);
+    }
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -330,9 +371,7 @@ class BookServiceDateView extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: PrimaryTextButton(
-          onPressed: () {
-            Get.toNamed(AppRoutes.bookServiceRequest, arguments: Get.arguments);
-          },
+          onPressed: _proceedToNext,
           text: 'continueText'.tr,
         ),
       ),

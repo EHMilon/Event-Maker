@@ -1,11 +1,17 @@
 import 'package:get/get.dart';
-import '../../mock_data/mock_data.dart';
 import '../../app_routes.dart';
+import '../../services/customer_booking_repository.dart';
+import '../../services/api_exception.dart';
+import '../../constants/api_constant.dart';
+import 'package:flutter/material.dart';
 
 class CustomerNotificationController extends GetxController {
   final RxList<CustomerNotificationModel> notifications =
       <CustomerNotificationModel>[].obs;
   final RxBool isLoading = false.obs;
+  final RxString errorMessage = ''.obs;
+
+  final CustomerBookingRepository _repository = CustomerBookingRepository();
 
   @override
   void onInit() {
@@ -14,63 +20,60 @@ class CustomerNotificationController extends GetxController {
   }
 
   Future<void> _loadNotifications() async {
-    isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
-    notifications.addAll([
-      CustomerNotificationModel(
-        id: '1',
-        title: 'Clara Tolson',
-        body: 'acceptedBookingBody',
-        timeAgo: '9 hr ago',
-        isRead: false,
-        type: NotificationType.booking,
-        serviceId: 'cat-1',
-      ),
-      CustomerNotificationModel(
-        id: '2',
-        title: 'Clara Tolson',
-        body: 'acceptedBookingBody',
-        timeAgo: '9 hr ago',
-        isRead: false,
-        type: NotificationType.booking,
-        serviceId: 'cat-2',
-      ),
-      CustomerNotificationModel(
-        id: '3',
-        title: 'Clara Tolson',
-        body: 'acceptedBookingBody',
-        timeAgo: '9 hr ago',
-        isRead: false,
-        type: NotificationType.booking,
-        serviceId: 'photo-1',
-      ),
-      CustomerNotificationModel(
-        id: '4',
-        title: 'Clara Tolson',
-        body: 'acceptedBookingBody',
-        timeAgo: '9 hr ago',
-        isRead: false,
-        type: NotificationType.booking,
-        serviceId: 'film-1',
-      ),
-      CustomerNotificationModel(
-        id: '5',
-        title: 'Clara Tolson',
-        body: 'rejectedBookingBody',
-        timeAgo: '9 hr ago',
-        isRead: true,
-        type: NotificationType.booking,
-      ),
-      CustomerNotificationModel(
-        id: '6',
-        title: 'Clara Tolson',
-        body: 'rejectedBookingBody',
-        timeAgo: '9 hr ago',
-        isRead: true,
-        type: NotificationType.booking,
-      ),
-    ]);
-    isLoading.value = false;
+    try {
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      // Fetch from API: GET /bookings/notification-list
+      final response = await _repository.fetchNotifications();
+
+      // Map API response to local model
+      notifications.assignAll(
+        response.data
+            .map(
+              (apiNotification) {
+                // Determine notification body based on accepted/rejected status
+                final bool isAccepted = apiNotification.acceptedAt != null;
+                final bool isRejected = apiNotification.rejectedAt != null;
+                
+                return CustomerNotificationModel(
+                  id: apiNotification.id.toString(),
+                  title: apiNotification.title,
+                  body: isAccepted
+                      ? 'acceptedBookingBody'
+                      : (isRejected
+                            ? 'rejectedBookingBody'
+                            : 'pendingBookingBody'),
+                  timeAgo:
+                      apiNotification.acceptedAt ??
+                      apiNotification.rejectedAt ??
+                      '',
+                  isRead: isAccepted || isRejected,
+                  type: NotificationType.booking,
+                  serviceId: apiNotification.serviceId.toString(),
+                  providerId: apiNotification.providerId,
+                  bookingId: apiNotification.id,
+                  // Get full URL for cover image from API
+                  coverImage: ApiConstant.getFullMediaUrl(apiNotification.service.coverImage),
+                );
+              },
+            )
+            .toList(),
+      );
+
+      isLoading.value = false;
+    } on ApiException catch (e) {
+      errorMessage.value = e.message;
+      isLoading.value = false;
+    } catch (e) {
+      errorMessage.value = 'Failed to load notifications';
+      isLoading.value = false;
+    }
+  }
+
+  /// Refresh notifications
+  Future<void> refreshNotifications() async {
+    await _loadNotifications();
   }
 
   void markAsRead(String id) {
@@ -84,6 +87,9 @@ class CustomerNotificationController extends GetxController {
         isRead: true,
         type: notifications[index].type,
         serviceId: notifications[index].serviceId,
+        providerId: notifications[index].providerId,
+        bookingId: notifications[index].bookingId,
+        coverImage: notifications[index].coverImage,
       );
     }
   }
@@ -94,18 +100,15 @@ class CustomerNotificationController extends GetxController {
 
   void handleNotificationClick(CustomerNotificationModel notification) {
     markAsRead(notification.id);
-    if (notification.serviceId != null &&
-        notification.body == 'acceptedBookingBody') {
-      final service = MockData.homeServices.firstWhereOrNull(
-        (s) => s.id == notification.serviceId,
+    // Handle accepted bookings - navigate to payment with booking details
+    if (notification.body == 'acceptedBookingBody' &&
+        notification.bookingId != null) {
+      // Navigate to payment screen with the booking ID
+      // The payment screen will fetch the booking details using the ID
+      Get.toNamed(
+        AppRoutes.payment,
+        arguments: {'booking_id': notification.bookingId},
       );
-
-      if (service != null) {
-        Get.toNamed(
-          AppRoutes.payment,
-          arguments: {'service': service, 'package': service.packages?.first},
-        );
-      }
     }
   }
 }
@@ -118,6 +121,9 @@ class CustomerNotificationModel {
   final bool isRead;
   final NotificationType type;
   final String? serviceId;
+  final int? providerId;
+  final int? bookingId;
+  final String? coverImage;
 
   CustomerNotificationModel({
     required this.id,
@@ -127,6 +133,9 @@ class CustomerNotificationModel {
     this.isRead = false,
     required this.type,
     this.serviceId,
+    this.providerId,
+    this.bookingId,
+    this.coverImage,
   });
 }
 
