@@ -1,0 +1,138 @@
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/views/service_provider_flow/home/sp_home_view.dart';
+import 'package:event_maker/views/service_provider_flow/service_provider_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:event_maker/views/service_provider_flow/profile/service_provider_profile_view.dart';
+import 'package:event_maker/views/service_provider_flow/services/sp_services_view.dart';
+import 'package:event_maker/views/service_provider_flow/requests/sp_requests_view.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:event_maker/views/chats/chat_view.dart';
+
+class ServiceProviderScaffold extends GetView<ServiceProviderController> {
+  const ServiceProviderScaffold({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      const SPHomeView(),
+      const SPRequestsView(),
+      const ChatView(isServiceProvider: true),
+      const ServicesView(),
+      const ServiceProviderProfileView(),
+    ];
+
+    return Scaffold(
+      body: Obx(
+        () => IndexedStack(index: controller.selectedIndex, children: pages),
+      ),
+      bottomNavigationBar: Obx(
+        () => Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            currentIndex: controller.selectedIndex,
+            onTap: controller.changeIndex,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: AppColors.white,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: const Color(0xFFB0B0C3),
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            selectedLabelStyle: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w400,
+            ),
+            items: [
+              _buildBottomNavItem(
+                iconPath: 'assets/icons/home.svg',
+                label: 'home'.tr,
+                index: 0,
+              ),
+              BottomNavigationBarItem(
+                icon: Stack(
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/notification_fill.svg',
+                      height: 24.h,
+                      colorFilter: ColorFilter.mode(
+                        controller.selectedIndex == 1
+                            ? AppColors.primary
+                            : const Color(0xFFB0B0C3),
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        height: 8.h,
+                        width: 8.h,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                label: 'requests'.tr,
+              ),
+              _buildBottomNavItem(
+                iconPath: 'assets/icons/chat.svg',
+                label: 'chats'.tr,
+                index: 2,
+              ),
+              _buildBottomNavItem(
+                iconPath: 'assets/icons/services.svg',
+                label: 'myServices'.tr,
+                index: 3,
+              ),
+              _buildBottomNavItem(
+                iconPath: 'assets/icons/profile.svg',
+                label: 'profile'.tr,
+                index: 4,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  BottomNavigationBarItem _buildBottomNavItem({
+    required String iconPath,
+    required String label,
+    required int index,
+  }) {
+    return BottomNavigationBarItem(
+      icon: Padding(
+        padding: EdgeInsets.only(bottom: 4.h),
+        child: SvgPicture.asset(
+          iconPath,
+          height: 24.h,
+          colorFilter: ColorFilter.mode(
+            controller.selectedIndex == index
+                ? AppColors.primary
+                : const Color(0xFFB0B0C3),
+            BlendMode.srcIn,
+          ),
+        ),
+      ),
+      label: label,
+    );
+  }
+}

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class LoginView extends GetView<AuthController> {
@@ -14,8 +14,22 @@ class LoginView extends GetView<AuthController> {
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
 
+    // Restore user type from SharedPreferences when login page is loaded
+    // This ensures user type is restored even after password reset flow
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.restoreUserType();
+    });
+
     return Scaffold(
       backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -24,14 +38,14 @@ class LoginView extends GetView<AuthController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 40.h),
+                SizedBox(height: 20.h),
                 Center(
                   child: Column(
                     children: [
                       Image.asset('assets/images/icon.png', height: 40.h),
                       SizedBox(height: 20.h),
                       Text(
-                        AppStrings.login,
+                        'login'.tr,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -40,7 +54,7 @@ class LoginView extends GetView<AuthController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        AppStrings.welcomeBack,
+                        'welcomeBack'.tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
@@ -51,8 +65,9 @@ class LoginView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 40.h),
                 CustomTextField(
-                  labelText: AppStrings.email,
-                  hintText: AppStrings.emailPlaceholder,
+                  controller: controller.loginEmailController,
+                  labelText: 'email'.tr,
+                  hintText: 'emailPlaceholder'.tr,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -67,8 +82,9 @@ class LoginView extends GetView<AuthController> {
                 SizedBox(height: 20.h),
                 Obx(
                   () => CustomTextField(
-                    labelText: AppStrings.password,
-                    hintText: AppStrings.passwordPlaceholder,
+                    controller: controller.loginPasswordController,
+                    labelText: 'password'.tr,
+                    hintText: 'passwordPlaceholder'.tr,
                     obscureText: controller.obscurePassword.value,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -95,27 +111,45 @@ class LoginView extends GetView<AuthController> {
                 Row(
                   children: [
                     Obx(
-                      () => Checkbox(
-                        value: controller.rememberMe.value,
-                        onChanged: controller.toggleRememberMe,
-                        activeColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.r),
+                      () => SizedBox(
+                        width: 24.w,
+                        height: 24.w,
+                        child: Checkbox(
+                          value: controller.rememberMe.value,
+                          onChanged: controller.toggleRememberMe,
+                          activeColor: AppColors.primary,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
                         ),
                       ),
                     ),
-                    Text(
-                      AppStrings.rememberMe,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColors.textPrimary,
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () => controller.toggleRememberMe(
+                        !controller.rememberMe.value,
+                      ),
+                      child: Text(
+                        'rememberMe'.tr,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                     const Spacer(),
                     TextButton(
                       onPressed: controller.onForgotPassword,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       child: Text(
-                        AppStrings.forgotPassword,
+                        'forgotPassword'.tr,
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: AppColors.textPrimary,
@@ -125,13 +159,16 @@ class LoginView extends GetView<AuthController> {
                   ],
                 ),
                 SizedBox(height: 30.h),
-                PrimaryTextButton(
-                  text: AppStrings.login,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      controller.onLogin();
-                    }
-                  },
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "login".tr,
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        controller.onLogin();
+                      }
+                    },
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h),
                 Center(
@@ -139,14 +176,14 @@ class LoginView extends GetView<AuthController> {
                     onTap: controller.onSignUp,
                     child: RichText(
                       text: TextSpan(
-                        text: AppStrings.dontHaveAccount,
+                        text: "dontHaveAccount".tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
                         ),
                         children: [
                           TextSpan(
-                            text: AppStrings.signUp,
+                            text: "signUp".tr,
                             style: TextStyle(
                               fontSize: 14.sp,
                               color: AppColors.primary,

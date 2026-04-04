@@ -1,7 +1,7 @@
-import 'package:event_maker/core/themes/app_colors.dart';
-import 'package:event_maker/data/models/service_model.dart';
+import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_controller.dart';
-import 'package:event_maker/views/services/service_detail_view.dart';
+import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

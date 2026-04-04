@@ -1,4 +1,4 @@
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/customer_flow/map/map_controller.dart';
 import 'package:event_maker/views/customer_flow/map/widgets/sub_category_card.dart';
 import 'package:flutter/material.dart';
@@ -16,15 +16,12 @@ class MapView extends GetView<MapController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
-        // elevation: 0,
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back, color: AppColors.black, size: 24.r),
-        //   onPressed: () => Get.back(),
-        // ),
+        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
+
         title: Text(
-          'My Location',
+          'myLocation'.tr,
           style: GoogleFonts.inter(
-            fontSize: 18.sp,
+            fontSize: 22.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),
@@ -44,11 +41,11 @@ class MapView extends GetView<MapController> {
                     children: [
                       SizedBox(height: 20.h),
                       // Search Location
-                      _buildLabel('Search Location'),
+                      _buildLabel('searchLocation'.tr),
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        height: 56.h,
+                        height: 48.h,
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(12.r),
@@ -67,7 +64,7 @@ class MapView extends GetView<MapController> {
                                 onChanged: (value) =>
                                     controller.locationSearch.value = value,
                                 decoration: InputDecoration(
-                                  hintText: 'UAE',
+                                  hintText: 'uae'.tr,
                                   hintStyle: GoogleFonts.inter(
                                     color: AppColors.black,
                                     fontSize: 14.sp,
@@ -81,7 +78,7 @@ class MapView extends GetView<MapController> {
                       ),
                       SizedBox(height: 24.h),
                       // Select Main Category
-                      _buildLabel('Select Categories'),
+                      _buildLabel('categories'.tr),
                       SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -105,7 +102,7 @@ class MapView extends GetView<MapController> {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Text(
-                                  value,
+                                  value.toLowerCase().tr,
                                   style: GoogleFonts.inter(
                                     color: AppColors.black,
                                     fontSize: 14.sp,
@@ -127,11 +124,11 @@ class MapView extends GetView<MapController> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildLabel('Select Categories'),
+                          _buildLabel('subCategoriesLabel'.tr),
                           TextButton(
                             onPressed: () => controller.selectAll(),
                             child: Text(
-                              'Select All',
+                              'selectAll'.tr,
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 color: AppColors.grey,
@@ -141,34 +138,24 @@ class MapView extends GetView<MapController> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.h),
-                      // Sub Categories Grid
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          mainAxisSpacing: 16.h,
-                          crossAxisSpacing: 16.w,
-                          childAspectRatio: 0.65, // Increased height
-                        ),
-                        itemCount: controller.subCategories.length,
-                        itemBuilder: (context, index) {
-                          final sub = controller.subCategories[index];
-                          final name = sub['name'] as String;
-                          final icon = sub['icon'] as String;
-                          return Obx(() {
+                      // Sub Categories Wrap
+                      Obx(
+                        () => Wrap(
+                          spacing: 8.w,
+                          runSpacing: 8.h,
+                          children: controller.subCategories.map((sub) {
+                            final name = sub['name'] as String;
                             final isSelected = controller.selectedSubCategories
                                 .contains(name);
                             return SubCategoryCard(
-                              name: name,
-                              icon: icon,
+                              name: name.toLowerCase().tr,
                               isSelected: isSelected,
                               onTap: () => controller.toggleSubCategory(name),
                             );
-                          });
-                        },
+                          }).toList(),
+                        ),
                       ),
+
                       SizedBox(height: 20.h),
                     ],
                   ),
@@ -190,7 +177,7 @@ class MapView extends GetView<MapController> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Search',
+                      'search'.tr,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -211,7 +198,7 @@ class MapView extends GetView<MapController> {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 16.sp,
+        fontSize: 14.sp,
         fontWeight: FontWeight.w500,
         color: AppColors.black,
       ),

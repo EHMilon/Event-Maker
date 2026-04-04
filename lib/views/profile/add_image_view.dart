@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/primary_text_button.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/primary_text_button.dart';
 import 'profile_controller.dart';
 
 class AddImageView extends GetView<ProfileController> {
@@ -12,16 +12,16 @@ class AddImageView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Add Image',
+          'addImage'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
@@ -43,10 +43,10 @@ class AddImageView extends GetView<ProfileController> {
                   width: double.infinity,
                   height: 200.h,
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: AppColors.lightGrey.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: Colors.grey.shade300,
+                      color: AppColors.lightGrey,
                       style: BorderStyle.solid,
                     ),
                   ),
@@ -56,11 +56,11 @@ class AddImageView extends GetView<ProfileController> {
                       Icon(
                         Icons.cloud_upload_outlined,
                         size: 48.sp,
-                        color: Colors.grey[400],
+                        color: AppColors.textSecondary.withOpacity(0.5),
                       ),
                       SizedBox(height: 12.h),
                       Text(
-                        'Upload',
+                        'upload'.tr,
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
@@ -72,7 +72,7 @@ class AddImageView extends GetView<ProfileController> {
                         'JPG, PNG or JPEG',
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: Colors.grey[500],
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -80,7 +80,7 @@ class AddImageView extends GetView<ProfileController> {
                 ),
                 SizedBox(height: 32.h),
                 Text(
-                  'Add a caption',
+                  'addCaption'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -91,15 +91,19 @@ class AddImageView extends GetView<ProfileController> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: AppColors.lightGrey),
                   ),
                   child: TextField(
                     controller: controller.captionController,
                     maxLines: 5,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14.sp,
+                    ),
                     decoration: InputDecoration(
-                      hintText: 'Enter Caption',
+                      hintText: 'enterCaption'.tr,
                       hintStyle: TextStyle(
-                        color: Colors.grey[400],
+                        color: AppColors.textSecondary.withOpacity(0.4),
                         fontSize: 14.sp,
                       ),
                       border: InputBorder.none,
@@ -110,10 +114,10 @@ class AddImageView extends GetView<ProfileController> {
                 SizedBox(height: 100.h),
                 PrimaryTextButton(
                   onPressed: () {
-                    // TODO: Implement upload logic
+                    // TODO: Implement image picking and upload logic with backend
                     Get.back();
                   },
-                  text: 'Upload',
+                  text: 'upload'.tr,
                 ),
                 SizedBox(height: 24.h),
               ],

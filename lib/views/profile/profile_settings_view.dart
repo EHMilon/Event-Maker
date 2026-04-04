@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_text_button.dart';
-import '../../core/routes/app_routes.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_text_button.dart';
+import '../../widgets/user_avatar.dart';
 import 'profile_controller.dart';
 
 class ProfileSettingsView extends GetView<ProfileController> {
@@ -14,26 +15,27 @@ class ProfileSettingsView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Profile Settings',
+          'profileSettings'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
       body: Obx(
         () => Skeletonizer(
-          enabled: controller.isLoading.value,
+          enabled: controller.isPersonalInfoLoading.value,
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Column(
@@ -53,28 +55,38 @@ class ProfileSettingsView extends GetView<ProfileController> {
                             width: 2.w,
                           ),
                         ),
-                        child: CircleAvatar(
-                          radius: 50.r,
-                          backgroundImage: AssetImage(
-                            controller.profileImage.value,
-                          ),
-                        ),
+                        child: Obx(() => UserAvatar(
+                          imageUrl: controller.profileImage.value,
+                          localFile: controller.selectedProfileImage.value,
+                          radius: 50,
+                        )),
                       ),
                       Positioned(
                         bottom: 0,
                         right: 0,
                         child: GestureDetector(
-                          onTap: () => Get.toNamed(AppRoutes.addImage),
+                          onTap: () => controller.pickProfileImage(),
                           child: Container(
                             padding: EdgeInsets.all(4.r),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
                               shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            child: Icon(
-                              Icons.camera_alt_outlined,
-                              size: 20.sp,
-                              color: AppColors.textPrimary,
+                            child: SvgPicture.asset(
+                              'assets/icons/camera.svg',
+                              width: 20.w,
+                              height: 20.h,
+                              colorFilter: ColorFilter.mode(
+                                AppColors.textPrimary,
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
                         ),
@@ -85,7 +97,7 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 32.h),
 
                 Text(
-                  'Full Name',
+                  'fullName'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -95,12 +107,12 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.nameController,
-                  hintText: 'Full Name',
+                  hintText: 'fullNamePlaceholder'.tr,
                 ),
 
                 SizedBox(height: 20.h),
                 Text(
-                  'Email',
+                  'email'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -108,15 +120,27 @@ class ProfileSettingsView extends GetView<ProfileController> {
                   ),
                 ),
                 SizedBox(height: 8.h),
+                // Email field is read-only (cannot be changed)
                 CustomTextField(
                   controller: controller.emailController,
-                  hintText: 'Email',
+                  hintText: 'emailPlaceholder'.tr,
                   keyboardType: TextInputType.emailAddress,
+                  readOnly: true,
+                  enabled: false,
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'emailCannotBeChanged'.tr,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 16.h),
                 Text(
-                  'Phone',
+                  'phoneNumber'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -126,13 +150,13 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.phoneController,
-                  hintText: 'Phone',
+                  hintText: 'phoneNumber'.tr,
                   keyboardType: TextInputType.phone,
                 ),
 
                 SizedBox(height: 20.h),
                 Text(
-                  'Nationality',
+                  'nationality'.tr,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
@@ -142,13 +166,40 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 SizedBox(height: 8.h),
                 CustomTextField(
                   controller: controller.nationalityController,
-                  hintText: 'Nationality',
+                  hintText: 'selectNationality'.tr,
                 ),
+
+                // Bio field - only shown for service providers
+                Obx(() {
+                  if (controller.isServiceProvider.value) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20.h),
+                        Text(
+                          'bio'.tr,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        CustomTextField(
+                          controller: controller.bioController,
+                          hintText: 'bioPlaceholder'.tr,
+                          maxLines: 4,
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
 
                 SizedBox(height: 48.h),
                 PrimaryTextButton(
-                  onPressed: () => controller.updateProfile(),
-                  text: 'Update',
+                  onPressed: () => controller.updatePersonalInfo(),
+                  text: 'update'.tr,
                 ),
                 SizedBox(height: 24.h),
               ],

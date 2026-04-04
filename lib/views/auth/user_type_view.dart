@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'auth_controller.dart';
-import '../../core/themes/app_colors.dart';
-import '../../core/constants/app_strings.dart';
-import '../../shared/widgets/primary_text_button.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/primary_text_button.dart';
 
 class UserTypeView extends GetView<AuthController> {
   const UserTypeView({super.key});
@@ -20,7 +19,7 @@ class UserTypeView extends GetView<AuthController> {
             Image.asset('assets/images/icon.png', height: 40.h),
             SizedBox(height: 20.h),
             Text(
-              AppStrings.selectUserType,
+              'selectUserType'.tr,
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
@@ -29,7 +28,7 @@ class UserTypeView extends GetView<AuthController> {
             ),
             SizedBox(height: 8.h),
             Text(
-              AppStrings.joinNowToStreamline,
+              'joinNowToStreamline'.tr,
               style: TextStyle(fontSize: 14.sp, color: const Color(0xFF414141)),
             ),
 
@@ -59,7 +58,7 @@ class UserTypeView extends GetView<AuthController> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
               child: PrimaryTextButton(
-                text: AppStrings.continueText,
+                text: 'continueText'.tr,
                 onPressed: controller.onContinueUserType,
               ),
             ),
@@ -87,7 +86,20 @@ class UserTypeView extends GetView<AuthController> {
           clipBehavior: Clip.antiAlias,
           child: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Image.asset(imagePath, height: 150),
+            child: Column(
+              children: [
+                Image.asset(imagePath, height: 100.h),
+                SizedBox(height: 12.h),
+                Text(
+                  type == 'customer' ? 'asCustomer'.tr : 'asServiceProvider'.tr,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF111111),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }),

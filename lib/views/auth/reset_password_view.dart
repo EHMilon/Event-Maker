@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class ResetPasswordView extends GetView<AuthController> {
@@ -36,7 +36,7 @@ class ResetPasswordView extends GetView<AuthController> {
                       Image.asset('assets/images/icon.png', height: 40.h),
                       SizedBox(height: 20.h),
                       Text(
-                        AppStrings.resetPassword,
+                        "resetPassword".tr,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -45,7 +45,7 @@ class ResetPasswordView extends GetView<AuthController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        AppStrings.pleaseResetPassword,
+                        "pleaseResetPassword".tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
@@ -57,8 +57,9 @@ class ResetPasswordView extends GetView<AuthController> {
                 SizedBox(height: 40.h),
                 Obx(
                   () => CustomTextField(
-                    labelText: AppStrings.newPassword,
-                    hintText: AppStrings.passwordPlaceholder,
+                    controller: controller.newPasswordController,
+                    labelText: "newPassword".tr,
+                    hintText: "passwordPlaceholder".tr,
                     obscureText: controller.obscureNewPassword.value,
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -75,8 +76,9 @@ class ResetPasswordView extends GetView<AuthController> {
                 SizedBox(height: 20.h),
                 Obx(
                   () => CustomTextField(
-                    labelText: AppStrings.confirmPassword,
-                    hintText: AppStrings.passwordPlaceholder,
+                    controller: controller.confirmPasswordController,
+                    labelText: "confirmPassword".tr,
+                    hintText: "passwordPlaceholder".tr,
                     obscureText: controller.obscureConfirmPassword.value,
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -91,9 +93,12 @@ class ResetPasswordView extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 40.h),
-                PrimaryTextButton(
-                  text: AppStrings.confirm,
-                  onPressed: controller.onConfirmReset,
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "confirm".tr,
+                    onPressed: controller.onConfirmReset,
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h), // Add some bottom spacing
               ],

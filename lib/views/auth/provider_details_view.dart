@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/primary_text_button.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class ProviderDetailsView extends GetView<AuthController> {
@@ -12,13 +12,21 @@ class ProviderDetailsView extends GetView<AuthController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 40.h),
+              SizedBox(height: 20.h),
               Center(
                 child: Column(
                   children: [
@@ -56,7 +64,7 @@ class ProviderDetailsView extends GetView<AuthController> {
                       ? null
                       : controller.selectedServiceType.value,
                   hint: "Select",
-                  items: ['Hospitality', 'Event Maker', 'Professional Trainer'],
+                  items: ['Hospitality', 'Event', 'Professional Trainer'],
                   onChanged: controller.updateServiceType,
                 ),
               ),
@@ -87,9 +95,12 @@ class ProviderDetailsView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 60.h),
-              PrimaryTextButton(
-                text: "Continue",
-                onPressed: controller.onContinueProviderDetails,
+              Obx(
+                () => PrimaryTextButton(
+                  text: "Continue",
+                  onPressed: controller.onContinueProviderDetails,
+                  isLoading: controller.isLoading.value,
+                ),
               ),
               SizedBox(height: 40.h),
             ],
@@ -117,7 +128,7 @@ class ProviderDetailsView extends GetView<AuthController> {
     required Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       hint: Text(
         hint,
         style: TextStyle(

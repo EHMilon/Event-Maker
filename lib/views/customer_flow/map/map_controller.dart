@@ -8,15 +8,41 @@ class MapController extends GetxController {
   final locationSearch = ''.obs;
 
   final selectedMainCategory = 'Hospitality'.obs;
-  final mainCategories = ['Hospitality', 'Event Maker', 'Professional Trainer'];
+  final mainCategories = ['Hospitality', 'Event', 'Professional Trainer'];
 
   final selectedSubCategories = <String>[].obs;
   final subCategories = <Map<String, dynamic>>[].obs;
 
+  // Sub-categories map based on main category
+  final Map<String, List<String>> subCategoriesMap = {
+    'Hospitality': ['Catering', 'Barista', 'Bakery', 'Waitstaff', 'Host/Hostess'],
+    'Event': ['Lighting', 'Sound', 'Decoration', 'Venue', 'Planner'],
+    'Professional Trainer': ['Photographer', 'Videographer', 'Musician', 'DJ', 'MC'],
+  };
+
   @override
   void onInit() {
     super.onInit();
+    // Listen to main category changes and update sub-categories
+    ever(selectedMainCategory, (_) => updateSubCategories());
     fetchSubCategories();
+  }
+
+  void updateSubCategories() {
+    // Get sub-categories for the selected main category
+    final newSubCategories = subCategoriesMap[selectedMainCategory.value] ?? [];
+    
+    // Convert to map format for the UI
+    subCategories.assignAll(newSubCategories.map((name) => {'name': name}).toList());
+    
+    // Clear selected sub-categories when changing main category
+    selectedSubCategories.clear();
+    
+    // Select default sub-categories (first 3) for better UX
+    if (newSubCategories.isNotEmpty) {
+      final names = newSubCategories.take(3).toList();
+      selectedSubCategories.assignAll(names);
+    }
   }
 
   Future<void> fetchSubCategories() async {
@@ -24,18 +50,9 @@ class MapController extends GetxController {
     try {
       // simulate backend call with 2s delay
       await Future.delayed(const Duration(seconds: 2));
-      subCategories.assignAll([
-        {'name': 'Lighting', 'icon': 'assets/icons/event.png'},
-        {'name': 'Musical', 'icon': 'assets/icons/musical.png'},
-        {'name': 'Filming', 'icon': 'assets/icons/filming.png'},
-        {'name': 'Photography', 'icon': 'assets/icons/photography.png'},
-        {'name': 'Catering', 'icon': 'assets/icons/catering.png'},
-        {'name': 'Cleaning', 'icon': 'assets/icons/catering.png'},
-        {'name': 'Barista', 'icon': 'assets/icons/event.png'},
-      ]);
-
-      // Default selections from design
-      selectedSubCategories.assignAll(['Musical', 'Filming', 'Photography']);
+      
+      // Load initial sub-categories based on default main category
+      updateSubCategories();
     } catch (e) {
       Get.snackbar(
         'Connection Error',

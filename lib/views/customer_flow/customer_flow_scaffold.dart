@@ -1,14 +1,15 @@
-import 'package:event_maker/core/themes/app_colors.dart';
+import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/views/customer_flow/customer_flow_controller.dart';
-import 'package:event_maker/views/customer_flow/home/home_view.dart';
+import 'package:event_maker/views/customer_flow/home/customer_home_view.dart';
 import 'package:event_maker/views/customer_flow/map/map_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-import 'package:event_maker/views/profile/profile_view.dart';
-import 'package:event_maker/views/customer_flow/bookmarks/bookmarks_view.dart';
+import 'package:event_maker/views/customer_flow/profile/profile_view.dart';
+import 'package:event_maker/views/customer_flow/bookings/customer_booking_view.dart';
+import 'package:event_maker/views/chats/chat_view.dart';
 
 class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   const CustomerFlowScaffold({super.key});
@@ -16,19 +17,23 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      const HomeView(),
+      const CustomerHomeView(),
       const MapView(),
-      const BookmarksView(),
+      const ChatView(isServiceProvider: false),
+      const CustomerBookingView(),
       const ProfileView(),
     ];
 
     return Scaffold(
       body: Obx(
-        () => IndexedStack(index: controller.selectedIndex, children: pages),
+        () => IndexedStack(
+          index: controller.selectedIndex.value,
+          children: pages,
+        ),
       ),
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
-          currentIndex: controller.selectedIndex,
+          currentIndex: controller.selectedIndex.value,
           onTap: controller.changeIndex,
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.primary,
@@ -49,52 +54,65 @@ class CustomerFlowScaffold extends GetView<CustomerFlowController> {
                 'assets/icons/home.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 0
+                  controller.selectedIndex.value == 0
                       ? AppColors.primary
-                      : AppColors.grey,
+                      : AppColors.grey500,
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Home',
+              label: 'home'.tr,
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
                 'assets/icons/map.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 1
+                  controller.selectedIndex.value == 1
+                      ? AppColors.primary
+                      : AppColors.grey500,
+                  BlendMode.srcIn,
+                ),
+              ),
+              label: 'map'.tr,
+            ),
+            BottomNavigationBarItem(
+              icon: SvgPicture.asset(
+                'assets/icons/chat.svg',
+                height: 24.h,
+                colorFilter: ColorFilter.mode(
+                  controller.selectedIndex.value == 2
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Map',
+              label: 'chats'.tr,
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
                 'assets/icons/booking.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 2
+                  controller.selectedIndex.value == 3
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Bookings',
+              label: 'bookings'.tr,
             ),
             BottomNavigationBarItem(
               icon: SvgPicture.asset(
                 'assets/icons/profile.svg',
                 height: 24.h,
                 colorFilter: ColorFilter.mode(
-                  controller.selectedIndex == 3
+                  controller.selectedIndex.value == 4
                       ? AppColors.primary
                       : AppColors.grey,
                   BlendMode.srcIn,
                 ),
               ),
-              label: 'Profile',
+              label: 'profile'.tr,
             ),
           ],
         ),

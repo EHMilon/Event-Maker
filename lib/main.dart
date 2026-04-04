@@ -1,16 +1,28 @@
+import 'package:event_maker/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'core/routes/app_routes.dart';
-import 'core/themes/app_themes.dart';
+import 'package:flutter/services.dart';
+import 'app_routes.dart';
+import 'constants/app_themes.dart';
+import 'utils/user_preferences.dart';
+import 'localization/app_localization.dart';
+import 'global/init_binding.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  
+  // Initialize StorageService before using it
+  await StorageService.init();
+  
+  final savedLanguageCode = await UserPreferences.getLanguageCode();
+  runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Locale initialLocale;
+
+  const MyApp({super.key, required this.initialLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +37,33 @@ class MyApp extends StatelessWidget {
           theme: AppThemes.lightTheme,
           // darkTheme: AppThemes.darkTheme,
           themeMode: ThemeMode.light,
+          translations: AppLocalization(),
+          locale: initialLocale,
+          fallbackLocale: const Locale(AppLocalization.fallbackLanguage),
+          initialBinding: InitialBinding(),
           initialRoute: AppRoutes.splash,
           getPages: AppRoutes.routes,
+          builder: (context, child) {
+            final brightness = Theme.of(context).brightness;
+            final overlayStyle = SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness:
+                  brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+              statusBarBrightness:
+                  brightness == Brightness.dark ? Brightness.dark : Brightness.light,
+            );
+
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: overlayStyle,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: child!,
+              ),
+            );
+          },
         );
       },
     );
   }
 }
+

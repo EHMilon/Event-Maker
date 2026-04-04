@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/themes/app_colors.dart';
-import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_text_button.dart';
+// import '../../core/constants/app_strings.dart';
+import '../../constants/app_colors.dart';
+import '../../widgets/custom_text_field.dart';
+import '../../widgets/primary_text_button.dart';
 import 'auth_controller.dart';
 
 class ForgotPasswordView extends GetView<AuthController> {
@@ -36,7 +36,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                       Image.asset('assets/images/icon.png', height: 40.h),
                       SizedBox(height: 20.h),
                       Text(
-                        AppStrings.resetPassword,
+                        "resetPassword".tr,
                         style: TextStyle(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
@@ -45,7 +45,7 @@ class ForgotPasswordView extends GetView<AuthController> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        AppStrings.resetPasswordSubtitle,
+                        "resetPasswordSubtitle".tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColors.textSecondary,
@@ -56,14 +56,18 @@ class ForgotPasswordView extends GetView<AuthController> {
                 ),
                 SizedBox(height: 40.h),
                 CustomTextField(
-                  labelText: AppStrings.email,
-                  hintText: AppStrings.emailPlaceholder,
+                  controller: controller.forgotEmailController,
+                  labelText: "email".tr,
+                  hintText: "emailPlaceholder".tr,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 40.h),
-                PrimaryTextButton(
-                  text: AppStrings.resetPassword,
-                  onPressed: controller.onResetPassword,
+                Obx(
+                  () => PrimaryTextButton(
+                    text: "resetPassword".tr,
+                    onPressed: controller.onResetPassword,
+                    isLoading: controller.isLoading.value,
+                  ),
                 ),
                 SizedBox(height: 20.h),
               ],

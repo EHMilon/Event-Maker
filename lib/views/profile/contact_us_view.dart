@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import '../../core/themes/app_colors.dart';
+import '../../constants/app_colors.dart';
 import 'profile_controller.dart';
 
 class ContactUsView extends GetView<ProfileController> {
@@ -11,20 +11,20 @@ class ContactUsView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Contact Us',
+          'contactUs'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
@@ -38,29 +38,27 @@ class ContactUsView extends GetView<ProfileController> {
               children: [
                 SizedBox(height: 20.h),
                 Text(
-                  'You can get in touch with us through below platforms. Our team will reach out to you as soon as it would be possible.',
+                  'contactUsSubtitle'.tr,
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                     height: 1.5,
                   ),
                 ),
                 SizedBox(height: 32.h),
 
                 _buildContactSection(
-                  title: 'Customer Support',
+                  title: 'customerSupport'.tr,
                   items: [
                     _buildContactItem(
-                      iconPath: 'assets/icons/mail.svg', // Reusing icons
-                      label: 'Contact Support',
+                      icon: Icons.phone_outlined,
+                      label: 'contactUs'.tr,
                       value: '000-0000-000',
-                      isSvg: true,
                     ),
                     _buildContactItem(
-                      iconPath: 'assets/icons/mail.svg',
-                      label: 'Email Address',
+                      icon: Icons.email_outlined,
+                      label: 'email'.tr,
                       value: 'example@gmail.com',
-                      isSvg: true,
                     ),
                   ],
                 ),
@@ -68,7 +66,7 @@ class ContactUsView extends GetView<ProfileController> {
                 SizedBox(height: 24.h),
 
                 _buildContactSection(
-                  title: 'Social Media',
+                  title: 'socialMedia'.tr,
                   items: [
                     _buildContactItem(
                       icon: Icons.language,
@@ -104,12 +102,12 @@ class ContactUsView extends GetView<ProfileController> {
       width: double.infinity,
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.lightGrey.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+             color: AppColors.black.withOpacity(0.09),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -135,8 +133,6 @@ class ContactUsView extends GetView<ProfileController> {
 
   Widget _buildContactItem({
     IconData? icon,
-    String? iconPath,
-    bool isSvg = false,
     required String label,
     required String value,
   }) {
@@ -164,7 +160,10 @@ class ContactUsView extends GetView<ProfileController> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 12.sp, color: Colors.grey[500]),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textSecondary,
+                ),
               ),
               Text(
                 value,
