@@ -10,7 +10,14 @@ import '../../models/personal_info_model.dart';
 import '../../models/wallet_model.dart';
 import '../../services/wallet_repository.dart';
 import '../../services/service_repository.dart';
-import '../../mock_data/mock_data.dart';
+import '../../models/service_model.dart';
+import '../../models/review_model.dart';
+import '../../models/service_provider_profile_model.dart';
+import '../../models/service_provider_review_model.dart';
+import '../../models/personal_info_model.dart';
+import '../../models/wallet_model.dart';
+import '../../services/wallet_repository.dart';
+import '../../services/service_repository.dart';
 import '../../utils/user_preferences.dart';
 import '../../app_routes.dart';
 import '../../constants/app_colors.dart';
@@ -48,15 +55,14 @@ class ProfileController extends GetxController {
 
   void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.toggle();
 
-  final RxString userName = 'John Doe'.obs;
-  final RxString userEmail = 'example@gmail.com'.obs;
-  final RxString profileImage = ''.obs; // Backend avatar URL only
+  final RxString userName = ''.obs;
+  final RxString userEmail = ''.obs;
+  final RxString profileImage = ''.obs;
   final RxBool isLoading = false.obs;
   final RxBool isServiceProvider = false.obs;
   final RxBool isAvailable = true.obs;
-  final RxString walletBalance = '1250'.obs;
+  final RxString walletBalance = '0'.obs;
 
-  // Mock data lists - TODO: Replace with actual backend models later
   final RxList<Map<String, dynamic>> transactions =
       <Map<String, dynamic>>[].obs;
   final RxList<ServiceModel> bookmarks = <ServiceModel>[].obs;
@@ -71,8 +77,8 @@ class ProfileController extends GetxController {
   final RxList<Map<String, String>> certifications =
       <Map<String, String>>[].obs;
 
-  final RxDouble rating = 4.9.obs;
-  final RxInt reviewCount = 3657.obs;
+  final RxDouble rating = 0.0.obs;
+  final RxInt reviewCount = 0.obs;
 
   // ===== SERVICE PROVIDER PROFILE API STATE =====
   final _apiService = ApiService();
@@ -172,24 +178,19 @@ class ProfileController extends GetxController {
   }
 
   /// Updates the application language and saves preference.
-  /// Backend Compatible: TODO - Sync language preference with backend API.
   void changeLanguage(SupportedLanguage language) async {
     selectedLanguage.value = language;
     await UserPreferences.setLanguageCode(language.code);
     Get.updateLocale(Locale(language.code));
-
-    // TODO: Implement backend sync here
-    // if (_connectivityService.isConnected.value) { ... }
   }
 
   Future<void> _initialize() async {
     await loadUserData();
-    await fetchPersonalInfo(); // Fetch personal info including availability status
-    loadMockData();
+    await fetchPersonalInfo();
+    await fetchBookmarks();
   }
 
-  /// Loads user data from local storage or backend.
-  /// Backend Compatible: Placeholder for API integration.
+  /// Loads user data from local storage.
   Future<void> loadUserData() async {
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
@@ -197,22 +198,17 @@ class ProfileController extends GetxController {
     }
 
     isLoading.value = true;
-    // User Rule: 2s delay for shimmer effect visibility
-    await Future.delayed(const Duration(seconds: 2));
 
     try {
-      // FIXME: Integrate with actual Auth API/Service
       final userData = await UserPreferences.getUserDetails();
       if (userData != null) {
-        userName.value = userData['name'] ?? 'John Doe';
-        userEmail.value = userData['email'] ?? 'example@gmail.com';
+        userName.value = userData['name'] ?? '';
+        userEmail.value = userData['email'] ?? '';
         isServiceProvider.value =
             userData['type'] == UserPreferences.USER_TYPE_SERVICE_PROVIDER;
 
         nameController.text = userName.value;
         emailController.text = userEmail.value;
-        phoneController.text = '000-0000-000'; // TODO: Fetch from backend
-        nationalityController.text = 'UAE'; // TODO: Fetch from backend
       } else {
         isServiceProvider.value = await UserPreferences.isServiceProvider();
       }
@@ -221,55 +217,6 @@ class ProfileController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  /// Populates mock data for UI development.
-  /// Backend Compatible: Replace with API calls in the future.
-  Future<void> loadMockData() async {
-    transactions.assignAll([
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-      {'title': 'John Doe', 'time': 'Just Now', 'amount': '105'},
-    ]);
-
-    // Load bookmarks from API
-    await fetchBookmarks();
-
-    faqs.assignAll([
-      {
-        'question': 'What payment methods do you accept?',
-        'answer': 'We accept online payment platforms such as PayPal & Stripe.',
-        'isExpanded': false.obs,
-      },
-    ]);
-
-    providerServices.assignAll(MockData.homeServices.take(5).toList());
-
-    providerReviews.assignAll([
-      ReviewModel(
-        userName: 'John Doe',
-        userImageUrl: 'https://picsum.photos/id/10/100/100',
-        date: '10 Feb',
-        rating: 4,
-        reviewText: 'Great service!',
-      ),
-    ]);
-
-    bio.value =
-        'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.';
-
-    certifications.assignAll([
-      {
-        'title': 'Professional Chef',
-        'date': 'July, 2025',
-        'school': 'Sonargaon Cooking School',
-      },
-      {
-        'title': 'Pizza Artisan',
-        'date': 'August, 2025',
-        'school': 'Lorenzo\'s Pizza',
-      },
-    ]);
   }
 
   /// Handles bookmark removal and syncs with Home.
@@ -314,7 +261,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  /// Backend Integration for password update.
+  /// Handles password update.
   Future<void> changePassword() async {
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
@@ -326,9 +273,7 @@ class ProfileController extends GetxController {
       return;
     }
 
-    // TODO: Validate current password and call Backend API
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
     isLoading.value = false;
 
     Get.toNamed(
@@ -337,7 +282,7 @@ class ProfileController extends GetxController {
     );
   }
 
-  /// Backend Integration for profile update.
+  /// Handles profile update.
   Future<void> updateProfile() async {
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
@@ -345,10 +290,8 @@ class ProfileController extends GetxController {
     }
 
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
 
     try {
-      // TODO: Call Profile Update API
       userName.value = nameController.text;
       userEmail.value = emailController.text;
 
@@ -867,8 +810,7 @@ class ProfileController extends GetxController {
   /// API Endpoint: GET /services/my-bookmarked?page=1&page_size=10
   Future<void> fetchBookmarks() async {
     if (!_connectivityService.isConnected.value) {
-      // Fallback to mock data on offline
-      bookmarks.assignAll(MockData.bookmarkedServices);
+      _showConnectivityError();
       return;
     }
 
@@ -881,13 +823,10 @@ class ProfileController extends GetxController {
       if (response.success) {
         bookmarks.assignAll(response.data);
       } else {
-        // Fallback to mock data on API error
-        bookmarks.assignAll(MockData.bookmarkedServices);
+        debugPrint('Failed to fetch bookmarks: ${response.message}');
       }
     } catch (e) {
       debugPrint('Error fetching bookmarks: $e');
-      // Fallback to mock data on error
-      bookmarks.assignAll(MockData.bookmarkedServices);
     }
   }
 

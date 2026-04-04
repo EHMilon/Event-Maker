@@ -83,18 +83,18 @@ class ProfileView extends GetView<ProfileController> {
                   onTap: () => Get.toNamed(AppRoutes.profileSettings),
                 ),
                 _buildMenuItem(
-                  icon: 'assets/icons/shield-check.svg',
+                  icon: 'assets/icons/security.svg',
                   title: 'security'.tr,
                   onTap: () => Get.toNamed(AppRoutes.changePassword),
                 ),
                 if (controller.isServiceProvider.value) ...[
                   _buildMenuItem(
-                    icon: 'assets/icons/scroll-text.svg',
+                    icon: 'assets/icons/certification.svg',
                     title: 'certifications'.tr,
                     onTap: () => Get.toNamed(AppRoutes.spCertifications),
                   ),
                   _buildMenuItem(
-                    icon: 'assets/icons/calendar-check-2.svg',
+                    icon: 'assets/icons/saved.svg',
                     title: 'myAvailability'.tr,
                     onTap: () {},
                     trailing: Switch(
@@ -151,7 +151,6 @@ class ProfileView extends GetView<ProfileController> {
                   titleColor: AppColors.error,
                   onTap: () => _showDeleteAccountDialog(context),
                 ),
-                SizedBox(height: 8.h),
                 _buildMenuItem(
                   icon: 'assets/icons/logout.svg',
                   title: 'logout'.tr,
@@ -182,7 +181,7 @@ class ProfileView extends GetView<ProfileController> {
         height: 24.h,
         colorFilter: titleColor != null
             ? ColorFilter.mode(titleColor, BlendMode.srcIn)
-            : ColorFilter.mode(AppColors.textSecondary, BlendMode.srcIn),
+            : ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
       ),
       title: Text(
         title,

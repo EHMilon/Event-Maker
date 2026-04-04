@@ -46,7 +46,7 @@ class CustomerBookmarkCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
-              color: AppColors.black.withOpacity(0.1),
+              color: AppColors.black.withOpacity(0.2),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -160,28 +160,28 @@ class CustomerBookmarkCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          SvgPicture.asset(
-                            "assets/icons/star_fill.svg",
-                            height: 16.h,
-                            width: 16.w,
-                            colorFilter: ColorFilter.mode(
-                              Colors.yellow,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            rating,
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     SvgPicture.asset(
+                      //       "assets/icons/star_fill.svg",
+                      //       height: 16.h,
+                      //       width: 16.w,
+                      //       colorFilter: ColorFilter.mode(
+                      //         Colors.yellow,
+                      //         BlendMode.srcIn,
+                      //       ),
+                      //     ),
+                      //     SizedBox(width: 4.w),
+                      //     Text(
+                      //       rating,
+                      //       style: GoogleFonts.inter(
+                      //         fontSize: 12.sp,
+                      //         fontWeight: FontWeight.w600,
+                      //         color: AppColors.textPrimary,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ],

@@ -1,4 +1,4 @@
-import 'package:event_maker/mock_data/mock_data.dart';
+import 'package:flutter/material.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/customer_flow/home/widgets/service_section_model.dart';
@@ -69,7 +69,6 @@ class HomeController extends GetxController {
   /// Get services grouped by service_as_name for display
   List<ServiceGroup> get displayServiceGroups {
     if (serviceGroups.isEmpty) {
-      // Fallback to local grouping if no backend data
       final grouped = <String, List<ServiceModel>>{};
       for (final service in filteredServices) {
         final key = service.serviceAsName.isNotEmpty
@@ -89,7 +88,6 @@ class HomeController extends GetxController {
       }).toList();
     }
 
-    // Use backend groups, filter by subcategory if selected
     if (selectedSubCategory.value != null &&
         selectedSubCategory.value!.isNotEmpty) {
       return serviceGroups
@@ -141,8 +139,6 @@ class HomeController extends GetxController {
     } catch (e) {
       isError.value = true;
       errorMessage.value = 'Failed to load home data. Please try again.';
-      // Fallback to mock data on error
-      await _loadMockData();
     } finally {
       isLoading.value = false;
     }
@@ -156,8 +152,7 @@ class HomeController extends GetxController {
       );
       subCategoriesMap[serviceTypeName] = subcategories;
     } catch (e) {
-      // Use fallback mock data on error
-      _setMockSubCategories(serviceTypeName);
+      debugPrint('Error fetching subcategories: $e');
     }
   }
 
@@ -176,8 +171,7 @@ class HomeController extends GetxController {
       // Update service sections based on the groups
       _updateServiceSections();
     } catch (e) {
-      // On error, fall back to mock data
-      await _loadMockData();
+      debugPrint('Error fetching customer services: $e');
     }
   }
 
@@ -248,82 +242,6 @@ class HomeController extends GetxController {
             ServiceType.catering, // Default, will be determined from service
       );
     }).toList();
-  }
-
-  /// Set mock subcategories for fallback
-  void _setMockSubCategories(String serviceTypeName) {
-    subCategoriesMap.value = {
-      'Event': ['Buffet', 'Cleaning', 'Decoration', 'Furniture'],
-      'Hospitality': [
-        'Catering',
-        'Barista',
-        'Bakery',
-        'Waitstaff',
-        'Host/Hostess',
-      ],
-      'Professional Trainer': [
-        'Photographer',
-        'Videographer',
-        'Musician',
-        'DJ',
-        'MC',
-      ],
-    };
-  }
-
-  /// Mock data loader - fallback implementation
-  Future<void> _loadMockData() async {
-    allServices.value = MockData.homeServices.map((service) {
-      final isBookmarked = _profileController.bookmarks.any(
-        (b) => b.id == service.id,
-      );
-      return ServiceModel(
-        id: service.id,
-        title: service.title,
-        description: service.description,
-        images: service.images,
-        type: service.type,
-        provider: service.provider,
-        location: service.location,
-        rating: service.rating,
-        reviewCount: service.reviewCount,
-        date: service.date,
-        basePrice: service.basePrice,
-        priceUnit: service.priceUnit,
-        packages: service.packages,
-        isBookmarked: isBookmarked,
-      );
-    }).toList();
-
-    // Load categories from backend or fallback to mock
-    mainCategories.value = ['Event', 'Hospitality', 'Professional trainer'];
-    _setMockSubCategories('Event');
-    _setMockSubCategories('Hospitality');
-    _setMockSubCategories('Professional Trainer');
-
-    serviceSections.value = [
-      const ServiceSectionModel(
-        id: 'catering',
-        titleKey: 'cateringServices',
-        categoryName: 'cateringServices',
-        serviceType: ServiceType.catering,
-      ),
-      const ServiceSectionModel(
-        id: 'filming',
-        titleKey: 'filmingEvents',
-        categoryName: 'filmingEvents',
-        serviceType: ServiceType.filming,
-      ),
-      const ServiceSectionModel(
-        id: 'cleaning',
-        titleKey: 'cleaningServices',
-        categoryName: 'cleaningServices',
-        serviceType: ServiceType.cleaning,
-      ),
-    ];
-
-    // Keep skeleton visible for demo - remove in production
-    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   /// Toggle bookmark status for a service
@@ -428,11 +346,7 @@ class HomeController extends GetxController {
     }
 
     try {
-      // TODO: Replace with backend search API
-      // final response = await apiService.get('/search?q=$query');
-      // searchResults.value = response.services.map((json) => ServiceModel.fromJson(json)).toList();
-
-      // Client-side search (temporary)
+      // Client-side search
       final lowercaseQuery = searchQuery.value.toLowerCase();
       searchResults.value = allServices.where((service) {
         return service.title.toLowerCase().contains(lowercaseQuery) ||

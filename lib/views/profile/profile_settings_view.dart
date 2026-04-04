@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -78,10 +79,14 @@ class ProfileSettingsView extends GetView<ProfileController> {
                                 ),
                               ],
                             ),
-                            child: Icon(
-                              Icons.camera_alt_outlined,
-                              size: 20.sp,
-                              color: AppColors.textPrimary,
+                            child: SvgPicture.asset(
+                              'assets/icons/camera.svg',
+                              width: 20.w,
+                              height: 20.h,
+                              colorFilter: ColorFilter.mode(
+                                AppColors.textPrimary,
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
                         ),

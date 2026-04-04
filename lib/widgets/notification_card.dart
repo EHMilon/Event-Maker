@@ -17,8 +17,13 @@ class NotificationCard extends StatelessWidget {
     required this.detail,
     required this.timeAgo,
     required this.onTap,
-    this.avatarAsset = 'assets/images/food_fresho_logo.png',
+    required this.avatarAsset,
   });
+
+  /// Check if the avatar is a network URL
+  bool get isNetworkImage =>
+      avatarAsset.isNotEmpty &&
+      (avatarAsset.startsWith('http://') || avatarAsset.startsWith('https://'));
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +50,21 @@ class NotificationCard extends StatelessWidget {
               child: Center(
                 child: Padding(
                   padding: EdgeInsets.all(10.w),
-                  child: Image.asset(
-                    avatarAsset,
-                    fit: BoxFit.contain,
-                  ),
+                  child: avatarAsset.isEmpty
+                      ? const Icon(Icons.image, color: Colors.white, size: 24)
+                      : isNetworkImage
+                          ? Image.network(
+                              avatarAsset,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.image, color: Colors.white, size: 24),
+                            )
+                          : Image.asset(
+                              avatarAsset,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.image, color: Colors.white, size: 24),
+                            ),
                 ),
               ),
             ),

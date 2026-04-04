@@ -263,10 +263,10 @@ class ServiceDetailView extends StatelessWidget {
                                         if (service.rating != null)
                                           Row(
                                             children: [
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.amber,
-                                                size: 14.r,
+                                              SvgPicture.asset(
+                                                "assets/icons/star_fill.svg",
+                                                height: 14.h,
+                                                width: 14.w,
                                               ),
                                               SizedBox(width: 4.w),
                                               Text(
@@ -394,8 +394,16 @@ class ServiceDetailView extends StatelessWidget {
                           ),
                         ],
                         SizedBox(height: 24.h),
-
                         // Date & Time + Location (If applicable)
+                        Text(
+                          'availability'.tr,
+                          style: GoogleFonts.inter(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
                         if (service.date != null) ...[
                           _buildInfoRow(
                             Icons.calendar_today_outlined,
@@ -439,14 +447,14 @@ class ServiceDetailView extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        SizedBox(height: 10.h),
-                        Text(
-                          service.location, // Or more detailed address
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
+                        // SizedBox(height: 10.h),
+                        // Text(
+                        //   service.location, // Or more detailed address
+                        //   style: GoogleFonts.inter(
+                        //     fontSize: 14.sp,
+                        //     color: AppColors.textSecondary,
+                        //   ),
+                        // ),
                         SizedBox(height: 16.h),
                         GestureDetector(
                           onTap: () {
