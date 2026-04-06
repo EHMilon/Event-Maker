@@ -217,6 +217,10 @@ class ApiConstant {
   /// Returns wallet summary and transaction history with pagination
   static const String providerWalletHistory = '/payments/provider-wallet-history';
 
+  /// Customer payment history endpoint
+  /// Returns paginated payment history for customers
+  static const String customerPaymentHistory = '/payments/customer-history';
+
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';

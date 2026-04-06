@@ -8,7 +8,9 @@ import '../../models/service_provider_profile_model.dart';
 import '../../models/service_provider_review_model.dart';
 import '../../models/personal_info_model.dart';
 import '../../models/wallet_model.dart';
+import '../../models/customer_payment_history_model.dart';
 import '../../services/wallet_repository.dart';
+import '../../services/customer_payment_repository.dart';
 import '../../services/service_repository.dart';
 import '../../models/service_model.dart';
 import '../../models/review_model.dart';
@@ -136,6 +138,9 @@ class ProfileController extends GetxController {
   /// Wallet repository instance
   final WalletRepository _walletRepository = WalletRepository();
 
+  /// Customer payment repository instance
+  final CustomerPaymentRepository _customerPaymentRepository = CustomerPaymentRepository();
+
   /// Service repository instance for bookmarks
   final ServiceRepository _serviceRepository = const ServiceRepository();
 
@@ -161,6 +166,31 @@ class ProfileController extends GetxController {
   /// Whether more transactions can be loaded
   bool get hasMoreWalletTransactions =>
       walletCurrentPage.value < walletTotalPages.value;
+
+  // ===== CUSTOMER PAYMENT HISTORY API STATE =====
+
+  /// Customer payment transactions from API
+  final RxList<CustomerPaymentTransaction> customerPaymentTransactions =
+      <CustomerPaymentTransaction>[].obs;
+
+  /// Loading state for customer payment history API calls
+  final RxBool isCustomerPaymentLoading = false.obs;
+
+  /// Error message for customer payment history API calls
+  final RxString customerPaymentError = ''.obs;
+
+  /// Current page for customer payment pagination
+  final RxInt customerPaymentCurrentPage = 1.obs;
+
+  /// Total pages for customer payment pagination
+  final RxInt customerPaymentTotalPages = 1.obs;
+
+  /// Total count of customer payments
+  final RxInt customerPaymentTotal = 0.obs;
+
+  /// Whether more customer payment transactions can be loaded
+  bool get hasMoreCustomerPayments =>
+      customerPaymentCurrentPage.value < customerPaymentTotalPages.value;
 
   @override
   void onInit() {
@@ -833,6 +863,64 @@ class ProfileController extends GetxController {
   /// Refreshes bookmarks data
   Future<void> refreshBookmarks() async {
     await fetchBookmarks();
+  }
+
+  // ===== CUSTOMER PAYMENT HISTORY API METHODS =====
+
+  /// Fetches customer payment history from API
+  /// API Endpoint: GET /payments/customer-history
+  ///
+  /// [refresh] - If true, resets pagination and fetches from page 1
+  Future<void> fetchCustomerPaymentHistory({bool refresh = false}) async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    // Reset pagination on refresh
+    if (refresh) {
+      customerPaymentCurrentPage.value = 1;
+      customerPaymentTransactions.clear();
+    }
+
+    isCustomerPaymentLoading.value = true;
+    customerPaymentError.value = '';
+
+    try {
+      final response = await _customerPaymentRepository.fetchCustomerPaymentHistory(
+        page: customerPaymentCurrentPage.value,
+        pageSize: 10,
+      );
+
+      if (response.success) {
+        // Update pagination info
+        customerPaymentTotalPages.value = response.pagination.totalPages;
+        customerPaymentTotal.value = response.pagination.total;
+
+        // Append transactions (for load more)
+        customerPaymentTransactions.addAll(response.data);
+      } else {
+        customerPaymentError.value = response.message;
+      }
+    } catch (e) {
+      customerPaymentError.value = e.toString();
+      debugPrint('Error fetching customer payment history: $e');
+    } finally {
+      isCustomerPaymentLoading.value = false;
+    }
+  }
+
+  /// Loads more customer payment transactions for pagination
+  Future<void> loadMoreCustomerPayments() async {
+    if (!hasMoreCustomerPayments || isCustomerPaymentLoading.value) return;
+
+    customerPaymentCurrentPage.value++;
+    await fetchCustomerPaymentHistory();
+  }
+
+  /// Refreshes customer payment data
+  Future<void> refreshCustomerPayments() async {
+    await fetchCustomerPaymentHistory(refresh: true);
   }
 
   /// NOTE: TextEditingControllers are NOT disposed here because this controller
