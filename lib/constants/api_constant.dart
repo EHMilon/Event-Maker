@@ -172,6 +172,11 @@ class ApiConstant {
   static String providerBookingRequestDecision(int id) =>
       '/bookings/provider/booking-request-decision/$id';
 
+  /// Mark booking as completed: POST /providers/mark-as-completed/{booking_id}
+  /// Body: {} (empty body)
+  static String providerMarkAsComplete(int bookingId) =>
+      '/providers/mark-as-completed/$bookingId';
+
   // ===== REVIEW ENDPOINTS =====
 
   static const String reviews = '/reviews';
@@ -236,6 +241,11 @@ class ApiConstant {
   /// Provider booking notifications: GET api/bookings/provider/booking-notification
   static const String providerBookingNotifications =
       '/bookings/provider/booking-notification';
+
+  /// Provider home screen data
+  /// GET /providers/home
+  /// Returns: Provider home data including earnings, analytics, balance, and active orders
+  static const String providerHome = '/providers/home';
 
   // ===== TIMEOUTS (in milliseconds) =====
 

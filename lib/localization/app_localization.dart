@@ -240,6 +240,8 @@ class AppLocalization extends Translations {
         'You have successfully accepted the request. The client will be notified shortly.',
     'rejectSuccessTitle': 'Request Rejected Successfully',
     'rejectSuccessSubtitle': 'You have successfully rejected the request.',
+    'specialRequest': 'Special Request',
+    'selectedPackage': 'Selected Package',
 
     // Service Provider My Services
     'myServices': 'My Services',
@@ -380,6 +382,7 @@ class AppLocalization extends Translations {
     'startTime': 'Start Time',
     'endTime': 'End Time',
     'select': 'Select',
+    'needConfirmationBeforePayment': 'Need confirmation before payment',
 
     // Days
     'mon': 'Mon',
@@ -700,6 +703,8 @@ class AppLocalization extends Translations {
     'acceptSuccessSubtitle': 'لقد قبلت الطلب بنجاح. سيتم إخطار العميل قريباً.',
     'rejectSuccessTitle': 'تم رفض الطلب بنجاح',
     'rejectSuccessSubtitle': 'لقد رفضت الطلب بنجاح.',
+    'specialRequest': 'طلب خاص',
+    'selectedPackage': 'الحزمة المختارة',
 
     // Service Provider My Services
     'myServices': 'خدماتي',
@@ -818,6 +823,7 @@ class AppLocalization extends Translations {
     'startTime': 'وقت البدء',
     'endTime': 'وقت الانتهاء',
     'select': 'اختر',
+    'needConfirmationBeforePayment': 'هل تحتاج إلى تأكيد قبل الدفع؟',
 
     // Days
     'mon': 'الاثنين',

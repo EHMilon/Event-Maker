@@ -99,4 +99,28 @@ class BookingRequestRepository {
   Future<Map<String, dynamic>> rejectBooking(int bookingId) async {
     return makeBookingDecision(bookingId: bookingId, action: 'rejected');
   }
+
+  /// Mark booking as completed.
+  /// POST: /providers/mark-as-completed/{booking_id}
+  Future<Map<String, dynamic>> markBookingAsCompleted(int bookingId) async {
+    try {
+      Log.d(
+        '=======> BookingRequestRepository: Marking booking $bookingId as completed',
+      );
+      final response = await _api.post(
+        ApiConstant.providerMarkAsComplete(bookingId),
+        body: {},
+      );
+      Log.d('=======> BookingRequestRepository: Mark as complete response: $response');
+      return response;
+    } on ApiException catch (e) {
+      Log.e('=======> BookingRequestRepository: ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e(
+        '=======> BookingRequestRepository: Error marking booking as completed: $e',
+      );
+      throw ApiException(message: 'Failed to mark booking as completed: $e');
+    }
+  }
 }

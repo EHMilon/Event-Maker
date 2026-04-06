@@ -79,7 +79,7 @@ class SPHomeView extends GetView<SPHomeController> {
   // Returns the appropriate greeting key and icon based on current time
   ({String greetingKey, IconData icon, Color iconColor}) _getGreetingData() {
     final hour = DateTime.now().hour;
-    
+
     if (hour >= 5 && hour < 12) {
       // Morning: 5 AM - 11:59 AM
       return (
@@ -106,7 +106,7 @@ class SPHomeView extends GetView<SPHomeController> {
 
   Widget _buildHeader() {
     final greetingData = _getGreetingData();
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -137,11 +137,11 @@ class SPHomeView extends GetView<SPHomeController> {
                 children: [
                   Flexible(
                     child: Text(
-                      controller.businessName.value.isEmpty 
-                        ? (controller.userName.value.isEmpty 
-                            ? 'Good morning' 
-                            : controller.userName.value)
-                        : controller.businessName.value,
+                      controller.businessName.value.isEmpty
+                          ? (controller.userName.value.isEmpty
+                                ? 'Good morning'
+                                : controller.userName.value)
+                          : controller.businessName.value,
                       style: GoogleFonts.inter(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w600,
@@ -455,7 +455,10 @@ class SPHomeView extends GetView<SPHomeController> {
             ),
             SizedBox(height: 12.h), // Spacing between header and amount
             Text(
-              controller.stats.value.totalBalance, // Use dynamic balance from controller
+              controller
+                  .stats
+                  .value
+                  .totalBalance, // Use dynamic balance from controller
               style: GoogleFonts.inter(
                 fontSize: 26.sp, // Large, bold balance text
                 color: AppColors.textPrimary,
@@ -468,8 +471,6 @@ class SPHomeView extends GetView<SPHomeController> {
       ),
     );
   }
-
-
 
   Widget _buildQuickActions(BuildContext context) {
     return Row(
@@ -608,18 +609,7 @@ class SPHomeView extends GetView<SPHomeController> {
           padding: EdgeInsets.only(bottom: 16.h),
           child: controller.isLoading.value
               ? _buildSkeletonCard()
-              : OrderCard(
-                  title: controller.activeOrders[index].title,
-                  imageUrl: controller.activeOrders[index].imageUrl,
-                  badgeCount: controller.activeOrders[index].badgeCount,
-                  titleColor: AppColors.grey500,
-                  onTap: () => Get.to(
-                    () => SPServiceOrdersView(
-                      serviceTitle: controller.activeOrders[index].title,
-                      orderCount: controller.activeOrders[index].badgeCount,
-                    ),
-                  ),
-                ),
+              : _buildOrderCard(index),
         ),
       ),
     );
@@ -657,6 +647,28 @@ class SPHomeView extends GetView<SPHomeController> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Builds an order card that navigates to service orders detail
+  Widget _buildOrderCard(int index) {
+    final order = controller.activeOrders[index];
+    final serviceGroup = controller.getServiceOrderGroup(order.id);
+
+    return OrderCard(
+      title: order.title,
+      imageUrl: order.imageUrl,
+      badgeCount: order.badgeCount,
+      titleColor: AppColors.grey500,
+      onTap: () {
+        Get.to(
+          () => SPServiceOrdersView(
+            serviceTitle: order.title,
+            orderCount: order.badgeCount,
+            bookings: serviceGroup?.bookings ?? [],
+          ),
+        );
+      },
     );
   }
 }

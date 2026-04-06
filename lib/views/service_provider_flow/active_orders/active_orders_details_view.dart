@@ -4,16 +4,24 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
+import 'package:event_maker/models/provider_home_model.dart';
 import 'package:event_maker/models/service_model.dart';
+import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 
+/// Service Orders Detail View for Service Provider
+///
+/// Displays individual bookings for a specific service.
+/// Each booking card shows customer info, date/time, and navigates to booking details.
 class SPServiceOrdersView extends StatelessWidget {
   final String serviceTitle;
   final int orderCount;
+  final List<ActiveBooking> bookings;
+
   const SPServiceOrdersView({
     super.key,
     required this.serviceTitle,
-    this.orderCount = 4,
+    this.orderCount = 0,
+    this.bookings = const [],
   });
 
   @override
@@ -38,49 +46,54 @@ class SPServiceOrdersView extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: GridView.builder(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 9.w,
-            mainAxisSpacing: 12.h,
-            mainAxisExtent: 240.h,
-          ),
-          itemCount: orderCount,
-          itemBuilder: (context, index) {
-            return _buildOrderCard(index);
-          },
-        ),
+        child: bookings.isEmpty
+            ? _buildEmptyView()
+            : GridView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 9.w,
+                  mainAxisSpacing: 12.h,
+                  mainAxisExtent: 240.h,
+                ),
+                itemCount: bookings.length,
+                itemBuilder: (context, index) {
+                  return _buildBookingCard(bookings[index]);
+                },
+              ),
       ),
     );
   }
 
-  Widget _buildOrderCard(int index) {
-    return GestureDetector(
-      onTap: () {
-        // Mocking ServiceModel from order details to reuse ServiceDetailView
-        final mockService = ServiceModel(
-          id: 'mock_id_$index',
-          title: 'Elite Event Photography',
-          description:
-              'Capturing your special moments with artistic precision and creativity. We specialize in event photography with over 8 years of experience documenting weddings, corporate events, and celebrations.',
-          images: ['https://picsum.photos/id/${index + 50}/300/200'],
-          type: ServiceType.photography,
-          provider: ServiceProvider(
-            name: 'Jenny Smith',
-            role: 'Caterer',
-            imageUrl:
-                'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop',
-            isVerified: true,
+  /// Builds empty state view
+  Widget _buildEmptyView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 64.sp,
+            color: AppColors.textSecondary,
           ),
-          location:
-              'Airport Rd - Al Manhal - W14 02 - Abu Dhabi - United Arab Emirates',
-          rating: 4.8,
-          reviewCount: 120,
-          basePrice: 46,
-        );
-        Get.to(() => ServiceDetailView(service: mockService, isOrder: true));
-      },
+          SizedBox(height: 16.h),
+          Text(
+            'noBookingsFound'.tr,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a booking card with real booking data
+  Widget _buildBookingCard(ActiveBooking booking) {
+    return GestureDetector(
+      onTap: () => _onBookingTap(booking),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -101,10 +114,22 @@ class SPServiceOrdersView extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
               child: Image.network(
-                'https://picsum.photos/id/${index + 50}/300/200',
+                booking.serviceImage.isNotEmpty
+                    ? booking.serviceImage
+                    : 'https://picsum.photos/300/200',
                 height: 110.h,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 110.h,
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey[400],
+                    ),
+                  );
+                },
               ),
             ),
             Padding(
@@ -114,7 +139,7 @@ class SPServiceOrdersView extends StatelessWidget {
                 children: [
                   // Service Title
                   Text(
-                    serviceTitle,
+                    booking.serviceTitle,
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -131,7 +156,7 @@ class SPServiceOrdersView extends StatelessWidget {
                       SizedBox(width: 4.w),
                       Expanded(
                         child: Text(
-                          '8PM - 11PM, 21 Nov',
+                          booking.formattedDateTime,
                           style: GoogleFonts.inter(
                             fontSize: 10.sp,
                             color: AppColors.textSecondary,
@@ -152,9 +177,17 @@ class SPServiceOrdersView extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 14.r,
-                        backgroundImage: const NetworkImage(
-                            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop'),
-                            
+                        backgroundColor: AppColors.primary.withOpacity(0.2),
+                        child: Text(
+                          booking.customerName.isNotEmpty
+                              ? booking.customerName[0].toUpperCase()
+                              : '?',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
                       SizedBox(width: 8.w),
                       Expanded(
@@ -162,7 +195,7 @@ class SPServiceOrdersView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Jenny Smith',
+                              booking.customerName,
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w500,
@@ -172,9 +205,9 @@ class SPServiceOrdersView extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Jenny@gmail.com',
+                              booking.customerEmail,
                               style: GoogleFonts.inter(
-                                fontSize: 12.sp,
+                                fontSize: 10.sp,
                                 color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -191,6 +224,38 @@ class SPServiceOrdersView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Handles booking card tap
+  /// Navigate to ServiceDetailView with isRequest=true to fetch real booking details from API
+  void _onBookingTap(ActiveBooking booking) {
+    // Create a minimal ServiceModel - actual data will be fetched from API
+    final serviceModel = ServiceModel(
+      id: booking.serviceId.toString(),
+      title: booking.serviceTitle,
+      description: '',
+      images: [booking.serviceImage],
+      type: ServiceType.catering,
+      provider: ServiceProvider(
+        name: '',
+        role: '',
+        imageUrl: '',
+        isVerified: false,
+      ),
+      location: '',
+      rating: 0,
+      reviewCount: 0,
+      basePrice: 0,
+    );
+
+    // Navigate with isRequest=true to fetch real booking details from API
+    Get.to(
+      () => ServiceDetailView(
+        service: serviceModel,
+        isRequest: true,
+        bookingId: booking.id,
       ),
     );
   }

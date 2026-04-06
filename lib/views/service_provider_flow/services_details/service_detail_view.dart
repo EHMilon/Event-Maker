@@ -136,6 +136,51 @@ class ServiceDetailView extends StatelessWidget {
     );
   }
 
+  /// Shows confirmation dialog for marking booking as complete
+  void _showMarkAsCompleteDialog(BuildContext context) {
+    if (bookingId == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AppCustomDialog(
+        iconPath: 'assets/images/accept.svg',
+        title: 'Are you sure you want to complete the service?',
+        mainButtonText: 'yes'.tr,
+        mainButtonCallback: () async {
+          Get.back(); // Close dialog
+          await _markBookingAsCompleted(bookingId!);
+        },
+        secondaryButtonText: 'no'.tr,
+        secondaryButtonCallback: () => Get.back(),
+      ),
+    );
+  }
+
+  /// Marks a booking as completed via API
+  Future<void> _markBookingAsCompleted(int bookingId) async {
+    try {
+      final repository = BookingRequestRepository();
+      final response = await repository.markBookingAsCompleted(bookingId);
+
+      final success = response['success'] as bool? ?? false;
+
+      if (success) {
+        Get.snackbar(
+          'success'.tr,
+          'Service marked as completed successfully',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        Get.back(); // Go back to list
+      } else {
+        final message =
+            response['message'] as String? ?? 'Failed to complete service';
+        Get.snackbar('error'.tr, message);
+      }
+    } catch (e) {
+      Get.snackbar('error'.tr, 'Failed to complete service: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Local state for package selection
@@ -150,8 +195,13 @@ class ServiceDetailView extends StatelessWidget {
         bookingId: bookingId!,
         service: service,
         isPastRequest: isPastRequest,
-        onAccept: () => _showAcceptDialog(context, bookingId!),
-        onReject: () => _showRejectDialog(context, bookingId!),
+        // If isOrder=true (from active orders), hide accept/reject and show mark as complete
+        showAcceptReject: !isOrder,
+        onAccept: isOrder ? null : () => _showAcceptDialog(context, bookingId!),
+        onReject: isOrder ? null : () => _showRejectDialog(context, bookingId!),
+        onMarkComplete: isOrder
+            ? () => _showMarkAsCompleteDialog(context)
+            : null,
       );
     }
 
@@ -261,9 +311,11 @@ class ServiceDetailView extends StatelessWidget {
                           onTap: () async {
                             final profile = await _repository
                                 .fetchVendorProfile(
-                              service.provider,
-                              providerId: service.providerId > 0 ? service.providerId : null,
-                            );
+                                  service.provider,
+                                  providerId: service.providerId > 0
+                                      ? service.providerId
+                                      : null,
+                                );
                             Get.to(() => VendorProfileView(vendor: profile));
                           },
                           child: Row(
@@ -413,7 +465,7 @@ class ServiceDetailView extends StatelessWidget {
                         ],
                         SizedBox(height: 24.h),
 
-                          // Date & Time + Location (If applicable)
+                        // Date & Time + Location (If applicable)
                         Text(
                           'availability'.tr,
                           style: GoogleFonts.inter(
@@ -738,24 +790,7 @@ class ServiceDetailView extends StatelessWidget {
                 children: [
                   if (isOrder)
                     PrimaryTextButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AppCustomDialog(
-                            iconPath: 'assets/images/accept.svg',
-                            title:
-                                'Are you sure you want to complete the service?',
-                            mainButtonText: 'yes'.tr,
-                            mainButtonCallback: () {
-                              // TODO: Handle actual completion logic (e.g., API call)
-                              Get.back(); // Close dialog
-                              Get.back(); // Go back
-                            },
-                            secondaryButtonText: 'no'.tr,
-                            secondaryButtonCallback: () => Get.back(),
-                          ),
-                        );
-                      },
+                      onPressed: () => _showMarkAsCompleteDialog(context),
                       text: 'markAsComplete'.tr,
                     )
                   else
@@ -767,8 +802,7 @@ class ServiceDetailView extends StatelessWidget {
                             arguments: {
                               'service': service,
                               'package': service.packages.isNotEmpty
-                                  ? service.packages[
-                                        selectedPackageIndex.value]
+                                  ? service.packages[selectedPackageIndex.value]
                                   : null,
                             },
                           );
@@ -778,8 +812,7 @@ class ServiceDetailView extends StatelessWidget {
                             arguments: {
                               'service': service,
                               'package': service.packages.isNotEmpty
-                                  ? service.packages[
-                                        selectedPackageIndex.value]
+                                  ? service.packages[selectedPackageIndex.value]
                                   : null,
                             },
                           );
@@ -859,15 +892,19 @@ class _BookingRequestDetailView extends StatefulWidget {
   final int bookingId;
   final ServiceModel service;
   final bool isPastRequest;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
+  final bool showAcceptReject;
+  final VoidCallback? onAccept;
+  final VoidCallback? onReject;
+  final VoidCallback? onMarkComplete;
 
   const _BookingRequestDetailView({
     required this.bookingId,
     required this.service,
     required this.isPastRequest,
-    required this.onAccept,
-    required this.onReject,
+    this.showAcceptReject = true,
+    this.onAccept,
+    this.onReject,
+    this.onMarkComplete,
   });
 
   @override
@@ -923,8 +960,8 @@ class _BookingRequestDetailViewDetailState
       body: _isLoading
           ? _buildLoadingState()
           : _error != null
-              ? _buildErrorState()
-              : _buildContent(),
+          ? _buildErrorState()
+          : _buildContent(),
     );
   }
 
@@ -970,18 +1007,34 @@ class _BookingRequestDetailViewDetailState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(width: 200.w, height: 24.h, color: AppColors.lightGrey),
+                      Container(
+                        width: 200.w,
+                        height: 24.h,
+                        color: AppColors.lightGrey,
+                      ),
                       SizedBox(height: 16.h),
                       Row(
                         children: [
-                          Container(width: 45.w, height: 45.w, color: AppColors.lightGrey),
+                          Container(
+                            width: 45.w,
+                            height: 45.w,
+                            color: AppColors.lightGrey,
+                          ),
                           SizedBox(width: 12.w),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(width: 120.w, height: 16.h, color: AppColors.lightGrey),
+                              Container(
+                                width: 120.w,
+                                height: 16.h,
+                                color: AppColors.lightGrey,
+                              ),
                               SizedBox(height: 8.h),
-                              Container(width: 80.w, height: 12.h, color: AppColors.lightGrey),
+                              Container(
+                                width: 80.w,
+                                height: 12.h,
+                                color: AppColors.lightGrey,
+                              ),
                             ],
                           ),
                         ],
@@ -1134,7 +1187,8 @@ class _BookingRequestDetailViewDetailState
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12.r),
                               color: AppColors.lightGrey,
-                              image: detail.provider.avatar != null &&
+                              image:
+                                  detail.provider.avatar != null &&
                                       detail.provider.avatar!.isNotEmpty
                                   ? DecorationImage(
                                       image: NetworkImage(
@@ -1146,7 +1200,8 @@ class _BookingRequestDetailViewDetailState
                                     )
                                   : null,
                             ),
-                            child: detail.provider.avatar == null ||
+                            child:
+                                detail.provider.avatar == null ||
                                     detail.provider.avatar!.isEmpty
                                 ? Icon(
                                     Icons.person,
@@ -1224,7 +1279,8 @@ class _BookingRequestDetailViewDetailState
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(50.r),
-                            child: detail.customer.avatar != null &&
+                            child:
+                                detail.customer.avatar != null &&
                                     detail.customer.avatar!.isNotEmpty
                                 ? Image.network(
                                     ApiConstant.getFullMediaUrl(
@@ -1289,10 +1345,7 @@ class _BookingRequestDetailViewDetailState
                       ),
                       SizedBox(height: 12.h),
                       _buildDetailRow('name'.tr, detail.customer.fullName),
-                      _buildDetailRow(
-                        'mobileNumber'.tr,
-                        detail.customer.phone,
-                      ),
+                      _buildDetailRow('mobileNumber'.tr, detail.customer.phone),
                       _buildDetailRow('email'.tr, detail.customer.email),
                       _buildDetailRow(
                         'dateTime'.tr,
@@ -1416,39 +1469,46 @@ class _BookingRequestDetailViewDetailState
             bottom: 30.h,
             left: 24.w,
             right: 24.w,
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: widget.onReject,
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: AppColors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      side: const BorderSide(color: AppColors.lightGrey),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+            child: widget.showAcceptReject
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: widget.onReject,
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: AppColors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16.h),
+                            side: const BorderSide(color: AppColors.lightGrey),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'reject'.tr,
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.black,
+                            ),
+                          ),
+                        ),
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'reject'.tr,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: PrimaryTextButton(
+                          onPressed: widget.onAccept,
+                          text: 'accept'.tr,
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: PrimaryTextButton(
-                    onPressed: widget.onAccept,
-                    text: 'accept'.tr,
-                  ),
-                ),
-              ],
-            ),
+                    ],
+                  )
+                : widget.onMarkComplete != null
+                    ? PrimaryTextButton(
+                        onPressed: widget.onMarkComplete,
+                        text: 'markAsComplete'.tr,
+                      )
+                    : const SizedBox.shrink(),
           ),
       ],
     );
@@ -1484,6 +1544,7 @@ class _BookingRequestDetailViewDetailState
               ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
@@ -1493,12 +1554,18 @@ class _BookingRequestDetailViewDetailState
               color: AppColors.textSecondary,
             ),
           ),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              softWrap: true,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
