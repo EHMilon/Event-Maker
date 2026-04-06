@@ -1,8 +1,10 @@
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/constants/api_constant.dart';
+import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/widgets/empty_widget.dart';
 import 'package:event_maker/views/customer_flow/bookings/customer_bookings_controller.dart';
-import 'package:event_maker/views/customer_flow/bookings/customer_booking_model.dart';
+import 'package:event_maker/models/customer_booking_model.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -104,7 +106,7 @@ class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Obx(() {
         if (controller.isLoading.value) {
-          return Obx(() => Skeletonizer(
+          return Skeletonizer(
             enabled: true,
             child: ListView.separated(
               itemCount: controller.skeletonRequests.length,
@@ -114,7 +116,7 @@ class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
                 return _RequestCard(request: item);
               },
             ),
-          ));
+          );
         }
 
         final list = controller.upcomingRequests;
@@ -145,7 +147,7 @@ class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Obx(() {
         if (controller.isLoading.value) {
-          return Obx(() => Skeletonizer(
+          return Skeletonizer(
             enabled: true,
             child: ListView.separated(
               itemCount: controller.skeletonRequests.length,
@@ -155,7 +157,7 @@ class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
                 return _RequestCard(request: item);
               },
             ),
-          ));
+          );
         }
 
         final list = controller.pastRequests;
@@ -181,32 +183,71 @@ class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
 class _RequestCard extends StatelessWidget {
   const _RequestCard({required this.request});
 
-  final CustomerBookingModel request;
+  final CustomerBookingItem request;
+
+  /// Navigate to service detail
+  Future<void> _navigateToServiceDetail(BuildContext context) async {
+    final serviceId = request.service.id;
+    if (serviceId <= 0) return;
+
+    // Show loading indicator
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      // Fetch service detail from API
+      final repository = ServiceRepository();
+      final service = await repository.fetchCustomerServiceDetail(serviceId);
+
+      // Close loading dialog
+      Get.back();
+
+      // Navigate to service detail view with booking info
+      // User already booked this service, so hide Book Now button
+      if (context.mounted) {
+        Get.to(() => ServiceDetailView(
+              service: service,
+              isAlreadyBooked: true, // Hide Book Now button
+              bookedPackage: request.selectedPackage, // Pre-selected package
+            ));
+      }
+    } catch (e) {
+      // Close loading dialog
+      Get.back();
+
+      // Show error snackbar
+      Get.snackbar(
+        'Error',
+        'Failed to load service details',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final service = request.service;
+    // Build image URL from cover image path
+    final imageUrl = request.service.coverImage.isNotEmpty
+        ? ApiConstant.getFullMediaUrl(request.service.coverImage)
+        : 'assets/images/catering.jpg';
+
     return GestureDetector(
-      onTap: () {
-        if (service != null) {
-          Get.to(() => ServiceDetailView(service: service));
-        }
-      },
+      onTap: () => _navigateToServiceDetail(context),
       child: Padding(
         padding: EdgeInsets.only(bottom: 8.h),
         child: CustomerBookmarkCard(
-          imagePath: request.image,
+          imagePath: imageUrl,
           title: request.title,
-          subtitle: request.subtitle,
-          location: request.subtitle,
-          price: service?.basePrice?.toString() ?? '',
-          priceUnit: service?.priceUnit ?? 'AED',
-          rating: service?.rating?.toString() ?? '',
+          subtitle: request.displayDateTime,
+          location: request.location,
+          price: request.totalAmount,
+          priceUnit: request.currency,
+          rating: '',
           showBookmarkButton: false,
         ),
       ),
     );
   }
 }
-
-

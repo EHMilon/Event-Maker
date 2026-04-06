@@ -1,6 +1,7 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/constants/api_constant.dart';
+import 'package:event_maker/models/customer_booking_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
@@ -16,11 +17,16 @@ import 'package:google_fonts/google_fonts.dart';
 class ServiceDetailView extends StatelessWidget {
   final ServiceModel service;
   final bool showEditButton;
+  final bool isAlreadyBooked; // When true, hide "Book Now" button
+  final CustomerBookingPackageInfo?
+  bookedPackage; // Pre-selected package from booking
 
   const ServiceDetailView({
     super.key,
     required this.service,
     this.showEditButton = false,
+    this.isAlreadyBooked = false,
+    this.bookedPackage,
   });
   ServiceRepository get _repository => const ServiceRepository();
 
@@ -55,11 +61,15 @@ class ServiceDetailView extends StatelessWidget {
         );
       } else {
         // Try as asset
-        return Image.asset(imagePath, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) =>
-            _buildPlaceholderImage());
+        return Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildPlaceholderImage(),
+        );
       }
     }
-    
+
     // Fall back to coverImage if images is empty
     if (service.coverImage.isNotEmpty) {
       final coverPath = service.coverImage;
@@ -73,11 +83,15 @@ class ServiceDetailView extends StatelessWidget {
               _buildPlaceholderImage(),
         );
       } else {
-        return Image.asset(coverPath, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) =>
-            _buildPlaceholderImage());
+        return Image.asset(
+          coverPath,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildPlaceholderImage(),
+        );
       }
     }
-    
+
     return _buildPlaceholderImage();
   }
 
@@ -501,7 +515,9 @@ class ServiceDetailView extends StatelessWidget {
                         // Pricing / Packages
                         if (service.packages.isNotEmpty) ...[
                           Text(
-                            'packagesPricings'.tr,
+                            isAlreadyBooked
+                                ? 'selectedPackage'.tr
+                                : 'packagesPricings'.tr,
                             style: GoogleFonts.inter(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w600,
@@ -509,128 +525,32 @@ class ServiceDetailView extends StatelessWidget {
                             ),
                           ),
                           SizedBox(height: 16.h),
-                          Obx(
-                            () => Column(
-                              children: List.generate(service.packages.length, (
-                                index,
-                              ) {
-                                final package = service.packages[index];
-                                final isSelected =
-                                    selectedPackageIndex.value == index;
-                                return GestureDetector(
-                                  onTap: () =>
-                                      selectedPackageIndex.value = index,
-                                  child: Container(
-                                    margin: EdgeInsets.only(bottom: 16.h),
-                                    padding: EdgeInsets.all(20.r),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(20.r),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.primary
-                                            : AppColors.lightGrey,
-                                        width: isSelected ? 2 : 1,
+                          // If already booked, show only the booked package
+                          if (isAlreadyBooked && bookedPackage != null)
+                            _buildSelectedPackageCard(bookedPackage!)
+                          // Otherwise, show all packages with selection
+                          else
+                            Obx(
+                              () => Column(
+                                children: List.generate(
+                                  service.packages.length,
+                                  (index) {
+                                    final package = service.packages[index];
+                                    final isSelected =
+                                        selectedPackageIndex.value == index;
+                                    return GestureDetector(
+                                      onTap: () =>
+                                          selectedPackageIndex.value = index,
+                                      child: _buildPackageCard(
+                                        package: package,
+                                        isSelected: isSelected,
+                                        isInteractive: !isAlreadyBooked,
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.05),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              package.name,
-                                              style: GoogleFonts.inter(
-                                                fontSize: 18.sp,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                            Container(
-                                              width: 24.r,
-                                              height: 24.r,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: isSelected
-                                                    ? AppColors.primary
-                                                    : Colors.transparent,
-                                                border: Border.all(
-                                                  color: isSelected
-                                                      ? AppColors.primary
-                                                      : AppColors.grey,
-                                                  width: 1.5,
-                                                ),
-                                              ),
-                                              child: isSelected
-                                                  ? Icon(
-                                                      Icons.check,
-                                                      size: 16.r,
-                                                      color: Colors.white,
-                                                    )
-                                                  : null,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 4.h),
-                                        Text(
-                                          '${package.price} ${service.priceUnit}',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 22.sp,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                        SizedBox(height: 20.h),
-                                        ...package.featureTitles.map(
-                                          (featureTitle) => Padding(
-                                            padding: EdgeInsets.only(
-                                              bottom: 12.h,
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  Icons.check,
-                                                  size: 18.r,
-                                                  color: const Color(
-                                                    0xFF00C566,
-                                                  ), // Green check
-                                                ),
-                                                SizedBox(width: 12.w),
-                                                Expanded(
-                                                  child: Text(
-                                                    featureTitle,
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 14.sp,
-                                                      color:
-                                                          AppColors.textSecondary,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
                         ] else ...[
                           Row(
                             children: [
@@ -676,30 +596,30 @@ class ServiceDetailView extends StatelessWidget {
             ),
           ),
 
-            // Bottom Buttons
-            if (!showEditButton)
-              Positioned(
-                bottom: 30.h,
-                left: 24.w,
-                right: 24.w,
-                child: PrimaryTextButton(
-                  onPressed: () {
-                    // Use requiresConfirmation to determine flow
-                    // Both hospitality and non-hospitality need to go through date/time selection first
-                    // The routing to payment vs booking request sent happens in ServiceBookingController
-                    Get.toNamed(
-                      AppRoutes.bookServiceDate,
-                      arguments: {
-                        'service': service,
-                        'package': service.packages.isNotEmpty
-                            ? service.packages[selectedPackageIndex.value]
-                            : null,
-                      },
-                    );
-                  },
-                  text: 'bookNow'.tr,
-                ),
+          // Bottom Buttons - hide when editing or already booked
+          if (!showEditButton && !isAlreadyBooked)
+            Positioned(
+              bottom: 30.h,
+              left: 24.w,
+              right: 24.w,
+              child: PrimaryTextButton(
+                onPressed: () {
+                  // Use requiresConfirmation to determine flow
+                  // Both hospitality and non-hospitality need to go through date/time selection first
+                  // The routing to payment vs booking request sent happens in ServiceBookingController
+                  Get.toNamed(
+                    AppRoutes.bookServiceDate,
+                    arguments: {
+                      'service': service,
+                      'package': service.packages.isNotEmpty
+                          ? service.packages[selectedPackageIndex.value]
+                          : null,
+                    },
+                  );
+                },
+                text: 'bookNow'.tr,
               ),
+            ),
         ],
       ),
     );
@@ -761,5 +681,155 @@ class ServiceDetailView extends StatelessWidget {
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
     return '$dayName, $day $monthName, $year $hour.$minute$period';
+  }
+
+  /// Build the selected package card (when user already booked)
+  Widget _buildSelectedPackageCard(CustomerBookingPackageInfo package) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(20.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppColors.primary, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                package.name,
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Container(
+                width: 24.r,
+                height: 24.r,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primary,
+                ),
+                child: Icon(Icons.check, size: 16.r, color: Colors.white),
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            '${package.price} ${service.priceUnit}',
+            style: GoogleFonts.inter(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build a package card for selection
+  Widget _buildPackageCard({
+    required ServicePackage package,
+    required bool isSelected,
+    required bool isInteractive,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(20.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: isSelected ? AppColors.primary : AppColors.lightGrey,
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                package.name,
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Container(
+                width: 24.r,
+                height: 24.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : AppColors.grey,
+                    width: 1.5,
+                  ),
+                ),
+                child: isSelected
+                    ? Icon(Icons.check, size: 16.r, color: Colors.white)
+                    : null,
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            '${package.price} ${service.priceUnit}',
+            style: GoogleFonts.inter(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+            ),
+          ),
+          SizedBox(height: 20.h),
+          ...package.featureTitles.map(
+            (featureTitle) => Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Row(
+                children: [
+                  Icon(Icons.check, size: 18.r, color: const Color(0xFF00C566)),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      featureTitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
