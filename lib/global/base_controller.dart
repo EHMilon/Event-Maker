@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../models/api_result.dart';
+import '../services/api_result.dart';
 import '../services/connectivity_service.dart';
 
 /// Base controller providing common state management functionality.

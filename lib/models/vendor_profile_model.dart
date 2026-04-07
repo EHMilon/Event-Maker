@@ -8,6 +8,7 @@ class VendorServiceModel {
   final String coverImage;
   final String startingPrice;
   final String currency;
+  final String firstAddress;
 
   VendorServiceModel({
     required this.id,
@@ -15,6 +16,7 @@ class VendorServiceModel {
     required this.coverImage,
     required this.startingPrice,
     required this.currency,
+    this.firstAddress = '',
   });
 
   factory VendorServiceModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class VendorServiceModel {
       coverImage: json['cover_image'] as String? ?? '',
       startingPrice: json['starting_price'] as String? ?? '0.00',
       currency: json['currency'] as String? ?? 'AED',
+      firstAddress: json['first_address'] as String? ?? '',
     );
   }
 }

@@ -61,7 +61,11 @@ class ServicesCard extends StatelessWidget {
         width: double.infinity,
         color: AppColors.lightGrey,
         child: const Center(
-          child: Icon(Icons.image_not_supported, size: 40, color: AppColors.grey),
+          child: Icon(
+            Icons.image_not_supported,
+            size: 40,
+            color: AppColors.grey,
+          ),
         ),
       );
     }
@@ -121,7 +125,6 @@ class ServicesCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8.r),
-                        
                       ),
                       child: Icon(
                         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
@@ -183,7 +186,7 @@ class ServicesCard extends StatelessWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: price,
+                              text: "$price AED",
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w400,

@@ -21,25 +21,35 @@ class ServiceProviderProfileView extends StatefulWidget {
 }
 
 class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   final controller = Get.find<ProfileController>();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 2, vsync: this);
     _loadProfileData();
   }
 
-  Future<void> _loadProfileData() async {
-    await controller.fetchAllProviderData();
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh profile data when app resumes (user returns to this screen)
+    if (state == AppLifecycleState.resumed) {
+      _loadProfileData();
+    }
+  }
+
+  Future<void> _loadProfileData() async {
+    await controller.fetchAllProviderData();
   }
 
   @override
@@ -288,7 +298,7 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                           service.coverImage,
                         ),
                         title: service.title,
-                        location: '',
+                        location: service.firstAddress,
                         price: service.startingPrice,
                         rating: service.ratingValue.toString(),
                         isBookmarked: false,

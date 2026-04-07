@@ -744,6 +744,9 @@ class ProfileController extends GetxController {
         userName.value = personalInfoResponse.data.fullName;
         bio.value = personalInfoResponse.data.bio ?? '';
 
+        // Refresh provider profile to get updated data (including approved services with first_address)
+        await fetchProviderProfile();
+
         Get.back();
         Get.snackbar(
           'success'.tr,

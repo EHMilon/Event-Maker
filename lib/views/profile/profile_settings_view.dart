@@ -55,11 +55,13 @@ class ProfileSettingsView extends GetView<ProfileController> {
                             width: 2.w,
                           ),
                         ),
-                        child: Obx(() => UserAvatar(
-                          imageUrl: controller.profileImage.value,
-                          localFile: controller.selectedProfileImage.value,
-                          radius: 50,
-                        )),
+                        child: Obx(
+                          () => UserAvatar(
+                            imageUrl: controller.profileImage.value,
+                            localFile: controller.selectedProfileImage.value,
+                            radius: 50,
+                          ),
+                        ),
                       ),
                       Positioned(
                         bottom: 0,
@@ -197,14 +199,16 @@ class ProfileSettingsView extends GetView<ProfileController> {
                 }),
 
                 SizedBox(height: 48.h),
-                PrimaryTextButton(
-                  onPressed: () => controller.updatePersonalInfo(),
-                  text: 'update'.tr,
-                ),
-                SizedBox(height: 24.h),
               ],
             ),
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: PrimaryTextButton(
+          onPressed: () => controller.updatePersonalInfo(),
+          text: 'update'.tr,
         ),
       ),
     );

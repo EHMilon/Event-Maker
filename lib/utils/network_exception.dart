@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import '../models/api_result.dart';
+import '../services/api_result.dart';
 import '../constants/api_constant.dart';
 import 'logger.dart';
 
