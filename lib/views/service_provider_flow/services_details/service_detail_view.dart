@@ -1,6 +1,7 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/constants/app_config.dart';
 import 'package:event_maker/models/booking_request_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/models/vendor_profile_model.dart';
@@ -1004,20 +1005,45 @@ class ServiceDetailView extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         debugPrint('Map clicked - opening full map view');
+        // Get first availability for coordinates
+        final firstAvailability = service.availabilities.isNotEmpty
+            ? service.availabilities.first
+            : null;
+
+        if (firstAvailability == null) {
+          Get.snackbar(
+            'No Location',
+            'This service does not have a location set.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+
         Get.toNamed(
           AppRoutes.mapResults,
           arguments: {
-            'serviceTitle': service.title,
-            'availabilities': service.availabilities.map((avail) {
-              return {
-                'latitude': avail.latitude,
-                'longitude': avail.longitude,
-                'address': avail.address,
-                'week_days': avail.weekDays,
-                'start_time': avail.startTime,
-                'end_time': avail.endTime,
-              };
-            }).toList(),
+            'is_single_service_view': true,
+            'service_id': service.apiId,
+            'service_title': service.title,
+            'service_description': service.description,
+            'service_address': firstAvailability.address.isNotEmpty
+                ? firstAvailability.address
+                : service.displayLocation,
+            'latitude': double.tryParse(firstAvailability.latitude) ?? 24.4539,
+            'longitude': double.tryParse(firstAvailability.longitude) ?? 54.3773,
+            'cover_image': service.coverImage,
+            'provider_id': service.providerId,
+            'provider_name': service.provider.name,
+            'provider_avatar': service.provider.imageUrl,
+            'starting_price': service.basePrice ?? 0.0,
+            'currency': service.priceUnit.split(' ').first,
+            'role_name': service.provider.role,
+            'rating': service.rating ?? 0.0,
+            'total_reviews': service.reviewCount,
+            'service_type_name': service.type.name,
+            'service_as_name': service.serviceAs?.label ?? '',
+            'requires_confirmation': service.requiresConfirmation,
+            'is_featured': service.isFeatured,
           },
         );
       },
@@ -1039,11 +1065,7 @@ class ServiceDetailView extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: const Color(0xFFE8E8E8),
                   child: Center(
-                    child: Icon(
-                      Icons.map,
-                      size: 50.r,
-                      color: AppColors.grey,
-                    ),
+                    child: Icon(Icons.map, size: 50.r, color: AppColors.grey),
                   ),
                 ),
               ),
@@ -1056,9 +1078,7 @@ class ServiceDetailView extends StatelessWidget {
                 ),
               ),
               // Tap overlay to ensure gestures work
-              Container(
-                color: Colors.transparent,
-              ),
+              Container(color: Colors.transparent),
             ],
           ),
         ),
@@ -1069,12 +1089,11 @@ class ServiceDetailView extends StatelessWidget {
   /// Build Google Maps Static API URL
   String _buildStaticMapUrl(double latitude, double longitude) {
     // Using Google Maps Static API
-    // You'll need to add your API key to AppConfig
-    const String apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with actual key
+    final String apiKey = AppConfig.googleMapsApiKey;
     const int width = 600;
     const int height = 300;
     const int zoom = 15;
-    
+
     return 'https://maps.googleapis.com/maps/api/staticmap?'
         'center=$latitude,$longitude'
         '&zoom=$zoom'

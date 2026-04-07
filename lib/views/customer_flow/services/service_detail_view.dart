@@ -931,20 +931,45 @@ class ServiceDetailView extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         debugPrint('Map clicked - opening full map view');
+        // Get first availability for coordinates
+        final firstAvailability = service.availabilities.isNotEmpty
+            ? service.availabilities.first
+            : null;
+        
+        if (firstAvailability == null) {
+          Get.snackbar(
+            'No Location',
+            'This service does not have a location set.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+
         Get.toNamed(
           AppRoutes.mapResults,
           arguments: {
-            'serviceTitle': service.title,
-            'availabilities': service.availabilities.map((avail) {
-              return {
-                'latitude': avail.latitude,
-                'longitude': avail.longitude,
-                'address': avail.address,
-                'week_days': avail.weekDays,
-                'start_time': avail.startTime,
-                'end_time': avail.endTime,
-              };
-            }).toList(),
+            'is_single_service_view': true,
+            'service_id': service.apiId,
+            'service_title': service.title,
+            'service_description': service.description,
+            'service_address': firstAvailability.address.isNotEmpty 
+                ? firstAvailability.address 
+                : service.location,
+            'latitude': double.tryParse(firstAvailability.latitude) ?? 24.4539,
+            'longitude': double.tryParse(firstAvailability.longitude) ?? 54.3773,
+            'cover_image': service.coverImage,
+            'provider_id': service.providerId,
+            'provider_name': service.provider.name,
+            'provider_avatar': service.provider.imageUrl,
+            'starting_price': service.basePrice ?? 0.0,
+            'currency': service.priceUnit.split(' ').first,
+            'role_name': service.provider.role,
+            'rating': service.rating ?? 0.0,
+            'total_reviews': service.reviewCount,
+            'service_type_name': service.type.name,
+            'service_as_name': service.serviceAs?.label ?? '',
+            'requires_confirmation': service.requiresConfirmation,
+            'is_featured': service.isFeatured,
           },
         );
       },

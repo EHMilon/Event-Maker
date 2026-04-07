@@ -388,6 +388,29 @@ class ServiceRepository {
       throw ApiException(message: 'Failed to fetch bookmarked services: $e');
     }
   }
+
+  /// Search for services on Map
+  /// Uses: GET api/services/search
+  Future<Map<String, dynamic>> searchMapServices(Map<String, dynamic> params) async {
+    final api = ApiService();
+    try {
+      final queryParams = <String, String>{};
+      params.forEach((key, value) {
+        if (value != null && value.toString().isNotEmpty) {
+          queryParams[key] = value.toString();
+        }
+      });
+      final response = await api.get(
+        ApiConstant.serviceSearch,
+        queryParams: queryParams,
+      );
+      return response as Map<String, dynamic>;
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to search map services: $e');
+    }
+  }
 }
 
 /// Response model for customer services grouped by service_as_name

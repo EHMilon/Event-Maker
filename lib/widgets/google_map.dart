@@ -40,6 +40,7 @@ class GoogleMapScreen extends StatefulWidget {
   final String apiKey;
   final bool canSelectLocation;
   final void Function(GoogleMapLocation)? onLocationSelect;
+  final bool useDarkStyle;
 
   const GoogleMapScreen({
     super.key,
@@ -48,6 +49,7 @@ class GoogleMapScreen extends StatefulWidget {
     this.withScaffold = true,
     this.onLocationSelect,
     this.canSelectLocation = true,
+    this.useDarkStyle = false,
   });
 
   @override
@@ -765,131 +767,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     );
   }
 
-  dynamic mapStyle = [
-    {
-      "elementType": "geometry",
-      "stylers": [
-        {"color": "#2b2f3a"},
-      ],
-    },
-    {
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#cfd3dc"},
-      ],
-    },
-    {
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        {"color": "#2b2f3a"},
-      ],
-    },
-    {
-      "featureType": "administrative.locality",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#e0b07a"},
-      ],
-    },
-    {
-      "featureType": "poi",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#d6b48a"},
-      ],
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "geometry",
-      "stylers": [
-        {"color": "#2f4a45"},
-      ],
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#7fbfa3"},
-      ],
-    },
-    {
-      "featureType": "road",
-      "elementType": "geometry",
-      "stylers": [
-        {"color": "#3e4453"},
-      ],
-    },
-    {
-      "featureType": "road",
-      "elementType": "geometry.stroke",
-      "stylers": [
-        {"color": "#2a2f3a"},
-      ],
-    },
-    {
-      "featureType": "road",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#c1c7d3"},
-      ],
-    },
-    {
-      "featureType": "road.highway",
-      "elementType": "geometry",
-      "stylers": [
-        {"color": "#5b556b"},
-      ],
-    },
-    {
-      "featureType": "road.highway",
-      "elementType": "geometry.stroke",
-      "stylers": [
-        {"color": "#3a3646"},
-      ],
-    },
-    {
-      "featureType": "road.highway",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#f0d6a8"},
-      ],
-    },
-    {
-      "featureType": "transit",
-      "elementType": "geometry",
-      "stylers": [
-        {"color": "#3b4152"},
-      ],
-    },
-    {
-      "featureType": "transit.station",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#e0b07a"},
-      ],
-    },
-    {
-      "featureType": "water",
-      "elementType": "geometry",
-      "stylers": [
-        {"color": "#1f334a"},
-      ],
-    },
-    {
-      "featureType": "water",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {"color": "#8fa1b5"},
-      ],
-    },
-    {
-      "featureType": "water",
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        {"color": "#1f334a"},
-      ],
-    },
-  ];
+  dynamic mapStyle = null; // Use default Google Maps style for better visibility
 
   @override
   Widget build(BuildContext context) {
@@ -899,7 +777,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
       child: Stack(
         children: [
           GoogleMap(
-            style: jsonEncode(mapStyle),
+            style: null, // Use default style for better visibility
             onTap: _handleTap,
             markers: markers,
             compassEnabled: true,
