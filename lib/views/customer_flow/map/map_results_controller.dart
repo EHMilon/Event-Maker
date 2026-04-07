@@ -1,17 +1,40 @@
 import 'package:get/get.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import '../../../models/service_model.dart';
+
+/// Availability location data for map markers
+class AvailabilityLocation {
+  final double latitude;
+  final double longitude;
+  final String address;
+  final String days;
+  final String time;
+
+  AvailabilityLocation({
+    required this.latitude,
+    required this.longitude,
+    required this.address,
+    required this.days,
+    required this.time,
+  });
+}
 
 class MapResultsController extends GetxController {
   final isLoading = false.obs;
   final selectedService = Rxn<ServiceModel>();
 
+  // Availability locations passed from service detail
+  List<AvailabilityLocation> availabilityLocations = [];
+
+  // Service title for display
+  String serviceTitle = '';
+
   // Mock points for polyline (as seen in the image)
-  final List<LatLng> polylinePoints = [
-    const LatLng(24.4539, 54.3773),
-    const LatLng(24.4500, 54.3800),
-    const LatLng(24.4450, 54.3700),
-    const LatLng(24.4400, 54.3750),
+  final List<gmaps.LatLng> polylinePoints = [
+    const gmaps.LatLng(24.4539, 54.3773),
+    const gmaps.LatLng(24.4500, 54.3800),
+    const gmaps.LatLng(24.4450, 54.3700),
+    const gmaps.LatLng(24.4400, 54.3750),
   ];
 
   final List<ServiceModel> mockServices = [
@@ -84,17 +107,61 @@ class MapResultsController extends GetxController {
   ];
 
   // Coordinates for services
-  final Map<String, LatLng> serviceLocations = {
-    '1': const LatLng(24.4539, 54.3773),
-    '2': const LatLng(24.4600, 54.3900),
-    '3': const LatLng(24.4400, 54.3600), // Food Catering
+  final Map<String, gmaps.LatLng> serviceLocations = {
+    '1': const gmaps.LatLng(24.4539, 54.3773),
+    '2': const gmaps.LatLng(24.4600, 54.3900),
+    '3': const gmaps.LatLng(24.4400, 54.3600), // Food Catering
   };
 
   @override
   void onInit() {
     super.onInit();
-    // Initially select the first service as in the image
-    selectedService.value = mockServices[0];
+
+    // Parse passed arguments from service detail view
+    final args = Get.arguments;
+    if (args != null && args is Map<String, dynamic>) {
+      // Parse service title
+      if (args.containsKey('serviceTitle')) {
+        serviceTitle = args['serviceTitle'] as String? ?? '';
+      }
+
+      // Parse availability locations
+      if (args.containsKey('availabilities')) {
+        final availabilities = args['availabilities'] as List<dynamic>?;
+        if (availabilities != null) {
+          availabilityLocations = availabilities.map((avail) {
+            return AvailabilityLocation(
+              latitude:
+                  double.tryParse(avail['latitude']?.toString() ?? '0') ?? 0,
+              longitude:
+                  double.tryParse(avail['longitude']?.toString() ?? '0') ?? 0,
+              address: avail['address']?.toString() ?? '',
+              days: (avail['week_days'] as List<dynamic>?)?.join(', ') ?? '',
+              time: '${avail['start_time'] ?? ''} - ${avail['end_time'] ?? ''}',
+            );
+          }).toList();
+        }
+      }
+
+      // Fallback: single location if no availabilities array
+      if (availabilityLocations.isEmpty && args.containsKey('latitude')) {
+        availabilityLocations.add(
+          AvailabilityLocation(
+            latitude: double.tryParse(args['latitude']?.toString() ?? '0') ?? 0,
+            longitude:
+                double.tryParse(args['longitude']?.toString() ?? '0') ?? 0,
+            address: args['address']?.toString() ?? '',
+            days: '',
+            time: '',
+          ),
+        );
+      }
+    }
+
+    // If no data passed, use mock services
+    if (availabilityLocations.isEmpty) {
+      selectedService.value = mockServices[0];
+    }
   }
 
   void onMarkerTap(ServiceModel service) {

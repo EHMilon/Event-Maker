@@ -14,7 +14,6 @@ dependencies:
     sdk: flutter
   http: ^1.3.0
   flutter_hooks: ^0.21.3+1
-  flutter_map: ^8.2.2
   flutter_polyline_points: ^3.1.0
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.3
@@ -31,6 +30,9 @@ dependencies:
   web_socket_channel: ^3.0.1
 
   logger: any
+  cached_network_image: ^3.4.1
+  google_maps: ^8.2.0
+  google_maps_flutter: ^2.10.0
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:

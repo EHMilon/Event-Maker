@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../constants/app_colors.dart';
-import '../../../widgets/custom_text_field.dart';
+import '../../constants/app_config.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/google_map.dart';
 
 class AvailabilityCardModel {
   final String id;
@@ -34,7 +36,9 @@ class AvailabilityCardModel {
     bool canGoOutsideVal = false,
   }) : selectedDays = RxList<String>(days ?? []),
        locationController = TextEditingController(text: location),
-       addressController = TextEditingController(text: address ?? location ?? ''),
+       addressController = TextEditingController(
+         text: address ?? location ?? '',
+       ),
        startTime = Rxn<TimeOfDay>(startTimeVal),
        endTime = Rxn<TimeOfDay>(endTimeVal),
        startTimeString = RxString(startTimeStr ?? '09:00:00'),
@@ -153,15 +157,18 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
               ),
             ),
             SizedBox(height: 8.h),
-            IgnorePointer(
-              ignoring: !widget.isEnabled,
-              child: CustomTextField(
-                controller: widget.card.addressController,
-                hintText: 'selectAddressHint'.tr,
-                prefixIcon: Icon(
-                  Icons.location_on_outlined,
-                  color: AppColors.primary,
-                  size: 20.r,
+            GestureDetector(
+              onTap: widget.isEnabled ? () => _openMapScreen(context) : null,
+              child: AbsorbPointer(
+                absorbing: true,
+                child: CustomTextField(
+                  controller: widget.card.addressController,
+                  hintText: 'selectAddressHint'.tr,
+                  prefixIcon: Icon(
+                    Icons.location_on_outlined,
+                    color: AppColors.primary,
+                    size: 20.r,
+                  ),
                 ),
               ),
             ),
@@ -236,7 +243,6 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
                   ),
                 ],
               ),
-              
           ],
         ),
       ),
@@ -378,6 +384,21 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
     if (picked != null) {
       target.value = picked;
     }
+  }
+
+  void _openMapScreen(BuildContext context) {
+    Get.to(
+      GoogleMapScreen(
+        apiKey: AppConfig.googleMapsApiKey,
+        onLocationSelect: (location) {
+          // Update the address controller with selected location name
+          widget.card.addressController.text = location.name;
+          // Update latitude and longitude
+          widget.card.latitude.value = location.position.latitude.toString();
+          widget.card.longitude.value = location.position.longitude.toString();
+        },
+      ),
+    );
   }
 
   String _formatTime(TimeOfDay? time) {

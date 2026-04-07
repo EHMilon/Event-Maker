@@ -41,6 +41,8 @@ import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:event_maker/views/service_provider_flow/service_provider_scaffold.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
+import 'package:event_maker/views/customer_flow/map/map_search_view.dart';
+import 'package:event_maker/views/customer_flow/map/map_search_controller.dart';
 import 'package:event_maker/views/notifications/customer_notification_view.dart';
 import 'package:event_maker/views/notifications/notification_binding.dart';
 import 'package:event_maker/views/notifications/notification_controller.dart';
@@ -111,6 +113,7 @@ class AppRoutes {
   static const String serviceProviderNotifications =
       '/service-provider-notifications';
   static const String mapResults = '/map-results';
+  static const String mapSearch = '/map-search';
   static const String vendorProfile = '/vendor-profile';
   static const String bookServiceDate = '/book-service-date';
   static const String bookServiceRequest = '/book-service-request';
@@ -295,6 +298,13 @@ class AppRoutes {
       name: mapResults,
       page: () => const MapResultsView(),
       binding: MapResultsBinding(),
+    ),
+    GetPage(
+      name: mapSearch,
+      page: () => const MapSearchView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<MapSearchController>(() => MapSearchController());
+      }),
     ),
     GetPage(
       name: vendorProfile,

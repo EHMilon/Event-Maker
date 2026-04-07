@@ -1,5 +1,4 @@
-import 'package:event_maker/views/customer_flow/map/map_results_binding.dart';
-import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
+import 'package:event_maker/views/customer_flow/map/map_search_view.dart';
 import 'package:get/get.dart';
 
 class MapController extends GetxController {
@@ -15,9 +14,21 @@ class MapController extends GetxController {
 
   // Sub-categories map based on main category
   final Map<String, List<String>> subCategoriesMap = {
-    'Hospitality': ['Catering', 'Barista', 'Bakery', 'Waitstaff', 'Host/Hostess'],
+    'Hospitality': [
+      'Catering',
+      'Barista',
+      'Bakery',
+      'Waitstaff',
+      'Host/Hostess',
+    ],
     'Event': ['Lighting', 'Sound', 'Decoration', 'Venue', 'Planner'],
-    'Professional Trainer': ['Photographer', 'Videographer', 'Musician', 'DJ', 'MC'],
+    'Professional Trainer': [
+      'Photographer',
+      'Videographer',
+      'Musician',
+      'DJ',
+      'MC',
+    ],
   };
 
   @override
@@ -31,13 +42,15 @@ class MapController extends GetxController {
   void updateSubCategories() {
     // Get sub-categories for the selected main category
     final newSubCategories = subCategoriesMap[selectedMainCategory.value] ?? [];
-    
+
     // Convert to map format for the UI
-    subCategories.assignAll(newSubCategories.map((name) => {'name': name}).toList());
-    
+    subCategories.assignAll(
+      newSubCategories.map((name) => {'name': name}).toList(),
+    );
+
     // Clear selected sub-categories when changing main category
     selectedSubCategories.clear();
-    
+
     // Select default sub-categories (first 3) for better UX
     if (newSubCategories.isNotEmpty) {
       final names = newSubCategories.take(3).toList();
@@ -50,7 +63,7 @@ class MapController extends GetxController {
     try {
       // simulate backend call with 2s delay
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Load initial sub-categories based on default main category
       updateSubCategories();
     } catch (e) {
@@ -89,10 +102,9 @@ class MapController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
     isLoading.value = false;
 
-    // Navigate to the interactive map view using direct navigation
+    // Navigate to the map search view
     Get.to(
-      () => const MapResultsView(),
-      binding: MapResultsBinding(),
+      () => const MapSearchView(),
       transition: Transition.fadeIn,
     );
   }

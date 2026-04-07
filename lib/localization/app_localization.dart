@@ -376,6 +376,8 @@ class AppLocalization extends Translations {
     'insufficientFunds': 'Insufficient Funds',
     'availability': 'Availability',
     'additionalAvailability': 'Additional Availability',
+    'showLess': 'Show Less',
+    'showMoreAvailabilities': 'Show @count more availability',
     'addAdditionalAvailability': 'Add Additional Availability',
     'additionalAvailabilityDisabledMsg':
         'Additional availability is disabled because "Cannot go outside location" is enabled.',
@@ -817,6 +819,8 @@ class AppLocalization extends Translations {
     'insufficientFunds': 'رصيد غير كافٍ',
     'availability': 'التوفر',
     'additionalAvailability': 'التوفر الإضافي',
+    'showLess': 'عرض أقل',
+    'showMoreAvailabilities': 'عرض @count توفر آخر',
     'addAdditionalAvailability': 'إضافة توفر إضافي',
     'additionalAvailabilityDisabledMsg':
         'التوفر الإضافي معطل لأن "لا يمكن الخروج من الموقع" مفعل.',

@@ -12,12 +12,11 @@ import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_controller.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:latlong2/latlong.dart' hide Path;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:event_maker/widgets/app_custom_dialog.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -475,29 +474,36 @@ class ServiceDetailView extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 10.h),
-                        if (service.date != null) ...[
-                          _buildInfoRow(
-                            Icons.calendar_today_outlined,
-                            _formatDate(service.date!),
-                          ),
-                          SizedBox(height: 12.h),
-                        ],
-                        _buildInfoRow(
-                          Icons.location_on_outlined,
-                          service.displayLocation,
-                        ),
 
-                        if (service.type == ServiceType.event ||
-                            service.type == ServiceType.training) ...[
-                          SizedBox(height: 12.h),
-                          if (service.type == ServiceType.event)
+                        // Display availability from API with dropdown for multiple
+                        if (service.availabilities.isNotEmpty) ...[
+                          _AvailabilityDropdown(
+                            availabilities: service.availabilities,
+                            formatTimeFromApi: _formatTimeFromApi,
+                          ),
+                        ] else ...[
+                          // Fallback for services without availabilities data
+                          if (service.date != null) ...[
                             _buildInfoRow(
-                              Icons.music_note,
-                              'Mia lachetti + Atlanta\'s best',
-                            ), // Static for now based on image
-                          if (service.type == ServiceType.event) ...[
+                              Icons.calendar_today_outlined,
+                              _formatDate(service.date!),
+                            ),
                             SizedBox(height: 12.h),
-                            _buildInfoRow(Icons.people_outline, '250'),
+                          ],
+                          _buildInfoRow(
+                            Icons.location_on_outlined,
+                            service.displayLocation,
+                          ),
+                        ],
+
+                        // Event-specific fields from API
+                        if (service.type == ServiceType.event) ...[
+                          if (service.attendanceCapacity != null) ...[
+                            SizedBox(height: 12.h),
+                            _buildInfoRow(
+                              Icons.people_outline,
+                              '${service.attendanceCapacity}',
+                            ),
                           ],
                         ],
 
@@ -521,46 +527,7 @@ class ServiceDetailView extends StatelessWidget {
                         //   ),
                         // ),
                         SizedBox(height: 16.h),
-                        GestureDetector(
-                          onTap: () async {
-                            Get.toNamed(AppRoutes.mapResults);
-                          },
-                          child: SizedBox(
-                            height: 180.h,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16.r),
-                              child: FlutterMap(
-                                options: MapOptions(
-                                  initialCenter: const LatLng(24.4539, 54.3773),
-                                  initialZoom: 13.0,
-                                  interactionOptions: const InteractionOptions(
-                                    flags: InteractiveFlag.none,
-                                  ),
-                                ),
-                                children: [
-                                  TileLayer(
-                                    urlTemplate:
-                                        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                                    userAgentPackageName:
-                                        'com.example.event_maker',
-                                  ),
-                                  MarkerLayer(
-                                    markers: [
-                                      const Marker(
-                                        point: LatLng(24.4539, 54.3773),
-                                        child: Icon(
-                                          Icons.location_on,
-                                          color: AppColors.error,
-                                          size: 30,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                        _buildLocationMap(context),
                         SizedBox(height: 24.h),
 
                         // Pricing / Packages
@@ -835,7 +802,7 @@ class ServiceDetailView extends StatelessWidget {
         SizedBox(width: 12.w),
         Expanded(
           child: Text(
-            text,
+            "Attendence Capacity: $text",
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
@@ -845,6 +812,133 @@ class ServiceDetailView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Build availability card for each availability entry
+  Widget _buildAvailabilityCard(ServiceAvailability availability, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // // Header with availability number
+          // if (service.availabilities.length > 1) ...[
+          //   Text(
+          //     '${'availability'.tr} ${index + 1}',
+          //     style: GoogleFonts.inter(
+          //       fontSize: 14.sp,
+          //       fontWeight: FontWeight.w600,
+          //       color: AppColors.textPrimary,
+          //     ),
+          //   ),
+          //   SizedBox(height: 12.h),
+          // ],
+
+          // Days
+          if (availability.weekDays.isNotEmpty) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 18.r,
+                  color: AppColors.primary,
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    availability.weekDays.join(', '),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+          ],
+
+          // Time
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.access_time, size: 18.r, color: AppColors.primary),
+              SizedBox(width: 12.w),
+              Text(
+                '${_formatTimeFromApi(availability.startTime)} - ${_formatTimeFromApi(availability.endTime)}',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          // Location/Address
+          if (availability.address.isNotEmpty) ...[
+            SizedBox(height: 12.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 18.r,
+                  color: AppColors.primary,
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    availability.address,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Format time string from API (e.g., "09:00:00" -> "9:00 AM")
+  String _formatTimeFromApi(String timeString) {
+    try {
+      // Parse time string like "09:00:00" or "14:00:00"
+      final parts = timeString.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+
+        final period = hour >= 12 ? 'PM' : 'AM';
+        final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+        final displayMinute = minute.toString().padLeft(2, '0');
+
+        return '$displayHour:$displayMinute $period';
+      }
+    } catch (_) {
+      // Return original if parsing fails
+    }
+    return timeString;
   }
 
   String _formatDate(DateTime date) {
@@ -884,6 +978,109 @@ class ServiceDetailView extends StatelessWidget {
     final period = date.hour >= 12 ? 'PM' : 'AM';
 
     return '$dayName, $day $monthName, $year $hour.$minute$period';
+  }
+
+  /// Build location map using availability coordinates
+  Widget _buildLocationMap(BuildContext context) {
+    // Get first availability for map display
+    final firstAvailability = service.availabilities.isNotEmpty
+        ? service.availabilities.first
+        : null;
+
+    // Default coordinates (UAE)
+    double latitude = 24.4539;
+    double longitude = 54.3773;
+
+    // Use availability coordinates if available
+    if (firstAvailability != null) {
+      try {
+        latitude = double.parse(firstAvailability.latitude);
+        longitude = double.parse(firstAvailability.longitude);
+      } catch (_) {
+        // Keep default coordinates
+      }
+    }
+
+    return GestureDetector(
+      onTap: () {
+        debugPrint('Map clicked - opening full map view');
+        Get.toNamed(
+          AppRoutes.mapResults,
+          arguments: {
+            'serviceTitle': service.title,
+            'availabilities': service.availabilities.map((avail) {
+              return {
+                'latitude': avail.latitude,
+                'longitude': avail.longitude,
+                'address': avail.address,
+                'week_days': avail.weekDays,
+                'start_time': avail.startTime,
+                'end_time': avail.endTime,
+              };
+            }).toList(),
+          },
+        );
+      },
+      child: Container(
+        height: 180.h,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.r),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Static map image using Google Maps Static API
+              Image.network(
+                _buildStaticMapUrl(latitude, longitude),
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: const Color(0xFFE8E8E8),
+                  child: Center(
+                    child: Icon(
+                      Icons.map,
+                      size: 50.r,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              // Location marker overlay
+              Center(
+                child: Icon(
+                  Icons.location_on,
+                  size: 40.r,
+                  color: AppColors.primary,
+                ),
+              ),
+              // Tap overlay to ensure gestures work
+              Container(
+                color: Colors.transparent,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build Google Maps Static API URL
+  String _buildStaticMapUrl(double latitude, double longitude) {
+    // Using Google Maps Static API
+    // You'll need to add your API key to AppConfig
+    const String apiKey = 'YOUR_GOOGLE_MAPS_API_KEY'; // Replace with actual key
+    const int width = 600;
+    const int height = 300;
+    const int zoom = 15;
+    
+    return 'https://maps.googleapis.com/maps/api/staticmap?'
+        'center=$latitude,$longitude'
+        '&zoom=$zoom'
+        '&size=${width}x$height'
+        '&markers=color:red%7C$latitude,$longitude'
+        '&key=$apiKey';
   }
 }
 
@@ -1504,11 +1701,11 @@ class _BookingRequestDetailViewDetailState
                     ],
                   )
                 : widget.onMarkComplete != null
-                    ? PrimaryTextButton(
-                        onPressed: widget.onMarkComplete,
-                        text: 'markAsComplete'.tr,
-                      )
-                    : const SizedBox.shrink(),
+                ? PrimaryTextButton(
+                    onPressed: widget.onMarkComplete,
+                    text: 'markAsComplete'.tr,
+                  )
+                : const SizedBox.shrink(),
           ),
       ],
     );
@@ -1568,6 +1765,188 @@ class _BookingRequestDetailViewDetailState
               overflow: TextOverflow.ellipsis,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dropdown widget for displaying multiple availabilities
+class _AvailabilityDropdown extends StatefulWidget {
+  final List<ServiceAvailability> availabilities;
+  final String Function(String) formatTimeFromApi;
+
+  const _AvailabilityDropdown({
+    required this.availabilities,
+    required this.formatTimeFromApi,
+  });
+
+  @override
+  State<_AvailabilityDropdown> createState() => _AvailabilityDropdownState();
+}
+
+class _AvailabilityDropdownState extends State<_AvailabilityDropdown> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // If only one availability, show it directly without dropdown
+    if (widget.availabilities.length == 1) {
+      return _buildAvailabilityCard(widget.availabilities.first, 0);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // First availability always visible
+        _buildAvailabilityCard(widget.availabilities.first, 0),
+
+        // Dropdown button to show more
+        if (widget.availabilities.length > 1) ...[
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.primary,
+                    size: 20.r,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    _isExpanded
+                        ? 'showLess'.tr
+                        : 'showMoreAvailabilities'.trParams({
+                            'count': '${widget.availabilities.length - 1}',
+                          }),
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Additional availabilities (hidden by default)
+          if (_isExpanded) ...[
+            SizedBox(height: 12.h),
+            ...widget.availabilities.skip(1).toList().asMap().entries.map((
+              entry,
+            ) {
+              final index = entry.key + 1; // Start from 1 since we skip first
+              final availability = entry.value;
+              return _buildAvailabilityCard(availability, index);
+            }),
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildAvailabilityCard(ServiceAvailability availability, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.borderLight),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Days
+          if (availability.weekDays.isNotEmpty) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16.r,
+                  color: AppColors.primary,
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    availability.weekDays.join(', '),
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.h),
+          ],
+
+          // Time
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.access_time, size: 16.r, color: AppColors.primary),
+              SizedBox(width: 10.w),
+              Text(
+                '${widget.formatTimeFromApi(availability.startTime)} - ${widget.formatTimeFromApi(availability.endTime)}',
+                style: GoogleFonts.inter(
+                  fontSize: 13.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          // Location/Address
+          if (availability.address.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.location_on_outlined,
+                  size: 16.r,
+                  color: AppColors.primary,
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    availability.address,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
