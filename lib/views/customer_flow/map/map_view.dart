@@ -16,8 +16,7 @@ class MapView extends GetView<MapController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundLight,
-        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
-
+        titleSpacing: (Navigator.of(context).canPop()) ? 24.w : 24.w,
         title: Text(
           'myLocation'.tr,
           style: GoogleFonts.inter(
@@ -40,40 +39,49 @@ class MapView extends GetView<MapController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 20.h),
-                      // Search Location
+                      // Search Location - Read-only field that opens map picker
                       _buildLabel('searchLocation'.tr),
                       SizedBox(height: 8.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        height: 48.h,
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: AppColors.lightGrey),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.location_on_outlined,
-                              color: AppColors.grey,
-                              size: 24.r,
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: TextField(
-                                onChanged: (value) =>
-                                    controller.locationSearch.value = value,
-                                decoration: InputDecoration(
-                                  hintText: 'uae'.tr,
-                                  hintStyle: GoogleFonts.inter(
-                                    color: AppColors.black,
+                      GestureDetector(
+                        onTap: () => controller.openLocationPicker(),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          height: 48.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(12.r),
+                            border: Border.all(color: AppColors.lightGrey),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                color: AppColors.grey,
+                                size: 24.r,
+                              ),
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: Obx(() => Text(
+                                  controller.selectedAddress.value.isNotEmpty
+                                      ? controller.selectedAddress.value
+                                      : 'tapToSelectLocation'.tr,
+                                  style: GoogleFonts.inter(
+                                    color: controller.selectedAddress.value.isNotEmpty
+                                        ? AppColors.black
+                                        : AppColors.grey,
                                     fontSize: 14.sp,
                                   ),
-                                  border: InputBorder.none,
-                                ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )),
                               ),
-                            ),
-                          ],
+                              Icon(
+                                Icons.chevron_right,
+                                color: AppColors.grey,
+                                size: 20.r,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 24.h),

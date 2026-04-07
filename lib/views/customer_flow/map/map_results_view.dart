@@ -1,332 +1,280 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/views/customer_flow/map/map_results_controller.dart';
-import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:latlong2/latlong.dart' hide Path;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class MapResultsView extends GetView<MapResultsController> {
+class MapResultsView extends StatelessWidget {
   const MapResultsView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Register the controller
+    final controller = Get.put(MapResultsController());
+
     return Scaffold(
-      body: Stack(
-        children: [
-          // Flutter Map
-          FlutterMap(
-            options: MapOptions(
-              initialCenter: const LatLng(24.4539, 54.3773),
-              initialZoom: 13.0,
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
+        return Stack(
+          children: [
+            // Google Map
+            GoogleMap(
+              initialCameraPosition: controller.initialCameraPosition,
+              markers: controller.markers.toSet(),
+              onMapCreated: controller.onMapCreated,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              mapToolbarEnabled: false,
+              compassEnabled: true,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
+                ),
+              },
             ),
-            children: [
-              TileLayer(
-                urlTemplate:
-                    'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                userAgentPackageName: 'com.example.event_maker',
-              ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: controller.polylinePoints,
-                    strokeWidth: 3.0,
+
+            // Back Button
+            Positioned(
+              top: 50.h,
+              left: 20.w,
+              child: GestureDetector(
+                onTap: () => Get.back(),
+                child: Container(
+                  padding: EdgeInsets.all(10.r),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.black.withOpacity(0.1),
+                        blurRadius: 10.r,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 20.r,
                     color: AppColors.black,
                   ),
-                ],
-              ),
-              MarkerLayer(
-                markers: [
-                  // Center red marker
-                  const Marker(
-                    point: LatLng(24.4450, 54.3780),
-                    child: Icon(
-                      Icons.location_on,
-                      color: AppColors.error,
-                      size: 40,
-                    ),
-                  ),
-                  // Dynamic markers from mock services
-                  ...controller.mockServices.map((service) {
-                    final point =
-                        controller.serviceLocations[service.id] ??
-                        const LatLng(0, 0);
-                    return _buildServiceMarker(
-                      point: point,
-                      service: service,
-                      isBlue:
-                          service.id ==
-                          '1', // Blue for elite photography as in design
-                    );
-                  }),
-                ],
-              ),
-            ],
-          ),
-
-          // Back Button
-          Positioned(
-            top: 50.h,
-            left: 20.w,
-            child: GestureDetector(
-              onTap: () => Get.back(),
-              child: Container(
-                padding: EdgeInsets.all(8.r),
-                decoration: const BoxDecoration(
-                  color: AppColors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
-                ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: AppColors.black,
-                  size: 24.r,
                 ),
               ),
             ),
-          ),
 
-          // Bottom Selected Service Card
-          Positioned(
-            bottom: 30.h,
-            left: 20.w,
-            right: 20.w,
-            child: Obx(() {
-              final service = controller.selectedService.value;
-              if (service == null) return const SizedBox.shrink();
-              return _buildSelectedServiceCard(service);
-            }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Marker _buildServiceMarker({
-    required LatLng point,
-    required ServiceModel service,
-    required bool isBlue,
-  }) {
-    return Marker(
-      point: point,
-      width: 150.w,
-      height: 60.h,
-      child: GestureDetector(
-        onTap: () => controller.onMarkerTap(service),
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Bubble style info window
-            Container(
-              margin: EdgeInsets.only(bottom: 10.h),
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: isBlue ? AppColors.primary : AppColors.white,
-                borderRadius: BorderRadius.circular(10.r),
-                border: isBlue
-                    ? Border.all(color: AppColors.white, width: 2)
-                    : null,
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
+            // Selected Service Card (shows only the selected service)
+            if (controller.selectedService != null)
+              Positioned(
+                bottom: 20.h,
+                left: 16.w,
+                right: 16.w,
+                child: _buildSelectedServiceCard(controller),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4.r),
-                    child: Image.network(
-                      service.images.isNotEmpty ? service.images.first : '',
-                      width: 30.w,
-                      height: 30.h,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        size: 20.r,
-                        color: AppColors.grey,
+
+            // No results message
+            if (controller.services.isEmpty)
+              Positioned(
+                bottom: 100.h,
+                left: 20.w,
+                right: 20.w,
+                child: Container(
+                  padding: EdgeInsets.all(16.r),
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.black.withOpacity(0.1),
+                        blurRadius: 10.r,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
                   ),
-                  SizedBox(width: 8.w),
-                  Flexible(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          service.title,
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                            color: isBlue ? AppColors.white : AppColors.black,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.search_off, size: 48.r, color: AppColors.grey),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'No services found',
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
                         ),
-                        Text(
-                          '${service.basePrice} ${service.priceUnit}',
-                          style: GoogleFonts.inter(
-                            fontSize: 9.sp,
-                            color: isBlue ? AppColors.lightGrey : AppColors.grey,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Try adjusting your search criteria',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.grey,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-            // Triangle pointer at the bottom of the bubble
-            CustomPaint(
-              size: Size(15.w, 10.h),
-              painter: TrianglePainter(
-                color: isBlue ? AppColors.primary : AppColors.white,
-              ),
-            ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  Widget _buildSelectedServiceCard(ServiceModel service) {
+  Widget _buildSelectedServiceCard(MapResultsController controller) {
+    final service = controller.selectedService!;
+
     return GestureDetector(
-      onTap: () => Get.to(() => ServiceDetailView(service: service)),
+      onTap: () => controller.onBottomCardTap(service.id),
       child: Container(
-        height: 100.h,
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(20.r),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 15,
-              offset: Offset(0, 5),
+              color: AppColors.black.withOpacity(0.15),
+              blurRadius: 20.r,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Row(
           children: [
-            Padding(
-              padding: EdgeInsets.all(10.r),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15.r),
-                child: Image.network(
-                  service.images.isNotEmpty ? service.images.first : '',
-                  width: 80.w,
-                  height: 80.h,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.image_not_supported,
-                    size: 40.r,
+            // Cover Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
+              child: CachedNetworkImage(
+                imageUrl: service.fullCoverImageUrl,
+                width: 90.w,
+                height: 90.w,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  width: 90.w,
+                  height: 90.w,
+                  color: AppColors.lightGrey,
+                  child: Icon(
+                    Icons.image,
                     color: AppColors.grey,
+                    size: 40.r,
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 90.w,
+                  height: 90.w,
+                  color: AppColors.lightGrey,
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: AppColors.grey,
+                    size: 40.r,
                   ),
                 ),
               ),
             ),
+            SizedBox(width: 16.w),
+            // Service Info
             Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 5.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      service.title,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.black,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.title,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
                     ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14.r,
-                          color: AppColors.grey,
-                        ),
-                        SizedBox(width: 4.w),
-                        Flexible(
-                          child: Text(
-                            service.location,
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              color: AppColors.grey,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 6.h),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16.r,
+                        color: AppColors.grey,
+                      ),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Text(
+                          service.address,
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            color: AppColors.grey,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(width: 6.w),
-                        Icon(Icons.star, size: 16.r, color: Colors.amber),
-                        SizedBox(width: 4.w),
-                        Text(
-                          service.rating.toString(),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Row(
+                    children: [
+                      // Role badge
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 5.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Text(
+                          service.roleName,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(width: 6.w),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10.w,
-                              vertical: 4.h,
+                      ),
+                      const Spacer(),
+                      // Rating
+                      if (service.rating > 0)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 16.r,
+                              color: Colors.amber,
                             ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(5.r),
-                            ),
-                            child: Text(
-                              service.provider.role,
+                            SizedBox(width: 4.w),
+                            Text(
+                              service.rating.toStringAsFixed(1),
                               style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.black,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
                             ),
-                          ),
+                          ],
                         ),
-                        SizedBox(width: 8.w),
-                        Flexible(
-                          child: Text(
-                            '${service.basePrice?.toStringAsFixed(2) ?? '0.00'} ${service.priceUnit}',
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            textAlign: TextAlign.end,
-                          ),
-                        ),
-                      ],
+                    ],
+                  ),
+                  SizedBox(height: 8.h),
+                  // Price
+                  Text(
+                    '${service.startingPrice.toStringAsFixed(2)} ${service.currency}',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -334,23 +282,4 @@ class MapResultsView extends GetView<MapResultsController> {
       ),
     );
   }
-}
-
-class TrianglePainter extends CustomPainter {
-  final Color color;
-  TrianglePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path();
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width / 2, size.height);
-    path.close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
