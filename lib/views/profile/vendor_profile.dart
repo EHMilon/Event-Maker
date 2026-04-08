@@ -201,7 +201,7 @@ class VendorProfileView extends StatelessWidget {
                                       service.coverImage,
                                     ),
                                     title: service.title,
-                                    location: service.firstAddress,
+                                    location: service.firstAddress ?? '',
                                     price: service.startingPrice,
                                     rating: vendor.ratingAvg,
                                     isBookmarked: false,

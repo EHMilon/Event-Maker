@@ -53,7 +53,7 @@ class ProviderApprovedService {
   final String averageRating;
   final int totalReviews;
   final String createdAt;
-  final String firstAddress;
+  final String? firstAddress;
 
   const ProviderApprovedService({
     required this.id,
@@ -67,7 +67,7 @@ class ProviderApprovedService {
     required this.averageRating,
     required this.totalReviews,
     required this.createdAt,
-    this.firstAddress = '',
+    this.firstAddress,
   });
 
   factory ProviderApprovedService.fromJson(Map<String, dynamic> json) {
@@ -83,7 +83,7 @@ class ProviderApprovedService {
       averageRating: json['average_rating'] as String? ?? '0.00',
       totalReviews: json['total_reviews'] as int? ?? 0,
       createdAt: json['created_at'] as String? ?? '',
-      firstAddress: json['first_address'] as String? ?? '',
+      firstAddress: json['first_address'] as String?,
     );
   }
 

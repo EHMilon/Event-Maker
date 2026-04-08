@@ -298,7 +298,7 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                           service.coverImage,
                         ),
                         title: service.title,
-                        location: service.firstAddress,
+                        location: service.firstAddress ?? '',
                         price: service.startingPrice,
                         rating: service.ratingValue.toString(),
                         isBookmarked: false,
