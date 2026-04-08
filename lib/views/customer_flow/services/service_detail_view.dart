@@ -5,6 +5,7 @@ import 'package:event_maker/constants/app_config.dart';
 import 'package:event_maker/models/customer_booking_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
+import 'package:event_maker/views/chats/chat_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:flutter/material.dart';
@@ -309,17 +310,56 @@ class ServiceDetailView extends StatelessWidget {
                             ),
                             SizedBox(width: 12.w),
                             InkWell(
-                              onTap: () {
-                                // TODO: use real chat thread id when backend chat API is available
-                                Get.toNamed(
-                                  AppRoutes.chatDetail,
-                                  arguments: {
-                                    'id': service.id,
-                                    'name': service.provider.name,
-                                    'image': service.provider.imageUrl,
-                                    'isAdmin': false,
-                                  },
+                              onTap: () async {
+                                // Show loading indicator
+                                Get.snackbar(
+                                  'Opening Chat',
+                                  'Connecting to provider...',
+                                  showProgressIndicator: true,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  duration: const Duration(seconds: 10),
                                 );
+                                
+                                try {
+                                  // Fetch vendor profile to get user ID
+                                  final profile = await _repository.fetchVendorProfileById(service.providerId);
+                                  
+                                  // Get user ID from vendor profile
+                                  // Note: VendorProfileModel.id is the user ID (UUID)
+                                  final userId = profile.id.toString();
+                                  
+                                  // Create/get private chat with provider
+                                  final chatRepo = ChatRepository();
+                                  final chat = await chatRepo.createOrGetPrivateChat(userId);
+                                  
+                                  // Close loading snackbar
+                                  Get.closeAllSnackbars();
+                                  
+                                  if (chat != null) {
+                                    Get.toNamed(
+                                      AppRoutes.chatDetail,
+                                      arguments: {
+                                        'id': chat.id,
+                                        'name': service.provider.name,
+                                        'image': service.provider.imageUrl,
+                                        'isAdmin': false,
+                                      },
+                                    );
+                                  } else {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Could not start chat. Please try again.',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  }
+                                } catch (e) {
+                                  Get.closeAllSnackbars();
+                                  Get.snackbar(
+                                    'Error',
+                                    'Failed to connect. Please try again.',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                }
                               },
                               borderRadius: BorderRadius.circular(14.r),
                               child: Container(
@@ -935,7 +975,7 @@ class ServiceDetailView extends StatelessWidget {
         final firstAvailability = service.availabilities.isNotEmpty
             ? service.availabilities.first
             : null;
-        
+
         if (firstAvailability == null) {
           Get.snackbar(
             'No Location',
@@ -952,11 +992,12 @@ class ServiceDetailView extends StatelessWidget {
             'service_id': service.apiId,
             'service_title': service.title,
             'service_description': service.description,
-            'service_address': firstAvailability.address.isNotEmpty 
-                ? firstAvailability.address 
+            'service_address': firstAvailability.address.isNotEmpty
+                ? firstAvailability.address
                 : service.location,
             'latitude': double.tryParse(firstAvailability.latitude) ?? 24.4539,
-            'longitude': double.tryParse(firstAvailability.longitude) ?? 54.3773,
+            'longitude':
+                double.tryParse(firstAvailability.longitude) ?? 54.3773,
             'cover_image': service.coverImage,
             'provider_id': service.providerId,
             'provider_name': service.provider.name,

@@ -16,7 +16,6 @@ class ChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // We register the controller lazily here so it gets created when the tab is accessed
     final controller = Get.put(ChatViewController());
 
     return Scaffold(
@@ -43,7 +42,6 @@ class ChatView extends StatelessWidget {
   }
 
   Widget _buildServiceProviderView(ChatViewController controller) {
-    // using DefaultTabController for custom tabs
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -222,15 +220,22 @@ class ChatView extends StatelessWidget {
   }
 
   Widget _buildChatTile(ChatModel chat, {bool isAdminChat = false}) {
+    // Get display name for the chat
+    final displayName = isAdminChat 
+        ? (chat.name ?? 'Admin')
+        : (chat.members.isNotEmpty ? chat.members.first.email : 'Unknown');
+    
+    // Get avatar from member or use default
+    final avatarUrl = 'assets/images/person.jpg';
+
     return InkWell(
       onTap: () {
-        // Navigate to chat detail screen with admin/customer context
         Get.toNamed(
           AppRoutes.chatDetail,
           arguments: {
             'id': chat.id,
-            'name': chat.participant.name,
-            'image': chat.participant.avatarUrl ?? 'assets/images/person.jpg',
+            'name': displayName,
+            'image': avatarUrl,
             'isAdmin': isAdminChat,
           },
         );
@@ -240,10 +245,9 @@ class ChatView extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 24.r,
-            backgroundImage: chat.participant.avatarUrl != null &&
-                    chat.participant.avatarUrl!.startsWith('http')
-                ? NetworkImage(chat.participant.avatarUrl!)
-                : const AssetImage('assets/images/person.jpg') as ImageProvider,
+            backgroundImage: avatarUrl.startsWith('http')
+                ? NetworkImage(avatarUrl)
+                : AssetImage(avatarUrl) as ImageProvider,
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           ),
           SizedBox(width: 12.w),
@@ -255,7 +259,7 @@ class ChatView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        chat.participant.name,
+                        displayName,
                         style: GoogleFonts.inter(
                           color: AppColors.textPrimary,
                           fontSize: 16.sp,
@@ -265,31 +269,12 @@ class ChatView extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (chat.unreadCount > 0) ...[
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Text(
-                          '${chat.unreadCount}',
-                          style: GoogleFonts.inter(
-                            color: AppColors.white,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
+                    // TODO: Add unread count badge if available from API
                   ],
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  chat.lastMessage.content,
+                  chat.lastMessage?.content ?? 'No messages yet',
                   style: GoogleFonts.inter(
                     color: AppColors.textSecondary,
                     fontSize: 14.sp,

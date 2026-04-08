@@ -349,6 +349,8 @@ class BookServiceDateView extends StatelessWidget {
                               fontSize: 14.sp,
                               color: AppColors.textPrimary,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

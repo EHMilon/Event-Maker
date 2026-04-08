@@ -4,9 +4,10 @@ import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/views/chats/chat_repository.dart';
 
 /// Controller for the chat detail / conversation screen.
-/// Uses [ChatRepository] for data fetching with backend-compatible patterns.
+/// Uses [ChatRepository] for real API data and [MockChatRepository] for admin chat.
 class ChatDetailController extends GetxController {
-  final ChatRepository _repository = const ChatRepository();
+  final ChatRepository _repository = ChatRepository();
+  final MockChatRepository _mockRepository = MockChatRepository();
 
   final isLoading = true.obs;
   final isSending = false.obs;
@@ -14,8 +15,8 @@ class ChatDetailController extends GetxController {
   final hasError = false.obs;
   String? errorMessage;
 
-  // Typed messages list
-  final RxList<MessageModel> messages = <MessageModel>[].obs;
+  // Messages list (API messages)
+  final RxList<ChatMessage> messages = <ChatMessage>[].obs;
 
   // Pagination support
   bool hasMoreMessages = false;
@@ -31,6 +32,9 @@ class ChatDetailController extends GetxController {
   // Auto-reply stream subscription
   StreamSubscription<MessageModel>? _autoReplySubscription;
 
+  // Admin messages (mock data) - for admin chat tab
+  final RxList<MessageModel> adminMessages = <MessageModel>[].obs;
+
   // Recommended topics for admin chat
   List<RecommendedTopic> get recommendedTopics => [
     RecommendedTopic(emoji: '📅', text: 'How can I book a service?'),
@@ -43,7 +47,10 @@ class ChatDetailController extends GetxController {
     super.onInit();
     _parseArguments();
     loadMessages();
-    _listenToAutoReplies();
+    
+    if (isAdminChat) {
+      _listenToAutoReplies();
+    }
   }
 
   @override
@@ -68,19 +75,33 @@ class ChatDetailController extends GetxController {
     errorMessage = null;
 
     try {
-      final response = await _repository.fetchMessages(chatId: chatId);
-      messages.value = response.messages;
-      hasMoreMessages = response.hasMore;
-      nextCursor = response.nextCursor;
-
-      // Mark messages as read when opening chat
-      if (messages.isNotEmpty) {
-        await _repository.markAsRead(chatId);
+      if (isAdminChat) {
+        // Load mock admin messages
+        final response = await _mockRepository.fetchAdminMessages(chatId: chatId);
+        // Convert ChatMessage to MessageModel for UI compatibility
+        adminMessages.value = response.messages.map((m) => MessageModel(
+          id: m.id,
+          chatId: m.chatId,
+          senderId: m.sender.id,
+          senderEmail: m.sender.email,
+          senderRole: m.sender.role,
+          content: m.content,
+          createdAt: m.createdAt,
+          isMe: false, // Will be set based on sender
+        )).toList();
+      } else {
+        // Load real messages from API
+        final fetchedMessages = await _repository.fetchMessages(chatId);
+        messages.value = fetchedMessages;
+        
+        // Mark messages as read when opening chat
+        if (fetchedMessages.isNotEmpty) {
+          await _repository.markAsRead(chatId);
+        }
       }
     } catch (e) {
       hasError.value = true;
       errorMessage = e.toString();
-      // TODO: Handle error appropriately
     } finally {
       isLoading.value = false;
     }
@@ -93,15 +114,27 @@ class ChatDetailController extends GetxController {
     isLoadingMore.value = true;
 
     try {
-      final response = await _repository.fetchMessages(
-        chatId: chatId,
-        cursor: nextCursor,
-      );
-      messages.addAll(response.messages);
-      hasMoreMessages = response.hasMore;
-      nextCursor = response.nextCursor;
+      if (isAdminChat) {
+        final response = await _mockRepository.fetchAdminMessages(
+          chatId: chatId,
+          cursor: nextCursor,
+        );
+        // Convert and add messages
+        adminMessages.addAll(response.messages.map((m) => MessageModel(
+          id: m.id,
+          chatId: m.chatId,
+          senderId: m.sender.id,
+          content: m.content,
+          createdAt: m.createdAt,
+          isMe: false,
+        )));
+      } else {
+        final fetchedMessages = await _repository.fetchMessages(chatId);
+        messages.addAll(fetchedMessages);
+      }
+      hasMoreMessages = false; // API doesn't support pagination yet
     } catch (e) {
-      // TODO: Handle pagination error
+      // Handle pagination error
     } finally {
       isLoadingMore.value = false;
     }
@@ -119,50 +152,41 @@ class ChatDetailController extends GetxController {
 
     isSending.value = true;
 
-    // Optimistically add message to UI
-    final optimisticMessage = MessageModel(
-      id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
-      chatId: chatId,
-      senderId: 'current_user',
-      content: composed,
-      createdAt: DateTime.now(),
-      isMe: true,
-    );
-
-    messages.insert(0, optimisticMessage);
-    messageText.value = '';
-
     try {
-      // Send message via repository
-      final sentMessage = await _repository.sendMessage(
-        chatId: chatId,
-        content: composed,
-      );
-
-      // Replace optimistic message with actual message from server
-      final index = messages.indexWhere((m) => m.id == optimisticMessage.id);
-      if (index != -1) {
-        messages[index] = sentMessage;
+      if (isAdminChat) {
+        // Send mock admin message
+        final sentMessage = await _mockRepository.sendAdminMessage(
+          chatId: chatId,
+          content: composed,
+        );
+        adminMessages.insert(0, sentMessage);
+      } else {
+        // Send real message via API
+        final sentMessage = await _repository.sendMessage(
+          chatId: chatId,
+          content: composed,
+        );
+        
+        if (sentMessage != null) {
+          messages.insert(0, sentMessage);
+        }
       }
+      messageText.value = '';
     } catch (e) {
-      // Remove optimistic message on failure
-      messages.removeWhere((m) => m.id == optimisticMessage.id);
       hasError.value = true;
       errorMessage = 'Failed to send message: $e';
-      // TODO: Show error to user
     } finally {
       isSending.value = false;
     }
   }
 
-  /// Listens to auto-reply messages from the repository.
+  /// Listens to auto-reply messages from the mock repository.
   void _listenToAutoReplies() {
-    _autoReplySubscription = ChatRepository.autoReplyStream.listen((
+    _autoReplySubscription = MockChatRepository.autoReplyStream.listen((
       replyMessage,
     ) {
-      // Only add if it's for this chat
       if (replyMessage.chatId == chatId) {
-        messages.insert(0, replyMessage);
+        adminMessages.insert(0, replyMessage);
       }
     });
   }

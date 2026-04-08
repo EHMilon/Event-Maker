@@ -119,7 +119,7 @@ class ServiceRepository {
 
     // Return mock data using legacy format
     return VendorProfileModel(
-      id: 0,
+      id: 'mock_${provider.name.hashCode}',
       name: provider.name,
       avatar: provider.imageUrl ?? '',
       ratingAvg: rating.toStringAsFixed(2),

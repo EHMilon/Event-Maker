@@ -1,5 +1,4 @@
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/views/chats/chat_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,10 +30,7 @@ class ChatDetailView extends StatelessWidget {
                   child: _buildShimmerMessages(),
                 );
               }
-              return _buildMessagesList(
-                controller,
-                isAdminView: controller.isAdminChat,
-              );
+              return _buildMessagesList(controller);
             }),
           ),
           // Message input
@@ -144,7 +140,6 @@ class ChatDetailView extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 12.h),
       child: InkWell(
         onTap: () {
-          // Send the topic text as a message
           controller.sendMessage(overrideText: topic.text);
         },
         borderRadius: BorderRadius.circular(12.r),
@@ -177,44 +172,67 @@ class ChatDetailView extends StatelessWidget {
     );
   }
 
-  /// Regular messages list for customer chats.
-  Widget _buildMessagesList(
-    ChatDetailController controller, {
-    bool isAdminView = false,
-  }) {
+  /// Regular messages list.
+  Widget _buildMessagesList(ChatDetailController controller) {
     return Obx(() {
-      final messages = controller.messages;
-
-      // Show admin welcome body if no messages and is admin chat
-      if (messages.isEmpty && isAdminView) {
-        return _buildAdminChatBody(controller);
+      final isAdmin = controller.isAdminChat;
+      
+      if (isAdmin) {
+        final adminMsgs = controller.adminMessages;
+        if (adminMsgs.isEmpty) {
+          return _buildAdminChatBody(controller);
+        }
+        return ListView.builder(
+          padding: EdgeInsets.only(
+            left: 22.w,
+            right: 22.w,
+            top: 16.h,
+            bottom: 16.h,
+          ),
+          itemCount: adminMsgs.length,
+          reverse: true,
+          itemBuilder: (context, index) {
+            final message = adminMsgs[index];
+            return _buildMessageBubble(
+              isMe: message.isMe,
+              content: message.content,
+              createdAt: message.createdAt,
+            );
+          },
+        );
+      } else {
+        final messages = controller.messages;
+        if (messages.isEmpty) {
+          return const Center(child: Text('No messages yet'));
+        }
+        return ListView.builder(
+          padding: EdgeInsets.only(
+            left: 22.w,
+            right: 22.w,
+            top: 16.h,
+            bottom: 16.h,
+          ),
+          itemCount: messages.length,
+          reverse: true,
+          itemBuilder: (context, index) {
+            final message = messages[index];
+            return _buildMessageBubble(
+              isMe: false, // TODO: Check if sender is current user
+              content: message.content,
+              createdAt: message.createdAt,
+            );
+          },
+        );
       }
-
-      return ListView.builder(
-        padding: EdgeInsets.only(
-          left: 22.w,
-          right: 22.w,
-          top: 16.h,
-          bottom: 16.h,
-        ),
-        itemCount: messages.length,
-        reverse: true,
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          return _buildMessageBubble(message, isAdminView: isAdminView);
-        },
-      );
     });
   }
 
   /// Individual message bubble widget.
-  Widget _buildMessageBubble(
-    MessageModel message, {
-    bool isAdminView = false,
+  Widget _buildMessageBubble({
+    required bool isMe,
+    required String content,
+    required DateTime createdAt,
   }) {
-    final isMe = message.isMe;
-    final messageType = message.type;
-
     return Padding(
       padding: EdgeInsets.only(bottom: 20.h),
       child: Align(
@@ -239,59 +257,16 @@ class ChatDetailView extends StatelessWidget {
               ),
             ],
           ),
-          child: _buildMessageContent(message, messageType),
-        ),
-      ),
-    );
-  }
-
-  /// Builds the content inside a message bubble based on message type.
-  Widget _buildMessageContent(MessageModel message, MessageType messageType) {
-    // Handle different message types
-    if (messageType == MessageType.image && message.attachmentUrl != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.r),
-            child: Image.network(
-              message.attachmentUrl!,
-              width: 200.w,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 200.w,
-                  height: 150.h,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image),
-                );
-              },
+          child: Text(
+            content,
+            style: GoogleFonts.roboto(
+              color: const Color(0xFF5E5F60),
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              height: 1.5,
             ),
           ),
-          if (message.content.isNotEmpty) ...[
-            SizedBox(height: 8.h),
-            Text(
-              message.content,
-              style: GoogleFonts.roboto(
-                color: const Color(0xFF5E5F60),
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ],
-      );
-    }
-
-    // Default text message
-    return Text(
-      message.content,
-      style: GoogleFonts.roboto(
-        color: const Color(0xFF5E5F60),
-        fontSize: 14.sp,
-        fontWeight: FontWeight.w400,
-        height: 1.5,
+        ),
       ),
     );
   }

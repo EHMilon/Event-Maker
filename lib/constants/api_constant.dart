@@ -229,7 +229,17 @@ class ApiConstant {
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';
-  static const String chatMessages = '/chats/messages';
+  static const String chatsPrivate = '/chats/private';
+  
+  /// Get chat details by ID: /chats/{chatId}
+  static String chatDetail(String chatId) => '/chats/$chatId';
+  
+  /// Get messages for a chat: /chats/{chatId}/messages
+  static String chatMessages(String chatId) => '/chats/$chatId/messages';
+  
+  /// Send message to a chat: /chats/{chatId}/messages
+  static String sendChatMessage(String chatId) => '/chats/$chatId/messages';
+  
   static const String chatRead = '/chats/read';
   static const String chatCreate = '/chats/create';
 

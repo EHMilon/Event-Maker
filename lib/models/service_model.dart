@@ -542,6 +542,7 @@ class ServiceModel {
     }
 
     return ServiceProvider(
+      id: providerJson['id']?.toString(),
       name: providerJson['name'] as String? ?? '',
       role: roleName ?? '',
       imageUrl: _getFullMediaUrl(providerJson['avatar'] as String?),
@@ -699,6 +700,7 @@ class ServiceModel {
 }
 
 class ServiceProvider {
+  final String? id;
   final String name;
   final String role;
   final String imageUrl;
@@ -710,6 +712,7 @@ class ServiceProvider {
   final List<ReviewModel>? reviews;
 
   const ServiceProvider({
+    this.id,
     required this.name,
     required this.role,
     required this.imageUrl,
@@ -723,9 +726,10 @@ class ServiceProvider {
 
   factory ServiceProvider.fromJson(Map<String, dynamic> json) {
     return ServiceProvider(
+      id: json['id']?.toString(),
       name: json['name'] as String? ?? '',
       role: json['role'] as String? ?? '',
-      imageUrl: json['image_url'] as String? ?? '',
+      imageUrl: json['image_url'] as String? ?? json['avatar'] as String? ?? '',
       bannerUrl: json['banner_url'] as String?,
       isVerified: json['is_verified'] as bool? ?? false,
       certifications: (json['certifications'] as List<dynamic>?)
@@ -737,6 +741,7 @@ class ServiceProvider {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'role': role,
       'image_url': imageUrl,

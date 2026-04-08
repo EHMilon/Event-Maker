@@ -3,16 +3,17 @@ import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/views/chats/chat_repository.dart';
 
 /// Controller for the chat list view.
-/// Uses [ChatRepository] for data fetching with backend-compatible patterns.
+/// Uses [ChatRepository] for real API data and [MockChatRepository] for admin chat.
 class ChatViewController extends GetxController {
-  final ChatRepository _repository = const ChatRepository();
+  final ChatRepository _repository = ChatRepository();
+  final MockChatRepository _mockRepository = MockChatRepository();
 
   final isLoading = true.obs;
   final searchQuery = ''.obs;
   final hasError = false.obs;
   String? errorMessage;
 
-  // Typed chat lists using proper models
+  // Chat lists using proper models
   final RxList<ChatModel> customerChats = <ChatModel>[].obs;
   final RxList<ChatModel> adminChats = <ChatModel>[].obs;
 
@@ -29,26 +30,25 @@ class ChatViewController extends GetxController {
     ever(searchQuery, (_) => _filterChats());
   }
 
-  /// Loads both customer and admin chats from the repository.
+  /// Loads both customer chats (from API) and admin chats (mock).
   Future<void> loadChats() async {
     isLoading.value = true;
     hasError.value = false;
     errorMessage = null;
 
     try {
-      // Fetch customer chats
-      final customerResponse = await _repository.fetchChats(isAdmin: false);
-      customerChats.value = customerResponse.chats;
-      filteredCustomerChats.value = customerResponse.chats;
+      // Fetch customer chats from real API
+      final chats = await _repository.fetchChats();
+      customerChats.value = chats;
+      filteredCustomerChats.value = chats;
 
-      // Fetch admin chats
-      final adminResponse = await _repository.fetchChats(isAdmin: true);
+      // Fetch admin chats from mock
+      final adminResponse = await _mockRepository.fetchAdminChats();
       adminChats.value = adminResponse.chats;
       filteredAdminChats.value = adminResponse.chats;
     } catch (e) {
       hasError.value = true;
       errorMessage = e.toString();
-      // TODO: Handle error appropriately (show snackbar, log, etc.)
     } finally {
       isLoading.value = false;
     }
@@ -74,21 +74,18 @@ class ChatViewController extends GetxController {
       return;
     }
 
-    filteredCustomerChats.value = customerChats
-        .where(
-          (chat) =>
-              chat.participant.name.toLowerCase().contains(query) ||
-              chat.lastMessage.content.toLowerCase().contains(query),
-        )
-        .toList();
+    filteredCustomerChats.value = customerChats.where((chat) {
+      final otherMember = chat.members.isNotEmpty ? chat.members.first : null;
+      final name = otherMember?.email ?? '';
+      final lastMsg = chat.lastMessage?.content ?? '';
+      return name.toLowerCase().contains(query) || lastMsg.toLowerCase().contains(query);
+    }).toList();
 
-    filteredAdminChats.value = adminChats
-        .where(
-          (chat) =>
-              chat.participant.name.toLowerCase().contains(query) ||
-              chat.lastMessage.content.toLowerCase().contains(query),
-        )
-        .toList();
+    filteredAdminChats.value = adminChats.where((chat) {
+      final name = chat.name ?? '';
+      final lastMsg = chat.lastMessage?.content ?? '';
+      return name.toLowerCase().contains(query) || lastMsg.toLowerCase().contains(query);
+    }).toList();
   }
 
   /// Gets a specific chat by ID.
