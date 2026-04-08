@@ -194,10 +194,15 @@ class PaymentView extends StatelessWidget {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: PrimaryTextButton(
-          onPressed: () => controller.processPayment(),
-          text: 'payNow'.tr,
-        ),
+        child: Obx(() => PrimaryTextButton(
+          onPressed: controller.isProcessingPayment.value
+              ? null
+              : () => controller.processPayment(),
+          text: controller.isProcessingPayment.value
+              ? 'processing'.tr
+              : 'payNow'.tr,
+          isLoading: controller.isProcessingPayment.value,
+        )),
       ),
     );
   }

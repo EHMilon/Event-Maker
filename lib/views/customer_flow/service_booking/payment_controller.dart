@@ -1,13 +1,19 @@
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/models/customer_booking_model.dart';
 import 'package:event_maker/services/customer_booking_repository.dart';
+import 'package:event_maker/services/payment_repository.dart';
 import 'package:event_maker/app_routes.dart';
 import 'package:get/get.dart';
 
+/// Controller for Payment screen handling Stripe and PayPal integration.
+///
+/// Manages payment method selection, checkout session creation, and URL launching.
 class PaymentController extends GetxController {
   final isLoading = true.obs;
-  final selectedPaymentMethod = 0.obs; // 0: Stripe, 1: Paypal
+  final isProcessingPayment = false.obs;
+  final selectedPaymentMethod = 0.obs; // 0: Stripe, 1: PayPal
   final errorMessage = ''.obs;
+  final successMessage = ''.obs;
 
   ServiceModel? service;
   ServicePackage? selectedPackage;
@@ -20,6 +26,7 @@ class PaymentController extends GetxController {
   final bookingLocation = ''.obs;
 
   final CustomerBookingRepository _repository = CustomerBookingRepository();
+  final PaymentRepository _paymentRepository = PaymentRepository();
 
   @override
   void onInit() {
@@ -113,10 +120,118 @@ class PaymentController extends GetxController {
     selectedPaymentMethod.value = index;
   }
 
-  void processPayment() {
-    // TODO: Integrate with backend payment gateway (Stripe/Paypal)
+  /// Processes payment by creating checkout session/order and opening payment URL.
+  ///
+  /// For Stripe (index 0): Creates checkout session and opens Stripe checkout URL.
+  /// For PayPal (index 1): Creates order and opens PayPal approval URL.
+  ///
+  /// Opens payment page inside the app using WebView for better UX and
+  /// to detect payment completion via URL monitoring.
+  Future<void> processPayment() async {
+    // Validate booking ID exists
+    if (bookingId == null) {
+      errorMessage.value = 'Booking ID is required for payment';
+      _showErrorSnackbar('Booking ID is required');
+      return;
+    }
 
-    // For now, just navigate to confirmation
-    Get.toNamed(AppRoutes.paymentConfirmation);
+    isProcessingPayment.value = true;
+    errorMessage.value = '';
+    successMessage.value = '';
+
+    try {
+      String checkoutUrl;
+      String paymentMethod = selectedPaymentMethodName;
+
+      if (selectedPaymentMethod.value == 0) {
+        // Stripe payment
+        checkoutUrl = await _processStripePayment();
+      } else {
+        // PayPal payment
+        checkoutUrl = await _processPayPalPayment();
+        paymentMethod = 'PayPal';
+      }
+
+      if (checkoutUrl.isNotEmpty) {
+        // Navigate to WebView payment screen
+        _openWebViewPayment(checkoutUrl, paymentMethod);
+      }
+    } catch (e) {
+      errorMessage.value = e.toString();
+      _showErrorSnackbar(errorMessage.value);
+    } finally {
+      isProcessingPayment.value = false;
+    }
   }
+
+  /// Processes Stripe payment by creating checkout session.
+  Future<String> _processStripePayment() async {
+    try {
+      final response = await _paymentRepository.createStripeCheckoutSession(
+        bookingId: bookingId!,
+      );
+
+      if (response.success && response.data != null) {
+        successMessage.value = response.message;
+        return response.data!.checkoutUrl;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      // Re-throw to be handled by processPayment
+      rethrow;
+    }
+  }
+
+  /// Processes PayPal payment by creating order.
+  Future<String> _processPayPalPayment() async {
+    try {
+      final response = await _paymentRepository.createPayPalOrder(
+        bookingId: bookingId!,
+      );
+
+      if (response.success && response.data != null) {
+        successMessage.value = response.message;
+        return response.data!.approvalUrl;
+      } else {
+        throw Exception(response.message);
+      }
+    } catch (e) {
+      // Re-throw to be handled by processPayment
+      rethrow;
+    }
+  }
+
+  /// Opens the payment checkout URL in WebView.
+  ///
+  /// The WebView will monitor URL changes to detect payment success/cancel
+  /// and automatically navigate to the appropriate screen.
+  void _openWebViewPayment(String checkoutUrl, String paymentMethod) {
+    // Navigate to WebView payment screen
+    Get.toNamed(
+      AppRoutes.webviewPayment,
+      arguments: {
+        'checkout_url': checkoutUrl,
+        'booking_id': bookingId,
+        'payment_method': paymentMethod,
+      },
+    );
+  }
+
+  /// Shows error snackbar with the given message.
+  void _showErrorSnackbar(String message) {
+    Get.snackbar(
+      'Payment Error',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 4),
+    );
+  }
+
+  /// Gets the selected payment method name.
+  String get selectedPaymentMethodName =>
+      selectedPaymentMethod.value == 0 ? 'Stripe' : 'PayPal';
+
+  /// Checks if booking is ready for payment.
+  bool get canProcessPayment => bookingId != null;
 }

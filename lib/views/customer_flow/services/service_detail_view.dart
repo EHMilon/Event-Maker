@@ -3,6 +3,7 @@ import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_config.dart';
 import 'package:event_maker/models/customer_booking_model.dart';
+import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/views/chats/chat_repository.dart';
@@ -309,12 +310,12 @@ class ServiceDetailView extends StatelessWidget {
                                   snackPosition: SnackPosition.BOTTOM,
                                   duration: const Duration(seconds: 10),
                                 );
-                                
+
                                 try {
                                   // Get provider user ID directly from service
                                   // The customer-services API now returns provider_user_id
                                   final userId = service.providerUserId;
-                                   
+
                                   if (userId == null || userId.isEmpty) {
                                     Get.snackbar(
                                       'Error',
@@ -323,42 +324,71 @@ class ServiceDetailView extends StatelessWidget {
                                     );
                                     return;
                                   }
-                                   
+
                                   // Create/get private chat with provider
                                   final chatRepo = ChatRepository();
-                                  final chat = await chatRepo.createOrGetPrivateChat(userId);
-                                  
+                                  final chat = await chatRepo
+                                      .createOrGetPrivateChat(userId);
+
                                   // Close loading snackbar
                                   Get.closeAllSnackbars();
-                                  
-                                   if (chat != null) {
-                                     // Get the other member (not current user)
-                                     final otherMember = chat.members.firstWhereOrNull(
-                                       (m) => m.id != null, // We'll filter by non-current user in detail view
-                                     );
-                                     // For now, use the first member with avatar, or provider image
-                                     String? memberAvatar;
-                                     if (otherMember?.avatar?.isNotEmpty == true) {
-                                       memberAvatar = otherMember!.avatar;
-                                     } else if (chat.members.isNotEmpty && chat.members.first.avatar?.isNotEmpty == true) {
-                                       memberAvatar = chat.members.first.avatar;
-                                     } else {
-                                       memberAvatar = _getFullImageUrl(service.provider.imageUrl);
-                                     }
-                                     
-                                     Get.toNamed(
-                                       AppRoutes.chatDetail,
-                                       arguments: {
-                                         'id': chat.id,
-                                         'name': otherMember?.fullName?.isNotEmpty == true 
-                                             ? otherMember!.fullName! 
-                                             : (chat.members.isNotEmpty && chat.members.first.fullName?.isNotEmpty == true 
-                                                 ? chat.members.first.fullName! 
-                                                 : service.provider.name),
-                                         'image': memberAvatar,
-                                         'isAdmin': false,
-                                       },
-                                     );
+
+                                  if (chat != null) {
+                                    // Find the other participant (not current user)
+                                    // The API response has members where first is always current user (role='customer')
+                                    // and second is the other party (role='provider')
+                                    ChatMember? otherMember;
+                                    if (chat.members.isNotEmpty) {
+                                      // Find member whose role is NOT 'customer' (i.e., the provider)
+                                      otherMember = chat.members
+                                          .firstWhereOrNull(
+                                            (m) => m.role != 'customer',
+                                          );
+                                      // Fallback to second member if no provider found
+                                      otherMember ??= chat.members.length > 1
+                                          ? chat.members[1]
+                                          : chat.members.first;
+                                    }
+                                    // Build full avatar URL using _getFullImageUrl()
+                                    String? memberAvatar;
+                                    if (otherMember?.avatar?.isNotEmpty ==
+                                        true) {
+                                      memberAvatar = _getFullImageUrl(
+                                        otherMember!.avatar!,
+                                      );
+                                    } else if (chat.members.isNotEmpty &&
+                                        chat.members.first.avatar?.isNotEmpty ==
+                                            true) {
+                                      memberAvatar = _getFullImageUrl(
+                                        chat.members.first.avatar!,
+                                      );
+                                    } else {
+                                      memberAvatar = _getFullImageUrl(
+                                        service.provider.imageUrl,
+                                      );
+                                    }
+
+                                    Get.toNamed(
+                                      AppRoutes.chatDetail,
+                                      arguments: {
+                                        'id': chat.id,
+                                        'name':
+                                            otherMember?.fullName?.isNotEmpty ==
+                                                true
+                                            ? otherMember!.fullName!
+                                            : (chat.members.isNotEmpty &&
+                                                      chat
+                                                              .members
+                                                              .first
+                                                              .fullName
+                                                              ?.isNotEmpty ==
+                                                          true
+                                                  ? chat.members.first.fullName!
+                                                  : service.provider.name),
+                                        'image': memberAvatar,
+                                        'isAdmin': false,
+                                      },
+                                    );
                                   } else {
                                     Get.snackbar(
                                       'Error',
@@ -620,11 +650,7 @@ class ServiceDetailView extends StatelessWidget {
   }
 
   Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      children: [
-        SizedBox(width: 12.w),
-      ],
-    );
+    return Row(children: [SizedBox(width: 12.w)]);
   }
 
   /// Build availability card for each availability entry

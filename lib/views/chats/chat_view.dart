@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/models/chat_model.dart';
@@ -281,21 +282,33 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           : 'Event Link'; // Default admin name from API
       // Use admin member's avatar, or fallback to icon
       avatarUrl = adminMember?.avatar?.isNotEmpty == true
-          ? adminMember!.avatar
+          ? ApiConstant.getFullMediaUrl(adminMember!.avatar)
           : 'assets/icons/icon.svg'; // Admin icon
     } else {
-      // For normal chats, use the other participant (not current user)
-      final otherMember = chat.members.isNotEmpty
-          ? (chat.members.first.fullName?.isNotEmpty == true
-                ? chat.members.first.fullName!
-                : chat.members.first.email)
-          : 'Unknown';
-      displayName = otherMember;
-      // Use member's avatar if available, otherwise use icon
-      avatarUrl =
-          chat.members.isNotEmpty &&
-              chat.members.first.avatar?.isNotEmpty == true
-          ? chat.members.first.avatar
+      // For normal chats, find the other participant (not current user)
+      // The API response has members where first is always current user (role='customer')
+      // and second is the other party (role='provider')
+      // We use role to identify the other participant
+      ChatMember? otherMember;
+      
+      if (chat.members.isNotEmpty) {
+        // Find member whose role is NOT 'customer' (i.e., the provider/admin)
+        otherMember = chat.members.firstWhereOrNull(
+          (m) => m.role != 'customer',
+        );
+        // Fallback to second member if no provider found
+        otherMember ??= chat.members.length > 1 
+            ? chat.members[1] 
+            : chat.members.first;
+      }
+
+      displayName = otherMember?.fullName?.isNotEmpty == true
+          ? otherMember!.fullName!
+          : otherMember?.email ?? 'Unknown';
+
+      // Build full avatar URL using ApiConstant.getFullMediaUrl()
+      avatarUrl = otherMember?.avatar?.isNotEmpty == true
+          ? ApiConstant.getFullMediaUrl(otherMember!.avatar)
           : 'assets/icons/icon.svg';
     }
 

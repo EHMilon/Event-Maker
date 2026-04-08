@@ -232,6 +232,18 @@ class ApiConstant {
   /// Returns paginated payment history for customers
   static const String customerPaymentHistory = '/payments/customer-history';
 
+  /// Stripe checkout session creation endpoint
+  /// POST /payments/stripe/create-checkout-session
+  /// Body: { "booking_id": int }
+  /// Response: { "success": true, "message": "...", "data": { "payment_id": int, "session_id": string, "checkout_url": string } }
+  static const String stripeCreateCheckoutSession = '/payments/stripe/create-checkout-session';
+
+  /// PayPal order creation endpoint
+  /// POST /payments/paypal/create-order
+  /// Body: { "booking_id": int }
+  /// Response: { "success": true, "message": "...", "data": { "payment_id": int, "order_id": string, "approval_url": string } }
+  static const String paypalCreateOrder = '/payments/paypal/create-order';
+
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';

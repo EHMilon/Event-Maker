@@ -452,6 +452,8 @@ class AppLocalization extends Translations {
     'bookingConfirmedSubtitle':
         'Your booking has been confirmed. Thank you for using our service!',
     'backToHome': 'Back to Home',
+    'paymentConfirmation': 'Payment Confirmation',
+    'processing': 'Processing...',
     // Customer Home
     'serviceCategories': 'Service Categories',
     'allCategories': 'All Categories',
@@ -902,6 +904,8 @@ class AppLocalization extends Translations {
     'paymentSuccessful': 'تم الدفع بنجاح!',
     'bookingConfirmedSubtitle': 'تم تأكيد حجزك. شكراً لاستخدامكم خدمتنا!',
     'backToHome': 'العودة للرئيسية',
+    'paymentConfirmation': 'تأكيد الدفع',
+    'processing': 'جاري المعالجة...',
 
     // Customer Home
     'serviceCategories': 'فئات الخدمة',

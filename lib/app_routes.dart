@@ -60,6 +60,7 @@ import 'package:event_maker/views/customer_flow/service_booking/payment_confirma
 import 'package:event_maker/views/customer_flow/service_booking/payment_view.dart';
 import 'package:event_maker/views/customer_flow/service_booking/booking_request_sent_view.dart';
 import 'package:event_maker/views/customer_flow/service_booking/booking_binding.dart';
+import 'package:event_maker/views/customer_flow/service_booking/webview_payment_screen.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_decision_view.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_view.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_controller.dart';
@@ -119,6 +120,7 @@ class AppRoutes {
   static const String bookServiceRequest = '/book-service-request';
   static const String payment = '/payment';
   static const String paymentConfirmation = '/payment-confirmation';
+  static const String webviewPayment = '/webview-payment';
   static const String bookingRequestSent = '/booking-request-sent';
   static const String spamReport = '/spam-report';
   static const String viewCertificate = '/view-certificate';
@@ -180,7 +182,7 @@ class AppRoutes {
     ),
     GetPage(
       name: onboarding,
-      page: () => const OnboardingView(),
+      page: () => OnboardingView(),
       binding: OnboardingBinding(),
     ),
     GetPage(
@@ -330,6 +332,18 @@ class AppRoutes {
       name: paymentConfirmation,
       page: () => const PaymentConfirmationView(),
       binding: BookingBinding(),
+    ),
+    // WebView Payment route for in-app payment processing
+    GetPage(
+      name: webviewPayment,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>;
+        return WebViewPaymentScreen(
+          checkoutUrl: args['checkout_url'] as String,
+          bookingId: args['booking_id'] as int,
+          paymentMethod: args['payment_method'] as String,
+        );
+      },
     ),
     GetPage(
       name: bookingRequestSent,

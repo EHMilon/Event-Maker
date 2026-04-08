@@ -186,7 +186,7 @@ class ServicesCard extends StatelessWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: "$price AED",
+                              text: "$price",
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w400,
