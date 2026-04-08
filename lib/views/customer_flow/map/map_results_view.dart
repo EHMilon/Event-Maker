@@ -31,6 +31,7 @@ class MapResultsView extends StatelessWidget {
             GoogleMap(
               initialCameraPosition: controller.initialCameraPosition,
               markers: controller.markers.toSet(),
+              polylines: controller.polylines.toSet(),
               onMapCreated: controller.onMapCreated,
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
@@ -163,11 +164,7 @@ class MapResultsView extends StatelessWidget {
                   width: 90.w,
                   height: 90.w,
                   color: AppColors.lightGrey,
-                  child: Icon(
-                    Icons.image,
-                    color: AppColors.grey,
-                    size: 40.r,
-                  ),
+                  child: Icon(Icons.image, color: AppColors.grey, size: 40.r),
                 ),
                 errorWidget: (context, url, error) => Container(
                   width: 90.w,
@@ -229,7 +226,7 @@ class MapResultsView extends StatelessWidget {
                           vertical: 5.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Text(
@@ -246,11 +243,7 @@ class MapResultsView extends StatelessWidget {
                       if (service.rating > 0)
                         Row(
                           children: [
-                            Icon(
-                              Icons.star,
-                              size: 16.r,
-                              color: Colors.amber,
-                            ),
+                            Icon(Icons.star, size: 16.r, color: Colors.amber),
                             SizedBox(width: 4.w),
                             Text(
                               service.rating.toStringAsFixed(1),
@@ -266,17 +259,62 @@ class MapResultsView extends StatelessWidget {
                   ),
                   SizedBox(height: 8.h),
                   // Price
-                  Text(
-                    '${service.startingPrice.toStringAsFixed(2)} ${service.currency}',
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '${service.startingPrice.toStringAsFixed(2)} ${service.currency}',
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      Spacer(),
+                      // Navigation Button
+                      Obx(() {
+                        final isNavigating = controller.isNavigating.value;
+                        return GestureDetector(
+                          onTap: () {
+                            if (isNavigating) {
+                              controller.stopNavigation();
+                            } else {
+                              controller.startNavigation();
+                            }
+                          },
+                          child: Container(
+                            width: 30.w,
+                            height: 30.w,
+                            decoration: BoxDecoration(
+                              color: isNavigating
+                                  ? Colors.red
+                                  : AppColors.primary,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      (isNavigating
+                                              ? Colors.red
+                                              : AppColors.primary)
+                                          .withValues(alpha: 0.3),
+                                  blurRadius: 8.r,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              isNavigating ? Icons.close : Icons.navigation,
+                              color: Colors.white,
+                              size: 20.r,
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
                   ),
                 ],
               ),
             ),
+            SizedBox(width: 12.w),
           ],
         ),
       ),

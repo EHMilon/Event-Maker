@@ -334,24 +334,30 @@ class BookServiceDateView extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          color: AppColors.textSecondary,
-                          size: 20.r,
-                        ),
-                        SizedBox(width: 8.w),
-                        Obx(
-                          () => Text(
-                            controller.selectedLocation.value,
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
-                              color: AppColors.textPrimary,
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: AppColors.textSecondary,
+                            size: 20.r,
+                          ),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: Obx(
+                              () => Text(
+                                controller.selectedLocation.value,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  color: AppColors.textPrimary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     Icon(
                       Icons.keyboard_arrow_down,
