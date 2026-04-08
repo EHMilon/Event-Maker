@@ -1,5 +1,6 @@
 /// Chat-related models for backend compatibility.
 /// These models provide type-safe data structures for the chat feature.
+library;
 
 /// Represents a chat conversation/thread.
 class ChatModel {

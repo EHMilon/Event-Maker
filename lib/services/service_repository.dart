@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import '../mock_data/mock_data.dart';
 import '../utils/user_preferences.dart';
@@ -220,7 +219,7 @@ class ServiceRepository {
       // Backend expects PATCH method with multipart/form-data for update
       Map<String, File> files = {};
       if (isNewImage) {
-        files = {'cover_image': File(coverImage!)};
+        files = {'cover_image': File(coverImage)};
         Log.d('=======> updateService - Using multipart PATCH with new image');
       } else {
         Log.d('=======> updateService - Using multipart PATCH without image');

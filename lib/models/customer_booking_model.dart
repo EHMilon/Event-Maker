@@ -1,5 +1,6 @@
 /// Customer Booking Models
 /// Matches API responses from customer booking endpoints
+library;
 
 /// Customer Booking item in list
 class CustomerBookingItem {

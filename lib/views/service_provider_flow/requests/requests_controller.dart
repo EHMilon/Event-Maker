@@ -210,6 +210,7 @@ class RequestsController extends GetxController {
   }
 
   /// Refresh all requests
+  @override
   Future<void> refresh() async {
     await fetchRequests();
   }

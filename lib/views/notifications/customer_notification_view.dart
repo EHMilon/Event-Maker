@@ -119,7 +119,7 @@ class _CustomerNotificationCard extends StatelessWidget {
 }
 
 class _NotificationCardPlaceholder extends StatelessWidget {
-  const _NotificationCardPlaceholder({super.key});
+  const _NotificationCardPlaceholder();
 
   @override
   Widget build(BuildContext context) {

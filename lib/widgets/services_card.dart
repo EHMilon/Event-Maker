@@ -55,7 +55,7 @@ class ServicesCard extends StatelessWidget {
         fullImageUrl.startsWith('https://');
 
     /// Build placeholder image widget
-    Widget _buildPlaceholderImage(double height) {
+    Widget buildPlaceholderImage(double height) {
       return Container(
         height: height,
         width: double.infinity,
@@ -104,7 +104,7 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholderImage(imageHeight),
+                              buildPlaceholderImage(imageHeight),
                         )
                       : Image.asset(
                           imagePath,
@@ -112,7 +112,7 @@ class ServicesCard extends StatelessWidget {
                           width: double.infinity,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholderImage(imageHeight),
+                              buildPlaceholderImage(imageHeight),
                         ),
                 ),
                 Positioned(

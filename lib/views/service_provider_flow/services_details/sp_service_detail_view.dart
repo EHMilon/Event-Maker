@@ -1,5 +1,4 @@
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/service_detail_view.dart';
 import 'package:event_maker/views/service_provider_flow/services_details/sp_service_detail_controller.dart';
 import 'package:flutter/material.dart';

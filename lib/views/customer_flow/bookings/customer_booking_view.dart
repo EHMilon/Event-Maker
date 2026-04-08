@@ -27,10 +27,10 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
           titleSpacing: 24.w,
           title: Text(
             'bookings'.tr,
-            style: GoogleFonts.inter(
+            style: TextStyle(
+              color: AppColors.textPrimary,
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
             ),
           ),
           bottom: PreferredSize(
@@ -207,11 +207,13 @@ class _RequestCard extends StatelessWidget {
       // Navigate to service detail view with booking info
       // User already booked this service, so hide Book Now button
       if (context.mounted) {
-        Get.to(() => ServiceDetailView(
-              service: service,
-              isAlreadyBooked: true, // Hide Book Now button
-              bookedPackage: request.selectedPackage, // Pre-selected package
-            ));
+        Get.to(
+          () => ServiceDetailView(
+            service: service,
+            isAlreadyBooked: true, // Hide Book Now button
+            bookedPackage: request.selectedPackage, // Pre-selected package
+          ),
+        );
       }
     } catch (e) {
       // Close loading dialog

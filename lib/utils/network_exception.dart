@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import '../services/api_result.dart';
-import '../constants/api_constant.dart';
 import 'logger.dart';
 
 /// Utility class for mapping exceptions and HTTP responses to typed errors.

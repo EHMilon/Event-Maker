@@ -4,11 +4,9 @@ import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/constants/app_config.dart';
 import 'package:event_maker/models/booking_request_model.dart';
 import 'package:event_maker/models/service_model.dart';
-import 'package:event_maker/models/vendor_profile_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/services/booking_request_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
-import 'package:event_maker/models/review_model.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
@@ -17,7 +15,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:event_maker/widgets/app_custom_dialog.dart';
 import 'package:event_maker/views/service_provider_flow/requests/requests_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -1505,7 +1502,7 @@ class _BookingRequestDetailViewDetailState
                                     width: 45.w,
                                     height: 45.w,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
+                                    errorBuilder: (_, _, _) => Container(
                                       width: 45.w,
                                       height: 45.w,
                                       color: AppColors.lightGrey,

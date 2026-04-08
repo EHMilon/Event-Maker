@@ -8,6 +8,7 @@
 /// 1. Client connects and sends [AuthEvent] with token
 /// 2. Server responds with [AuthenticatedEvent]
 /// 3. Real-time events flow (messages, typing, presence, etc.)
+library;
 
 import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/constants/api_constant.dart';

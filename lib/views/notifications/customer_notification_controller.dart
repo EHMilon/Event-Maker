@@ -3,7 +3,6 @@ import '../../app_routes.dart';
 import '../../services/customer_booking_repository.dart';
 import '../../services/api_exception.dart';
 import '../../constants/api_constant.dart';
-import 'package:flutter/material.dart';
 
 class CustomerNotificationController extends GetxController {
   final RxList<CustomerNotificationModel> notifications =

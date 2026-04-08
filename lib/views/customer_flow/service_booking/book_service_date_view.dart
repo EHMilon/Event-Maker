@@ -25,7 +25,7 @@ class BookServiceDateView extends StatelessWidget {
     });
 
     // Initialize the booking controller with current selections
-    void _proceedToNext() {
+    void proceedToNext() {
       // Get selected date as YYYY-MM-DD format
       final monthIndex =
           controller.months.indexOf(controller.selectedMonth.value) + 1;
@@ -377,7 +377,7 @@ class BookServiceDateView extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: PrimaryTextButton(
-          onPressed: _proceedToNext,
+          onPressed: proceedToNext,
           text: 'continueText'.tr,
         ),
       ),

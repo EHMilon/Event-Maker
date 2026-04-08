@@ -19,8 +19,8 @@ class MapView extends GetView<MapController> {
         titleSpacing: (Navigator.of(context).canPop()) ? 24.w : 24.w,
         title: Text(
           'myLocation'.tr,
-          style: GoogleFonts.inter(
-            fontSize: 22.sp,
+          style: TextStyle(
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.black,
           ),

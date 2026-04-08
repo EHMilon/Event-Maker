@@ -26,8 +26,8 @@ class SPRequestsView extends GetView<RequestsController> {
           titleSpacing: 24.w,
           title: Text(
             'requests'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 24.sp,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
@@ -122,7 +122,7 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
         child: ListView.separated(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           itemCount: controller.upcomingRequests.length,
-          separatorBuilder: (_, __) => SizedBox(height: 16.h),
+          separatorBuilder: (_, _) => SizedBox(height: 16.h),
           itemBuilder: (_, index) {
             final request = controller.upcomingRequests[index];
             return _buildRequestCard(request);
@@ -175,8 +175,8 @@ class _UpcomingRequestsTab extends GetView<RequestsController> {
       child: ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         itemCount: 5,
-        separatorBuilder: (_, __) => SizedBox(height: 16.h),
-        itemBuilder: (_, __) => Container(
+        separatorBuilder: (_, _) => SizedBox(height: 16.h),
+        itemBuilder: (_, _) => Container(
           height: 90.h,
           decoration: BoxDecoration(
             color: AppColors.lightGrey,
@@ -279,7 +279,7 @@ class _PastRequestsTab extends GetView<RequestsController> {
         child: ListView.separated(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           itemCount: controller.pastRequests.length,
-          separatorBuilder: (_, __) => SizedBox(height: 16.h),
+          separatorBuilder: (_, _) => SizedBox(height: 16.h),
           itemBuilder: (_, index) {
             final request = controller.pastRequests[index];
             return _buildRequestCard(request);
@@ -333,8 +333,8 @@ class _PastRequestsTab extends GetView<RequestsController> {
       child: ListView.separated(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         itemCount: 5,
-        separatorBuilder: (_, __) => SizedBox(height: 16.h),
-        itemBuilder: (_, __) => Container(
+        separatorBuilder: (_, _) => SizedBox(height: 16.h),
+        itemBuilder: (_, _) => Container(
           height: 90.h,
           decoration: BoxDecoration(
             color: AppColors.lightGrey,

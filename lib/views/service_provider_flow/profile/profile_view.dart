@@ -26,7 +26,7 @@ class ProfileView extends GetView<ProfileController> {
           'settings'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 22.sp,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -102,7 +102,6 @@ class ProfileView extends GetView<ProfileController> {
                       onChanged: (value) =>
                           controller.toggleAvailability(value),
                       activeThumbColor: AppColors.primary,
-                      activeColor: AppColors.primary.withOpacity(0.5),
                     ),
                   ),
                   _buildMenuItem(

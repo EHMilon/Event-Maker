@@ -767,7 +767,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     );
   }
 
-  dynamic mapStyle = null; // Use default Google Maps style for better visibility
+  dynamic mapStyle; // Use default Google Maps style for better visibility
 
   @override
   Widget build(BuildContext context) {
@@ -875,7 +875,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
       jsonEncode(history),
     );
 
-    return null;
+    return;
   }
 
   Widget _searchHistoryItemWidget(GoogleMapSearchModel item, int index) {
@@ -1171,7 +1171,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                   int index = entry.key;
                   GoogleMapSearchModel item = entry.value;
                   return _searchItemWidget(item, index);
-                }).toList(),
+                }),
               if (_searchResults.isEmpty)
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 24.w),
@@ -1206,7 +1206,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                   GoogleMapSearchModel item = entry.value;
 
                   return _searchHistoryItemWidget(item, index);
-                }).toList(),
+                }),
             ],
           ),
         ),

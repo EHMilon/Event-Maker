@@ -45,6 +45,7 @@ class SPServicedetailController extends GetxController {
   }
 
   /// Refresh service detail
+  @override
   Future<void> refresh() async {
     await fetchServiceDetail();
   }

@@ -64,8 +64,8 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
           titleSpacing: 24.w,
           title: Text(
             'myProfile'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 24.sp,
+            style: TextStyle(
+              fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),

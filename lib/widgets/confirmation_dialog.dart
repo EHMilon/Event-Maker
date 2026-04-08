@@ -2,7 +2,6 @@ import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ConfirmationDialog extends StatelessWidget {

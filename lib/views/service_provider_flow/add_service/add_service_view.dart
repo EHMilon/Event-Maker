@@ -64,7 +64,7 @@ class _AddServiceViewState extends State<AddServiceView> {
         ),
         title: Text(
           widget.isEdit ? 'editService'.tr : 'addNewService'.tr,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -303,7 +303,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                             controller.needsConfirmationBeforePayment.value =
                                 value;
                           },
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                         ),
                       ],
                     ),

@@ -29,7 +29,7 @@ class ChatView extends StatelessWidget {
         leadingWidth: 40.w,
         title: Text(
           'chats'.tr,
-          style: GoogleFonts.inter(
+          style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,

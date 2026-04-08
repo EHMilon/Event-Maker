@@ -26,7 +26,11 @@ class ServicesView extends GetView<SPServicesController> {
         titleSpacing: 24.w,
         title: Text(
           'myServices'.tr,
-          style: GoogleFonts.inter(fontSize: 24.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
         ),
       ),
       body: SafeArea(

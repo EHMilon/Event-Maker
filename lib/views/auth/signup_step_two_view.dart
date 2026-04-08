@@ -68,7 +68,7 @@ class SignupStepTwoView extends GetView<AuthController> {
               SizedBox(height: 8.h),
               Obx(
                 () => DropdownButtonFormField<String>(
-                  value: controller.selectedNationality.value,
+                  initialValue: controller.selectedNationality.value,
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: AppColors.textPrimary,

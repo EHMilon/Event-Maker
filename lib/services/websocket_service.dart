@@ -9,6 +9,7 @@
 ///
 /// Backend developer: This service is ready to connect to your WebSocket server.
 /// Just update [ApiConstant.wsBaseUrl] with your WebSocket endpoint.
+library;
 
 import 'dart:async';
 import 'dart:convert';
