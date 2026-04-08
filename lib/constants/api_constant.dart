@@ -27,7 +27,13 @@ class ApiConstant {
 
   // ===== WEBSOCKET URLS =====
 
-  static const String wsBaseUrl = 'wss://api.eventmaker.com/ws';
+  /// WebSocket base URL for real-time chat
+  static const String wsBaseUrl = 'ws://10.10.12.62:8005/ws';
+
+  /// Build chat WebSocket URL with chat ID and JWT token
+  /// Format: ws://10.10.12.62:8005/ws/chat/{chatId}?token={jwt}
+  static String chatWebSocketUrl(String chatId, String token) =>
+      '$wsBaseUrl/chat/$chatId?token=$token';
 
   // ===== AUTH ENDPOINTS =====
 
@@ -229,7 +235,20 @@ class ApiConstant {
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';
+  
+  /// Query param for filtering chats: chat_type=normal | admin
+  static const String chatTypeParam = 'chat_type';
+  static const String chatTypeNormal = 'normal';
+  static const String chatTypeAdmin = 'admin';
+  
+  /// Create private chat with another user
+  /// POST /chats/private
+  /// Body: { "other_user_id": "userId" }
   static const String chatsPrivate = '/chats/private';
+  
+  /// Create private admin chat
+  /// POST /chats/private-admin
+  static const String chatsPrivateAdmin = '/chats/private-admin';
   
   /// Get chat details by ID: /chats/{chatId}
   static String chatDetail(String chatId) => '/chats/$chatId';
@@ -333,83 +352,4 @@ class ApiConstant {
   static const String keyData = 'data';
   static const String keyErrors = 'errors';
   static const String keyStatusCode = 'status_code';
-}
-
-/// WebSocket event types for chat functionality.
-///
-/// Backend developer: Ensure your WebSocket server sends events
-/// with these exact type names for seamless integration.
-class WsEventType {
-  // ===== CONNECTION EVENTS =====
-
-  /// Sent by client to authenticate connection
-  static const String authenticate = 'authenticate';
-
-  /// Server confirms successful authentication
-  static const String authenticated = 'authenticated';
-
-  /// Ping/pong for connection health
-  static const String ping = 'ping';
-  static const String pong = 'pong';
-
-  // ===== MESSAGE EVENTS =====
-
-  /// Send a new message
-  static const String messageSend = 'message:send';
-
-  /// Server confirms message sent (with message ID)
-  static const String messageSent = 'message:sent';
-
-  /// Receive a new message from another user
-  static const String messageReceived = 'message:received';
-
-  /// Message delivery confirmation
-  static const String messageDelivered = 'message:delivered';
-
-  /// Message read confirmation
-  static const String messageRead = 'message:read';
-
-  /// Message deleted event
-  static const String messageDeleted = 'message:deleted';
-
-  // ===== TYPING EVENTS =====
-
-  /// User started typing
-  static const String typingStart = 'typing:start';
-
-  /// User stopped typing
-  static const String typingStop = 'typing:stop';
-
-  // ===== PRESENCE EVENTS =====
-
-  /// User came online
-  static const String userOnline = 'user:online';
-
-  /// User went offline
-  static const String userOffline = 'user:offline';
-
-  /// User status changed (online/offline/away)
-  static const String userStatus = 'user:status';
-
-  // ===== CHAT EVENTS =====
-
-  /// New chat created
-  static const String chatCreated = 'chat:created';
-
-  /// Chat updated (e.g., last message, unread count)
-  static const String chatUpdated = 'chat:updated';
-
-  /// User joined a chat
-  static const String chatJoined = 'chat:joined';
-
-  /// User left a chat
-  static const String chatLeft = 'chat:left';
-
-  // ===== ERROR EVENTS =====
-
-  /// General error event
-  static const String error = 'error';
-
-  /// Connection error
-  static const String connectionError = 'connection:error';
 }

@@ -194,15 +194,6 @@ class ServiceDetailView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // if (showEditButton)
-                            //   IconButton(
-                            //     onPressed: _onEditPressed,
-                            //     icon: Icon(
-                            //       Icons.edit_outlined,
-                            //       color: AppColors.primary,
-                            //       size: 24.r,
-                            //     ),
-                            //   ),
                           ],
                         ),
                         SizedBox(height: 16.h),
@@ -321,13 +312,19 @@ class ServiceDetailView extends StatelessWidget {
                                 );
                                 
                                 try {
-                                  // Fetch vendor profile to get user ID
-                                  final profile = await _repository.fetchVendorProfileById(service.providerId);
-                                  
-                                  // Get user ID from vendor profile
-                                  // Note: VendorProfileModel.id is the user ID (UUID)
-                                  final userId = profile.id.toString();
-                                  
+                                  // Get provider user ID directly from service
+                                  // The customer-services API now returns provider_user_id
+                                  final userId = service.providerUserId;
+                                   
+                                  if (userId == null || userId.isEmpty) {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Provider not available for chat.',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                    return;
+                                  }
+                                   
                                   // Create/get private chat with provider
                                   final chatRepo = ChatRepository();
                                   final chat = await chatRepo.createOrGetPrivateChat(userId);
@@ -335,16 +332,34 @@ class ServiceDetailView extends StatelessWidget {
                                   // Close loading snackbar
                                   Get.closeAllSnackbars();
                                   
-                                  if (chat != null) {
-                                    Get.toNamed(
-                                      AppRoutes.chatDetail,
-                                      arguments: {
-                                        'id': chat.id,
-                                        'name': service.provider.name,
-                                        'image': service.provider.imageUrl,
-                                        'isAdmin': false,
-                                      },
-                                    );
+                                   if (chat != null) {
+                                     // Get the other member (not current user)
+                                     final otherMember = chat.members.firstWhereOrNull(
+                                       (m) => m.id != null, // We'll filter by non-current user in detail view
+                                     );
+                                     // For now, use the first member with avatar, or provider image
+                                     String? memberAvatar;
+                                     if (otherMember?.avatar?.isNotEmpty == true) {
+                                       memberAvatar = otherMember!.avatar;
+                                     } else if (chat.members.isNotEmpty && chat.members.first.avatar?.isNotEmpty == true) {
+                                       memberAvatar = chat.members.first.avatar;
+                                     } else {
+                                       memberAvatar = _getFullImageUrl(service.provider.imageUrl);
+                                     }
+                                     
+                                     Get.toNamed(
+                                       AppRoutes.chatDetail,
+                                       arguments: {
+                                         'id': chat.id,
+                                         'name': otherMember?.fullName?.isNotEmpty == true 
+                                             ? otherMember!.fullName! 
+                                             : (chat.members.isNotEmpty && chat.members.first.fullName?.isNotEmpty == true 
+                                                 ? chat.members.first.fullName! 
+                                                 : service.provider.name),
+                                         'image': memberAvatar,
+                                         'isAdmin': false,
+                                       },
+                                     );
                                   } else {
                                     Get.snackbar(
                                       'Error',
@@ -500,14 +515,6 @@ class ServiceDetailView extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        // SizedBox(height: 10.h),
-                        // Text(
-                        //   service.location, // Or more detailed address
-                        //   style: GoogleFonts.inter(
-                        //     fontSize: 14.sp,
-                        //     color: AppColors.textSecondary,
-                        //   ),
-                        // ),
                         SizedBox(height: 16.h),
                         _buildLocationMap(context),
                         SizedBox(height: 24.h),
@@ -571,18 +578,6 @@ class ServiceDetailView extends StatelessWidget {
                                   color: AppColors.primary,
                                 ),
                               ),
-                              // if (service.type == ServiceType.event ||
-                              //     service.type == ServiceType.training ||
-                              //     service.type == ServiceType.cleaning ||
-                              //     service.type == ServiceType.filming ||
-                              //     service.type == ServiceType.catering)
-                              //   Text(
-                              //     'perHr'.tr,
-                              //     style: GoogleFonts.inter(
-                              //       fontSize: 12.sp,
-                              //       color: AppColors.textSecondary,
-                              //     ),
-                              //   ),
                             ],
                           ),
                         ],
@@ -628,18 +623,7 @@ class ServiceDetailView extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        // Icon(icon, size: 18.r, color: AppColors.primary),
         SizedBox(width: 12.w),
-        // Expanded(
-        //   child: Text(
-        //     text,
-        //     style: GoogleFonts.inter(
-        //       fontSize: 14.sp,
-        //       color: AppColors.textSecondary,
-        //       fontWeight: FontWeight.w500,
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }

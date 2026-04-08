@@ -339,6 +339,8 @@ class ServiceModel {
   // API response fields
   final int apiId;
   final int providerId;
+  final String?
+  providerUserId; // User ID (UUID) for chat API - provided by customer-services endpoint
   final String title;
   final String description;
   final String serviceTypeName;
@@ -384,6 +386,7 @@ class ServiceModel {
     dynamic id,
     this.apiId = 0,
     this.providerId = 0,
+    this.providerUserId,
     required this.title,
     required this.description,
     this.serviceTypeName = '',
@@ -432,6 +435,9 @@ class ServiceModel {
       id: apiId.toString(),
       apiId: apiId,
       providerId: json['provider_id'] as int? ?? 0,
+      // Get provider_user_id from nested provider object (from customer-services endpoint)
+      providerUserId: (json['provider'] as Map<String, dynamic>?)?['provider_user_id'] as String? 
+          ?? json['provider_user_id'] as String?, // Fallback to top-level if available
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       serviceTypeName: json['service_type_name'] as String? ?? '',

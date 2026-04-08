@@ -1,33 +1,56 @@
 import 'package:get/get.dart';
 
 /// Chat-related models for backend compatibility.
-/// These models provide type-safe data structures for the chat feature.
 
 /// Represents a member in a chat conversation.
 class ChatMember {
   final String id;
   final String email;
   final String role;
+  final String? fullName;
+  final String? avatar;
 
-  const ChatMember({required this.id, required this.email, required this.role});
+  const ChatMember({
+    required this.id,
+    required this.email,
+    required this.role,
+    this.fullName,
+    this.avatar,
+  });
 
   factory ChatMember.fromJson(Map<String, dynamic> json) {
     return ChatMember(
       id: json['id'] as String? ?? '',
       email: json['email'] as String? ?? '',
       role: json['role'] as String? ?? '',
+      fullName: json['full_name'] as String?,
+      avatar: json['avatar'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'email': email, 'role': role};
+    return {
+      'id': id,
+      'email': email,
+      'role': role,
+      if (fullName != null) 'full_name': fullName,
+      if (avatar != null) 'avatar': avatar,
+    };
   }
 
-  ChatMember copyWith({String? id, String? email, String? role}) {
+  ChatMember copyWith({
+    String? id,
+    String? email,
+    String? role,
+    String? fullName,
+    String? avatar,
+  }) {
     return ChatMember(
       id: id ?? this.id,
       email: email ?? this.email,
       role: role ?? this.role,
+      fullName: fullName ?? this.fullName,
+      avatar: avatar ?? this.avatar,
     );
   }
 }
@@ -37,11 +60,15 @@ class MessageSender {
   final String id;
   final String email;
   final String role;
+  final String? fullName;
+  final String? avatar;
 
   const MessageSender({
     required this.id,
     required this.email,
     required this.role,
+    this.fullName,
+    this.avatar,
   });
 
   factory MessageSender.fromJson(Map<String, dynamic> json) {
@@ -49,11 +76,19 @@ class MessageSender {
       id: json['id'] as String? ?? '',
       email: json['email'] as String? ?? '',
       role: json['role'] as String? ?? '',
+      fullName: json['full_name'] as String?,
+      avatar: json['avatar'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'email': email, 'role': role};
+    return {
+      'id': id,
+      'email': email,
+      'role': role,
+      if (fullName != null) 'full_name': fullName,
+      if (avatar != null) 'avatar': avatar,
+    };
   }
 }
 
@@ -123,16 +158,19 @@ class ChatModel {
     );
   }
 
-  /// Get the other participant in a private chat (not the current user)
+  /// Get the other participant in a private chat
   ChatMember? getOtherParticipant(String currentUserId) {
     if (isGroup) return null;
     return members.firstWhereOrNull((m) => m.id != currentUserId);
   }
 
-  /// Get display name for the chat (name or other participant's name)
+  /// Get display name for the chat
   String getDisplayName(String currentUserId) {
     if (name != null && name!.isNotEmpty) return name!;
     final other = getOtherParticipant(currentUserId);
+    if (other?.fullName != null && other!.fullName!.isNotEmpty) {
+      return other.fullName!;
+    }
     return other?.email ?? 'Unknown';
   }
 }
@@ -265,168 +303,5 @@ class ChatsResponse {
       );
     }
     return const ChatsResponse(chats: [], hasMore: false);
-  }
-}
-
-// ===== LEGACY MODELS (for backward compatibility with existing UI) =====
-
-/// Message type enum for different content types.
-enum MessageType {
-  text,
-  image,
-  file,
-  system;
-
-  static MessageType fromString(String? value) {
-    switch (value?.toLowerCase()) {
-      case 'image':
-        return MessageType.image;
-      case 'file':
-        return MessageType.file;
-      case 'system':
-        return MessageType.system;
-      default:
-        return MessageType.text;
-    }
-  }
-
-  String toJsonString() {
-    return name;
-  }
-}
-
-/// Represents a participant in a chat conversation (legacy model for UI compatibility).
-class ChatParticipant {
-  final String id;
-  final String name;
-  final String? avatarUrl;
-  final bool isOnline;
-  final String? role;
-
-  const ChatParticipant({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-    this.isOnline = false,
-    this.role,
-  });
-
-  factory ChatParticipant.fromJson(Map<String, dynamic> json) {
-    return ChatParticipant(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? 'Unknown',
-      avatarUrl: json['avatar_url'] as String?,
-      isOnline: json['is_online'] as bool? ?? false,
-      role: json['role'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'avatar_url': avatarUrl,
-      'is_online': isOnline,
-      'role': role,
-    };
-  }
-}
-
-/// Represents a single message in a chat (legacy model for UI compatibility).
-class MessageModel {
-  final String id;
-  final String chatId;
-  final String senderId;
-  final String senderEmail;
-  final String senderRole;
-  final String content;
-  final DateTime createdAt;
-  final MessageType type;
-  final bool isMe;
-  final String? attachmentUrl;
-  final String? attachmentName;
-
-  const MessageModel({
-    required this.id,
-    required this.chatId,
-    required this.senderId,
-    this.senderEmail = '',
-    this.senderRole = '',
-    required this.content,
-    required this.createdAt,
-    this.type = MessageType.text,
-    this.isMe = false,
-    this.attachmentUrl,
-    this.attachmentName,
-  });
-
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
-    // Handle new API format with nested sender
-    MessageSender? sender;
-    if (json['sender'] != null) {
-      sender = MessageSender.fromJson(json['sender'] as Map<String, dynamic>);
-    }
-
-    return MessageModel(
-      id: json['id'] as String? ?? '',
-      chatId: json['chat'] as String? ?? json['chat_id'] as String? ?? '',
-      senderId: sender?.id ?? json['sender_id'] as String? ?? '',
-      senderEmail: sender?.email ?? json['sender_email'] as String? ?? '',
-      senderRole: sender?.role ?? json['sender_role'] as String? ?? '',
-      content: json['content'] as String? ?? '',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
-      type: MessageType.fromString(json['type'] as String?),
-      isMe: json['is_me'] as bool? ?? false,
-      attachmentUrl: json['attachment_url'] as String?,
-      attachmentName: json['attachment_name'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'chat_id': chatId,
-      'sender_id': senderId,
-      'content': content,
-      'created_at': createdAt.toIso8601String(),
-      'type': type.toJsonString(),
-      'is_me': isMe,
-      'attachment_url': attachmentUrl,
-      'attachment_name': attachmentName,
-    };
-  }
-
-  MessageModel copyWith({
-    String? id,
-    String? chatId,
-    String? senderId,
-    String? content,
-    DateTime? createdAt,
-    MessageType? type,
-    bool? isMe,
-    String? attachmentUrl,
-    String? attachmentName,
-  }) {
-    return MessageModel(
-      id: id ?? this.id,
-      chatId: chatId ?? this.chatId,
-      senderId: senderId ?? this.senderId,
-      content: content ?? this.content,
-      createdAt: createdAt ?? this.createdAt,
-      type: type ?? this.type,
-      isMe: isMe ?? this.isMe,
-      attachmentUrl: attachmentUrl ?? this.attachmentUrl,
-      attachmentName: attachmentName ?? this.attachmentName,
-    );
-  }
-
-  /// Formats the message time for display (e.g., "9:41 AM").
-  String get formattedTime {
-    final hour = createdAt.hour > 12 ? createdAt.hour - 12 : createdAt.hour;
-    final period = createdAt.hour >= 12 ? 'PM' : 'AM';
-    final minute = createdAt.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
   }
 }

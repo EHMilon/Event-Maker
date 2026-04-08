@@ -3,10 +3,9 @@ import 'package:event_maker/models/chat_model.dart';
 import 'package:event_maker/views/chats/chat_repository.dart';
 
 /// Controller for the chat list view.
-/// Uses [ChatRepository] for real API data and [MockChatRepository] for admin chat.
+/// Uses [ChatRepository] for all chat operations with backend API.
 class ChatViewController extends GetxController {
   final ChatRepository _repository = ChatRepository();
-  final MockChatRepository _mockRepository = MockChatRepository();
 
   final isLoading = true.obs;
   final searchQuery = ''.obs;
@@ -30,22 +29,22 @@ class ChatViewController extends GetxController {
     ever(searchQuery, (_) => _filterChats());
   }
 
-  /// Loads both customer chats (from API) and admin chats (mock).
+  /// Loads both customer chats and admin chats from API.
   Future<void> loadChats() async {
     isLoading.value = true;
     hasError.value = false;
     errorMessage = null;
 
     try {
-      // Fetch customer chats from real API
-      final chats = await _repository.fetchChats();
-      customerChats.value = chats;
-      filteredCustomerChats.value = chats;
+      // Fetch customer chats from real API (chat_type=normal)
+      final normalChats = await _repository.fetchNormalChats();
+      customerChats.value = normalChats;
+      filteredCustomerChats.value = normalChats;
 
-      // Fetch admin chats from mock
-      final adminResponse = await _mockRepository.fetchAdminChats();
-      adminChats.value = adminResponse.chats;
-      filteredAdminChats.value = adminResponse.chats;
+      // Fetch admin chats from real API (chat_type=admin)
+      final fetchedAdminChats = await _repository.fetchAdminChats();
+      adminChats.value = fetchedAdminChats;
+      filteredAdminChats.value = fetchedAdminChats;
     } catch (e) {
       hasError.value = true;
       errorMessage = e.toString();
@@ -54,8 +53,10 @@ class ChatViewController extends GetxController {
     }
   }
 
-  /// Refreshes the chat lists (for pull-to-refresh).
+  /// Refreshes the chat lists (for pull-to-refresh and when returning from chat).
   Future<void> refreshChats() async {
+    // Set loading to true to show shimmer, then load new data
+    isLoading.value = true;
     await loadChats();
   }
 
@@ -76,15 +77,18 @@ class ChatViewController extends GetxController {
 
     filteredCustomerChats.value = customerChats.where((chat) {
       final otherMember = chat.members.isNotEmpty ? chat.members.first : null;
-      final name = otherMember?.email ?? '';
+      // Search in fullName first, then email
+      final name = otherMember?.fullName ?? otherMember?.email ?? '';
       final lastMsg = chat.lastMessage?.content ?? '';
-      return name.toLowerCase().contains(query) || lastMsg.toLowerCase().contains(query);
+      return name.toLowerCase().contains(query) ||
+          lastMsg.toLowerCase().contains(query);
     }).toList();
 
     filteredAdminChats.value = adminChats.where((chat) {
       final name = chat.name ?? '';
       final lastMsg = chat.lastMessage?.content ?? '';
-      return name.toLowerCase().contains(query) || lastMsg.toLowerCase().contains(query);
+      return name.toLowerCase().contains(query) ||
+          lastMsg.toLowerCase().contains(query);
     }).toList();
   }
 
