@@ -5,6 +5,7 @@ import 'package:event_maker/constants/app_config.dart';
 import 'package:event_maker/models/customer_booking_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
+import 'package:event_maker/views/chats/chat_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:flutter/material.dart';
@@ -192,15 +193,6 @@ class ServiceDetailView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // if (showEditButton)
-                            //   IconButton(
-                            //     onPressed: _onEditPressed,
-                            //     icon: Icon(
-                            //       Icons.edit_outlined,
-                            //       color: AppColors.primary,
-                            //       size: 24.r,
-                            //     ),
-                            //   ),
                           ],
                         ),
                         SizedBox(height: 16.h),
@@ -308,17 +300,80 @@ class ServiceDetailView extends StatelessWidget {
                             ),
                             SizedBox(width: 12.w),
                             InkWell(
-                              onTap: () {
-                                // TODO: use real chat thread id when backend chat API is available
-                                Get.toNamed(
-                                  AppRoutes.chatDetail,
-                                  arguments: {
-                                    'id': service.id,
-                                    'name': service.provider.name,
-                                    'image': service.provider.imageUrl,
-                                    'isAdmin': false,
-                                  },
+                              onTap: () async {
+                                // Show loading indicator
+                                Get.snackbar(
+                                  'Opening Chat',
+                                  'Connecting to provider...',
+                                  showProgressIndicator: true,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  duration: const Duration(seconds: 10),
                                 );
+                                
+                                try {
+                                  // Get provider user ID directly from service
+                                  // The customer-services API now returns provider_user_id
+                                  final userId = service.providerUserId;
+                                   
+                                  if (userId == null || userId.isEmpty) {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Provider not available for chat.',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                    return;
+                                  }
+                                   
+                                  // Create/get private chat with provider
+                                  final chatRepo = ChatRepository();
+                                  final chat = await chatRepo.createOrGetPrivateChat(userId);
+                                  
+                                  // Close loading snackbar
+                                  Get.closeAllSnackbars();
+                                  
+                                   if (chat != null) {
+                                     // Get the other member (not current user)
+                                     final otherMember = chat.members.firstWhereOrNull(
+                                       (m) => m.id != null, // We'll filter by non-current user in detail view
+                                     );
+                                     // For now, use the first member with avatar, or provider image
+                                     String? memberAvatar;
+                                     if (otherMember?.avatar?.isNotEmpty == true) {
+                                       memberAvatar = otherMember!.avatar;
+                                     } else if (chat.members.isNotEmpty && chat.members.first.avatar?.isNotEmpty == true) {
+                                       memberAvatar = chat.members.first.avatar;
+                                     } else {
+                                       memberAvatar = _getFullImageUrl(service.provider.imageUrl);
+                                     }
+                                     
+                                     Get.toNamed(
+                                       AppRoutes.chatDetail,
+                                       arguments: {
+                                         'id': chat.id,
+                                         'name': otherMember?.fullName?.isNotEmpty == true 
+                                             ? otherMember!.fullName! 
+                                             : (chat.members.isNotEmpty && chat.members.first.fullName?.isNotEmpty == true 
+                                                 ? chat.members.first.fullName! 
+                                                 : service.provider.name),
+                                         'image': memberAvatar,
+                                         'isAdmin': false,
+                                       },
+                                     );
+                                  } else {
+                                    Get.snackbar(
+                                      'Error',
+                                      'Could not start chat. Please try again.',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  }
+                                } catch (e) {
+                                  Get.closeAllSnackbars();
+                                  Get.snackbar(
+                                    'Error',
+                                    'Failed to connect. Please try again.',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                }
                               },
                               borderRadius: BorderRadius.circular(14.r),
                               child: Container(
@@ -459,14 +514,6 @@ class ServiceDetailView extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        // SizedBox(height: 10.h),
-                        // Text(
-                        //   service.location, // Or more detailed address
-                        //   style: GoogleFonts.inter(
-                        //     fontSize: 14.sp,
-                        //     color: AppColors.textSecondary,
-                        //   ),
-                        // ),
                         SizedBox(height: 16.h),
                         _buildLocationMap(context),
                         SizedBox(height: 24.h),
@@ -530,18 +577,6 @@ class ServiceDetailView extends StatelessWidget {
                                   color: AppColors.primary,
                                 ),
                               ),
-                              // if (service.type == ServiceType.event ||
-                              //     service.type == ServiceType.training ||
-                              //     service.type == ServiceType.cleaning ||
-                              //     service.type == ServiceType.filming ||
-                              //     service.type == ServiceType.catering)
-                              //   Text(
-                              //     'perHr'.tr,
-                              //     style: GoogleFonts.inter(
-                              //       fontSize: 12.sp,
-                              //       color: AppColors.textSecondary,
-                              //     ),
-                              //   ),
                             ],
                           ),
                         ],
@@ -587,18 +622,7 @@ class ServiceDetailView extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        // Icon(icon, size: 18.r, color: AppColors.primary),
         SizedBox(width: 12.w),
-        // Expanded(
-        //   child: Text(
-        //     text,
-        //     style: GoogleFonts.inter(
-        //       fontSize: 14.sp,
-        //       color: AppColors.textSecondary,
-        //       fontWeight: FontWeight.w500,
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
@@ -934,7 +958,7 @@ class ServiceDetailView extends StatelessWidget {
         final firstAvailability = service.availabilities.isNotEmpty
             ? service.availabilities.first
             : null;
-        
+
         if (firstAvailability == null) {
           Get.snackbar(
             'No Location',
@@ -951,11 +975,12 @@ class ServiceDetailView extends StatelessWidget {
             'service_id': service.apiId,
             'service_title': service.title,
             'service_description': service.description,
-            'service_address': firstAvailability.address.isNotEmpty 
-                ? firstAvailability.address 
+            'service_address': firstAvailability.address.isNotEmpty
+                ? firstAvailability.address
                 : service.location,
             'latitude': double.tryParse(firstAvailability.latitude) ?? 24.4539,
-            'longitude': double.tryParse(firstAvailability.longitude) ?? 54.3773,
+            'longitude':
+                double.tryParse(firstAvailability.longitude) ?? 54.3773,
             'cover_image': service.coverImage,
             'provider_id': service.providerId,
             'provider_name': service.provider.name,

@@ -61,7 +61,8 @@ class VendorReviewModel {
 /// Represents the aggregated profile information returned by the backend,
 /// including services, reviews, and metadata.
 class VendorProfileModel {
-  final int id;
+  /// User ID (UUID string) - used for chat API and other user-specific operations
+  final String id;
   final String name;
   final String avatar;
   final String? companyName;
@@ -145,8 +146,12 @@ class VendorProfileModel {
     final ratingValue =
         double.tryParse(json['rating_avg'] as String? ?? '0') ?? 0;
 
+    // Parse id as String (UUID) - it's used for chat API which expects UUID
+    final idValue = json['id'];
+    final userId = idValue is String ? idValue : (idValue is int ? idValue.toString() : '');
+
     return VendorProfileModel(
-      id: json['id'] as int? ?? 0,
+      id: userId,
       name: json['name'] as String? ?? '',
       avatar: json['avatar'] as String? ?? '',
       companyName: json['company_name'] as String?,

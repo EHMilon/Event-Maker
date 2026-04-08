@@ -1,405 +1,255 @@
-/// WebSocket Service for real-time communication.
+/// WebSocket Service for real-time chat communication.
 ///
 /// Features:
 /// - Connection lifecycle management
 /// - Automatic reconnection with exponential backoff
 /// - Heartbeat/ping-pong for connection health
 /// - Event-based message handling
-/// - Offline message queueing
-///
-/// Backend developer: This service is ready to connect to your WebSocket server.
-/// Just update [ApiConstant.wsBaseUrl] with your WebSocket endpoint.
-library;
+/// - Message sending and receiving
 
 import 'dart:async';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/status.dart' as ws_status;
 import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/models/websocket_events.dart';
-import 'package:event_maker/utils/logger.dart';
-import 'package:event_maker/utils/user_preferences.dart';
 
-/// WebSocket connection states.
-enum WsConnectionState {
-  /// Not connected, not attempting to connect
-  disconnected,
+/// Callback type for incoming messages.
+typedef MessageCallback = void Function(dynamic message);
 
-  /// Attempting to connect
-  connecting,
+/// Callback type for connection status changes.
+typedef ConnectionCallback = void Function(bool isConnected);
 
-  /// Connected and authenticated
-  connected,
-
-  /// Connection lost, attempting to reconnect
-  reconnecting,
-
-  /// Authentication failed
-  authFailed,
-
-  /// Connection error
-  error,
-}
-
-/// WebSocket service for real-time chat communication.
-///
-/// Usage:
-/// ```dart
-/// final wsService = WebSocketService();
-///
-/// // Listen to connection state
-/// wsService.connectionStateStream.listen((state) {
-///   if (state == WsConnectionState.connected) {
-///     print('Connected to WebSocket');
-///   }
-/// });
-///
-/// // Listen to events
-/// wsService.eventStream.listen((event) {
-///   if (event is MessageReceivedEvent) {
-///     print('New message: ${event.message.content}');
-///   }
-/// });
-///
-/// // Connect
-/// await wsService.connect();
-///
-/// // Send message
-/// wsService.send(SendMessageEvent(chatId: '123', content: 'Hello'));
-///
-/// // Disconnect when done
-/// wsService.disconnect();
-/// ```
+/// WebSocket service for real-time chat.
 class WebSocketService {
-  /// Singleton instance
-  static final WebSocketService _instance = WebSocketService._internal();
-  factory WebSocketService() => _instance;
-  WebSocketService._internal();
-
-  // ===== WEBSOCKET CHANNEL =====
   WebSocketChannel? _channel;
-
-  // ===== STREAM CONTROLLERS =====
-  final _connectionStateController =
-      StreamController<WsConnectionState>.broadcast();
-  final _eventController = StreamController<WsEvent>.broadcast();
-
-  // ===== STATE =====
-  WsConnectionState _connectionState = WsConnectionState.disconnected;
-  String? _authToken;
+  StreamSubscription? _subscription;
   Timer? _heartbeatTimer;
   Timer? _reconnectTimer;
+  
+  bool _isConnected = false;
+  String? _currentChatId;
+  String? _currentToken;
   int _reconnectAttempts = 0;
-  bool _isManualDisconnect = false;
+  
+  final MessageCallback? onMessageReceived;
+  final ConnectionCallback? onConnected;
+  final ConnectionCallback? onDisconnected;
+  final void Function(String error)? onError;
 
-  // ===== PENDING MESSAGES QUEUE =====
-  /// Messages queued while offline or reconnecting
-  final List<WsEvent> _pendingMessages = [];
+  WebSocketService({
+    this.onMessageReceived,
+    this.onConnected,
+    this.onDisconnected,
+    this.onError,
+  });
 
-  // ===== PUBLIC GETTERS =====
+  /// Check if currently connected
+  bool get isConnected => _isConnected;
 
-  /// Current connection state
-  WsConnectionState get connectionState => _connectionState;
-
-  /// Stream of connection state changes
-  Stream<WsConnectionState> get connectionStateStream =>
-      _connectionStateController.stream;
-
-  /// Stream of all WebSocket events
-  Stream<WsEvent> get eventStream => _eventController.stream;
-
-  /// Whether currently connected and authenticated
-  bool get isConnected => _connectionState == WsConnectionState.connected;
-
-  /// Whether currently attempting to connect or reconnect
-  bool get isConnecting =>
-      _connectionState == WsConnectionState.connecting ||
-      _connectionState == WsConnectionState.reconnecting;
-
-  // ===== CONNECTION MANAGEMENT =====
-
-  /// Connect to WebSocket server.
-  ///
-  /// If [token] is provided, it will be used for authentication.
-  /// Otherwise, token is fetched from [UserPreferences].
-  ///
-  /// Returns true if connected successfully, false otherwise.
-  Future<bool> connect({String? token}) async {
-    if (isConnected || isConnecting) {
-      Log.w('WebSocket: Already connected or connecting');
-      return isConnected;
+  /// Connect to WebSocket for a specific chat
+  Future<bool> connect(String chatId, String token) async {
+    if (_isConnected && _currentChatId == chatId) {
+      return true;
     }
 
-    _authToken = token ?? await UserPreferences.getAccessToken();
-    if (_authToken == null) {
-      Log.e('WebSocket: No auth token available');
-      _updateConnectionState(WsConnectionState.authFailed);
+    // Disconnect existing connection if any
+    await disconnect();
+
+    _currentChatId = chatId;
+    _currentToken = token;
+    _reconnectAttempts = 0;
+
+    return _establishConnection();
+  }
+
+  /// Establish WebSocket connection
+  Future<bool> _establishConnection() async {
+    if (_currentChatId == null || _currentToken == null) {
+      onError?.call('Chat ID or token is missing');
       return false;
     }
 
-    _isManualDisconnect = false;
-    _updateConnectionState(WsConnectionState.connecting);
-
     try {
-      final uri = Uri.parse(ApiConstant.wsBaseUrl);
-      Log.d('WebSocket: Connecting to ${uri.host}');
-
-      _channel = WebSocketChannel.connect(uri, protocols: ['json']);
-
-      // Wait for connection to establish
+      final wsUrl = ApiConstant.chatWebSocketUrl(_currentChatId!, _currentToken!);
+      
+      _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
+      
+      // Wait for connection to be established
       await _channel!.ready.timeout(
         Duration(milliseconds: ApiConstant.wsConnectionTimeout),
         onTimeout: () {
-          throw TimeoutException('WebSocket connection timeout');
+          throw TimeoutException('Connection timeout');
         },
       );
 
-      Log.d('WebSocket: Connected, authenticating');
-      _setupListeners();
-      _authenticate();
+      _isConnected = true;
+      _reconnectAttempts = 0;
+      _startHeartbeat();
+      _listenToMessages();
+      
+      onConnected?.call(true);
       return true;
     } catch (e) {
-      Log.e('WebSocket: Connection failed', e);
-      _updateConnectionState(WsConnectionState.error);
+      _isConnected = false;
+      onError?.call('Failed to connect: $e');
       _scheduleReconnect();
       return false;
     }
   }
 
-  /// Disconnect from WebSocket server.
-  ///
-  /// If [reconnect] is true, will attempt to reconnect.
-  /// If [isManual] is true, won't auto-reconnect.
-  void disconnect({bool reconnect = false, bool isManual = false}) {
-    _isManualDisconnect = isManual;
-
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = null;
-
-    if (reconnect) {
-      _updateConnectionState(WsConnectionState.reconnecting);
-    } else {
-      _updateConnectionState(WsConnectionState.disconnected);
-    }
-
-    try {
-      _channel?.sink.close(ws_status.goingAway);
-    } catch (e) {
-      Log.e('WebSocket: Error closing connection', e);
-    }
-    _channel = null;
-
-    if (reconnect && !_isManualDisconnect) {
-      _scheduleReconnect();
-    }
-  }
-
-  /// Manually trigger reconnection.
-  Future<void> reconnect() async {
-    disconnect(reconnect: true);
-    await connect();
-  }
-
-  // ===== AUTHENTICATION =====
-
-  /// Send authentication event to server.
-  void _authenticate() {
-    if (_authToken == null) return;
-
-    final authEvent = AuthEvent(token: 'Bearer $_authToken');
-    _sendRaw(authEvent.toJson());
-  }
-
-  // ===== MESSAGE SENDING =====
-
-  /// Send a WebSocket event.
-  ///
-  /// If not connected, message is queued and sent when reconnected.
-  void send(WsEvent event) {
-    if (!isConnected) {
-      Log.w('WebSocket: Not connected, queuing message');
-      _pendingMessages.add(event);
-      return;
-    }
-
-    _sendRaw(event.toJson());
-  }
-
-  /// Send raw JSON to WebSocket.
-  void _sendRaw(Map<String, dynamic> data) {
-    try {
-      final jsonStr = jsonEncode(data);
-      Log.d('WebSocket: Sending ${data['type']}');
-      _channel?.sink.add(jsonStr);
-    } catch (e) {
-      Log.e('WebSocket: Failed to send message', e);
-    }
-  }
-
-  /// Send all pending messages.
-  void _flushPendingMessages() {
-    if (_pendingMessages.isEmpty) return;
-
-    Log.d('WebSocket: Sending ${_pendingMessages.length} pending messages');
-    for (final event in _pendingMessages) {
-      send(event);
-    }
-    _pendingMessages.clear();
-  }
-
-  // ===== LISTENERS =====
-
-  /// Setup WebSocket message listeners.
-  void _setupListeners() {
-    _channel?.stream.listen(_onMessage, onError: _onError, onDone: _onDone);
-  }
-
-  /// Handle incoming WebSocket message.
-  void _onMessage(dynamic message) {
-    try {
-      final json = jsonDecode(message as String) as Map<String, dynamic>;
-      final event = WsEvent.fromJson(json);
-
-      Log.d('WebSocket: Received event ${event.type}');
-
-      // Handle internal events
-      _handleInternalEvent(event);
-
-      // Emit to public stream
-      _eventController.add(event);
-    } catch (e) {
-      Log.e('WebSocket: Failed to parse message', e);
-    }
-  }
-
-  /// Handle internal events (authentication, heartbeat).
-  void _handleInternalEvent(WsEvent event) {
-    switch (event.type) {
-      case WsEventType.authenticated:
-        Log.d('WebSocket: Authenticated successfully');
-        _updateConnectionState(WsConnectionState.connected);
-        _reconnectAttempts = 0;
-        _startHeartbeat();
-        _flushPendingMessages();
-        break;
-
-      case WsEventType.pong:
-        // Heartbeat response - connection is alive
-        break;
-
-      case WsEventType.error:
-        if (event is ErrorEvent) {
-          Log.e('WebSocket: Server error - ${event.code}: ${event.message}');
-
-          // Check for auth-related errors
-          if (event.code.contains('AUTH') || event.code.contains('TOKEN')) {
-            _updateConnectionState(WsConnectionState.authFailed);
-            disconnect(isManual: true);
+  /// Listen to incoming WebSocket messages
+  void _listenToMessages() {
+    _subscription = _channel?.stream.listen(
+      (data) {
+        try {
+          final json = jsonDecode(data as String) as Map<String, dynamic>;
+          
+          // Handle different message types
+          final type = json['type'] as String?;
+          
+          if (type == 'message' || type == 'message_received') {
+            // Parse message received from server
+            onMessageReceived?.call(json);
+          } else if (type == 'ping') {
+            // Respond to heartbeat ping
+            _sendPong();
+          } else if (type == 'error') {
+            onError?.call(json['message'] as String? ?? 'Unknown error');
           }
-        } else {
-          Log.e('WebSocket: Received error event with invalid format');
+        } catch (e) {
+          // If not JSON, treat as plain text message
+          onMessageReceived?.call(data);
         }
-        break;
-    }
+      },
+      onError: (error) {
+        _isConnected = false;
+        onError?.call('WebSocket error: $error');
+        _scheduleReconnect();
+      },
+      onDone: () {
+        _isConnected = false;
+        onDisconnected?.call(false);
+        _scheduleReconnect();
+      },
+    );
   }
 
-  /// Handle WebSocket error.
-  void _onError(dynamic error) {
-    Log.e('WebSocket: Connection error', error);
-    _updateConnectionState(WsConnectionState.error);
-
-    if (!_isManualDisconnect) {
-      _scheduleReconnect();
-    }
-  }
-
-  /// Handle WebSocket connection closed.
-  void _onDone() {
-    Log.d('WebSocket: Connection closed');
-
-    if (!_isManualDisconnect) {
-      _updateConnectionState(WsConnectionState.reconnecting);
-      _scheduleReconnect();
-    } else {
-      _updateConnectionState(WsConnectionState.disconnected);
-    }
-  }
-
-  // ===== HEARTBEAT =====
-
-  /// Start heartbeat timer.
+  /// Start heartbeat timer to keep connection alive
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
     _heartbeatTimer = Timer.periodic(
       Duration(milliseconds: ApiConstant.wsHeartbeatInterval),
-      (_) => _sendHeartbeat(),
+      (_) => _sendPing(),
     );
   }
 
-  /// Send heartbeat ping.
-  void _sendHeartbeat() {
-    if (!isConnected) return;
-
-    final ping = PingEvent();
-    _sendRaw(ping.toJson());
+  /// Send ping to server
+  void _sendPing() {
+    if (_isConnected && _channel != null) {
+      try {
+        _channel!.sink.add(jsonEncode({'type': 'ping'}));
+      } catch (e) {
+        // Silently handle send errors
+      }
+    }
   }
 
-  // ===== RECONNECTION =====
+  /// Send pong response to server
+  void _sendPong() {
+    if (_isConnected && _channel != null) {
+      try {
+        _channel!.sink.add(jsonEncode({'type': 'pong'}));
+      } catch (e) {
+        // Silently handle send errors
+      }
+    }
+  }
 
-  /// Schedule reconnection attempt with exponential backoff.
+  /// Send a message through WebSocket
+  Future<bool> sendMessage(String content) async {
+    if (!_isConnected || _channel == null) {
+      onError?.call('Not connected to WebSocket');
+      return false;
+    }
+
+    try {
+      final message = {
+        'content': content,
+      };
+      _channel!.sink.add(jsonEncode(message));
+      return true;
+    } catch (e) {
+      onError?.call('Failed to send message: $e');
+      return false;
+    }
+  }
+
+  /// Send typing indicator
+  Future<void> sendTypingIndicator(bool isTyping) async {
+    if (!_isConnected || _channel == null) return;
+
+    try {
+      final data = {
+        'type': 'typing',
+        'is_typing': isTyping,
+      };
+      _channel!.sink.add(jsonEncode(data));
+    } catch (e) {
+      // Silently handle send errors
+    }
+  }
+
+  /// Schedule reconnection with exponential backoff
   void _scheduleReconnect() {
-    _reconnectTimer?.cancel();
-
-    final maxAttempts = ApiConstant.wsMaxReconnectAttempts;
-    if (maxAttempts > 0 && _reconnectAttempts >= maxAttempts) {
-      Log.e('WebSocket: Max reconnect attempts reached');
-      _updateConnectionState(WsConnectionState.error);
+    if (ApiConstant.wsMaxReconnectAttempts > 0 &&
+        _reconnectAttempts >= ApiConstant.wsMaxReconnectAttempts) {
       return;
     }
 
-    // Calculate delay with exponential backoff
-    final delay = _calculateReconnectDelay();
+    _reconnectTimer?.cancel();
+    
+    final delay = _calculateBackoffDelay();
     _reconnectAttempts++;
 
-    Log.d(
-      'WebSocket: Reconnecting in ${delay.inSeconds}s (attempt $_reconnectAttempts)',
-    );
-
-    _reconnectTimer = Timer(delay, () async {
-      _updateConnectionState(WsConnectionState.reconnecting);
-      await connect();
+    _reconnectTimer = Timer(Duration(milliseconds: delay), () {
+      if (_currentChatId != null && _currentToken != null) {
+        _establishConnection();
+      }
     });
   }
 
-  /// Calculate reconnect delay with exponential backoff.
-  Duration _calculateReconnectDelay() {
-    final baseMs = ApiConstant.wsReconnectDelayBase;
-    final maxMs = ApiConstant.wsReconnectMaxDelay;
-
-    // Exponential backoff: base * 2^attempts, capped at max
-    final delayMs = (baseMs * (1 << _reconnectAttempts)).clamp(0, maxMs);
-
-    return Duration(milliseconds: delayMs);
+  /// Calculate exponential backoff delay
+  int _calculateBackoffDelay() {
+    final baseDelay = ApiConstant.wsReconnectDelayBase;
+    final maxDelay = ApiConstant.wsReconnectMaxDelay;
+    
+    // Exponential backoff: base * 2^attempts
+    int delay = baseDelay * (1 << _reconnectAttempts);
+    
+    // Add jitter to prevent thundering herd
+    delay += (delay * 0.1 * (DateTime.now().millisecond % 10) / 10).toInt();
+    
+    return delay > maxDelay ? maxDelay : delay;
   }
 
-  // ===== STATE MANAGEMENT =====
-
-  /// Update connection state and notify listeners.
-  void _updateConnectionState(WsConnectionState newState) {
-    if (_connectionState == newState) return;
-
-    _connectionState = newState;
-    _connectionStateController.add(newState);
-  }
-
-  // ===== CLEANUP =====
-
-  /// Dispose all resources.
-  void dispose() {
-    disconnect(isManual: true);
+  /// Disconnect from WebSocket
+  Future<void> disconnect() async {
     _heartbeatTimer?.cancel();
     _reconnectTimer?.cancel();
-    _connectionStateController.close();
-    _eventController.close();
+    
+    await _subscription?.cancel();
+    await _channel?.sink.close();
+    
+    _isConnected = false;
+    _currentChatId = null;
+    _currentToken = null;
+    _channel = null;
+    
+    onDisconnected?.call(false);
+  }
+
+  /// Dispose all resources
+  void dispose() {
+    disconnect();
   }
 }

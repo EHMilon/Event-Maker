@@ -9,15 +9,54 @@ import 'package:event_maker/models/chat_model.dart';
 import 'chat_view_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ChatView extends StatelessWidget {
+class ChatView extends StatefulWidget {
   final bool isServiceProvider;
 
   const ChatView({super.key, required this.isServiceProvider});
 
   @override
+  State<ChatView> createState() => _ChatViewState();
+}
+
+class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
+  late ChatViewController controller;
+  bool _isFirstBuild = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Use Get.put to register controller, or Get.find if already registered
+    if (Get.isRegistered<ChatViewController>()) {
+      controller = Get.find<ChatViewController>();
+    } else {
+      controller = Get.put(ChatViewController());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh chats when app comes back to foreground or when returning to this screen
+    if (state == AppLifecycleState.resumed) {
+      controller.refreshChats();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // We register the controller lazily here so it gets created when the tab is accessed
-    final controller = Get.put(ChatViewController());
+    // Refresh chats on first build and when returning to this screen
+    if (_isFirstBuild) {
+      _isFirstBuild = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.refreshChats();
+      });
+    }
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -36,14 +75,13 @@ class ChatView extends StatelessWidget {
           ),
         ),
       ),
-      body: isServiceProvider
+      body: widget.isServiceProvider
           ? _buildServiceProviderView(controller)
           : _buildCustomerView(controller),
     );
   }
 
   Widget _buildServiceProviderView(ChatViewController controller) {
-    // using DefaultTabController for custom tabs
     return DefaultTabController(
       length: 2,
       child: Column(
@@ -148,18 +186,24 @@ class ChatView extends StatelessWidget {
             _buildSearchBar(controller),
             SizedBox(height: 24.h),
             Expanded(
-              child: Skeletonizer(
-                enabled: isLoading,
-                child: ListView.separated(
-                  itemCount: isLoading ? 4 : chats.length,
-                  separatorBuilder: (context, index) => SizedBox(height: 20.h),
-                  itemBuilder: (context, index) {
-                    if (isLoading) {
-                      return _buildChatTileMock();
-                    }
-                    final chat = chats[index];
-                    return _buildChatTile(chat, isAdminChat: !isCustomerTab);
-                  },
+              child: RefreshIndicator(
+                onRefresh: controller.refreshChats,
+                color: AppColors.primary,
+                child: Skeletonizer(
+                  enabled: isLoading,
+                  child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: isLoading ? 4 : chats.length,
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 20.h),
+                    itemBuilder: (context, index) {
+                      if (isLoading) {
+                        return _buildChatTileMock();
+                      }
+                      final chat = chats[index];
+                      return _buildChatTile(chat, isAdminChat: !isCustomerTab);
+                    },
+                  ),
                 ),
               ),
             ),
@@ -222,15 +266,47 @@ class ChatView extends StatelessWidget {
   }
 
   Widget _buildChatTile(ChatModel chat, {bool isAdminChat = false}) {
+    // For admin chats, find the admin member and use their full_name
+    // For normal chats, use the other participant's full_name
+    String displayName;
+    String? avatarUrl;
+
+    if (isAdminChat) {
+      // Find admin member in the chat
+      final adminMember = chat.members.firstWhereOrNull(
+        (m) => m.role == 'admin',
+      );
+      displayName = adminMember?.fullName?.isNotEmpty == true
+          ? adminMember!.fullName!
+          : 'Event Link'; // Default admin name from API
+      // Use admin member's avatar, or fallback to icon
+      avatarUrl = adminMember?.avatar?.isNotEmpty == true
+          ? adminMember!.avatar
+          : 'assets/icons/icon.svg'; // Admin icon
+    } else {
+      // For normal chats, use the other participant (not current user)
+      final otherMember = chat.members.isNotEmpty
+          ? (chat.members.first.fullName?.isNotEmpty == true
+                ? chat.members.first.fullName!
+                : chat.members.first.email)
+          : 'Unknown';
+      displayName = otherMember;
+      // Use member's avatar if available, otherwise use icon
+      avatarUrl =
+          chat.members.isNotEmpty &&
+              chat.members.first.avatar?.isNotEmpty == true
+          ? chat.members.first.avatar
+          : 'assets/icons/icon.svg';
+    }
+
     return InkWell(
       onTap: () {
-        // Navigate to chat detail screen with admin/customer context
         Get.toNamed(
           AppRoutes.chatDetail,
           arguments: {
             'id': chat.id,
-            'name': chat.participant.name,
-            'image': chat.participant.avatarUrl ?? 'assets/images/person.jpg',
+            'name': displayName,
+            'image': avatarUrl,
             'isAdmin': isAdminChat,
           },
         );
@@ -238,14 +314,26 @@ class ChatView extends StatelessWidget {
       borderRadius: BorderRadius.circular(12.r),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 24.r,
-            backgroundImage: chat.participant.avatarUrl != null &&
-                    chat.participant.avatarUrl!.startsWith('http')
-                ? NetworkImage(chat.participant.avatarUrl!)
-                : const AssetImage('assets/images/person.jpg') as ImageProvider,
-            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-          ),
+          // Use CircleAvatar for network images, SvgPicture for SVG icons
+          avatarUrl?.startsWith('http') == true
+              ? CircleAvatar(
+                  radius: 24.r,
+                  backgroundImage: NetworkImage(avatarUrl!),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                )
+              : CircleAvatar(
+                  radius: 24.r,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  child: SvgPicture.asset(
+                    avatarUrl ?? 'assets/icons/icon.svg',
+                    width: 20.w,
+                    height: 20.h,
+                    // colorFilter: const ColorFilter.mode(
+                    //   AppColors.primary,
+                    //   BlendMode.srcIn,
+                    // ),
+                  ),
+                ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -255,41 +343,22 @@ class ChatView extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        chat.participant.name,
+                        displayName,
                         style: GoogleFonts.inter(
                           color: AppColors.textPrimary,
                           fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (chat.unreadCount > 0) ...[
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Text(
-                          '${chat.unreadCount}',
-                          style: GoogleFonts.inter(
-                            color: AppColors.white,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
+                    // TODO: Add unread count badge if available from API
                   ],
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  chat.lastMessage.content,
+                  chat.lastMessage?.content ?? 'No messages yet',
                   style: GoogleFonts.inter(
                     color: AppColors.textSecondary,
                     fontSize: 14.sp,

@@ -339,6 +339,8 @@ class ServiceModel {
   // API response fields
   final int apiId;
   final int providerId;
+  final String?
+  providerUserId; // User ID (UUID) for chat API - provided by customer-services endpoint
   final String title;
   final String description;
   final String serviceTypeName;
@@ -384,6 +386,7 @@ class ServiceModel {
     dynamic id,
     this.apiId = 0,
     this.providerId = 0,
+    this.providerUserId,
     required this.title,
     required this.description,
     this.serviceTypeName = '',
@@ -432,6 +435,9 @@ class ServiceModel {
       id: apiId.toString(),
       apiId: apiId,
       providerId: json['provider_id'] as int? ?? 0,
+      // Get provider_user_id from nested provider object (from customer-services endpoint)
+      providerUserId: (json['provider'] as Map<String, dynamic>?)?['provider_user_id'] as String? 
+          ?? json['provider_user_id'] as String?, // Fallback to top-level if available
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       serviceTypeName: json['service_type_name'] as String? ?? '',
@@ -542,6 +548,7 @@ class ServiceModel {
     }
 
     return ServiceProvider(
+      id: providerJson['id']?.toString(),
       name: providerJson['name'] as String? ?? '',
       role: roleName ?? '',
       imageUrl: _getFullMediaUrl(providerJson['avatar'] as String?),
@@ -699,6 +706,7 @@ class ServiceModel {
 }
 
 class ServiceProvider {
+  final String? id;
   final String name;
   final String role;
   final String imageUrl;
@@ -710,6 +718,7 @@ class ServiceProvider {
   final List<ReviewModel>? reviews;
 
   const ServiceProvider({
+    this.id,
     required this.name,
     required this.role,
     required this.imageUrl,
@@ -723,9 +732,10 @@ class ServiceProvider {
 
   factory ServiceProvider.fromJson(Map<String, dynamic> json) {
     return ServiceProvider(
+      id: json['id']?.toString(),
       name: json['name'] as String? ?? '',
       role: json['role'] as String? ?? '',
-      imageUrl: json['image_url'] as String? ?? '',
+      imageUrl: json['image_url'] as String? ?? json['avatar'] as String? ?? '',
       bannerUrl: json['banner_url'] as String?,
       isVerified: json['is_verified'] as bool? ?? false,
       certifications: (json['certifications'] as List<dynamic>?)
@@ -737,6 +747,7 @@ class ServiceProvider {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'role': role,
       'image_url': imageUrl,

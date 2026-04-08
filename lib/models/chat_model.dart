@@ -1,225 +1,233 @@
+import 'package:get/get.dart';
+
 /// Chat-related models for backend compatibility.
-/// These models provide type-safe data structures for the chat feature.
-library;
+
+/// Represents a member in a chat conversation.
+class ChatMember {
+  final String id;
+  final String email;
+  final String role;
+  final String? fullName;
+  final String? avatar;
+
+  const ChatMember({
+    required this.id,
+    required this.email,
+    required this.role,
+    this.fullName,
+    this.avatar,
+  });
+
+  factory ChatMember.fromJson(Map<String, dynamic> json) {
+    return ChatMember(
+      id: json['id'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      role: json['role'] as String? ?? '',
+      fullName: json['full_name'] as String?,
+      avatar: json['avatar'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'role': role,
+      if (fullName != null) 'full_name': fullName,
+      if (avatar != null) 'avatar': avatar,
+    };
+  }
+
+  ChatMember copyWith({
+    String? id,
+    String? email,
+    String? role,
+    String? fullName,
+    String? avatar,
+  }) {
+    return ChatMember(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      role: role ?? this.role,
+      fullName: fullName ?? this.fullName,
+      avatar: avatar ?? this.avatar,
+    );
+  }
+}
+
+/// Represents a sender of a message.
+class MessageSender {
+  final String id;
+  final String email;
+  final String role;
+  final String? fullName;
+  final String? avatar;
+
+  const MessageSender({
+    required this.id,
+    required this.email,
+    required this.role,
+    this.fullName,
+    this.avatar,
+  });
+
+  factory MessageSender.fromJson(Map<String, dynamic> json) {
+    return MessageSender(
+      id: json['id'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      role: json['role'] as String? ?? '',
+      fullName: json['full_name'] as String?,
+      avatar: json['avatar'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'role': role,
+      if (fullName != null) 'full_name': fullName,
+      if (avatar != null) 'avatar': avatar,
+    };
+  }
+}
 
 /// Represents a chat conversation/thread.
 class ChatModel {
   final String id;
-  final ChatParticipant participant;
-  final MessageModel lastMessage;
-  final int unreadCount;
-  final bool isAdminChat;
-  final DateTime updatedAt;
+  final bool isGroup;
+  final String? name;
+  final DateTime createdAt;
+  final List<ChatMember> members;
+  final ChatMessage? lastMessage;
 
   const ChatModel({
     required this.id,
-    required this.participant,
-    required this.lastMessage,
-    this.unreadCount = 0,
-    this.isAdminChat = false,
-    required this.updatedAt,
+    required this.isGroup,
+    this.name,
+    required this.createdAt,
+    required this.members,
+    this.lastMessage,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
     return ChatModel(
       id: json['id'] as String? ?? '',
-      participant: ChatParticipant.fromJson(
-        json['participant'] as Map<String, dynamic>? ?? {},
-      ),
-      lastMessage: MessageModel.fromJson(
-        json['lastMessage'] as Map<String, dynamic>? ?? {},
-      ),
-      unreadCount: json['unread_count'] as int? ?? 0,
-      isAdminChat: json['is_admin_chat'] as bool? ?? false,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+      isGroup: json['is_group'] as bool? ?? false,
+      name: json['name'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
+      members:
+          (json['members'] as List<dynamic>?)
+              ?.map((e) => ChatMember.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      lastMessage: json['last_message'] != null
+          ? ChatMessage.fromJson(json['last_message'] as Map<String, dynamic>)
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'participant': participant.toJson(),
-      'lastMessage': lastMessage.toJson(),
-      'unread_count': unreadCount,
-      'is_admin_chat': isAdminChat,
-      'updated_at': updatedAt.toIso8601String(),
+      'is_group': isGroup,
+      'name': name,
+      'created_at': createdAt.toIso8601String(),
+      'members': members.map((e) => e.toJson()).toList(),
+      'last_message': lastMessage?.toJson(),
     };
   }
 
   ChatModel copyWith({
     String? id,
-    ChatParticipant? participant,
-    MessageModel? lastMessage,
-    int? unreadCount,
-    bool? isAdminChat,
-    DateTime? updatedAt,
+    bool? isGroup,
+    String? name,
+    DateTime? createdAt,
+    List<ChatMember>? members,
+    ChatMessage? lastMessage,
   }) {
     return ChatModel(
       id: id ?? this.id,
-      participant: participant ?? this.participant,
-      lastMessage: lastMessage ?? this.lastMessage,
-      unreadCount: unreadCount ?? this.unreadCount,
-      isAdminChat: isAdminChat ?? this.isAdminChat,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
-}
-
-/// Represents a participant in a chat conversation.
-class ChatParticipant {
-  final String id;
-  final String name;
-  final String? avatarUrl;
-  final bool isOnline;
-  final String? role;
-
-  const ChatParticipant({
-    required this.id,
-    required this.name,
-    this.avatarUrl,
-    this.isOnline = false,
-    this.role,
-  });
-
-  factory ChatParticipant.fromJson(Map<String, dynamic> json) {
-    return ChatParticipant(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? 'Unknown',
-      avatarUrl: json['avatar_url'] as String?,
-      isOnline: json['is_online'] as bool? ?? false,
-      role: json['role'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'avatar_url': avatarUrl,
-      'is_online': isOnline,
-      'role': role,
-    };
-  }
-
-  ChatParticipant copyWith({
-    String? id,
-    String? name,
-    String? avatarUrl,
-    bool? isOnline,
-    String? role,
-  }) {
-    return ChatParticipant(
-      id: id ?? this.id,
+      isGroup: isGroup ?? this.isGroup,
       name: name ?? this.name,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      isOnline: isOnline ?? this.isOnline,
-      role: role ?? this.role,
+      createdAt: createdAt ?? this.createdAt,
+      members: members ?? this.members,
+      lastMessage: lastMessage ?? this.lastMessage,
     );
   }
-}
 
-/// Message type enum for different content types.
-enum MessageType {
-  text,
-  image,
-  file,
-  system;
-
-  static MessageType fromString(String? value) {
-    switch (value?.toLowerCase()) {
-      case 'image':
-        return MessageType.image;
-      case 'file':
-        return MessageType.file;
-      case 'system':
-        return MessageType.system;
-      default:
-        return MessageType.text;
-    }
+  /// Get the other participant in a private chat
+  ChatMember? getOtherParticipant(String currentUserId) {
+    if (isGroup) return null;
+    return members.firstWhereOrNull((m) => m.id != currentUserId);
   }
 
-  String toJsonString() {
-    return name;
+  /// Get display name for the chat
+  String getDisplayName(String currentUserId) {
+    if (name != null && name!.isNotEmpty) return name!;
+    final other = getOtherParticipant(currentUserId);
+    if (other?.fullName != null && other!.fullName!.isNotEmpty) {
+      return other.fullName!;
+    }
+    return other?.email ?? 'Unknown';
   }
 }
 
 /// Represents a single message in a chat.
-class MessageModel {
+class ChatMessage {
   final String id;
   final String chatId;
-  final String senderId;
+  final MessageSender sender;
   final String content;
   final DateTime createdAt;
-  final MessageType type;
-  final bool isMe;
-  final String? attachmentUrl;
-  final String? attachmentName;
 
-  const MessageModel({
+  const ChatMessage({
     required this.id,
     required this.chatId,
-    required this.senderId,
+    required this.sender,
     required this.content,
     required this.createdAt,
-    this.type = MessageType.text,
-    this.isMe = false,
-    this.attachmentUrl,
-    this.attachmentName,
   });
 
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
-    return MessageModel(
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
       id: json['id'] as String? ?? '',
-      chatId: json['chat_id'] as String? ?? '',
-      senderId: json['sender_id'] as String? ?? '',
+      chatId: json['chat'] as String? ?? '',
+      sender: MessageSender.fromJson(
+        json['sender'] as Map<String, dynamic>? ?? {},
+      ),
       content: json['content'] as String? ?? '',
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
-      type: MessageType.fromString(json['type'] as String?),
-      isMe: json['is_me'] as bool? ?? false,
-      attachmentUrl: json['attachment_url'] as String?,
-      attachmentName: json['attachment_name'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'chat_id': chatId,
-      'sender_id': senderId,
+      'chat': chatId,
+      'sender': sender.toJson(),
       'content': content,
       'created_at': createdAt.toIso8601String(),
-      'type': type.toJsonString(),
-      'is_me': isMe,
-      'attachment_url': attachmentUrl,
-      'attachment_name': attachmentName,
     };
   }
 
-  MessageModel copyWith({
+  ChatMessage copyWith({
     String? id,
     String? chatId,
-    String? senderId,
+    MessageSender? sender,
     String? content,
     DateTime? createdAt,
-    MessageType? type,
-    bool? isMe,
-    String? attachmentUrl,
-    String? attachmentName,
   }) {
-    return MessageModel(
+    return ChatMessage(
       id: id ?? this.id,
       chatId: chatId ?? this.chatId,
-      senderId: senderId ?? this.senderId,
+      sender: sender ?? this.sender,
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
-      type: type ?? this.type,
-      isMe: isMe ?? this.isMe,
-      attachmentUrl: attachmentUrl ?? this.attachmentUrl,
-      attachmentName: attachmentName ?? this.attachmentName,
     );
   }
 
@@ -230,11 +238,16 @@ class MessageModel {
     final minute = createdAt.minute.toString().padLeft(2, '0');
     return '$hour:$minute $period';
   }
+
+  /// Check if this message was sent by the current user
+  bool isSentBy(String userId) {
+    return sender.id == userId;
+  }
 }
 
 /// Response model for paginated messages.
 class MessagesResponse {
-  final List<MessageModel> messages;
+  final List<ChatMessage> messages;
   final bool hasMore;
   final String? nextCursor;
 
@@ -246,8 +259,9 @@ class MessagesResponse {
 
   factory MessagesResponse.fromJson(Map<String, dynamic> json) {
     return MessagesResponse(
-      messages: (json['messages'] as List<dynamic>?)
-              ?.map((e) => MessageModel.fromJson(e as Map<String, dynamic>))
+      messages:
+          (json['messages'] as List<dynamic>?)
+              ?.map((e) => ChatMessage.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       hasMore: json['has_more'] as bool? ?? false,
@@ -268,14 +282,26 @@ class ChatsResponse {
     this.nextCursor,
   });
 
-  factory ChatsResponse.fromJson(Map<String, dynamic> json) {
-    return ChatsResponse(
-      chats: (json['chats'] as List<dynamic>?)
-              ?.map((e) => ChatModel.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      hasMore: json['has_more'] as bool? ?? false,
-      nextCursor: json['next_cursor'] as String?,
-    );
+  factory ChatsResponse.fromJson(dynamic json) {
+    if (json is List) {
+      return ChatsResponse(
+        chats: json
+            .map((e) => ChatModel.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        hasMore: false,
+      );
+    }
+    if (json is Map<String, dynamic>) {
+      return ChatsResponse(
+        chats:
+            (json['chats'] as List<dynamic>?)
+                ?.map((e) => ChatModel.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            [],
+        hasMore: json['has_more'] as bool? ?? false,
+        nextCursor: json['next_cursor'] as String?,
+      );
+    }
+    return const ChatsResponse(chats: [], hasMore: false);
   }
 }
