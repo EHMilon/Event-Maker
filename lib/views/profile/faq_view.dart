@@ -1,12 +1,34 @@
+import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../constants/app_colors.dart';
-import 'profile_controller.dart';
+import '../../models/faq_model.dart';
 
-class FAQView extends GetView<ProfileController> {
+class FAQView extends StatefulWidget {
   const FAQView({super.key});
+
+  @override
+  State<FAQView> createState() => _FAQViewState();
+}
+
+class _FAQViewState extends State<FAQView> {
+  final ProfileController controller = Get.find<ProfileController>();
+  final RxMap<int, RxBool> expandedStates = <int, RxBool>{}.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.fetchFaqs();
+  }
+
+  RxBool _getExpandedState(int faqId) {
+    if (!expandedStates.containsKey(faqId)) {
+      expandedStates[faqId] = false.obs;
+    }
+    return expandedStates[faqId]!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +52,7 @@ class FAQView extends GetView<ProfileController> {
       ),
       body: Obx(
         () => Skeletonizer(
-          enabled: controller.isLoading.value,
+          enabled: controller.isFaqsLoading.value,
           child: ListView.separated(
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
             itemCount: controller.faqs.length,
@@ -39,17 +61,19 @@ class FAQView extends GetView<ProfileController> {
               height: 32.h,
             ),
             itemBuilder: (context, index) {
-              final faq = controller.faqs[index];
+              final FaqModel faq = controller.faqs[index];
+              final isExpanded = _getExpandedState(faq.id);
+              
               return Column(
                 children: [
                   GestureDetector(
                     onTap: () {
-                      faq['isExpanded'].value = !faq['isExpanded'].value;
+                      isExpanded.value = !isExpanded.value;
                     },
                     child: Row(
                       children: [
                         Icon(
-                          faq['isExpanded'].value
+                          isExpanded.value
                               ? Icons.remove_circle_outline
                               : Icons.add_circle_outline,
                           color: AppColors.primary,
@@ -58,7 +82,7 @@ class FAQView extends GetView<ProfileController> {
                         SizedBox(width: 12.w),
                         Expanded(
                           child: Text(
-                            faq['question'].toString().tr,
+                            faq.question.tr,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
@@ -72,8 +96,8 @@ class FAQView extends GetView<ProfileController> {
                   Obx(
                     () => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      height: faq['isExpanded'].value ? null : 0,
-                      child: faq['isExpanded'].value
+                      height: isExpanded.value ? null : 0,
+                      child: isExpanded.value
                           ? Padding(
                               padding: EdgeInsets.only(
                                 left: 32.w,
@@ -81,7 +105,7 @@ class FAQView extends GetView<ProfileController> {
                                 bottom: 8.h,
                               ),
                               child: Text(
-                                faq['answer'].toString().tr,
+                                faq.answer.tr,
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   color: AppColors.textSecondary,

@@ -67,6 +67,10 @@ class ApiConstant {
   /// GET /settings/contact-info
   static const String contactInfo = '/settings/contact-info';
 
+  /// Public FAQs endpoint
+  /// GET /settings/public/faqs
+  static const String publicFaqs = '/settings/public/faqs';
+
   /// Upload avatar image (uses PATCH personal-info with multipart)
   static const String uploadAvatar = '/settings/personal-info/me';
 

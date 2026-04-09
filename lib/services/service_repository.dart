@@ -173,8 +173,8 @@ class ServiceRepository {
         );
         return ServiceModel.fromJson(response['data']);
       }
-    } on ApiException catch (e) {
-      throw ApiException(message: e.message);
+    } on ApiException {
+          rethrow;
     } catch (e) {
       throw ApiException(message: 'Failed to create service: $e');
     }
@@ -237,8 +237,8 @@ class ServiceRepository {
       Log.d('=======> updateService - Response data: $data');
       return ServiceModel.fromJson(data);
     } on ApiException catch (e) {
-      Log.e('=======> updateService - ApiException: ${e.message}');
-      throw ApiException(message: e.message);
+          Log.e('=======> updateService - ApiException: ${e.message}');
+          rethrow;
     } catch (e) {
       Log.e('=======> updateService - Error: $e');
       throw ApiException(message: 'Failed to update service: $e');

@@ -9,6 +9,7 @@ import '../../models/service_provider_review_model.dart';
 import '../../models/personal_info_model.dart';
 import '../../models/wallet_model.dart';
 import '../../models/customer_payment_history_model.dart';
+import '../../models/faq_model.dart';
 import '../../services/wallet_repository.dart';
 import '../../services/customer_payment_repository.dart';
 import '../../services/service_repository.dart';
@@ -60,7 +61,7 @@ class ProfileController extends GetxController {
   final RxList<Map<String, dynamic>> transactions =
       <Map<String, dynamic>>[].obs;
   final RxList<ServiceModel> bookmarks = <ServiceModel>[].obs;
-  final RxList<Map<String, dynamic>> faqs = <Map<String, dynamic>>[].obs;
+  final RxList<FaqModel> faqs = <FaqModel>[].obs;
   final RxList<ServiceModel> providerServices = <ServiceModel>[].obs;
   final RxList<ReviewModel> providerReviews = <ReviewModel>[].obs;
 
@@ -183,6 +184,14 @@ class ProfileController extends GetxController {
   /// Whether more customer payment transactions can be loaded
   bool get hasMoreCustomerPayments =>
       customerPaymentCurrentPage.value < customerPaymentTotalPages.value;
+
+  // ===== FAQ API STATE =====
+
+  /// Loading state for FAQs API calls
+  final RxBool isFaqsLoading = false.obs;
+
+  /// Error message for FAQs API calls
+  final RxString faqsError = ''.obs;
 
   @override
   void onInit() {
@@ -1112,6 +1121,36 @@ class ProfileController extends GetxController {
   /// Refreshes customer payment data
   Future<void> refreshCustomerPayments() async {
     await fetchCustomerPaymentHistory(refresh: true);
+  }
+
+  // ===== FAQ API METHODS =====
+
+  /// Fetches FAQs from API
+  /// API Endpoint: GET /settings/public/faqs
+  Future<void> fetchFaqs() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return;
+    }
+
+    isFaqsLoading.value = true;
+    faqsError.value = '';
+
+    try {
+      final response = await _apiService.get(ApiConstant.publicFaqs);
+
+      final faqResponse = FaqResponse.fromJson(response);
+      if (faqResponse.success) {
+        faqs.assignAll(faqResponse.data);
+      } else {
+        faqsError.value = faqResponse.message;
+      }
+    } catch (e) {
+      faqsError.value = e.toString();
+      debugPrint('Error fetching FAQs: $e');
+    } finally {
+      isFaqsLoading.value = false;
+    }
   }
 
   /// NOTE: TextEditingControllers are NOT disposed here because this controller
