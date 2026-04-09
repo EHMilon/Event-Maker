@@ -27,6 +27,25 @@ class CertificationRepository {
     }
   }
 
+  /// Fetch certifications for a specific provider by ID.
+  /// GET: api/providers/provider-certificates?provider_id={providerId}
+  Future<CertificationListResponse> fetchProviderCertifications(int providerId) async {
+    try {
+      Log.d('=======> CertificationRepository: Fetching certifications for provider $providerId');
+      final response = await _api.get(
+        '/providers/provider-certificates?provider_id=$providerId',
+      );
+      Log.d('=======> CertificationRepository: Response received: $response');
+      return CertificationListResponse.fromJson(response);
+    } on ApiException catch (e) {
+      Log.e('=======> CertificationRepository: ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> CertificationRepository: Error fetching provider certifications: $e');
+      throw ApiException(message: 'Failed to fetch provider certifications: $e');
+    }
+  }
+
   /// Fetch a single certification by ID.
   /// GET: api/providers/certificates/detail/{id}
   Future<CertificationModel> fetchCertificationDetail(int certificationId) async {

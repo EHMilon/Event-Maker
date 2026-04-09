@@ -277,10 +277,18 @@ class VendorProfileView extends StatelessWidget {
                       },
                     );
                   } else if (value == 'certification') {
-                    Get.toNamed(AppRoutes.viewCertificate);
-                  } else if (value == 'report') {
-                    Get.toNamed(AppRoutes.spamReport);
-                  }
+                    Get.toNamed(
+                      AppRoutes.viewCertificate,
+                      arguments: {
+                        'providerId': vendor.id,
+                      },
+                    );
+                   } else if (value == 'report') {
+                     Get.toNamed(
+                       AppRoutes.spamReport,
+                       arguments: {'providerId': vendor.id},
+                     );
+                   }
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(

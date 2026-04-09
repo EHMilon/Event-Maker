@@ -192,6 +192,10 @@ class ApiConstant {
   static const String reviews = '/reviews';
   static const String createReview = '/reviews/create';
 
+  // ===== REPORT ENDPOINTS =====
+
+  static const String submitProviderReport = '/providers/submit-report';
+
   // ===== DOCUMENT ENDPOINTS =====
 
   /// Provider documents: GET, POST

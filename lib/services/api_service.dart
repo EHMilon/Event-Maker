@@ -393,6 +393,23 @@ class ApiService {
     }
   }
 
+  /// Submit provider report to backend
+  /// POST /api/providers/submit-report
+  Future<dynamic> submitProviderReport({
+    required int providerId,
+    required String issue,
+    required String tellUsMore,
+  }) async {
+    return post(
+      ApiConstant.submitProviderReport,
+      body: {
+        'provider_id': providerId,
+        'issue': issue,
+        'tell_us_more': tellUsMore,
+      },
+    );
+  }
+
   dynamic _processResponse(http.Response response) {
     dynamic body;
 

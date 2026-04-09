@@ -439,7 +439,27 @@ class AppRoutes {
     ),
     // Customer flow - vendor profile related routes
     GetPage(name: addReview, page: () => const AddReviewView()),
-    GetPage(name: viewCertificate, page: () => const ViewCertificate()),
-    GetPage(name: spamReport, page: () => const SpamReportView()),
+    GetPage(
+      name: viewCertificate,
+      page: () {
+        final arguments = Get.arguments as Map<String, dynamic>?;
+        final providerIdRaw = arguments?['providerId'];
+        final providerId = providerIdRaw is int
+            ? providerIdRaw
+            : int.tryParse(providerIdRaw?.toString() ?? '0') ?? 0;
+        return ViewCertificate(providerId: providerId);
+      },
+    ),
+    GetPage(
+      name: spamReport,
+      page: () {
+        final arguments = Get.arguments as Map<String, dynamic>?;
+        final providerIdRaw = arguments?['providerId'];
+        final providerId = providerIdRaw is int
+            ? providerIdRaw
+            : int.tryParse(providerIdRaw?.toString() ?? '0') ?? 0;
+        return SpamReportView(providerId: providerId);
+      },
+    ),
   ];
 }
