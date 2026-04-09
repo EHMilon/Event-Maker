@@ -29,6 +29,7 @@ import 'package:event_maker/views/customer_flow/categories/categories_view.dart'
 import 'package:event_maker/views/customer_flow/categories/categories_binding.dart';
 import 'package:event_maker/views/profile/faq_view.dart';
 import 'package:event_maker/views/profile/contact_us_view.dart';
+import 'package:event_maker/views/profile/contact_us_controller.dart';
 import 'package:event_maker/views/profile/profile_binding.dart';
 import 'package:event_maker/views/profile/profile_settings_binding.dart';
 import 'package:event_maker/views/customer_flow/customer_flow_scaffold.dart';
@@ -274,7 +275,13 @@ class AppRoutes {
       binding: ProfileBinding(),
     ),
     GetPage(name: faq, page: () => const FAQView()),
-    GetPage(name: contactUs, page: () => const ContactUsView()),
+    GetPage(
+      name: contactUs,
+      page: () => const ContactUsView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ContactUsController>(() => ContactUsController());
+      }),
+    ),
     GetPage(
       name: customerHome,
       page: () => const CustomerFlowScaffold(),
