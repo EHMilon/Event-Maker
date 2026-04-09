@@ -244,6 +244,18 @@ class ApiConstant {
   /// Response: { "success": true, "message": "...", "data": { "payment_id": int, "order_id": string, "approval_url": string } }
   static const String paypalCreateOrder = '/payments/paypal/create-order';
 
+  /// Provider Stripe Connect endpoint
+  /// GET /payments/provider-connect
+  /// Returns Stripe account info and onboarding URL
+  /// Response: { "success": true, "message": "...", "data": { "stripe_account_id": string, "onboarding_url": string, "charges_enabled": bool, "payouts_enabled": bool, "details_submitted": bool } }
+  static const String providerConnect = '/payments/provider-connect';
+
+  /// Provider withdrawal endpoint
+  /// POST /payments/provider-withdrawal
+  /// Body: { "amount": double, "method": "stripe" }
+  /// Response: { "success": true, "message": "...", "data": { ... } }
+  static const String providerWithdrawal = '/payments/provider-withdrawal';
+
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';

@@ -43,44 +43,54 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          // Avatar - uses API endpoint: GET /settings/personal-info/me -> avatar field
-                          _buildAvatar(controller.userAvatar),
-                          SizedBox(width: 12.w),
-                          // Location and greeting section
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Hi, ${controller.userName}!',
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              // SizedBox(height: 4.h),
-                              Row(
+                      Flexible(
+                        child: Row(
+                          children: [
+                            // Avatar - uses API endpoint: GET /settings/personal-info/me -> avatar field
+                            _buildAvatar(controller.userAvatar),
+                            SizedBox(width: 12.w),
+                            // Location and greeting section
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SvgPicture.asset(
-                                    'assets/icons/location.svg',
-                                    height: 16.h,
-                                    width: 16.w,
-                                  ),
-                                  SizedBox(width: 4.w),
                                   Text(
-                                    controller.userLocation,
+                                    'Hi, ${controller.userName}!',
                                     style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.black,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                  // SizedBox(height: 4.h),
+                                  Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/location.svg',
+                                        height: 16.h,
+                                        width: 16.w,
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Flexible(
+                                        child: Text(
+                                          controller.userLocation,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                       Row(
                         children: [

@@ -829,6 +829,202 @@ class ProfileController extends GetxController {
     await fetchWalletHistory(refresh: true);
   }
 
+  // ===== STRIPE CONNECT & WITHDRAWAL METHODS =====
+
+  /// Stripe Connect status
+  final Rx<ProviderConnectResponse?> providerConnectStatus =
+      Rx<ProviderConnectResponse?>(null);
+
+  /// Loading state for Stripe Connect
+  final RxBool isStripeConnectLoading = false.obs;
+
+  /// Loading state for withdrawal
+  final RxBool isWithdrawalLoading = false.obs;
+
+  /// Fetches provider Stripe Connect status
+  /// GET /payments/provider-connect
+  Future<ProviderConnectResponse?> fetchProviderConnect() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return null;
+    }
+
+    isStripeConnectLoading.value = true;
+
+    try {
+      final response = await _walletRepository.fetchProviderConnect();
+      providerConnectStatus.value = response;
+      return response;
+    } catch (e) {
+      debugPrint('Error fetching provider connect: $e');
+      return null;
+    } finally {
+      isStripeConnectLoading.value = false;
+    }
+  }
+
+  /// Opens Stripe Connect onboarding URL
+  /// Returns true if URL was opened successfully
+  Future<bool> openStripeOnboarding() async {
+    final onboardingUrl = providerConnectStatus.value?.data?.onboardingUrl;
+    if (onboardingUrl == null || onboardingUrl.isEmpty) {
+      Get.snackbar(
+        'error'.tr,
+        'stripeOnboardingNotAvailable'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    final success = await _walletRepository.openStripeOnboarding(onboardingUrl);
+    if (!success) {
+      Get.snackbar(
+        'error'.tr,
+        'couldNotOpenStripeOnboarding'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+    return success;
+  }
+
+  /// Initiates a withdrawal request
+  /// POST /payments/provider-withdrawal
+  /// 
+  /// [amount] - Amount to withdraw
+  /// Returns true if withdrawal was successful
+  Future<bool> requestWithdrawal(double amount) async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return false;
+    }
+
+    // Validate amount
+    if (amount <= 0) {
+      Get.snackbar(
+        'error'.tr,
+        'invalidAmount'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if provider has enough balance
+    final availableBalance =
+        walletSummary.value?.availableBalanceAmount ?? 0.0;
+    if (amount > availableBalance) {
+      Get.snackbar(
+        'error'.tr,
+        'insufficientFunds'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Check if Stripe Connect is set up
+    if (providerConnectStatus.value == null) {
+      await fetchProviderConnect();
+    }
+
+    final connectStatus = providerConnectStatus.value;
+    if (connectStatus == null ||
+        !connectStatus.canReceivePayouts ||
+        !connectStatus.isOnboardingComplete) {
+      Get.snackbar(
+        'error'.tr,
+        'stripeConnectNotSetup'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    isWithdrawalLoading.value = true;
+
+    try {
+      final response = await _walletRepository.requestWithdrawal(
+        amount: amount,
+        method: 'stripe',
+      );
+
+      if (response.success) {
+        Get.snackbar(
+          'success'.tr,
+          response.message.isNotEmpty
+              ? response.message
+              : 'withdrawalRequestSubmitted'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[700],
+          colorText: Colors.white,
+        );
+
+        // Refresh wallet data to reflect the withdrawal
+        await fetchWalletHistory(refresh: true);
+
+        return true;
+      } else {
+        Get.snackbar(
+          'error'.tr,
+          response.message.isNotEmpty
+              ? response.message
+              : 'withdrawalFailed'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error requesting withdrawal: $e');
+      Get.snackbar(
+        'error'.tr,
+        'somethingWentWrong'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    } finally {
+      isWithdrawalLoading.value = false;
+    }
+  }
+
+  /// Checks Stripe Connect status and handles withdrawal flow
+  /// Returns the appropriate action for the UI
+  Future<WithdrawalAction> checkWithdrawalFlow() async {
+    if (!_connectivityService.isConnected.value) {
+      _showConnectivityError();
+      return WithdrawalAction.showConnectivityError;
+    }
+
+    // Fetch Stripe Connect status
+    final connectStatus = await fetchProviderConnect();
+    if (connectStatus == null) {
+      return WithdrawalAction.showError;
+    }
+
+    // Check if provider needs to complete Stripe onboarding
+    if (connectStatus.needsOnboarding && connectStatus.data?.onboardingUrl != null) {
+      return WithdrawalAction.openStripeOnboarding;
+    }
+
+    // Check if payouts are enabled
+    if (!connectStatus.canReceivePayouts) {
+      return WithdrawalAction.stripeNotReady;
+    }
+
+    // Provider is ready to withdraw
+    return WithdrawalAction.showWithdrawalDialog;
+  }
+
   // ===== BOOKMARKS API METHODS =====
 
   /// Fetches user's bookmarked services from API
@@ -927,4 +1123,13 @@ class ProfileController extends GetxController {
     // TextEditingControllers intentionally not disposed for singleton lifecycle
     super.onClose();
   }
+}
+
+/// Enum for withdrawal flow actions
+enum WithdrawalAction {
+  showConnectivityError,
+  showError,
+  openStripeOnboarding,
+  stripeNotReady,
+  showWithdrawalDialog,
 }

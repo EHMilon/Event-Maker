@@ -129,32 +129,331 @@ class WalletView extends GetView<ProfileController> {
 
   /// Builds the withdraw button
   Widget _buildWithdrawButton() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56.h,
-        child: ElevatedButton(
-          onPressed: () {
-            // TODO: Implement Withdraw flow with Backend API
-            if (controller.walletBalance.value == "0") {
-              Get.snackbar('error'.tr, 'insufficientFunds'.tr);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.r),
+    return Obx(
+      () => Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56.h,
+          child: ElevatedButton(
+            onPressed: controller.isWithdrawalLoading.value ||
+                    controller.isStripeConnectLoading.value
+                ? null
+                : () => _handleWithdrawTap(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+            child: controller.isWithdrawalLoading.value ||
+                    controller.isStripeConnectLoading.value
+                ? SizedBox(
+                    width: 24.w,
+                    height: 24.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    'withdraw'.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Handles withdraw button tap
+  Future<void> _handleWithdrawTap() async {
+    // Check if wallet has balance
+    final availableBalance =
+        controller.walletSummary.value?.availableBalanceAmount ?? 0.0;
+    if (availableBalance <= 0) {
+      Get.snackbar(
+        'error'.tr,
+        'insufficientFunds'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // Check withdrawal flow
+    final action = await controller.checkWithdrawalFlow();
+
+    switch (action) {
+      case WithdrawalAction.showConnectivityError:
+      case WithdrawalAction.showError:
+        // Error already shown by controller
+        break;
+
+      case WithdrawalAction.openStripeOnboarding:
+        // Show dialog to complete Stripe onboarding first
+        _showStripeOnboardingDialog();
+        break;
+
+      case WithdrawalAction.stripeNotReady:
+        // Show dialog that Stripe is not ready for payouts
+        _showStripeNotReadyDialog();
+        break;
+
+      case WithdrawalAction.showWithdrawalDialog:
+        // Show withdrawal amount input dialog
+        _showWithdrawalDialog(availableBalance);
+        break;
+    }
+  }
+
+  /// Shows dialog for Stripe onboarding
+  void _showStripeOnboardingDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'setupStripeAccount'.tr,
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'stripeOnboardingRequired'.tr,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'cancel'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
-          child: Text(
-            'withdraw'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              controller.openStripeOnboarding();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
+            child: Text(
+              'setupNow'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows dialog when Stripe is not ready for payouts
+  void _showStripeNotReadyDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'payoutsNotAvailable'.tr,
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          'stripePayoutsNotEnabled'.tr,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'ok'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows withdrawal amount input dialog
+  void _showWithdrawalDialog(double availableBalance) {
+    final amountController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'withdrawFunds'.tr,
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${'availableBalance'.tr}: $availableBalance AED',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            TextField(
+              controller: amountController,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText: 'amount'.tr,
+                hintText: '0.00',
+                suffixText: 'AED',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            // Quick amount buttons
+            Row(
+              children: [
+                _buildQuickAmountButton(amountController, availableBalance, 0.25),
+                SizedBox(width: 8.w),
+                _buildQuickAmountButton(amountController, availableBalance, 0.50),
+                SizedBox(width: 8.w),
+                _buildQuickAmountButton(amountController, availableBalance, 1.0),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'cancel'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text);
+              if (amount == null || amount <= 0) {
+                Get.snackbar(
+                  'error'.tr,
+                  'invalidAmount'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: AppColors.error,
+                  colorText: Colors.white,
+                );
+                return;
+              }
+              if (amount > availableBalance) {
+                Get.snackbar(
+                  'error'.tr,
+                  'insufficientFunds'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: AppColors.error,
+                  colorText: Colors.white,
+                );
+                return;
+              }
+
+              Get.back();
+
+              // Request withdrawal
+              await controller.requestWithdrawal(amount);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: Text(
+              'withdraw'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds quick amount selection button
+  Widget _buildQuickAmountButton(
+    TextEditingController amountController,
+    double availableBalance,
+    double fraction,
+  ) {
+    final amount = (availableBalance * fraction).toStringAsFixed(2);
+    return Expanded(
+      child: OutlinedButton(
+        onPressed: () => amountController.text = amount,
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+        child: Text(
+          fraction == 1.0 ? 'All' : '${(fraction * 100).toInt()}%',
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.primary,
           ),
         ),
       ),
@@ -464,7 +763,10 @@ class WalletView extends GetView<ProfileController> {
   void _loadMoreIfNeeded() {
     if (controller.hasMoreWalletTransactions &&
         !controller.isWalletLoading.value) {
-      controller.loadMoreWalletTransactions();
+      // Defer the pagination call to avoid "setState called during build" error
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.loadMoreWalletTransactions();
+      });
     }
   }
 }

@@ -202,7 +202,11 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                         return _buildChatTileMock();
                       }
                       final chat = chats[index];
-                      return _buildChatTile(chat, isAdminChat: !isCustomerTab);
+                      return _buildChatTile(
+                        chat,
+                        isAdminChat: !isCustomerTab,
+                        isServiceProvider: widget.isServiceProvider,
+                      );
                     },
                   ),
                 ),
@@ -266,7 +270,11 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildChatTile(ChatModel chat, {bool isAdminChat = false}) {
+  Widget _buildChatTile(
+    ChatModel chat, {
+    bool isAdminChat = false,
+    bool isServiceProvider = false,
+  }) {
     // For admin chats, find the admin member and use their full_name
     // For normal chats, use the other participant's full_name
     String displayName;
@@ -285,20 +293,19 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           ? ApiConstant.getFullMediaUrl(adminMember!.avatar)
           : 'assets/icons/icon.svg'; // Admin icon
     } else {
-      // For normal chats, find the other participant (not current user)
-      // The API response has members where first is always current user (role='customer')
-      // and second is the other party (role='provider')
-      // We use role to identify the other participant
+      // For normal chats, find the other participant
+      // If service provider is viewing, show the customer
+      // If customer is viewing, show the provider
       ChatMember? otherMember;
-      
+
       if (chat.members.isNotEmpty) {
-        // Find member whose role is NOT 'customer' (i.e., the provider/admin)
+        // Determine which member to show based on who's viewing
         otherMember = chat.members.firstWhereOrNull(
-          (m) => m.role != 'customer',
+          (m) => isServiceProvider ? m.role == 'customer' : m.role != 'customer',
         );
-        // Fallback to second member if no provider found
-        otherMember ??= chat.members.length > 1 
-            ? chat.members[1] 
+        // Fallback to second member if no matching member found
+        otherMember ??= chat.members.length > 1
+            ? chat.members[1]
             : chat.members.first;
       }
 

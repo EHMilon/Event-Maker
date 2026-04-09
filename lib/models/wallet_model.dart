@@ -294,3 +294,135 @@ class WalletHistoryResponse {
     );
   }
 }
+
+/// Provider Stripe Connect status response
+/// GET /payments/provider-connect
+class ProviderConnectResponse {
+  final bool success;
+  final String message;
+  final ProviderConnectData? data;
+
+  ProviderConnectResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  /// Returns true if provider has completed Stripe onboarding
+  bool get isOnboardingComplete => data?.detailsSubmitted ?? false;
+
+  /// Returns true if provider can receive payouts
+  bool get canReceivePayouts => data?.payoutsEnabled ?? false;
+
+  /// Returns true if provider can accept charges
+  bool get canAcceptCharges => data?.chargesEnabled ?? false;
+
+  /// Returns true if provider needs to complete onboarding
+  bool get needsOnboarding =>
+      data?.onboardingUrl != null && !(data?.detailsSubmitted ?? false);
+
+  factory ProviderConnectResponse.fromJson(Map<String, dynamic> json) {
+    return ProviderConnectResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: json['data'] != null
+          ? ProviderConnectData.fromJson(
+              json['data'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+}
+
+/// Provider Stripe Connect data
+class ProviderConnectData {
+  final String? stripeAccountId;
+  final String? onboardingUrl;
+  final bool chargesEnabled;
+  final bool payoutsEnabled;
+  final bool detailsSubmitted;
+
+  ProviderConnectData({
+    this.stripeAccountId,
+    this.onboardingUrl,
+    required this.chargesEnabled,
+    required this.payoutsEnabled,
+    required this.detailsSubmitted,
+  });
+
+  factory ProviderConnectData.fromJson(Map<String, dynamic> json) {
+    return ProviderConnectData(
+      stripeAccountId: json['stripe_account_id'] as String?,
+      onboardingUrl: json['onboarding_url'] as String?,
+      chargesEnabled: json['charges_enabled'] as bool? ?? false,
+      payoutsEnabled: json['payouts_enabled'] as bool? ?? false,
+      detailsSubmitted: json['details_submitted'] as bool? ?? false,
+    );
+  }
+}
+
+/// Provider withdrawal request
+/// POST /payments/provider-withdrawal
+class ProviderWithdrawalRequest {
+  final double amount;
+  final String method;
+
+  ProviderWithdrawalRequest({
+    required this.amount,
+    this.method = 'stripe',
+  });
+
+  Map<String, dynamic> toJson() => {
+        'amount': amount,
+        'method': method,
+      };
+}
+
+/// Provider withdrawal response
+class ProviderWithdrawalResponse {
+  final bool success;
+  final String message;
+  final ProviderWithdrawalData? data;
+
+  ProviderWithdrawalResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  factory ProviderWithdrawalResponse.fromJson(Map<String, dynamic> json) {
+    return ProviderWithdrawalResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: json['data'] != null
+          ? ProviderWithdrawalData.fromJson(
+              json['data'] as Map<String, dynamic>,
+            )
+          : null,
+    );
+  }
+}
+
+/// Provider withdrawal data
+class ProviderWithdrawalData {
+  final int? withdrawalId;
+  final String? amount;
+  final String? status;
+  final String? createdAt;
+
+  ProviderWithdrawalData({
+    this.withdrawalId,
+    this.amount,
+    this.status,
+    this.createdAt,
+  });
+
+  factory ProviderWithdrawalData.fromJson(Map<String, dynamic> json) {
+    return ProviderWithdrawalData(
+      withdrawalId: json['withdrawal_id'] as int?,
+      amount: json['amount']?.toString(),
+      status: json['status'] as String?,
+      createdAt: json['created_at'] as String?,
+    );
+  }
+}
