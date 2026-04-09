@@ -272,6 +272,8 @@ class VendorProfileView extends StatelessWidget {
                       arguments: {
                         'vendorName': vendor.name,
                         'vendorLogo': vendor.avatar,
+                        'providerId': vendor.id,
+                        'serviceId': vendor.services.isNotEmpty ? vendor.services.first.id : null,
                       },
                     );
                   } else if (value == 'certification') {
