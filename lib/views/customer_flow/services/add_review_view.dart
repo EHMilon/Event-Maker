@@ -145,12 +145,6 @@ class _AddReviewViewState extends State<AddReviewView> {
               }
             });
             
-            Get.snackbar(
-              'Existing Review',
-              'You can update your previous review',
-              backgroundColor: Colors.blue.withValues(alpha: 0.1),
-              colorText: Colors.blue,
-            );
           }
         case Error<Map<String, dynamic>>(message: final message):
           // No existing review - that's fine, user can create new one

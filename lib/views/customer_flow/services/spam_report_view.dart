@@ -1,11 +1,18 @@
 import 'package:event_maker/constants/app_colors.dart';
+import 'package:event_maker/services/api_service.dart';
+import 'package:event_maker/services/api_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SpamReportView extends StatefulWidget {
-  const SpamReportView({super.key});
+  const SpamReportView({
+    super.key,
+    required this.providerId,
+  });
+
+  final int providerId;
 
   @override
   State<SpamReportView> createState() => _SpamReportViewState();
@@ -14,6 +21,7 @@ class SpamReportView extends StatefulWidget {
 class _SpamReportViewState extends State<SpamReportView> {
   final TextEditingController _detailsController = TextEditingController();
   final List<String> _selectedReasons = [];
+  bool _isLoading = false;
 
   final List<String> _reportReasons = [
     'Scam',
@@ -41,7 +49,7 @@ class _SpamReportViewState extends State<SpamReportView> {
     });
   }
 
-  void _submitReport() {
+  Future<void> _submitReport() async {
     if (_selectedReasons.isEmpty) {
       Get.snackbar(
         'Error',
@@ -52,14 +60,59 @@ class _SpamReportViewState extends State<SpamReportView> {
       return;
     }
 
-    // TODO: Implement backend integration for submitting report
-    Get.back();
-    Get.snackbar(
-      'Success',
-      'Report submitted successfully',
-      backgroundColor: AppColors.primary.withOpacity(0.1),
-      colorText: AppColors.primary,
-    );
+    if (_detailsController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please provide additional details so we can process your report.',
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final issue = _selectedReasons.join(', ');
+
+      final response = await ApiService().submitProviderReport(
+        providerId: widget.providerId,
+        issue: issue,
+        tellUsMore: _detailsController.text.trim(),
+      );
+
+      if (response['success'] == true) {
+        Get.back();
+        Get.snackbar(
+          'Success',
+          response['message'] ?? 'Report submitted successfully',
+          backgroundColor: AppColors.primary.withOpacity(0.1),
+          colorText: AppColors.primary,
+        );
+      }
+    } on ApiException catch (e) {
+      Get.snackbar(
+        'Error',
+        e.message,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to submit report. Please try again.',
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -96,7 +149,7 @@ class _SpamReportViewState extends State<SpamReportView> {
                     'Report an issue',
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -212,24 +265,34 @@ class _SpamReportViewState extends State<SpamReportView> {
             child: SizedBox(
               width: double.infinity,
               height: 56.h,
-              child: ElevatedButton(
-                onPressed: _submitReport,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  elevation: 0,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _submitReport,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Text(
-                  'Submit',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+                elevation: 0,
               ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      'Submit',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
             ),
           ),
         ],

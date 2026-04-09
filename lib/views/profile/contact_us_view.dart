@@ -227,7 +227,6 @@ class ContactUsView extends StatelessWidget {
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
                       color: onTap != null ? AppColors.primary : AppColors.black,
-                      decoration: onTap != null ? TextDecoration.underline : null,
                     ),
                   ),
                 ],
