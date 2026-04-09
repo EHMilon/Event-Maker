@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:event_maker/models/booking_notification_model.dart';
 import 'package:event_maker/services/booking_notification_repository.dart';
 import 'package:event_maker/services/api_exception.dart';
+import '../../constants/api_constant.dart';
 
 class NotificationController extends GetxController {
   final BookingNotificationRepository _repository =
@@ -73,7 +74,7 @@ class NotificationController extends GetxController {
         ServiceRequest(
           id: notification.id.toString(),
           customerName: notification.customer.fullName,
-          customerImage: notification.customer.avatar ?? '',
+          customerImage: ApiConstant.getFullMediaUrl(notification.customer.avatar),
           serviceTitle: notification.title,
           serviceDescription: '',
           date: DateTime.now(),

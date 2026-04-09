@@ -205,7 +205,7 @@ class ProfileSettingsView extends GetView<ProfileController> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
         child: PrimaryTextButton(
           onPressed: () => controller.updatePersonalInfo(),
           text: 'update'.tr,

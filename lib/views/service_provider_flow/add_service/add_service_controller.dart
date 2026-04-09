@@ -4,6 +4,7 @@ import '../../../models/service_model.dart';
 import '../../../models/my_service_model.dart';
 import '../../../models/service_request_model.dart';
 import '../../../services/service_repository.dart';
+import '../../../services/api_exception.dart';
 import '../services/sp_services_controller.dart';
 import '../../../widgets/availability_widget_card.dart';
 
@@ -663,6 +664,63 @@ class AddServiceController extends GetxController {
         return false;
       }
 
+      // TODO: Move repeated validation logic into form validator mixin when we modularize this flow further.
+      final attendanceText = attendanceCapacityController.text.trim();
+      int? attendanceValue;
+      if (showAttendanceCapacity && attendanceText.isNotEmpty) {
+        attendanceValue = int.tryParse(attendanceText);
+        if (attendanceValue == null || attendanceValue <= 0) {
+          Get.snackbar(
+            'Invalid Input',
+            'Attendance capacity must be a positive number',
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+          );
+          isLoading.value = false;
+          return false;
+        }
+      }
+
+      // Validate Primary Availability Times
+      if (primaryAvailabilityCard.selectedDays.isNotEmpty) {
+        final start = primaryAvailabilityCard.startTime.value ??
+            const TimeOfDay(hour: 9, minute: 0);
+        final end = primaryAvailabilityCard.endTime.value ??
+            const TimeOfDay(hour: 17, minute: 0);
+
+        if (!_isValidTimeRange(start, end)) {
+          Get.snackbar(
+            'Invalid Time',
+            'Start time must be before end time for primary availability',
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+          );
+          isLoading.value = false;
+          return false;
+        }
+      }
+
+      // Validate Additional Availability Times
+      for (var i = 0; i < additionalAvailabilityCards.length; i++) {
+        final card = additionalAvailabilityCards[i];
+        if (card.selectedDays.isNotEmpty) {
+          final start =
+              card.startTime.value ?? const TimeOfDay(hour: 9, minute: 0);
+          final end =
+              card.endTime.value ?? const TimeOfDay(hour: 17, minute: 0);
+
+          if (!_isValidTimeRange(start, end)) {
+            Get.snackbar(
+              'Invalid Time',
+              'Start time must be before end time for additional availability #${i + 1}',
+              backgroundColor: Colors.red.withOpacity(0.1),
+              colorText: Colors.red,
+            );
+            isLoading.value = false;
+            return false;
+          }
+        }
+      }
       // Build packages for API
       final apiPackages = packages.asMap().entries.map((entry) {
         final index = entry.key;
@@ -755,9 +813,7 @@ class AddServiceController extends GetxController {
         options: selectedSubOptionsItems.isNotEmpty
             ? _getSubOptionLabel(selectedSubOptionsItems.first)
             : null,
-        attendanceCapacity: attendanceCapacityController.text.trim().isNotEmpty
-            ? int.tryParse(attendanceCapacityController.text.trim())
-            : null,
+        attendanceCapacity: attendanceValue,
         packages: apiPackages,
         availabilities: apiAvailabilities,
         canGoOutsideLocation: primaryAvailabilityCard.canGoOutside.value,
@@ -801,10 +857,14 @@ class AddServiceController extends GetxController {
         isEdit ? 'Service updated successfully' : 'Service added successfully',
       );
       return true;
-    } catch (e) {
-      isLoading.value = false;
-      Get.snackbar('Error', 'Failed to save service: $e');
-      return false;
+    } on ApiException catch (e) {
+          isLoading.value = false;
+          Get.snackbar('Error', e.message);
+          return false;
+        } catch (e) {
+          isLoading.value = false;
+          Get.snackbar('Error', 'Failed to save service: $e');
+          return false;
     }
   }
 
@@ -838,8 +898,14 @@ class AddServiceController extends GetxController {
       }
     }).toList();
   }
+/// Check if start time is before end time
+bool _isValidTimeRange(TimeOfDay start, TimeOfDay end) {
+  final startMinutes = start.hour * 60 + start.minute;
+  final endMinutes = end.hour * 60 + end.minute;
+  return startMinutes < endMinutes;
+}
 
-  /// Format time for API (HH:MM:SS format)
+/// Format time for API (HH:MM:SS format)
   String _formatTimeForApi(String time) {
     if (time.isEmpty) return '09:00:00';
     // If already in correct format, return as is

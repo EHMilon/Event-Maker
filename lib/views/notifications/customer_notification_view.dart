@@ -83,10 +83,7 @@ class _CustomerNotificationCard extends StatelessWidget {
     final action = _formatAction(notification.body);
     final detail = 'booking request'.tr;
 
-    // Get full image URL from the cover_image path
-    final imageUrl = notification.coverImage != null && notification.coverImage!.isNotEmpty
-        ? ApiConstant.getFullMediaUrl(notification.coverImage)
-        : '';
+    final imageUrl = notification.coverImage ?? '';
 
     return NotificationCard(
       name: name,

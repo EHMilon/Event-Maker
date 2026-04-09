@@ -37,7 +37,7 @@ class CustomerNotificationController extends GetxController {
                 
                 return CustomerNotificationModel(
                   id: apiNotification.id.toString(),
-                  title: apiNotification.title,
+                  title: apiNotification.provider.fullName,
                   body: isAccepted
                       ? 'acceptedBookingBody'
                       : (isRejected
@@ -52,9 +52,9 @@ class CustomerNotificationController extends GetxController {
                   serviceId: apiNotification.serviceId.toString(),
                   providerId: apiNotification.providerId,
                   bookingId: apiNotification.id,
-                  // Get full URL for cover image from API
-                  coverImage: ApiConstant.getFullMediaUrl(apiNotification.service.coverImage),
-                );
+                                    // Get full URL for provider avatar from API
+                                    coverImage: ApiConstant.getFullMediaUrl(apiNotification.provider.avatar),
+                                  );
               },
             )
             .toList(),

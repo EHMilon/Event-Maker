@@ -382,8 +382,45 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
     final initial = target.value ?? const TimeOfDay(hour: 9, minute: 0);
     final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked != null) {
+      // Basic validation check
+      if (target == widget.card.startTime && widget.card.endTime.value != null) {
+        if (!_isBefore(picked, widget.card.endTime.value!)) {
+          Get.snackbar(
+            'invalidTime'.tr,
+            'startTimeBeforeEndTime'.tr,
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+          );
+          return;
+        }
+      } else if (target == widget.card.endTime &&
+          widget.card.startTime.value != null) {
+        if (!_isBefore(widget.card.startTime.value!, picked)) {
+          Get.snackbar(
+            'invalidTime'.tr,
+            'startTimeBeforeEndTime'.tr,
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+          );
+          return;
+        }
+      }
       target.value = picked;
+
+      // Update string representation for consistency
+      final formattedTime = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+      if (target == widget.card.startTime) {
+        widget.card.startTimeString.value = formattedTime;
+      } else {
+        widget.card.endTimeString.value = formattedTime;
+      }
     }
+  }
+
+  bool _isBefore(TimeOfDay start, TimeOfDay end) {
+    final startMin = start.hour * 60 + start.minute;
+    final endMin = end.hour * 60 + end.minute;
+    return startMin < endMin;
   }
 
   void _openMapScreen(BuildContext context) {

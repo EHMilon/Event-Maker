@@ -505,7 +505,7 @@ class ServiceDetailView extends StatelessWidget {
                           ],
                         ],
 
-                        SizedBox(height: 24.h),
+                        SizedBox(height: 16.h),
 
                         // Location Header and Map
                         Text(

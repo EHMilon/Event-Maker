@@ -10,27 +10,43 @@ class ApiException implements Exception {
   });
 
   factory ApiException.fromStatusCode(int statusCode, [dynamic body]) {
-    switch (statusCode) {
-      case 400:
-        return ApiException(message: 'Bad request', statusCode: statusCode, data: body);
-      case 401:
-        return ApiException(message: 'Unauthorized', statusCode: statusCode, data: body);
-      case 403:
-        return ApiException(message: 'Forbidden', statusCode: statusCode, data: body);
-      case 404:
-        return ApiException(message: 'Not found', statusCode: statusCode, data: body);
-      case 408:
-        return ApiException(message: 'Request timeout', statusCode: statusCode, data: body);
-      case 422:
-        return ApiException(message: 'Validation error', statusCode: statusCode, data: body);
-      case 500:
-        return ApiException(message: 'Internal server error', statusCode: statusCode, data: body);
-      case 503:
-        return ApiException(message: 'Service unavailable', statusCode: statusCode, data: body);
-      default:
-        return ApiException(message: 'Something went wrong', statusCode: statusCode, data: body);
+      String message = 'Something went wrong';
+
+      // First set default message based on status code
+      switch (statusCode) {
+        case 400:
+          message = 'Bad request';
+          break;
+        case 401:
+          message = 'Unauthorized';
+          break;
+        case 403:
+          message = 'Forbidden';
+          break;
+        case 404:
+          message = 'Not found';
+          break;
+        case 408:
+          message = 'Request timeout';
+          break;
+        case 422:
+          message = 'Validation error';
+          break;
+        case 500:
+          message = 'Internal server error';
+          break;
+        case 503:
+          message = 'Service unavailable';
+          break;
+      }
+
+      // OVERRIDE with server message if available - ALWAYS prefer server provided message
+      if (body != null && body is Map && body.containsKey('message')) {
+        message = body['message'].toString();
+      }
+
+      return ApiException(message: message, statusCode: statusCode, data: body);
     }
-  }
 
   factory ApiException.noInternet() =>
       ApiException(message: 'No internet connection');

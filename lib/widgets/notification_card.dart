@@ -47,26 +47,22 @@ class NotificationCard extends StatelessWidget {
                 color: Colors.black,
                 shape: BoxShape.circle,
               ),
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(10.w),
-                  child: avatarAsset.isEmpty
-                      ? const Icon(Icons.image, color: Colors.white, size: 24)
-                      : isNetworkImage
-                          ? Image.network(
-                              avatarAsset,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.image, color: Colors.white, size: 24),
-                            )
-                          : Image.asset(
-                              avatarAsset,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.image, color: Colors.white, size: 24),
-                            ),
-                ),
-              ),
+              clipBehavior: Clip.antiAlias,
+              child: avatarAsset.isEmpty
+                  ? const Center(child: Icon(Icons.person, color: Colors.white, size: 24))
+                  : isNetworkImage
+                      ? Image.network(
+                          avatarAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(child: Icon(Icons.person, color: Colors.white, size: 24)),
+                        )
+                      : Image.asset(
+                          avatarAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Center(child: Icon(Icons.person, color: Colors.white, size: 24)),
+                        ),
             ),
             SizedBox(width: 14.w),
             Expanded(
