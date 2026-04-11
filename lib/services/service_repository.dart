@@ -1,6 +1,6 @@
 import 'dart:io';
 import '../mock_data/mock_data.dart';
-import '../utils/user_preferences.dart';
+import '../services/storage_service.dart';
 import '../utils/logger.dart';
 import '../mock_data/review_mock.dart';
 import '../models/service_model.dart';
@@ -143,7 +143,7 @@ class ServiceRepository {
     final api = ApiService();
 
     // Check authentication before making API call
-    final token = await UserPreferences.getAccessToken();
+    final token = await StorageService().getAccessToken();
     Log.d(
       '=======> createService - Token check: ${token != null ? "EXISTS (${token.length} chars)" : "NULL"}',
     );
@@ -190,7 +190,7 @@ class ServiceRepository {
     }
 
     // Check authentication before making API call
-    final token = await UserPreferences.getAccessToken();
+    final token = await StorageService().getAccessToken();
     Log.d(
       '=======> updateService - Token check: ${token != null ? "EXISTS (${token.length} chars)" : "NULL"}',
     );

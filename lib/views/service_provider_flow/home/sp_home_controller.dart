@@ -3,7 +3,7 @@ import 'package:event_maker/models/order_model.dart';
 import 'package:event_maker/models/provider_home_model.dart';
 import 'package:event_maker/services/connectivity_service.dart';
 import 'package:event_maker/services/provider_home_repository.dart';
-import 'package:event_maker/utils/user_preferences.dart';
+import '../../../../services/storage_service.dart';
 import 'package:get/get.dart';
 
 /// Controller for Service Provider Home Screen
@@ -45,7 +45,7 @@ class SPHomeController extends GetxController {
   /// Fetches user information from local storage
   Future<void> fetchUserInfo() async {
     try {
-      final userDetails = await UserPreferences.getUserDetails();
+      final userDetails = await StorageService().getUserDetails();
       if (userDetails != null) {
         userName.value = userDetails['name'] ?? '';
         // TODO: Fetch business name from provider profile when backend is ready

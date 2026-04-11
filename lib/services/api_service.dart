@@ -7,12 +7,19 @@ import 'package:event_maker/utils/logger.dart';
 import 'package:event_maker/services/api_exception.dart';
 import 'package:event_maker/services/connectivity_service.dart';
 import 'package:event_maker/services/storage_service.dart';
-import 'package:event_maker/utils/user_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 
+/// API Service for handling all HTTP requests.
+///
+/// Features:
+/// - Automatic token refresh on 401/expired tokens
+/// - Unified storage for tokens via StorageService
+/// - Request/response logging
+/// - Timeout handling
+/// - Network connectivity checking
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
@@ -27,26 +34,13 @@ class ApiService {
   // Completer to queue requests waiting for token refresh
   Completer<bool>? _refreshCompleter;
 
-  // Synchronous headers getter - uses StorageService for backward compatibility
-  // For multipart requests, use _getAuthHeader() instead
-  Map<String, String> get _headers {
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    final token = _storage.getToken();
-    if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-    return headers;
-  }
-
   /// Ensures the token is valid, refreshing if necessary.
   /// Returns true if a valid token is available, false otherwise.
   Future<bool> _ensureValidToken() async {
     // Check if token is expired
-    final isExpired = await UserPreferences.isTokenExpired();
+    final isExpired = await _storage.isTokenExpired();
     if (!isExpired) {
+      Log.d('=======> Token is valid, proceeding with request');
       return true;
     }
 
@@ -55,7 +49,7 @@ class ApiService {
     // If already refreshing, wait for it to complete
     if (_isRefreshing) {
       Log.d('=======> Token refresh already in progress, waiting...');
-      return _refreshCompleter?.future ?? Future.value(false);
+      return await (_refreshCompleter?.future ?? Future.value(false));
     }
 
     _isRefreshing = true;
@@ -79,7 +73,7 @@ class ApiService {
   /// Returns true if successful, false otherwise.
   Future<bool> _refreshToken() async {
     try {
-      final refreshToken = await UserPreferences.getRefreshToken();
+      final refreshToken = await _storage.getRefreshToken();
       if (refreshToken == null || refreshToken.isEmpty) {
         Log.e('=======> No refresh token available');
         await _handleAuthFailure();
@@ -87,6 +81,7 @@ class ApiService {
       }
 
       Log.d('=======> Calling refresh token endpoint...');
+      Log.d('=======> Refresh token length: ${refreshToken.length} chars');
 
       final response = await _client
           .post(
@@ -99,34 +94,39 @@ class ApiService {
           )
           .timeout(const Duration(seconds: 10));
 
-      Log.d(
-        '=======> Refresh token response: ${response.statusCode} ${response.body}',
-      );
+      Log.d('=======> Refresh token response: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final body = jsonDecode(response.body);
         final newAccessToken = body['access_token'] ?? body['accessToken'];
         final newRefreshToken = body['refresh_token'] ?? body['refreshToken'];
-        final expiresIn = body['expires_in'] ?? body['expiresIn'] ?? 3600;
+        final expiresIn = body['expires_in'] ?? body['expiresIn'] ?? 864000000;
 
         if (newAccessToken != null && newAccessToken.isNotEmpty) {
-          await UserPreferences.saveTokens(
+          // Save new tokens - expiresIn is in milliseconds from backend
+          await _storage.saveTokens(
             accessToken: newAccessToken,
             refreshToken: newRefreshToken ?? refreshToken,
-            expiresIn: expiresIn is int ? expiresIn : int.tryParse(expiresIn.toString()) ?? 3600,
+            expiresIn: expiresIn is int
+                ? expiresIn
+                : int.tryParse(expiresIn.toString()) ?? 864000000,
           );
           Log.d('=======> Token refreshed successfully');
           return true;
+        } else {
+          Log.e('=======> Refresh response missing access_token');
         }
+      } else {
+        Log.e('=======> Refresh failed with status ${response.statusCode}');
+        Log.e('=======> Response body: ${response.body}');
       }
 
       // Refresh failed - clear user data
-      Log.e('=======> Token refresh failed with status ${response.statusCode}');
       await _handleAuthFailure();
       return false;
     } on TimeoutException {
       Log.e('=======> Token refresh timed out');
-      await _handleAuthFailure();
+      // Don't clear auth on timeout - user might retry
       return false;
     } on SocketException {
       Log.e('=======> Token refresh network error');
@@ -140,49 +140,70 @@ class ApiService {
   }
 
   /// Handles authentication failure by clearing user data.
-  /// Subclasses or listeners can override this behavior.
   Future<void> _handleAuthFailure() async {
     Log.e('=======> Authentication failed - clearing user data');
-    await UserPreferences.clearUserData();
-    await _storage.removeToken();
+    await _storage.clearUserData();
   }
 
-  // Async headers getter using UserPreferences (correct token source)
+  /// Builds headers with authentication token.
   Future<Map<String, String>> _getHeadersAsync() async {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-    final token = await UserPreferences.getAccessToken();
+
+    final token = await _storage.getAccessToken();
     Log.d(
       '=======> _getHeadersAsync - Token retrieved: ${token != null ? "exists (${token.length} chars)" : "NULL"}',
     );
+
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
       Log.d(
         '=======> _getHeadersAsync - Authorization header set: Bearer ${token.substring(0, token.length > 20 ? 20 : token.length)}...',
       );
     } else {
-      Log.e('=======> _getHeadersAsync - WARNING: No token available for authenticated request!');
+      Log.w(
+        '=======> _getHeadersAsync - WARNING: No token available for authenticated request!',
+      );
     }
+
     return headers;
   }
 
-  // Multipart এ Content-Type দেওয়া যাবে না — http নিজেই set করে
+  /// Synchronous headers getter - uses cached/sync token retrieval.
+  Map<String, String> get _headers {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    final token = _storage.getToken();
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+
+    return headers;
+  }
+
+  /// Builds authorization header for multipart requests.
   Future<Map<String, String>> _getAuthHeader() async {
     final headers = <String, String>{};
-    final token = await UserPreferences.getAccessToken();
+
+    final token = await _storage.getAccessToken();
     Log.d(
       '=======> Auth Header - Token retrieved: ${token != null ? "exists (${token.length} chars)" : "NULL"}',
     );
+
     if (token != null && token.isNotEmpty) {
       headers['Authorization'] = 'Bearer $token';
       Log.d(
         '=======> Authorization header set: Bearer ${token.substring(0, token.length > 20 ? 20 : token.length)}...',
       );
     } else {
-      Log.e('=======> WARNING: No token available for authenticated request!');
+      Log.w('=======> WARNING: No token available for authenticated request!');
     }
+
     return headers;
   }
 
@@ -198,13 +219,19 @@ class ApiService {
     return uri;
   }
 
+  // ==================== HTTP METHODS ====================
+
   Future<dynamic> get(
     String endpoint, {
     Map<String, dynamic>? queryParams,
     Map<String, String>? extraHeaders,
   }) async {
     // Ensure token is valid before making request
-    await _ensureValidToken();
+    final tokenValid = await _ensureValidToken();
+    if (!tokenValid) {
+      throw ApiException.unauthorized('Session expired. Please login again.');
+    }
+
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.get(
@@ -218,13 +245,21 @@ class ApiService {
     String endpoint, {
     dynamic body,
     Map<String, String>? extraHeaders,
+    bool requiresAuth = true,
   }) async {
-    // Ensure token is valid before making request
-    await _ensureValidToken();
+    // Ensure token is valid before making request (if auth required)
+    if (requiresAuth) {
+      final tokenValid = await _ensureValidToken();
+      if (!tokenValid) {
+        throw ApiException.unauthorized('Session expired. Please login again.');
+      }
+    }
+
     final headers = await _getHeadersAsync();
     debugPrint(
       "POST Request to ${_buildUri(endpoint)} with body: ${jsonEncode(body)} and headers: ${{...headers, ...?extraHeaders}}",
     );
+
     return _request(
       () => _client.post(
         _buildUri(endpoint),
@@ -240,7 +275,11 @@ class ApiService {
     Map<String, String>? extraHeaders,
   }) async {
     // Ensure token is valid before making request
-    await _ensureValidToken();
+    final tokenValid = await _ensureValidToken();
+    if (!tokenValid) {
+      throw ApiException.unauthorized('Session expired. Please login again.');
+    }
+
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.put(
@@ -257,7 +296,11 @@ class ApiService {
     Map<String, String>? extraHeaders,
   }) async {
     // Ensure token is valid before making request
-    await _ensureValidToken();
+    final tokenValid = await _ensureValidToken();
+    if (!tokenValid) {
+      throw ApiException.unauthorized('Session expired. Please login again.');
+    }
+
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.patch(
@@ -273,7 +316,11 @@ class ApiService {
     Map<String, String>? extraHeaders,
   }) async {
     // Ensure token is valid before making request
-    await _ensureValidToken();
+    final tokenValid = await _ensureValidToken();
+    if (!tokenValid) {
+      throw ApiException.unauthorized('Session expired. Please login again.');
+    }
+
     final headers = await _getHeadersAsync();
     return _request(
       () => _client.delete(
@@ -294,10 +341,14 @@ class ApiService {
     }
 
     // Ensure token is valid before making request
-    await _ensureValidToken();
+    final tokenValid = await _ensureValidToken();
+    if (!tokenValid) {
+      throw ApiException.unauthorized('Session expired. Please login again.');
+    }
 
     try {
       final request = http.MultipartRequest(method, _buildUri(endpoint));
+
       // Add headers (async token retrieval)
       request.headers.addAll(await _getAuthHeader());
 
@@ -324,15 +375,18 @@ class ApiService {
           ),
         );
       }
+
       // Send request
       final streamed = await request.send().timeout(
         Duration(seconds: AppConstants.connectTimeout),
       );
       final response = await http.Response.fromStream(streamed);
+
       // Log network
       Log.d(
         '=======> MULTIPART $method ${request.url} → ${response.statusCode}\n${response.body}',
       );
+
       return _processResponse(response);
     } on TimeoutException {
       throw ApiException.timeout();
@@ -346,6 +400,8 @@ class ApiService {
     }
   }
 
+  // ==================== REQUEST HANDLING ====================
+
   Future<dynamic> _request(Future<http.Response> Function() request) async {
     if (!await _connectivity.hasConnection) {
       throw ApiException.noInternet();
@@ -357,10 +413,7 @@ class ApiService {
       );
 
       Log.d(
-        '=======>  Method: ${response.request?.method} URL: ${response.request?.url} Status: ${response.statusCode} Body: ${response.body}',
-      );
-      Log.d(
-        '=======>  Request Headers: ${response.request?.headers}',
+        '=======> Method: ${response.request?.method} URL: ${response.request?.url} Status: ${response.statusCode}',
       );
 
       // If we get a 401, try to refresh the token and retry once
@@ -373,10 +426,13 @@ class ApiService {
           final retryResponse = await request().timeout(
             Duration(seconds: AppConstants.connectTimeout),
           );
-          Log.d(
-            '=======>  Retry Method: ${retryResponse.request?.method} URL: ${retryResponse.request?.url} Status: ${retryResponse.statusCode} Body: ${retryResponse.body}',
-          );
+          Log.d('=======> Retry Status: ${retryResponse.statusCode}');
           return _processResponse(retryResponse);
+        } else {
+          Log.e('=======> Token refresh failed, cannot retry request');
+          throw ApiException.unauthorized(
+            'Session expired. Please login again.',
+          );
         }
       }
 
@@ -394,7 +450,6 @@ class ApiService {
   }
 
   /// Submit provider report to backend
-  /// POST /api/providers/submit-report
   Future<dynamic> submitProviderReport({
     required int providerId,
     required String issue,
@@ -416,7 +471,6 @@ class ApiService {
     // Log the raw response for debugging
     Log.d('=======> Response Status: ${response.statusCode}');
     Log.d('=======> Response Body: ${response.body}');
-    Log.d('=======> Response Headers: ${response.headers}');
 
     // Handle empty response body
     if (response.body.isEmpty) {
@@ -426,7 +480,9 @@ class ApiService {
         return {};
       }
       // For error responses with empty body
-      throw ApiException.fromStatusCode(response.statusCode, {'message': 'Empty response from server'});
+      throw ApiException.fromStatusCode(response.statusCode, {
+        'message': 'Empty response from server',
+      });
     }
 
     try {
@@ -435,10 +491,17 @@ class ApiService {
       // Log raw body for debugging
       Log.e('=======> Failed to parse JSON response: ${response.body}');
       // Check if it's an HTML error page
-      if (response.body.contains('<!DOCTYPE') || response.body.contains('<html')) {
-        throw ApiException(message: "Server returned HTML error page (status ${response.statusCode})");
+      if (response.body.contains('<!DOCTYPE') ||
+          response.body.contains('<html')) {
+        throw ApiException(
+          message:
+              "Server returned HTML error page (status ${response.statusCode})",
+        );
       }
-      throw ApiException(message: "Invalid JSON response: ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}");
+      throw ApiException(
+        message:
+            "Invalid JSON response: ${response.body.substring(0, response.body.length > 100 ? 100 : response.body.length)}",
+      );
     }
 
     if (response.statusCode >= 200 && response.statusCode < 300) {

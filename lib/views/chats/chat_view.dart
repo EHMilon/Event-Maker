@@ -19,8 +19,11 @@ class ChatView extends StatefulWidget {
   State<ChatView> createState() => _ChatViewState();
 }
 
-class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
+class _ChatViewState extends State<ChatView>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late ChatViewController controller;
+  late TabController _tabController;
+  late TextEditingController _searchController;
   bool _isFirstBuild = true;
 
   @override
@@ -33,10 +36,31 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
     } else {
       controller = Get.put(ChatViewController());
     }
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_onTabChanged);
+    _searchController = TextEditingController();
+
+    // Listen to search query changes to update the text field
+    controller.searchQuery.listen((query) {
+      _searchController.text = query;
+      _searchController.selection = TextSelection.fromPosition(
+        TextPosition(offset: query.length),
+      );
+    });
+  }
+
+  void _onTabChanged() {
+    // Only clear search when tab actually changes (not during animation)
+    if (!_tabController.indexIsChanging) {
+      controller.updateSearchQuery('');
+    }
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -83,46 +107,45 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
   }
 
   Widget _buildServiceProviderView(ChatViewController controller) {
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-            child: Container(
-              height: 32.h,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+          child: Container(
+            height: 32.h,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelPadding: EdgeInsets.symmetric(horizontal: 4.w),
+              splashFactory: NoSplash.splashFactory,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              indicator: BoxDecoration(
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(20.r),
               ),
-              child: TabBar(
-                indicatorSize: TabBarIndicatorSize.tab,
-                labelPadding: EdgeInsets.symmetric(horizontal: 4.w),
-                splashFactory: NoSplash.splashFactory,
-                isScrollable: true,
-                tabAlignment: TabAlignment.start,
-                indicator: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                labelColor: AppColors.white,
-                unselectedLabelColor: AppColors.textPrimary,
-                physics: const BouncingScrollPhysics(),
-                dividerColor: Colors.transparent,
-                tabs: [_buildTab('customer'.tr), _buildTab('admin'.tr)],
-              ),
+              labelColor: AppColors.white,
+              unselectedLabelColor: AppColors.textPrimary,
+              physics: const BouncingScrollPhysics(),
+              dividerColor: Colors.transparent,
+              tabs: [_buildTab('customer'.tr), _buildTab('admin'.tr)],
             ),
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildChatListContent(controller, true),
-                _buildChatListContent(controller, false),
-              ],
-            ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildChatListContent(controller, true),
+              _buildChatListContent(controller, false),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -166,19 +189,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       final chats = isCustomerTab
           ? controller.filteredCustomerChats
           : controller.filteredAdminChats;
-
-      if (chats.isEmpty && !isLoading) {
-        return Center(
-          child: Text(
-            'postVibeFirstChat'.tr,
-            style: GoogleFonts.inter(
-              color: AppColors.textSecondary,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        );
-      }
+      final hasQuery = controller.searchQuery.value.isNotEmpty;
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -186,32 +197,48 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
           children: [
             _buildSearchBar(controller),
             SizedBox(height: 24.h),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: controller.refreshChats,
-                color: AppColors.primary,
-                child: Skeletonizer(
-                  enabled: isLoading,
-                  child: ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: isLoading ? 4 : chats.length,
-                    separatorBuilder: (context, index) =>
-                        SizedBox(height: 20.h),
-                    itemBuilder: (context, index) {
-                      if (isLoading) {
-                        return _buildChatTileMock();
-                      }
-                      final chat = chats[index];
-                      return _buildChatTile(
-                        chat,
-                        isAdminChat: !isCustomerTab,
-                        isServiceProvider: widget.isServiceProvider,
-                      );
-                    },
+            if (chats.isEmpty && !isLoading)
+              Expanded(
+                child: Center(
+                  child: Text(
+                    hasQuery ? 'noResultsFound'.tr : 'postVibeFirstChat'.tr,
+                    style: GoogleFonts.inter(
+                      color: AppColors.textSecondary,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: controller.refreshChats,
+                  color: AppColors.primary,
+                  child: Skeletonizer(
+                    enabled: isLoading,
+                    child: ListView.separated(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      itemCount: isLoading ? 4 : chats.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 20.h),
+                      itemBuilder: (context, index) {
+                        if (isLoading) {
+                          return _buildChatTileMock();
+                        }
+                        final chat = chats[index];
+                        return _buildChatTile(
+                          chat,
+                          isAdminChat: !isCustomerTab,
+                          isServiceProvider: widget.isServiceProvider,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       );
@@ -227,6 +254,7 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
         border: Border.all(color: AppColors.grey.withValues(alpha: 0.2)),
       ),
       child: TextField(
+        controller: _searchController,
         onChanged: controller.updateSearchQuery,
         decoration: InputDecoration(
           hintText: 'search'.tr,
@@ -243,6 +271,18 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
                 BlendMode.srcIn,
               ),
             ),
+          ),
+          suffixIcon: Obx(
+            () => controller.searchQuery.value.isNotEmpty
+                ? IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      size: 20.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                    onPressed: () => controller.updateSearchQuery(''),
+                  )
+                : const SizedBox.shrink(),
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 14.h),
@@ -301,7 +341,8 @@ class _ChatViewState extends State<ChatView> with WidgetsBindingObserver {
       if (chat.members.isNotEmpty) {
         // Determine which member to show based on who's viewing
         otherMember = chat.members.firstWhereOrNull(
-          (m) => isServiceProvider ? m.role == 'customer' : m.role != 'customer',
+          (m) =>
+              isServiceProvider ? m.role == 'customer' : m.role != 'customer',
         );
         // Fallback to second member if no matching member found
         otherMember ??= chat.members.length > 1

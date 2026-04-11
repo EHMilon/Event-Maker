@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:event_maker/models/auth_models.dart';
 import 'package:event_maker/global/base_controller.dart';
 import 'package:event_maker/utils/logger.dart';
-import 'package:event_maker/utils/user_preferences.dart';
+import 'package:event_maker/services/storage_service.dart';
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/services/api_service.dart';
 import 'package:event_maker/services/api_exception.dart';
@@ -17,6 +17,7 @@ import 'package:event_maker/constants/api_constant.dart';
 /// and uses try-catch pattern with ApiException for error handling.
 class AuthController extends BaseController {
   final ApiService _apiService = ApiService();
+  final StorageService _storage = StorageService();
 
   // Controllers - using late to prevent early disposal issues
   late final loginEmailController = TextEditingController();
@@ -56,6 +57,11 @@ class AuthController extends BaseController {
 
   Timer? _otpTimer;
   bool _controllersDisposed = false;
+
+  // Constants for user types
+  static const String USER_TYPE_CUSTOMER = 'customer';
+  static const String USER_TYPE_SERVICE_PROVIDER = 'provider';
+  static const String DEFAULT_LANGUAGE = 'en';
 
   @override
   void onInit() {
@@ -133,10 +139,10 @@ class AuthController extends BaseController {
     selectedType.value = type;
   }
 
-  /// Restore user type from SharedPreferences
+  /// Restore user type from StorageService
   Future<void> restoreUserType() async {
     try {
-      final userType = await UserPreferences.getUserType();
+      final userType = await _storage.getUserType();
       if (userType.isNotEmpty && selectedType.value.isEmpty) {
         selectedType.value = userType;
       }
@@ -147,7 +153,7 @@ class AuthController extends BaseController {
 
   Future<void> onContinueUserType() async {
     if (selectedType.value.isNotEmpty) {
-      await UserPreferences.setUserType(selectedType.value);
+      await _storage.setUserType(selectedType.value);
       Get.toNamed(AppRoutes.login);
     } else {
       showWarning('Please select user type');
@@ -187,14 +193,14 @@ class AuthController extends BaseController {
     setLoading(true);
 
     try {
-      var userType = await UserPreferences.getUserType();
+      var userType = await _storage.getUserType();
 
-      if (userType == UserPreferences.USER_TYPE_CUSTOMER) {
-        final hasUserType = await UserPreferences.hasUserType();
+      if (userType == USER_TYPE_CUSTOMER) {
+        final hasUserType = await _storage.hasUserType();
         if (!hasUserType) {
           if (selectedType.value.isNotEmpty) {
             userType = selectedType.value;
-            await UserPreferences.setUserType(userType);
+            await _storage.setUserType(userType);
           } else {
             showError('Please select user type');
             Get.offAllNamed('/user-type');
@@ -222,24 +228,24 @@ class AuthController extends BaseController {
       final response = await _apiService.post(
         ApiConstant.signIn,
         body: request.toJson(),
+        requiresAuth: false, // Login doesn't require auth
       );
 
       final data = SignInResponseModel.fromJson(response);
 
-      // Save session
+      // Save session using StorageService
       await Future.wait([
-        UserPreferences.saveUserDetails(
+        _storage.saveUserDetails(
           userId: data.user.id,
           name: data.user.fullName,
           email: data.user.emailAddress,
           userType: data.user.role,
         ),
-        UserPreferences.saveTokens(
+        _storage.saveTokens(
           accessToken: data.accessToken,
           refreshToken: data.refreshToken,
           expiresIn: data.expiresIn,
         ),
-        UserPreferences.setLoggedIn(true),
       ]);
 
       loginEmailController.clear();
@@ -251,7 +257,7 @@ class AuthController extends BaseController {
         return;
       }
 
-      if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+      if (userType == USER_TYPE_SERVICE_PROVIDER) {
         Get.offAllNamed(AppRoutes.serviceProviderHome);
       } else {
         Get.offAllNamed(AppRoutes.customerHome);
@@ -337,7 +343,7 @@ class AuthController extends BaseController {
       return;
     }
 
-    await UserPreferences.setUserType(selectedType.value);
+    await _storage.setUserType(selectedType.value);
 
     if (selectedType.value == 'provider') {
       Get.toNamed(AppRoutes.providerDetails);
@@ -376,6 +382,7 @@ class AuthController extends BaseController {
       final response = await _apiService.post(
         ApiConstant.signUp,
         body: request.toJson(),
+        requiresAuth: false, // Signup doesn't require auth
       );
 
       final data = SignUpResponseModel.fromJson(response);
@@ -420,6 +427,7 @@ class AuthController extends BaseController {
       final response = await _apiService.post(
         ApiConstant.signUp,
         body: request.toJson(),
+        requiresAuth: false, // Signup doesn't require auth
       );
 
       final data = SignUpResponseModel.fromJson(response);
@@ -472,6 +480,7 @@ class AuthController extends BaseController {
       final response = await _apiService.post(
         ApiConstant.forgotPassword,
         body: request.toJson(),
+        requiresAuth: false, // Forgot password doesn't require auth
       );
 
       final data = ForgotPasswordResponseModel.fromJson(response);
@@ -537,6 +546,7 @@ class AuthController extends BaseController {
         final response = await _apiService.post(
           ApiConstant.verifyResetCode,
           body: request.toJson(),
+          requiresAuth: false,
         );
 
         final data = VerifyResetCodeResponseModel.fromJson(response);
@@ -554,24 +564,24 @@ class AuthController extends BaseController {
         final response = await _apiService.post(
           ApiConstant.verifyEmail,
           body: request.toJson(),
+          requiresAuth: false,
         );
 
         final data = VerifyEmailResponseModel.fromJson(response);
 
         // Save tokens if present
         if (data.tokens != null) {
-          await UserPreferences.saveTokens(
+          await _storage.saveTokens(
             accessToken: data.tokens!.accessToken,
             refreshToken: data.tokens!.refreshToken,
             expiresIn: data.tokens!.expiresIn,
           );
-          await UserPreferences.saveUserDetails(
+          await _storage.saveUserDetails(
             userId: data.userId,
             name: '',
             email: '',
             userType: data.role,
           );
-          await UserPreferences.setLoggedIn(true);
         }
 
         _otpTimer?.cancel();
@@ -618,6 +628,7 @@ class AuthController extends BaseController {
       await _apiService.post(
         ApiConstant.resendVerificationCode,
         body: request.toJson(),
+        requiresAuth: false,
       );
 
       _startOtpTimer();
@@ -674,7 +685,11 @@ class AuthController extends BaseController {
         confirmPassword: confirmPassword,
       );
 
-      await _apiService.post(ApiConstant.resetPassword, body: request.toJson());
+      await _apiService.post(
+        ApiConstant.resetPassword,
+        body: request.toJson(),
+        requiresAuth: false,
+      );
 
       newPasswordController.clear();
       confirmPasswordController.clear();
@@ -765,7 +780,7 @@ class AuthController extends BaseController {
       Get.offAllNamed('/congratulations');
     } on ApiException catch (e) {
       if (e.isUnauthorized) {
-        await UserPreferences.clearUserData();
+        await _storage.clearUserData();
       }
       // Parse backend error message for user-friendly feedback
       final errorMessage = _parseChangePasswordError(e);
@@ -848,8 +863,8 @@ class AuthController extends BaseController {
   /// Navigate to appropriate home screen based on user type
   void _navigateToHome() async {
     try {
-      final userType = await UserPreferences.getUserType();
-      if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+      final userType = await _storage.getUserType();
+      if (userType == USER_TYPE_SERVICE_PROVIDER) {
         Get.offAllNamed(AppRoutes.serviceProviderHome);
       } else {
         Get.offAllNamed(AppRoutes.customerHome);
@@ -861,34 +876,38 @@ class AuthController extends BaseController {
   }
 
   Future<void> onGetStarted() async {
-    String userType = await UserPreferences.getUserType();
+    String userType = await _storage.getUserType();
 
-    if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+    if (userType == USER_TYPE_SERVICE_PROVIDER) {
       Get.offAllNamed(AppRoutes.serviceProviderHome);
     } else {
       Get.offAllNamed(AppRoutes.customerHome);
     }
   }
 
+  /// Logout user and clear all session data
   Future<void> logout() async {
     if (isLoading.value) return;
 
     setLoading(true);
 
     try {
-      await _apiService
-          .post(ApiConstant.logout)
-          .timeout(const Duration(seconds: 5));
+      // Only call logout API if we have a valid token
+      final hasToken = await _storage.hasValidTokens();
+      if (hasToken) {
+        await _apiService
+            .post(ApiConstant.logout)
+            .timeout(const Duration(seconds: 5));
+      }
     } catch (e) {
       Log.e('Logout API call failed', e);
+      // Continue with logout even if API fails
     }
 
     try {
       _clearPersistedUserId();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('user_type');
-      await UserPreferences.clearUserData();
       disposeAllControllers();
+      await _storage.clearUserData();
       Get.offAllNamed(AppRoutes.onboarding);
     } catch (e) {
       Log.e('Logout cleanup failed', e);
@@ -1000,25 +1019,18 @@ class AuthController extends BaseController {
       if (backendMessage.contains('already') ||
           backendMessage.contains('exists') ||
           backendMessage.contains('taken')) {
-        if (backendMessage.contains('email')) {
-          return 'This email is already registered. Please login instead';
-        }
-        if (backendMessage.contains('phone')) {
-          return 'This phone number is already registered';
-        }
+        return 'This email is already registered. Please use a different email';
       }
     }
 
     // Fallback to status code based messages
     switch (statusCode) {
       case 400:
-        return 'Invalid registration information';
-      case 409:
-        return 'Account already exists with this email';
+        return 'Invalid signup information. Please check all fields';
       case 422:
-        return 'Please check your information and try again';
+        return 'Invalid signup data. Please check your information';
       default:
-        return 'Registration failed. Please try again';
+        return 'Signup failed. Please try again';
     }
   }
 
@@ -1029,6 +1041,7 @@ class AuthController extends BaseController {
 
     // Try to extract message from backend response
     if (data != null && data is Map<String, dynamic>) {
+      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
       final errors = data['errors'];
 
       // Handle validation errors
@@ -1037,21 +1050,27 @@ class AuthController extends BaseController {
           return 'Please enter a valid email address';
         }
       }
+
+      // Match common backend messages
+      if (backendMessage.contains('not found') ||
+          backendMessage.contains('does not exist')) {
+        return 'No account found with this email address';
+      }
     }
 
     // Fallback to status code based messages
     switch (statusCode) {
       case 404:
         return 'No account found with this email address';
-      case 400:
+      case 422:
         return 'Invalid email address. Please check and try again';
       default:
-        return 'Failed to send reset link. Please try again';
+        return 'Failed to send reset email. Please try again';
     }
   }
 
-  /// Parses API exceptions into user-friendly error messages for reset password
-  String _parseResetPasswordError(ApiException exception) {
+  /// Parses API exceptions into user-friendly error messages for OTP
+  String _parseOtpError(ApiException exception) {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
@@ -1062,90 +1081,77 @@ class AuthController extends BaseController {
 
       // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
-        if (errors.containsKey('new_password')) {
-          return 'New password must be at least 8 characters';
-        }
-        if (errors.containsKey('confirm_password')) {
-          return 'Passwords do not match';
+        if (errors.containsKey('verification_code') ||
+            errors.containsKey('otp')) {
+          return 'Please enter a valid verification code';
         }
       }
-
-      // Match common backend messages
-      if (backendMessage.contains('match') || backendMessage.contains('confirm')) {
-        return 'New password and confirm password do not match';
-      }
-      if (backendMessage.contains('expired') ||
-          backendMessage.contains('invalid') ||
-          backendMessage.contains('secret')) {
-        return 'Reset link has expired. Please request a new one';
-      }
-    }
-
-    // Fallback to status code based messages
-    switch (statusCode) {
-      case 400:
-        return 'Invalid password reset request';
-      case 401:
-        return 'Reset session expired. Please request a new link';
-      case 422:
-        return 'Invalid password format. Please check your password';
-      default:
-        return 'Failed to reset password. Please try again';
-    }
-  }
-
-  /// Parses API exceptions into user-friendly error messages for OTP verification
-  String _parseOtpError(ApiException exception) {
-    final int? statusCode = exception.statusCode;
-    final dynamic data = exception.data;
-
-    // Try to extract message from backend response
-    if (data != null && data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
 
       // Match common backend messages
       if (backendMessage.contains('invalid') ||
           backendMessage.contains('incorrect') ||
           backendMessage.contains('wrong')) {
-        return 'Invalid code. Please check and try again';
+        return 'Invalid verification code. Please check and try again';
       }
-      if (backendMessage.contains('expired') || backendMessage.contains('timeout')) {
-        return 'Code has expired. Please request a new code';
-      }
-      if (backendMessage.contains('attempt') || backendMessage.contains('limit')) {
-        return 'Too many attempts. Please try again later';
+      if (backendMessage.contains('expired')) {
+        return 'Verification code has expired. Please request a new one';
       }
     }
 
     // Fallback to status code based messages
     switch (statusCode) {
       case 400:
-        return 'Invalid verification code';
+        return 'Invalid verification code. Please check and try again';
       case 401:
-        return 'Code expired or invalid. Please request a new one';
-      case 403:
-        return 'Too many failed attempts. Please try again later';
+        return 'Session expired. Please start the process again';
+      case 404:
+        return 'User not found. Please signup again';
+      case 422:
+        return 'Invalid verification code format';
       default:
         return 'Verification failed. Please try again';
     }
   }
 
-  /// Parses API exceptions into user-friendly error messages for resend OTP
+  /// Parses resend OTP error messages
   String _parseResendOtpError(ApiException exception) {
+    // Resend errors are usually network/server related
+    return 'Failed to resend code. Please check your connection and try again';
+  }
+
+  /// Parses reset password error messages
+  String _parseResetPasswordError(ApiException exception) {
     final int? statusCode = exception.statusCode;
+    final dynamic data = exception.data;
+
+    // Try to extract message from backend response
+    if (data != null && data is Map<String, dynamic>) {
+      final errors = data['errors'];
+
+      // Handle validation errors
+      if (errors != null && errors is Map<String, dynamic>) {
+        if (errors.containsKey('new_password')) {
+          return 'Password must be at least 8 characters';
+        }
+        if (errors.containsKey('confirm_password')) {
+          return 'Passwords do not match';
+        }
+        if (errors.containsKey('secret_key')) {
+          return 'Session expired. Please start the reset process again';
+        }
+      }
+    }
 
     // Fallback to status code based messages
     switch (statusCode) {
-      case 429:
-        return 'Please wait a moment before requesting a new code';
       case 400:
-        return 'Unable to resend code. Please try again';
+        return 'Invalid reset request. Please check your password';
+      case 401:
+        return 'Session expired. Please start the reset process again';
+      case 404:
+        return 'Reset session not found. Please try again';
       default:
-        return 'Failed to resend code. Please try again';
+        return 'Failed to reset password. Please try again';
     }
-  }
-
-  void goBack() {
-    Get.back();
   }
 }

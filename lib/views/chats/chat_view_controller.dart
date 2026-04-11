@@ -77,7 +77,6 @@ class ChatViewController extends GetxController {
 
     filteredCustomerChats.value = customerChats.where((chat) {
       final otherMember = chat.members.isNotEmpty ? chat.members.first : null;
-      // Search in fullName first, then email
       final name = otherMember?.fullName ?? otherMember?.email ?? '';
       final lastMsg = chat.lastMessage?.content ?? '';
       return name.toLowerCase().contains(query) ||
@@ -85,7 +84,11 @@ class ChatViewController extends GetxController {
     }).toList();
 
     filteredAdminChats.value = adminChats.where((chat) {
-      final name = chat.name ?? '';
+      final adminMember = chat.members.firstWhereOrNull(
+        (m) => m.role == 'admin',
+      );
+      final name =
+          adminMember?.fullName ?? adminMember?.email ?? chat.name ?? '';
       final lastMsg = chat.lastMessage?.content ?? '';
       return name.toLowerCase().contains(query) ||
           lastMsg.toLowerCase().contains(query);

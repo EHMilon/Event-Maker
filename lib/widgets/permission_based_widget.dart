@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../utils/user_preferences.dart';
+import '../services/storage_service.dart';
 
 /// A widget that displays different content based on user permissions/roles.
 ///
@@ -18,27 +18,27 @@ import '../utils/user_preferences.dart';
 class PermissionBasedWidget extends StatelessWidget {
   /// Widget to show for service providers
   final Widget? serviceProviderChild;
-  
+
   /// Widget to show for customers
   final Widget? customerChild;
-  
+
   /// Widget to show when user type is not determined or doesn't match
   final Widget? fallbackChild;
-  
+
   /// Builder function for service providers (alternative to serviceProviderChild)
   final Widget Function()? serviceProviderBuilder;
-  
+
   /// Builder function for customers (alternative to customerChild)
   final Widget Function()? customerBuilder;
-  
+
   /// Builder function for fallback (alternative to fallbackChild)
   final Widget Function()? fallbackBuilder;
-  
+
   /// List of allowed roles for this widget
   /// If null, widget shows content based on user type
   /// If provided, only shows content if user's role is in this list
   final List<String>? allowedRoles;
-  
+
   /// Callback when user doesn't have permission
   final VoidCallback? onPermissionDenied;
 
@@ -57,7 +57,7 @@ class PermissionBasedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: UserPreferences.getUserType(),
+      future: StorageService().getUserType(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Show fallback while loading
@@ -65,9 +65,9 @@ class PermissionBasedWidget extends StatelessWidget {
                  (fallbackBuilder?.call() ??
                  const SizedBox.shrink());
         }
-        
-        String userType = snapshot.data ?? UserPreferences.USER_TYPE_CUSTOMER;
-        
+
+        String userType = snapshot.data ?? StorageService.USER_TYPE_CUSTOMER;
+
         // Check allowed roles if specified
         if (allowedRoles != null && !allowedRoles!.contains(userType)) {
           if (onPermissionDenied != null) {
@@ -77,14 +77,14 @@ class PermissionBasedWidget extends StatelessWidget {
                  (fallbackBuilder?.call() ??
                  const SizedBox.shrink());
         }
-        
+
         // Show content based on user type
         switch (userType) {
-          case UserPreferences.USER_TYPE_SERVICE_PROVIDER:
+          case StorageService.USER_TYPE_SERVICE_PROVIDER:
             return serviceProviderChild ??
                    (serviceProviderBuilder?.call() ??
                    const SizedBox.shrink());
-          case UserPreferences.USER_TYPE_CUSTOMER:
+          case StorageService.USER_TYPE_CUSTOMER:
             return customerChild ??
                    (customerBuilder?.call() ??
                    const SizedBox.shrink());
@@ -104,10 +104,10 @@ class PermissionBasedWidget extends StatelessWidget {
 class EditButtonForServiceProviderOnly extends StatelessWidget {
   /// Callback when button is pressed
   final VoidCallback? onPressed;
-  
+
   /// Button text (default: 'Edit')
   final String text;
-  
+
   /// Icon to show alongside text
   final IconData? icon;
 
@@ -143,9 +143,9 @@ extension UserRoleExtension on UserRole {
   String get name {
     switch (this) {
       case UserRole.customer:
-        return UserPreferences.USER_TYPE_CUSTOMER;
+        return StorageService.USER_TYPE_CUSTOMER;
       case UserRole.serviceProvider:
-        return UserPreferences.USER_TYPE_SERVICE_PROVIDER;
+        return StorageService.USER_TYPE_SERVICE_PROVIDER;
     }
   }
 }
@@ -155,10 +155,10 @@ extension UserRoleExtension on UserRole {
 class ReactivePermissionWidget extends StatelessWidget {
   /// Widget to show for service providers
   final Widget Function() serviceProviderBuilder;
-  
+
   /// Widget to show for customers
   final Widget Function() customerBuilder;
-  
+
   /// Widget to show when user type is not determined
   final Widget Function()? fallbackBuilder;
 
@@ -172,7 +172,7 @@ class ReactivePermissionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // This requires UserPreferences to expose userType as RxString
+      // This requires StorageService to expose userType as RxString
       // For now, we use the async version
       return PermissionBasedWidget(
         serviceProviderBuilder: serviceProviderBuilder,

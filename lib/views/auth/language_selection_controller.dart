@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../utils/user_preferences.dart';
+import '../../services/storage_service.dart';
 import '../../app_routes.dart';
 import '../../localization/app_localization.dart';
 
@@ -23,7 +23,7 @@ class LanguageSelectionController extends GetxController {
   /// Load previously saved language preference
   Future<void> _loadSavedLanguage() async {
     try {
-      final savedLanguageCode = await UserPreferences.getLanguageCode();
+      final savedLanguageCode = await StorageService().getLanguageCode();
       selectedLanguage.value = SupportedLanguage.values.firstWhere(
         (lang) => lang.code == savedLanguageCode,
         orElse: () => SupportedLanguage.english,
@@ -47,7 +47,7 @@ class LanguageSelectionController extends GetxController {
     
     try {
       // Save language preference locally
-      await UserPreferences.setLanguageCode(selectedLanguage.value.code);
+      await StorageService().saveLanguageCode(selectedLanguage.value.code);
       
       // Update app locale
       Get.updateLocale(Locale(selectedLanguage.value.code));
@@ -57,7 +57,7 @@ class LanguageSelectionController extends GetxController {
       // await ApiService.updateUserLanguage(selectedLanguage.value.code);
       
       // Mark first time as complete
-      await UserPreferences.setFirstTimeComplete();
+      await StorageService().setFirstTimeComplete();
       
       // Navigate to user type selection
       Get.offAllNamed(AppRoutes.userType);
@@ -79,11 +79,11 @@ class LanguageSelectionController extends GetxController {
     
     try {
       // Use default English
-      await UserPreferences.setLanguageCode(SupportedLanguage.english.code);
+      await StorageService().saveLanguageCode(SupportedLanguage.english.code);
       Get.updateLocale(Locale(AppLocalization.defaultLanguage));
       
       // Mark first time as complete
-      await UserPreferences.setFirstTimeComplete();
+      await StorageService().setFirstTimeComplete();
       
       // Navigate to onboarding
       Get.offAllNamed(AppRoutes.userType);

@@ -5,17 +5,16 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'app_routes.dart';
 import 'constants/app_themes.dart';
-import 'utils/user_preferences.dart';
 import 'localization/app_localization.dart';
 import 'global/init_binding.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize StorageService before using it
   await StorageService.init();
-  
-  final savedLanguageCode = await UserPreferences.getLanguageCode();
+
+  final savedLanguageCode = await StorageService().getLanguageCode();
   runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
 }
 

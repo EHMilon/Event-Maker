@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../app_routes.dart';
 // import '../../core/constants/app_strings.dart';
 import '../../utils/logger.dart';
-import '../../utils/user_preferences.dart';
+import '../../services/storage_service.dart';
 
 class OnboardingController extends GetxController {
   final PageController pageController = PageController();
@@ -23,7 +23,7 @@ class OnboardingController extends GetxController {
     {
       "title": "onboardingTitle3".tr,
       "subtitle": "onboardingSubtitle3".tr,
-      "image": "assets/images/onboarding_3.png",
+      "image": "assets/images/onbording_3.png",
     },
   ];
 
@@ -41,14 +41,14 @@ class OnboardingController extends GetxController {
       );
     } else {
       Log.i("Onboarding completed, navigating to Language Selection");
-      await UserPreferences.setOnboardingComplete();
+      await StorageService().setOnboardingComplete();
       Get.offAllNamed(AppRoutes.languageSelection);
     }
   }
 
   Future<void> skip() async {
     Log.i("Onboarding skipped");
-    await UserPreferences.setOnboardingComplete();
+    await StorageService().setOnboardingComplete();
     Get.offAllNamed(AppRoutes.languageSelection);
   }
 }

@@ -13,7 +13,7 @@ import '../../models/faq_model.dart';
 import '../../services/wallet_repository.dart';
 import '../../services/customer_payment_repository.dart';
 import '../../services/service_repository.dart';
-import '../../utils/user_preferences.dart';
+import '../../services/storage_service.dart';
 import '../../app_routes.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/api_constant.dart';
@@ -132,7 +132,8 @@ class ProfileController extends GetxController {
   final WalletRepository _walletRepository = WalletRepository();
 
   /// Customer payment repository instance
-  final CustomerPaymentRepository _customerPaymentRepository = CustomerPaymentRepository();
+  final CustomerPaymentRepository _customerPaymentRepository =
+      CustomerPaymentRepository();
 
   /// Service repository instance for bookmarks
   final ServiceRepository _serviceRepository = const ServiceRepository();
@@ -201,7 +202,7 @@ class ProfileController extends GetxController {
   }
 
   Future<void> _loadLanguage() async {
-    final langCode = await UserPreferences.getLanguageCode();
+    final langCode = await StorageService().getLanguageCode();
     selectedLanguage.value = SupportedLanguage.values.firstWhere(
       (e) => e.code == langCode,
       orElse: () => SupportedLanguage.english,
@@ -211,7 +212,7 @@ class ProfileController extends GetxController {
   /// Updates the application language and saves preference.
   void changeLanguage(SupportedLanguage language) async {
     selectedLanguage.value = language;
-    await UserPreferences.setLanguageCode(language.code);
+    await StorageService().saveLanguageCode(language.code);
     Get.updateLocale(Locale(language.code));
   }
 
@@ -231,17 +232,18 @@ class ProfileController extends GetxController {
     isLoading.value = true;
 
     try {
-      final userData = await UserPreferences.getUserDetails();
+      final userData = await StorageService().getUserDetails();
       if (userData != null) {
         userName.value = userData['name'] ?? '';
         userEmail.value = userData['email'] ?? '';
         isServiceProvider.value =
-            userData['type'] == UserPreferences.USER_TYPE_SERVICE_PROVIDER;
+            userData['type'] == StorageService.USER_TYPE_SERVICE_PROVIDER;
 
         nameController.text = userName.value;
         emailController.text = userEmail.value;
       } else {
-        isServiceProvider.value = await UserPreferences.isServiceProvider();
+        final userType = await StorageService().getUserType();
+        isServiceProvider.value = userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
       }
     } catch (e) {
       Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
@@ -353,8 +355,8 @@ class ProfileController extends GetxController {
     }
 
     // Clear all user data and tokens from local storage
-    await UserPreferences.clearUserData();
-    await UserPreferences.resetOnboarding();
+    await StorageService().clearUserData();
+    await StorageService().resetOnboarding();
 
     // Navigate to onboarding screen and clear navigation stack
     Get.offAllNamed(AppRoutes.onboarding);
@@ -384,8 +386,8 @@ class ProfileController extends GetxController {
         );
 
         // Clear all user data and tokens
-        await UserPreferences.clearUserData();
-        await UserPreferences.resetOnboarding();
+        await StorageService().clearUserData();
+        await StorageService().resetOnboarding();
 
         // Navigate to onboarding screen
         Get.offAllNamed(AppRoutes.onboarding);
@@ -902,7 +904,7 @@ class ProfileController extends GetxController {
 
   /// Initiates a withdrawal request
   /// POST /payments/provider-withdrawal
-  /// 
+  ///
   /// [amount] - Amount to withdraw
   /// Returns true if withdrawal was successful
   Future<bool> requestWithdrawal(double amount) async {
@@ -924,8 +926,7 @@ class ProfileController extends GetxController {
     }
 
     // Check if provider has enough balance
-    final availableBalance =
-        walletSummary.value?.availableBalanceAmount ?? 0.0;
+    final availableBalance = walletSummary.value?.availableBalanceAmount ?? 0.0;
     if (amount > availableBalance) {
       Get.snackbar(
         'error'.tr,
@@ -1021,7 +1022,8 @@ class ProfileController extends GetxController {
     }
 
     // Check if provider needs to complete Stripe onboarding
-    if (connectStatus.needsOnboarding && connectStatus.data?.onboardingUrl != null) {
+    if (connectStatus.needsOnboarding &&
+        connectStatus.data?.onboardingUrl != null) {
       return WithdrawalAction.openStripeOnboarding;
     }
 
@@ -1087,10 +1089,11 @@ class ProfileController extends GetxController {
     customerPaymentError.value = '';
 
     try {
-      final response = await _customerPaymentRepository.fetchCustomerPaymentHistory(
-        page: customerPaymentCurrentPage.value,
-        pageSize: 10,
-      );
+      final response = await _customerPaymentRepository
+          .fetchCustomerPaymentHistory(
+            page: customerPaymentCurrentPage.value,
+            pageSize: 10,
+          );
 
       if (response.success) {
         // Update pagination info

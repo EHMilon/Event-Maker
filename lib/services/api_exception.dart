@@ -57,6 +57,9 @@ class ApiException implements Exception {
   factory ApiException.unknown([Object? error]) =>
       ApiException(message: error?.toString() ?? 'An unexpected error occurred');
 
+  factory ApiException.unauthorized([String? message]) =>
+      ApiException(message: message ?? 'Unauthorized', statusCode: 401);
+
   bool get isUnauthorized => statusCode == 401;
 
   @override
