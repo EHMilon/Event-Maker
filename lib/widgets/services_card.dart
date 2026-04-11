@@ -13,6 +13,7 @@ class ServicesCard extends StatelessWidget {
   final String rating;
   final bool isBookmarked;
   final bool useFullWidth;
+  final bool showBookmarkIcon;
   final VoidCallback? onTap;
   final VoidCallback? onBookmarkTap;
 
@@ -25,6 +26,7 @@ class ServicesCard extends StatelessWidget {
     required this.rating,
     this.isBookmarked = false,
     this.useFullWidth = false,
+    this.showBookmarkIcon = true,
     this.onTap,
     this.onBookmarkTap,
   });
@@ -115,25 +117,26 @@ class ServicesCard extends StatelessWidget {
                               buildPlaceholderImage(imageHeight),
                         ),
                 ),
-                Positioned(
-                  top: 8.h,
-                  right: 8.w,
-                  child: GestureDetector(
-                    onTap: onBookmarkTap,
-                    child: Container(
-                      padding: EdgeInsets.all(6.r),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Icon(
-                        isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                        size: 18.r,
-                        color: Colors.white,
+                if (showBookmarkIcon)
+                  Positioned(
+                    top: 8.h,
+                    right: 8.w,
+                    child: GestureDetector(
+                      onTap: onBookmarkTap,
+                      child: Container(
+                        padding: EdgeInsets.all(6.r),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Icon(
+                          isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                          size: 18.r,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
             // Content Section
@@ -152,7 +155,7 @@ class ServicesCard extends StatelessWidget {
                       color: AppColors.black,
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 8.h),
                   Row(
                     children: [
                       SvgPicture.asset(
@@ -178,7 +181,7 @@ class ServicesCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 10.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -186,7 +189,7 @@ class ServicesCard extends StatelessWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: "$price",
+                              text: price,
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w400,

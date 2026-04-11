@@ -297,6 +297,8 @@ class CustomerBookingNotification {
   final String title;
   final String? acceptedAt;
   final String? rejectedAt;
+  final String? bookingDate;
+  final String? startTime;
   final CustomerBookingCustomer customer;
   final CustomerBookingProviderInfo provider;
   final CustomerBookingServiceInfo service;
@@ -310,6 +312,8 @@ class CustomerBookingNotification {
     required this.title,
     this.acceptedAt,
     this.rejectedAt,
+    this.bookingDate,
+    this.startTime,
     required this.customer,
     required this.provider,
     required this.service,
@@ -325,6 +329,8 @@ class CustomerBookingNotification {
       title: json['title'] as String? ?? '',
       acceptedAt: json['accepted_at'] as String?,
       rejectedAt: json['rejected_at'] as String?,
+      bookingDate: json['booking_date'] as String?,
+      startTime: json['start_time'] as String?,
       customer: CustomerBookingCustomer.fromJson(
         json['customer'] as Map<String, dynamic>? ?? {},
       ),
@@ -347,6 +353,8 @@ class CustomerBookingNotification {
       'title': title,
       'accepted_at': acceptedAt,
       'rejected_at': rejectedAt,
+      'booking_date': bookingDate,
+      'start_time': startTime,
       'customer': customer.toJson(),
       'provider': provider.toJson(),
       'service': service.toJson(),
@@ -403,9 +411,7 @@ class CustomerBookingProviderInfo {
     this.totalReviews = 0,
   });
 
-  factory CustomerBookingProviderInfo.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory CustomerBookingProviderInfo.fromJson(Map<String, dynamic> json) {
     return CustomerBookingProviderInfo(
       id: json['id'] as int? ?? 0,
       fullName: json['full_name'] as String? ?? '',

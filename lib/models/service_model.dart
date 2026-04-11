@@ -436,8 +436,11 @@ class ServiceModel {
       apiId: apiId,
       providerId: json['provider_id'] as int? ?? 0,
       // Get provider_user_id from nested provider object (from customer-services endpoint)
-      providerUserId: (json['provider'] as Map<String, dynamic>?)?['provider_user_id'] as String? 
-          ?? json['provider_user_id'] as String?, // Fallback to top-level if available
+      providerUserId:
+          (json['provider'] as Map<String, dynamic>?)?['provider_user_id']
+              as String? ??
+          json['provider_user_id']
+              as String?, // Fallback to top-level if available
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       serviceTypeName: json['service_type_name'] as String? ?? '',
@@ -457,8 +460,16 @@ class ServiceModel {
       approvalStatus: json['approval_status'] as String? ?? 'pending',
       isFeatured: json['is_featured'] as bool? ?? false,
       isDeleted: json['is_deleted'] as bool? ?? false,
-      averageRating: json['average_rating'] as String? ?? '0.00',
-      totalReviews: json['total_reviews'] as int? ?? 0,
+      averageRating:
+          json['average_rating'] as String? ??
+          (json['provider'] as Map<String, dynamic>?)?['average_rating']
+              as String? ??
+          '0.00',
+      totalReviews:
+          json['total_reviews'] as int? ??
+          (json['provider'] as Map<String, dynamic>?)?['total_reviews']
+              as int? ??
+          0,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),

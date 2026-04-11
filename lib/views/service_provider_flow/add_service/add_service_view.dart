@@ -96,6 +96,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     value: controller.selectedCategory.value,
                     labelText: 'selectServiceType'.tr,
                     hintText: 'selectServiceType'.tr,
+                    enabled: !widget.isEdit,
                     items: ServiceCategory.values.map((category) {
                       return DropdownMenuItem(
                         value: category,
@@ -143,6 +144,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                         : null,
                     labelText: 'whatIsYourRole'.tr,
                     hintText: 'selectRole'.tr,
+                    enabled: !widget.isEdit,
                     items: controller.availableRoleOptions.map((role) {
                       return DropdownMenuItem(
                         value: role,
@@ -171,11 +173,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                     selectedItems: controller.selectedServiceAsItems,
                     label: 'serviceAs'.tr,
                     hintText: 'selectServiceAs'.tr,
+                    enabled: !widget.isEdit,
                     itemBuilder: (serviceAs) => serviceAs.label,
                     onSelected: (item) {
                       controller.toggleServiceAs(item);
-                      // Reset sub-options if the base service changed significantly
-                      // controller.selectedSubOptions.clear();
                     },
                     onRemoved: (item) => controller.removeServiceAs(item),
                     onAddPressed: controller.addCustomServiceAsDirectly,
@@ -202,7 +203,8 @@ class _AddServiceViewState extends State<AddServiceView> {
                       selectedItems: controller.selectedSubOptionsItems,
                       label: 'selectOptions'.tr,
                       hintText:
-                          'selectOptions'.tr, // Using same key as label for now
+                          'selectOptions'.tr,
+                      enabled: !widget.isEdit,
                       itemBuilder: (option) => option.label,
                       onSelected: (item) =>
                           controller.toggleSubOptionItem(item),

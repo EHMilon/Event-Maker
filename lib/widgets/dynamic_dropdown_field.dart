@@ -16,6 +16,7 @@ class DynamicDropdownField<T> extends StatefulWidget {
   final TextEditingController addController;
   final VoidCallback onSaveAdd;
   final VoidCallback onCancelAdd;
+  final bool enabled;
 
   const DynamicDropdownField({
     super.key,
@@ -31,6 +32,7 @@ class DynamicDropdownField<T> extends StatefulWidget {
     required this.addController,
     required this.onSaveAdd,
     required this.onCancelAdd,
+    this.enabled = true,
   });
 
   @override
@@ -43,6 +45,7 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
   OverlayEntry? _overlayEntry;
 
   void _toggleDropdown() {
+    if (!widget.enabled) return;
     if (_isExpanded) {
       _closeDropdown();
     } else {

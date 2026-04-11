@@ -35,6 +35,7 @@ class VendorServiceModel {
 class VendorReviewModel {
   final int id;
   final String customerName;
+  final String avatar;
   final int rating;
   final String comment;
   final String createdAt;
@@ -42,6 +43,7 @@ class VendorReviewModel {
   VendorReviewModel({
     required this.id,
     required this.customerName,
+    required this.avatar,
     required this.rating,
     required this.comment,
     required this.createdAt,
@@ -51,6 +53,7 @@ class VendorReviewModel {
     return VendorReviewModel(
       id: json['id'] as int? ?? 0,
       customerName: json['customer_name'] as String? ?? '',
+      avatar: json['avatar'] as String? ?? '',
       rating: json['rating'] as int? ?? 0,
       comment: json['comment'] as String? ?? '',
       createdAt: json['created_at'] as String? ?? '',
@@ -135,7 +138,7 @@ class VendorProfileModel {
         .map(
           (r) => ReviewModel(
             userName: r.customerName,
-            userImageUrl: '',
+            userImageUrl: r.avatar,
             date: r.createdAt,
             rating: r.rating.toDouble(),
             reviewText: r.comment,
@@ -148,7 +151,9 @@ class VendorProfileModel {
 
     // Parse id as String (UUID) - it's used for chat API which expects UUID
     final idValue = json['id'];
-    final userId = idValue is String ? idValue : (idValue is int ? idValue.toString() : '');
+    final userId = idValue is String
+        ? idValue
+        : (idValue is int ? idValue.toString() : '');
 
     return VendorProfileModel(
       id: userId,

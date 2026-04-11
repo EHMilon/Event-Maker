@@ -58,11 +58,9 @@ class ReviewCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18.r,
-                backgroundImage: review.userImageUrl.startsWith('http')
+                backgroundImage: review.userImageUrl.isNotEmpty
                     ? NetworkImage(review.userImageUrl)
-                    : (review.userImageUrl.isEmpty
-                        ? null
-                        : AssetImage(review.userImageUrl) as ImageProvider),
+                    : null,
                 child: review.userImageUrl.isEmpty
                     ? Icon(Icons.person, size: 18.r, color: AppColors.grey)
                     : null,
@@ -79,6 +77,8 @@ class ReviewCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Row(
                       children: List.generate(5, (index) {
@@ -112,7 +112,7 @@ class ReviewCard extends StatelessWidget {
               color: AppColors.textSecondary,
               height: 1.4,
             ),
-            maxLines: 3,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ],

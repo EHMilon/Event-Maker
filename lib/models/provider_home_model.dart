@@ -153,6 +153,7 @@ class ActiveBooking {
   final String serviceImage;
   final String customerName;
   final String customerEmail;
+  final String? customerAvatar;
   final String bookingDate;
   final String startTime;
   final String endTime;
@@ -172,6 +173,7 @@ class ActiveBooking {
     required this.serviceImage,
     required this.customerName,
     required this.customerEmail,
+    required this.customerAvatar,
     required this.bookingDate,
     required this.startTime,
     required this.endTime,
@@ -193,6 +195,7 @@ class ActiveBooking {
       serviceImage: json['service_image'] as String? ?? '',
       customerName: json['customer_name'] as String? ?? '',
       customerEmail: json['customer_email'] as String? ?? '',
+      customerAvatar: json['customer_avatar'] as String? ?? '',
       bookingDate: json['booking_date'] as String? ?? '',
       startTime: json['start_time'] as String? ?? '',
       endTime: json['end_time'] as String? ?? '',
@@ -238,7 +241,8 @@ class ServiceOrderGroup {
       serviceTitle: json['service_title'] as String? ?? '',
       totalBookings: json['total_bookings'] as int? ?? 0,
       serviceImage: json['service_image'] as String? ?? '',
-      bookings: (json['bookings'] as List<dynamic>?)
+      bookings:
+          (json['bookings'] as List<dynamic>?)
               ?.map((e) => ActiveBooking.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -251,16 +255,16 @@ class ActiveOrders {
   final int total;
   final List<ServiceOrderGroup> results;
 
-  ActiveOrders({
-    required this.total,
-    required this.results,
-  });
+  ActiveOrders({required this.total, required this.results});
 
   factory ActiveOrders.fromJson(Map<String, dynamic> json) {
     return ActiveOrders(
       total: json['total'] as int? ?? 0,
-      results: (json['results'] as List<dynamic>?)
-              ?.map((e) => ServiceOrderGroup.fromJson(e as Map<String, dynamic>))
+      results:
+          (json['results'] as List<dynamic>?)
+              ?.map(
+                (e) => ServiceOrderGroup.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );
@@ -301,10 +305,18 @@ class ProviderHomeData {
   /// Empty instance for initialization
   factory ProviderHomeData.empty() {
     return ProviderHomeData(
-      thisMonthEarning: ThisMonthEarning(amount: '0', currency: 'AED', growthPercent: 0),
+      thisMonthEarning: ThisMonthEarning(
+        amount: '0',
+        currency: 'AED',
+        growthPercent: 0,
+      ),
       analytics: ProviderAnalytics(
         basedOn: 'last_30_days',
-        totalEarnings: AnalyticsStat(value: '0', currency: 'AED', growthPercent: 0),
+        totalEarnings: AnalyticsStat(
+          value: '0',
+          currency: 'AED',
+          growthPercent: 0,
+        ),
         totalRequests: AnalyticsStat(value: 0, growthPercent: 0),
         completed: AnalyticsStat(value: 0, growthPercent: 0),
         pending: AnalyticsStat(value: 0, growthPercent: 0),

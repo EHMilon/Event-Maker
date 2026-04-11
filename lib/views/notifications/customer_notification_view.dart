@@ -12,11 +12,12 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // Refresh notifications when navigating back from payment/accept/reject
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
         controller.refreshNotifications();
-        return true;
+        Get.back();
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -41,29 +42,40 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
           ),
         ),
         body: Obx(
-        () => Skeletonizer(
-          enabled: controller.isLoading.value,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: ListView.builder(
-              padding: EdgeInsets.only(top: 16.h, bottom: 20.h),
-              itemCount: controller.isLoading.value
-                  ? 6
-                  : controller.notifications.length,
-              itemBuilder: (context, index) {
-                if (controller.isLoading.value) {
-                  return const _NotificationCardPlaceholder();
-                }
-                final notification = controller.notifications[index];
-                return _CustomerNotificationCard(
-                  notification: notification,
-                  onTap: () => controller.handleNotificationClick(notification),
-                );
-              },
-            ),
+          () => Skeletonizer(
+            enabled: controller.isLoading.value && controller.notifications.isEmpty,
+            child: controller.isLoading.value && controller.notifications.isEmpty
+                ? _buildLoadingList()
+                : RefreshIndicator(
+                    onRefresh: controller.refreshNotifications,
+                    color: Get.theme.colorScheme.primary,
+                    child: ListView.builder(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                      itemCount: controller.notifications.isEmpty ? 0 : controller.notifications.length,
+                      itemBuilder: (context, index) {
+                        if (controller.isLoading.value && index < controller.notifications.length) {
+                          return const _NotificationCardPlaceholder();
+                        }
+                        final notification = controller.notifications[index];
+                        return _CustomerNotificationCard(
+                          notification: notification,
+                          onTap: () => controller.handleNotificationClick(notification),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ),
-      ),)
+      ),
+    );
+  }
+
+  Widget _buildLoadingList() {
+    return ListView.separated(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      itemCount: 6,
+      separatorBuilder: (_, _) => SizedBox(height: 12.h),
+      itemBuilder: (_, _) => const _NotificationCardPlaceholder(),
     );
   }
 }

@@ -178,16 +178,22 @@ class SPServiceOrdersView extends StatelessWidget {
                       CircleAvatar(
                         radius: 14.r,
                         backgroundColor: AppColors.primary.withOpacity(0.2),
-                        child: Text(
-                          booking.customerName.isNotEmpty
-                              ? booking.customerName[0].toUpperCase()
-                              : '?',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
-                        ),
+                        backgroundImage:
+                            (booking.customerAvatar?.isNotEmpty ?? false)
+                            ? NetworkImage(booking.customerAvatar!)
+                            : null,
+                        child: (booking.customerAvatar?.isEmpty ?? true)
+                            ? Text(
+                                booking.customerName.isNotEmpty
+                                    ? booking.customerName[0].toUpperCase()
+                                    : '?',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              )
+                            : null,
                       ),
                       SizedBox(width: 8.w),
                       Expanded(
@@ -255,6 +261,7 @@ class SPServiceOrdersView extends StatelessWidget {
       () => ServiceDetailView(
         service: serviceModel,
         isRequest: true,
+        isOrder: true,
         bookingId: booking.id,
       ),
     );

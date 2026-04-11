@@ -7,6 +7,7 @@ import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/services/booking_request_repository.dart';
 import 'package:event_maker/views/profile/vendor_profile.dart';
+import 'package:event_maker/views/service_provider_flow/home/sp_home_controller.dart';
 import 'package:event_maker/widgets/primary_text_button.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_service_view.dart';
 import 'package:event_maker/views/service_provider_flow/add_service/add_screens_binding.dart';
@@ -27,6 +28,7 @@ class ServiceDetailView extends StatelessWidget {
     this.isRequest = false,
     this.isOrder = false,
     this.isPastRequest = false,
+    this.isPendingRequest = false,
     bool? hideActionButtons,
     this.bookingId,
   }) : hideActionButtons = hideActionButtons ?? false;
@@ -34,6 +36,7 @@ class ServiceDetailView extends StatelessWidget {
   final bool isOrder;
   final bool isRequest;
   final bool isPastRequest;
+  final bool isPendingRequest;
   final ServiceModel service;
   final bool showEditButton;
   final bool hideActionButtons;
@@ -139,43 +142,44 @@ class ServiceDetailView extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AppCustomDialog(
+      builder: (dialogContext) => AppCustomDialog(
         iconPath: 'assets/images/accept.svg',
         title: 'Are you sure you want to complete the service?',
         mainButtonText: 'yes'.tr,
         mainButtonCallback: () async {
-          Get.back(); // Close dialog
-          await _markBookingAsCompleted(bookingId!);
+          // Close dialog
+          Navigator.of(dialogContext).pop();
+
+          // Call API
+          final repository = BookingRequestRepository();
+          final response = await repository.markBookingAsCompleted(bookingId!);
+          final success = response['success'] as bool? ?? false;
+
+          if (success) {
+            // Navigate back to active orders
+            Get.back(); // Go back from ServiceDetailView
+            Get.back(); // Go back from service orders to active orders
+
+            // Refresh data
+            if (Get.isRegistered<SPHomeController>()) {
+              await Get.find<SPHomeController>().refreshData();
+            }
+
+            // Show success message
+            Get.snackbar(
+              'success'.tr,
+              'Service marked as completed successfully',
+            );
+          } else {
+            final message =
+                response['message'] as String? ?? 'Failed to complete service';
+            Get.snackbar('error'.tr, message);
+          }
         },
         secondaryButtonText: 'no'.tr,
-        secondaryButtonCallback: () => Get.back(),
+        secondaryButtonCallback: () => Navigator.of(dialogContext).pop(),
       ),
     );
-  }
-
-  /// Marks a booking as completed via API
-  Future<void> _markBookingAsCompleted(int bookingId) async {
-    try {
-      final repository = BookingRequestRepository();
-      final response = await repository.markBookingAsCompleted(bookingId);
-
-      final success = response['success'] as bool? ?? false;
-
-      if (success) {
-        Get.snackbar(
-          'success'.tr,
-          'Service marked as completed successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        Get.back(); // Go back to list
-      } else {
-        final message =
-            response['message'] as String? ?? 'Failed to complete service';
-        Get.snackbar('error'.tr, message);
-      }
-    } catch (e) {
-      Get.snackbar('error'.tr, 'Failed to complete service: $e');
-    }
   }
 
   @override
@@ -192,10 +196,16 @@ class ServiceDetailView extends StatelessWidget {
         bookingId: bookingId!,
         service: service,
         isPastRequest: isPastRequest,
-        // If isOrder=true (from active orders), hide accept/reject and show mark as complete
-        showAcceptReject: !isOrder,
-        onAccept: isOrder ? null : () => _showAcceptDialog(context, bookingId!),
-        onReject: isOrder ? null : () => _showRejectDialog(context, bookingId!),
+        isOrder: isOrder,
+        isPendingRequest: isPendingRequest,
+        // Show accept/reject only for pending requests (from notifications)
+        showAcceptReject: isPendingRequest,
+        onAccept: isPendingRequest
+            ? () => _showAcceptDialog(context, bookingId!)
+            : null,
+        onReject: isPendingRequest
+            ? () => _showRejectDialog(context, bookingId!)
+            : null,
         onMarkComplete: isOrder
             ? () => _showMarkAsCompleteDialog(context)
             : null,
@@ -1027,7 +1037,8 @@ class ServiceDetailView extends StatelessWidget {
                 ? firstAvailability.address
                 : service.displayLocation,
             'latitude': double.tryParse(firstAvailability.latitude) ?? 24.4539,
-            'longitude': double.tryParse(firstAvailability.longitude) ?? 54.3773,
+            'longitude':
+                double.tryParse(firstAvailability.longitude) ?? 54.3773,
             'cover_image': service.coverImage,
             'provider_id': service.providerId,
             'provider_name': service.provider.name,
@@ -1105,6 +1116,8 @@ class _BookingRequestDetailView extends StatefulWidget {
   final int bookingId;
   final ServiceModel service;
   final bool isPastRequest;
+  final bool isOrder;
+  final bool isPendingRequest;
   final bool showAcceptReject;
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
@@ -1114,7 +1127,9 @@ class _BookingRequestDetailView extends StatefulWidget {
     required this.bookingId,
     required this.service,
     required this.isPastRequest,
-    this.showAcceptReject = true,
+    required this.isOrder,
+    required this.isPendingRequest,
+    this.showAcceptReject = false,
     this.onAccept,
     this.onReject,
     this.onMarkComplete,
@@ -1676,8 +1691,8 @@ class _BookingRequestDetailViewDetailState
           ),
         ),
 
-        // Bottom Buttons - only for upcoming requests (not past)
-        if (!widget.isPastRequest)
+        // Bottom Buttons - show for orders (mark as complete) OR pending requests (accept/reject)
+        if (widget.isOrder || widget.isPendingRequest)
           Positioned(
             bottom: 30.h,
             left: 24.w,

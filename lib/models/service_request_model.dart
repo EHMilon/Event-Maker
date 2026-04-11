@@ -67,9 +67,9 @@ class ServiceRequestModel {
       'description': description,
       'service_type_name': serviceTypeName,
       'role_name': roleName,
-      'service_as_name': ?serviceAsName,
-      'event_vanue': ?eventVenue,
-      'options': ?options,
+      if (serviceAsName != null && serviceAsName!.isNotEmpty) 'service_as_name': serviceAsName!,
+      if (eventVenue != null && eventVenue!.isNotEmpty) 'event_vanue': eventVenue!,
+      if (options != null && options!.isNotEmpty) 'options': options!,
       if (attendanceCapacity != null)
         'attendance_capacity': attendanceCapacity.toString(),
       'can_go_outside_location': canGoOutsideLocation.toString(),

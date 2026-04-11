@@ -12,6 +12,49 @@ import 'package:get/get.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class _TabListener extends StatefulWidget {
+  final Widget child;
+  final CustomerBookingsController controller;
+
+  const _TabListener({required this.child, required this.controller});
+
+  @override
+  State<_TabListener> createState() => _TabListenerState();
+}
+
+class _TabListenerState extends State<_TabListener> {
+  int _previousIndex = 0;
+  TabController? _tabController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = DefaultTabController.of(context);
+    if (_tabController != controller) {
+      _tabController?.removeListener(_onTabChanged);
+      _tabController = controller;
+      _previousIndex = _tabController!.index;
+      _tabController!.addListener(_onTabChanged);
+    }
+  }
+
+  void _onTabChanged() {
+    if (_tabController != null && _tabController!.index != _previousIndex) {
+      _previousIndex = _tabController!.index;
+      widget.controller.selectedTabIndex.value = _tabController!.index;
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 class CustomerBookingView extends GetView<CustomerBookingsController> {
   const CustomerBookingView({super.key});
 
@@ -19,58 +62,61 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.white,
-        appBar: AppBar(
+      child: _TabListener(
+        controller: controller,
+        child: Scaffold(
           backgroundColor: AppColors.white,
-          elevation: 0,
-          titleSpacing: 24.w,
-          title: Text(
-            'bookings'.tr,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
+          appBar: AppBar(
+            backgroundColor: AppColors.white,
+            elevation: 0,
+            titleSpacing: 24.w,
+            title: Text(
+              'bookings'.tr,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(40.h),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: TabBar(
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  dividerColor: Colors.transparent,
-                  indicator: const BoxDecoration(),
-                  splashFactory: NoSplash.splashFactory,
-                  overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  indicatorPadding: EdgeInsets.zero,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelPadding: EdgeInsets.only(right: 8.w),
-                  labelColor: AppColors.textPrimary,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(40.h),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    dividerColor: Colors.transparent,
+                    indicator: const BoxDecoration(),
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    indicatorPadding: EdgeInsets.zero,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelPadding: EdgeInsets.only(right: 8.w),
+                    labelColor: AppColors.textPrimary,
+                    unselectedLabelColor: AppColors.textSecondary,
+                    labelStyle: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    onTap: (index) => controller.selectedTabIndex.value = index,
+                    tabs: [
+                      _buildTab('upcoming'.tr, 0),
+                      _buildTab('history'.tr, 1),
+                    ],
                   ),
-                  unselectedLabelStyle: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  onTap: (index) => controller.selectedTabIndex.value = index,
-                  tabs: [
-                    _buildTab('upcoming'.tr, 0),
-                    _buildTab('history'.tr, 1),
-                  ],
                 ),
               ),
             ),
           ),
-        ),
-        body: TabBarView(
-          children: [_UpcomingRequestsTab(), _HistoryRequestsTab()],
+          body: TabBarView(
+            children: [_UpcomingRequestsTab(), _HistoryRequestsTab()],
+          ),
         ),
       ),
     );
@@ -102,39 +148,43 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
 class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return Skeletonizer(
-            enabled: true,
-            child: ListView.separated(
-              itemCount: controller.skeletonRequests.length,
-              separatorBuilder: (context, index) => SizedBox(height: 8.h),
-              itemBuilder: (context, index) {
-                final item = controller.skeletonRequests[index];
-                return _RequestCard(request: item);
-              },
-            ),
-          );
-        }
+    return RefreshIndicator(
+      onRefresh: () => controller.refreshBookings(),
+      color: AppColors.primary,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return Skeletonizer(
+              enabled: true,
+              child: ListView.separated(
+                itemCount: controller.skeletonRequests.length,
+                separatorBuilder: (context, index) => SizedBox(height: 8.h),
+                itemBuilder: (context, index) {
+                  final item = controller.skeletonRequests[index];
+                  return _RequestCard(request: item);
+                },
+              ),
+            );
+          }
 
-        final list = controller.upcomingRequests;
-        if (list.isEmpty) {
-          return EmptyWidget(
-            message: 'noUpcomingRequests'.tr,
-            icon: Icons.event_available,
+          final list = controller.upcomingRequests;
+          if (list.isEmpty) {
+            return EmptyWidget(
+              message: 'noUpcomingRequests'.tr,
+              icon: Icons.event_available,
+            );
+          }
+          return ListView.separated(
+            itemCount: list.length,
+            separatorBuilder: (context, index) => SizedBox(height: 8.h),
+            itemBuilder: (context, index) {
+              final item = list[index];
+              return _RequestCard(request: item);
+            },
           );
-        }
-        return ListView.separated(
-          itemCount: list.length,
-          separatorBuilder: (context, index) => SizedBox(height: 8.h),
-          itemBuilder: (context, index) {
-            final item = list[index];
-            return _RequestCard(request: item);
-          },
-        );
-      }),
+        }),
+      ),
     );
   }
 }
@@ -143,39 +193,43 @@ class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
 class _HistoryRequestsTab extends GetView<CustomerBookingsController> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      child: Obx(() {
-        if (controller.isLoading.value) {
-          return Skeletonizer(
-            enabled: true,
-            child: ListView.separated(
-              itemCount: controller.skeletonRequests.length,
-              separatorBuilder: (context, index) => SizedBox(height: 8.h),
-              itemBuilder: (context, index) {
-                final item = controller.skeletonRequests[index];
-                return _RequestCard(request: item);
-              },
-            ),
-          );
-        }
+    return RefreshIndicator(
+      onRefresh: () => controller.refreshBookings(),
+      color: AppColors.primary,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return Skeletonizer(
+              enabled: true,
+              child: ListView.separated(
+                itemCount: controller.skeletonRequests.length,
+                separatorBuilder: (context, index) => SizedBox(height: 8.h),
+                itemBuilder: (context, index) {
+                  final item = controller.skeletonRequests[index];
+                  return _RequestCard(request: item);
+                },
+              ),
+            );
+          }
 
-        final list = controller.pastRequests;
-        if (list.isEmpty) {
-          return EmptyWidget(
-            message: 'noHistoryRequests'.tr,
-            icon: Icons.event_available,
+          final list = controller.pastRequests;
+          if (list.isEmpty) {
+            return EmptyWidget(
+              message: 'noHistoryRequests'.tr,
+              icon: Icons.event_available,
+            );
+          }
+          return ListView.separated(
+            itemCount: list.length,
+            separatorBuilder: (context, index) => SizedBox(height: 8.h),
+            itemBuilder: (context, index) {
+              final item = list[index];
+              return _RequestCard(request: item);
+            },
           );
-        }
-        return ListView.separated(
-          itemCount: list.length,
-          separatorBuilder: (context, index) => SizedBox(height: 8.h),
-          itemBuilder: (context, index) {
-            final item = list[index];
-            return _RequestCard(request: item);
-          },
-        );
-      }),
+        }),
+      ),
     );
   }
 }

@@ -2,9 +2,11 @@ import 'package:event_maker/models/customer_booking_model.dart';
 import 'package:event_maker/services/customer_booking_repository.dart';
 import 'package:event_maker/services/api_exception.dart';
 import 'package:event_maker/utils/logger.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class CustomerBookingsController extends GetxController {
+class CustomerBookingsController extends GetxController
+    with WidgetsBindingObserver {
   final CustomerBookingRepository _repository = CustomerBookingRepository();
 
   final isLoading = true.obs;
@@ -17,7 +19,21 @@ class CustomerBookingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _loadData();
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -25,31 +41,33 @@ class CustomerBookingsController extends GetxController {
     errorMessage.value = null;
 
     // Show skeleton loading
-    skeletonRequests.assignAll(List.generate(
-      5,
-      (index) => CustomerBookingItem(
-        id: -1, // Use -1 to indicate skeleton placeholder
-        bookingDate: 'Skeleton Loading...',
-        startTime: '',
-        endTime: '',
-        servicesDuration: '',
-        title: 'Loading Title...',
-        location: 'Loading Location...',
-        subtotal: '0.00',
-        serviceFee: '0.00',
-        totalAmount: '0.00',
-        currency: 'AED',
-        status: 'pending',
-        paymentStatus: 'unpaid',
-        service: const CustomerBookingServiceInfo(
-          id: 0,
-          title: '',
-          coverImage: '',
+    skeletonRequests.assignAll(
+      List.generate(
+        5,
+        (index) => CustomerBookingItem(
+          id: -1, // Use -1 to indicate skeleton placeholder
+          bookingDate: 'Skeleton Loading...',
+          startTime: '',
+          endTime: '',
+          servicesDuration: '',
+          title: 'Loading Title...',
+          location: 'Loading Location...',
+          subtotal: '0.00',
+          serviceFee: '0.00',
+          totalAmount: '0.00',
+          currency: 'AED',
+          status: 'pending',
+          paymentStatus: 'unpaid',
+          service: const CustomerBookingServiceInfo(
+            id: 0,
+            title: '',
+            coverImage: '',
+          ),
+          createdAt: '',
+          updatedAt: '',
         ),
-        createdAt: '',
-        updatedAt: '',
       ),
-    ));
+    );
 
     // Fetch both upcoming and past bookings in parallel
     try {
@@ -69,7 +87,9 @@ class CustomerBookingsController extends GetxController {
         pastRequests.assignAll(pastResponse.data);
       }
 
-      Log.d('=======> CustomerBookingsController: Loaded ${upcomingRequests.length} upcoming, ${pastRequests.length} past bookings');
+      Log.d(
+        '=======> CustomerBookingsController: Loaded ${upcomingRequests.length} upcoming, ${pastRequests.length} past bookings',
+      );
     } on ApiException catch (e) {
       errorMessage.value = e.message;
       Log.e('=======> CustomerBookingsController: ApiException: ${e.message}');
@@ -81,13 +101,21 @@ class CustomerBookingsController extends GetxController {
     }
   }
 
-  /// Refresh bookings data
+  /// Refresh bookings data (public method for pull-to-refresh)
   Future<void> refreshBookings() async {
     await _loadData();
   }
 
+  /// Reload data (alias for refreshBookings)
+  Future<void> reloadData() async {
+    await _loadData();
+  }
+
   /// Get combined list of all bookings
-  List<CustomerBookingItem> get currentRequests => [...upcomingRequests, ...pastRequests];
+  List<CustomerBookingItem> get currentRequests => [
+    ...upcomingRequests,
+    ...pastRequests,
+  ];
 
   /// Get bookings for the selected tab
   List<CustomerBookingItem> get selectedTabBookings =>

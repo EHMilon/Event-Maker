@@ -302,6 +302,7 @@ class _ServiceProviderProfileViewState extends State<ServiceProviderProfileView>
                         price: service.startingPrice,
                         rating: service.ratingValue.toString(),
                         isBookmarked: false,
+                        showBookmarkIcon: false,
                         onTap: () {},
                       );
                     },

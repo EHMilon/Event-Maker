@@ -32,13 +32,17 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
       body: SafeArea(
         child: Obx(
           () => Skeletonizer(
-            enabled: controller.isLoading.value,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20.h),
+            enabled: controller.isLoading.value && controller.allServices.isEmpty,
+            child: RefreshIndicator(
+              onRefresh: controller.refreshHomeData,
+              color: Get.theme.colorScheme.primary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20.h),
                   // Home Screen Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,17 +201,15 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                   ),
                   SizedBox(height: 18.h),
 
-                  // Service Categories
+// Service Categories
                   _buildSectionHeader(
                     'subCategoriesLabel'.tr,
                     'all',
                     'allCategories'.tr,
                     navigateToCategories: true,
                   ),
-                  // SizedBox(height: 16.h),
                   _buildCategories(),
                   SizedBox(height: 24.h),
-                  // Dynamic service groups from backend API (grouped by service_as_name)
                   ...controller.displayServiceGroups.expand(
                     (group) => [
                       _buildSectionHeader(
@@ -226,6 +228,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

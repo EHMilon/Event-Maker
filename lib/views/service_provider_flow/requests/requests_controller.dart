@@ -38,6 +38,15 @@ class RequestsController extends GetxController {
   void onInit() {
     super.onInit();
     fetchRequests();
+    ever(selectedTabIndex, _onTabChanged);
+  }
+
+  void _onTabChanged(int index) {
+    if (index == 0 && upcomingRequests.isEmpty) {
+      fetchUpcomingRequests();
+    } else if (index == 1 && pastRequests.isEmpty) {
+      fetchPastRequests();
+    }
   }
 
   /// Fetch both upcoming and past requests

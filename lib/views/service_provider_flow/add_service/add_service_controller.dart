@@ -5,6 +5,7 @@ import '../../../models/my_service_model.dart';
 import '../../../models/service_request_model.dart';
 import '../../../services/service_repository.dart';
 import '../../../services/api_exception.dart';
+import '../../../utils/logger.dart';
 import '../services/sp_services_controller.dart';
 import '../../../widgets/availability_widget_card.dart';
 
@@ -664,21 +665,87 @@ class AddServiceController extends GetxController {
         return false;
       }
 
+      // Validate at least one availability has days selected
+      final hasPrimaryAvailability = primaryAvailabilityCard.selectedDays.isNotEmpty;
+      final hasAdditionalAvailability = additionalAvailabilityCards.any((card) => card.selectedDays.isNotEmpty);
+      
+      if (!hasPrimaryAvailability && !hasAdditionalAvailability) {
+        Get.snackbar(
+          'Required',
+          'Please select at least one day for availability',
+          backgroundColor: Colors.red.withOpacity(0.1),
+          colorText: Colors.red,
+        );
+        isLoading.value = false;
+        return false;
+      }
+
       // TODO: Move repeated validation logic into form validator mixin when we modularize this flow further.
-      final attendanceText = attendanceCapacityController.text.trim();
-      int? attendanceValue;
-      if (showAttendanceCapacity && attendanceText.isNotEmpty) {
-        attendanceValue = int.tryParse(attendanceText);
-        if (attendanceValue == null || attendanceValue <= 0) {
-          Get.snackbar(
-            'Invalid Input',
-            'Attendance capacity must be a positive number',
-            backgroundColor: Colors.red.withOpacity(0.1),
-            colorText: Colors.red,
-          );
-          isLoading.value = false;
-          return false;
+      
+      // Get all field values early for validation and conditional logic
+      // Use serviceTypeName string to determine allowed fields - more reliable than category enum
+      final serviceTypeName = _getServiceTypeName(selectedServiceType.value);
+      final roleName = _getRoleName(selectedRole.value);
+      final serviceAsValue = selectedServiceAs.value;
+      
+      // Determine if this is an Event-type service based on service type name
+      final isEventType = serviceTypeName == 'Event';
+      
+      // Get service as name if selected
+      String? serviceAsName;
+      if (selectedServiceAsItems.isNotEmpty) {
+        final item = selectedServiceAsItems.first;
+        if (item is ServiceAs) {
+          serviceAsName = item.label;
+        } else if (item is String) {
+          serviceAsName = item;
         }
+      }
+
+      // Attendance capacity - only for Event and Trainer categories
+      int? attendanceValue;
+      if (showAttendanceCapacity) {
+        final attendanceText = attendanceCapacityController.text.trim();
+        if (attendanceText.isNotEmpty) {
+          attendanceValue = int.tryParse(attendanceText);
+          if (attendanceValue == null || attendanceValue <= 0) {
+            Get.snackbar(
+              'Invalid Input',
+              'Attendance capacity must be a positive number',
+              backgroundColor: Colors.red.withOpacity(0.1),
+              colorText: Colors.red,
+            );
+            isLoading.value = false;
+            return false;
+          }
+        }
+      }
+      
+      // Backend validation: attendance_capacity only for Event type
+      if (!isEventType && serviceTypeName != 'Professional Trainer') {
+        attendanceValue = null; // Don't send attendance for Hospitality
+      }
+
+      // Event venue - only for Event category
+      String? eventVenue;
+      if (showEventVenueDropdown) {
+        eventVenue = selectedEventVenue.value?.label;
+      }
+      
+      // Backend validation: event_vanue only for Event type
+      if (!isEventType) {
+        eventVenue = null;
+      }
+
+      // Sub options - only for Event + Business + specific ServiceAs
+      String? options;
+      if (showSubOptionsChecklist && selectedSubOptionsItems.isNotEmpty) {
+        options = _getSubOptionLabel(selectedSubOptionsItems.first);
+      }
+      
+      // Backend validation: options only for Event type
+      if (!isEventType) {
+        options = null;
       }
 
       // Validate Primary Availability Times
@@ -783,25 +850,44 @@ class AddServiceController extends GetxController {
         }
       }
 
-      // Get service type name for API
-      // Always use the currently selected service type (user can change it in edit mode)
-      final serviceTypeName = _getServiceTypeName(selectedServiceType.value);
+      // Get role name for API (already computed above)
+      // roleName is already available from line 688
 
-      // Get role name for API
-      final roleName = _getRoleName(selectedRole.value);
+      // Get service as name if selected (already computed above)
+      // serviceAsName is already available from line 699
 
-      // Get service as name if selected
-      String? serviceAsName;
-      if (selectedServiceAsItems.isNotEmpty) {
-        final item = selectedServiceAsItems.first;
-        if (item is ServiceAs) {
-          serviceAsName = item.label;
-        } else if (item is String) {
-          serviceAsName = item;
+      // Check for changes in edit mode
+      if (isEdit && existingService != null) {
+        final hasChanges = _hasServiceChanges(
+          existingService: existingService,
+          newTitle: titleController.text.trim(),
+          newDescription: descriptionController.text.trim(),
+          newServiceTypeName: serviceTypeName,
+          newRoleName: roleName,
+          newServiceAsName: serviceAsName,
+          newEventVenue: eventVenue, // Use pre-computed filtered value
+          newOptions: options, // Use pre-computed filtered value
+          newAttendanceCapacity: attendanceValue,
+          newCanGoOutsideLocation: primaryAvailabilityCard.canGoOutside.value,
+          newCannotGoOutsideLocation: primaryAvailabilityCard.cannotGoOutside.value,
+          newRequiresConfirmation: needsConfirmationBeforePayment.value,
+          newImagePath: selectedImagePath.value,
+        );
+
+        if (!hasChanges) {
+          Get.snackbar(
+            'No Changes',
+            'No changes detected to update',
+            backgroundColor: Colors.orange.withOpacity(0.1),
+            colorText: Colors.orange,
+          );
+          isLoading.value = false;
+          return false;
         }
       }
 
       // Build the request model
+      // Use pre-computed values that have been filtered based on category/role
       final request = ServiceRequestModel(
         id: existingService != null ? int.tryParse(existingService.id) : null,
         title: titleController.text.trim(),
@@ -809,11 +895,9 @@ class AddServiceController extends GetxController {
         serviceTypeName: serviceTypeName,
         roleName: roleName,
         serviceAsName: serviceAsName,
-        eventVenue: selectedEventVenue.value?.label,
-        options: selectedSubOptionsItems.isNotEmpty
-            ? _getSubOptionLabel(selectedSubOptionsItems.first)
-            : null,
-        attendanceCapacity: attendanceValue,
+        eventVenue: eventVenue, // Already filtered by category above
+        options: options, // Already filtered by category above
+        attendanceCapacity: attendanceValue, // Already filtered by category above
         packages: apiPackages,
         availabilities: apiAvailabilities,
         canGoOutsideLocation: primaryAvailabilityCard.canGoOutside.value,
@@ -826,6 +910,8 @@ class AddServiceController extends GetxController {
       // Call the API
       final repository = const ServiceRepository();
       ServiceModel savedService;
+
+      Log.d('=======> saveService - Request being sent: serviceTypeName=${request.serviceTypeName}, eventVenue=${request.eventVenue}');
 
       if (isEdit && existingService != null) {
         savedService = await repository.updateService(request);
@@ -858,13 +944,15 @@ class AddServiceController extends GetxController {
       );
       return true;
     } on ApiException catch (e) {
-          isLoading.value = false;
-          Get.snackbar('Error', e.message);
-          return false;
-        } catch (e) {
-          isLoading.value = false;
-          Get.snackbar('Error', 'Failed to save service: $e');
-          return false;
+      isLoading.value = false;
+      Log.e('=======> saveService - ApiException caught: ${e.message}');
+      Get.snackbar('Error', e.message);
+      return false;
+    } catch (e) {
+      isLoading.value = false;
+      Log.e('=======> saveService - Exception caught: $e');
+      Get.snackbar('Error', 'Failed to save service: $e');
+      return false;
     }
   }
 
@@ -1087,6 +1175,38 @@ bool _isValidTimeRange(TimeOfDay start, TimeOfDay end) {
   String _getWeekdayShort(int weekday) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[weekday - 1];
+  }
+
+  bool _hasServiceChanges({
+    required ServiceModel existingService,
+    required String newTitle,
+    required String newDescription,
+    required String newServiceTypeName,
+    required String newRoleName,
+    String? newServiceAsName,
+    String? newEventVenue,
+    String? newOptions,
+    int? newAttendanceCapacity,
+    required bool newCanGoOutsideLocation,
+    required bool newCannotGoOutsideLocation,
+    required bool newRequiresConfirmation,
+    String? newImagePath,
+  }) {
+    return newTitle != existingService.title ||
+        newDescription != existingService.description ||
+        newServiceTypeName != existingService.serviceTypeName ||
+        newRoleName != existingService.roleName ||
+        newServiceAsName != existingService.serviceAsName ||
+        newEventVenue != existingService.eventVenue ||
+        newOptions != existingService.options ||
+        newAttendanceCapacity != existingService.attendanceCapacity ||
+        newCanGoOutsideLocation != existingService.canGoOutsideLocation ||
+        newCannotGoOutsideLocation != existingService.canNotGoOutsideLocation ||
+        newRequiresConfirmation != existingService.requiresConfirmation ||
+        (newImagePath != null &&
+            newImagePath.isNotEmpty &&
+            !newImagePath.startsWith('/media/') &&
+            !newImagePath.startsWith('http'));
   }
 }
 

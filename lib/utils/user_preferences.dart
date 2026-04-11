@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../constants/api_constant.dart';
 
 class UserPreferences {
   static const String _userTypeKey = 'user_type';
@@ -170,7 +173,51 @@ class UserPreferences {
   }
   
   // ===== JWT Token Management =====
-  
+
+  /// Attempt to refresh the access token if expired
+  /// Returns true if token is valid (either not expired or successfully refreshed)
+  static Future<bool> refreshTokenIfNeeded() async {
+    final expired = await isTokenExpired();
+    if (!expired) {
+      return true;
+    }
+
+    final refreshToken = await getRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return false;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConstant.baseUrl}${ApiConstant.refreshToken}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'refresh_token': refreshToken}),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final body = jsonDecode(response.body);
+        final newAccessToken = body['access_token'] ?? body['accessToken'];
+        final newRefreshToken = body['refresh_token'] ?? body['refreshToken'];
+        final expiresIn = body['expires_in'] ?? body['expiresIn'] ?? 3600;
+
+        if (newAccessToken != null && newAccessToken.isNotEmpty) {
+          await saveTokens(
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken ?? refreshToken,
+            expiresIn: expiresIn is int ? expiresIn : int.tryParse(expiresIn.toString()) ?? 3600,
+          );
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Save JWT tokens after login/signup
   static Future<bool> saveTokens({
     required String accessToken,

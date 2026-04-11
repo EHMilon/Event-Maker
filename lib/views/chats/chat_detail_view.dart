@@ -163,7 +163,7 @@ class ChatDetailView extends StatelessWidget {
     required DateTime createdAt,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 20.h),
+      padding: EdgeInsets.only(bottom: 5.h),
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
@@ -180,7 +180,7 @@ class ChatDetailView extends StatelessWidget {
             border: Border.all(color: const Color(0xFFF2F2F2)),
             boxShadow: [
               BoxShadow(
-                color: const Color.fromARGB(51, 70, 70, 70),
+                color: const Color.fromARGB(36, 70, 70, 70),
                 blurRadius: 10,
                 offset: const Offset(0, 0),
               ),

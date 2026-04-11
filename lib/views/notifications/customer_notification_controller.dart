@@ -28,36 +28,33 @@ class CustomerNotificationController extends GetxController {
 
       // Map API response to local model
       notifications.assignAll(
-        response.data
-            .map(
-              (apiNotification) {
-                // Determine notification body based on accepted/rejected status
-                final bool isAccepted = apiNotification.acceptedAt != null;
-                final bool isRejected = apiNotification.rejectedAt != null;
-                
-                return CustomerNotificationModel(
-                  id: apiNotification.id.toString(),
-                  title: apiNotification.provider.fullName,
-                  body: isAccepted
-                      ? 'acceptedBookingBody'
-                      : (isRejected
-                            ? 'rejectedBookingBody'
-                            : 'pendingBookingBody'),
-                  timeAgo:
-                      apiNotification.acceptedAt ??
-                      apiNotification.rejectedAt ??
-                      '',
-                  isRead: isAccepted || isRejected,
-                  type: NotificationType.booking,
-                  serviceId: apiNotification.serviceId.toString(),
-                  providerId: apiNotification.providerId,
-                  bookingId: apiNotification.id,
-                                    // Get full URL for provider avatar from API
-                                    coverImage: ApiConstant.getFullMediaUrl(apiNotification.provider.avatar),
-                                  );
-              },
-            )
-            .toList(),
+        response.data.map((apiNotification) {
+          // Determine notification body based on accepted/rejected status
+          final bool isAccepted = apiNotification.acceptedAt != null;
+          final bool isRejected = apiNotification.rejectedAt != null;
+
+          return CustomerNotificationModel(
+            id: apiNotification.id.toString(),
+            title: apiNotification.provider.fullName,
+            body: isAccepted
+                ? 'acceptedBookingBody'
+                : (isRejected ? 'rejectedBookingBody' : 'pendingBookingBody'),
+            timeAgo:
+                apiNotification.acceptedAt ?? apiNotification.rejectedAt ?? '',
+            isRead: isAccepted || isRejected,
+            type: NotificationType.booking,
+            serviceId: apiNotification.serviceId.toString(),
+            providerId: apiNotification.providerId,
+            bookingId: apiNotification.id,
+            // Get full URL for provider avatar from API
+            coverImage: ApiConstant.getFullMediaUrl(
+              apiNotification.provider.avatar,
+            ),
+            // Include booking date and time from API response
+            bookingDate: apiNotification.bookingDate,
+            bookingTime: apiNotification.startTime,
+          );
+        }).toList(),
       );
 
       isLoading.value = false;
@@ -89,6 +86,8 @@ class CustomerNotificationController extends GetxController {
         providerId: notifications[index].providerId,
         bookingId: notifications[index].bookingId,
         coverImage: notifications[index].coverImage,
+        bookingDate: notifications[index].bookingDate,
+        bookingTime: notifications[index].bookingTime,
       );
     }
   }
@@ -102,11 +101,15 @@ class CustomerNotificationController extends GetxController {
     // Handle accepted bookings - navigate to payment with booking details
     if (notification.body == 'acceptedBookingBody' &&
         notification.bookingId != null) {
-      // Navigate to payment screen with the booking ID
+      // Navigate to payment screen with the booking ID and date/time info
       // The payment screen will fetch the booking details using the ID
       Get.toNamed(
         AppRoutes.payment,
-        arguments: {'booking_id': notification.bookingId},
+        arguments: {
+          'booking_id': notification.bookingId,
+          'booking_date': notification.bookingDate ?? '',
+          'booking_time': notification.bookingTime ?? '',
+        },
       );
     }
   }
@@ -123,6 +126,8 @@ class CustomerNotificationModel {
   final int? providerId;
   final int? bookingId;
   final String? coverImage;
+  final String? bookingDate;
+  final String? bookingTime;
 
   CustomerNotificationModel({
     required this.id,
@@ -135,6 +140,8 @@ class CustomerNotificationModel {
     this.providerId,
     this.bookingId,
     this.coverImage,
+    this.bookingDate,
+    this.bookingTime,
   });
 }
 

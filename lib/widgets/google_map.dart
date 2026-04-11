@@ -1159,7 +1159,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: surfaceColor,
+        color: Colors.grey,
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: SingleChildScrollView(
           child: Column(

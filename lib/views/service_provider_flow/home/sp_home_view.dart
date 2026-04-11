@@ -17,36 +17,49 @@ class SPHomeView extends GetView<SPHomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFE),
-      body: SafeArea(
-        child: Obx(() {
-          if (controller.hasError.value) {
-            return _buildErrorView();
-          }
-          return Skeletonizer(
-            enabled: controller.isLoading.value,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  SizedBox(height: 20.h),
-                  _buildPromoImage(),
-                  SizedBox(height: 25.h),
-                  _buildAnalyticsSection(),
-                  SizedBox(height: 30.h),
-                  _buildQuickActions(context),
-                  SizedBox(height: 30.h),
-                  _buildActiveOrdersHeader(),
-                  SizedBox(height: 15.h),
-                  _buildActiveOrdersList(),
-                ],
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        controller.fetchDashboardData();
+        Get.back();
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFBFBFE),
+        body: SafeArea(
+          child: Obx(() {
+            if (controller.hasError.value && controller.activeOrders.isEmpty) {
+              return _buildErrorView();
+            }
+            return Skeletonizer(
+              enabled: controller.isLoading.value && controller.activeOrders.isEmpty,
+              child: RefreshIndicator(
+                onRefresh: controller.refreshData,
+                color: Get.theme.colorScheme.primary,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      SizedBox(height: 20.h),
+                      _buildPromoImage(),
+                      SizedBox(height: 25.h),
+                      _buildAnalyticsSection(),
+                      SizedBox(height: 30.h),
+                      _buildQuickActions(context),
+                      SizedBox(height: 30.h),
+                      _buildActiveOrdersHeader(),
+                      SizedBox(height: 15.h),
+                      _buildActiveOrdersList(),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

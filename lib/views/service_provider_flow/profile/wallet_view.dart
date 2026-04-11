@@ -596,21 +596,25 @@ class WalletView extends GetView<ProfileController> {
                   children: [
                     // Booking code if available
                     if (transaction.bookingCode != null) ...[
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightGrey.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          transaction.bookingCode!,
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.lightGrey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            transaction.bookingCode!,
+                            style: GoogleFonts.inter(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),

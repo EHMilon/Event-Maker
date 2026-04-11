@@ -12,44 +12,66 @@ class NotificationView extends GetView<NotificationController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        controller.fetchNotifications();
+        Get.back();
+      },
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-        ),
-        titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
-        title: Text(
-          'Notification',
-          style: TextStyle(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-      ),
-      body: Obx(
-        () => Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: ListView.builder(
-            padding: EdgeInsets.only(top: 16.h, bottom: 20.h),
-            itemCount: controller.serviceRequests.length,
-            itemBuilder: (context, index) {
-              final request = controller.serviceRequests[index];
-              return NotificationCard(
-                name: _formatName(request.customerName),
-                action: _formatAction(request.status),
-                detail: 'booking request'.tr,
-                timeAgo: request.createdAt,
-                avatarAsset: request.customerImage ?? '', // Use customer image from API
-                onTap: () => _handleNotificationClick(request),
-              );
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            onPressed: () {
+              controller.fetchNotifications();
+              Get.back();
             },
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+          ),
+          titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
+          title: Text(
+            'Notification',
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
           ),
         ),
+        body: Obx(() {
+          if (controller.isLoading.value &&
+              controller.serviceRequests.isEmpty) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: Get.theme.colorScheme.primary,
+              ),
+            );
+          }
+          return RefreshIndicator(
+            onRefresh: controller.fetchNotifications,
+            color: Get.theme.colorScheme.primary,
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              itemCount: controller.serviceRequests.isEmpty
+                  ? 0
+                  : controller.serviceRequests.length,
+              itemBuilder: (context, index) {
+                final request = controller.serviceRequests[index];
+                return NotificationCard(
+                  name: _formatName(request.customerName),
+                  action: _formatAction(request.status),
+                  detail: 'booking request'.tr,
+                  timeAgo: request.createdAt,
+                  avatarAsset: request.customerImage,
+                  onTap: () => _handleNotificationClick(request),
+                );
+              },
+            ),
+          );
+        }),
       ),
     );
   }
@@ -58,13 +80,22 @@ class NotificationView extends GetView<NotificationController> {
     // Navigate with booking ID to fetch real data from API
     final bookingId = int.tryParse(request.id);
     if (bookingId != null) {
-      Get.to(() => ServiceDetailView(
-        service: _convertToServiceModel(request),
-        isRequest: true,
-        bookingId: bookingId,
-      ));
+      Get.to(
+        () => ServiceDetailView(
+          service: _convertToServiceModel(request),
+          isRequest: true,
+          isPendingRequest: true,
+          bookingId: bookingId,
+        ),
+      );
     } else {
-      Get.to(() => ServiceDetailView(service: _convertToServiceModel(request), isRequest: true));
+      Get.to(
+        () => ServiceDetailView(
+          service: _convertToServiceModel(request),
+          isRequest: true,
+          isPendingRequest: true,
+        ),
+      );
     }
   }
 
@@ -87,7 +118,7 @@ class NotificationView extends GetView<NotificationController> {
       date: request.date,
       basePrice: request.price,
       priceUnit: request.priceUnit,
-          packages: [],
+      packages: [],
       isBookmarked: false,
     );
   }

@@ -49,10 +49,26 @@ class SplashController extends GetxController {
       return;
     }
 
-    // User was logged in but token is expired/invalid - redirect to login
+    // User was logged in but token is expired/invalid - try to refresh first
     if (isLoggedIn && (!hasValidTokens || isTokenExpired)) {
-      Log.i("Token expired or invalid, redirecting to Login");
-      // Clear stale login state
+      Log.i("Token expired or invalid, attempting refresh...");
+
+      // Try to refresh the token before logging out
+      final refreshed = await UserPreferences.refreshTokenIfNeeded();
+
+      if (refreshed) {
+        Log.i("Token refreshed successfully, navigating to home");
+        final userType = await UserPreferences.getUserType();
+        if (userType == UserPreferences.USER_TYPE_SERVICE_PROVIDER) {
+          Get.offAllNamed(AppRoutes.serviceProviderHome);
+        } else {
+          Get.offAllNamed(AppRoutes.customerHome);
+        }
+        return;
+      }
+
+      // Refresh failed - clear stale login state and redirect to login
+      Log.i("Token refresh failed, redirecting to Login");
       await UserPreferences.setLoggedIn(false);
       final hasUserType = await UserPreferences.hasUserType();
 

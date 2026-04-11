@@ -348,14 +348,19 @@ class ServiceDetailDecisionView extends StatelessWidget {
                     color: AppColors.error,
                     borderRadius: BorderRadius.circular(12.r),
                     child: InkWell(
-                      onTap: () {
+                      onTap: () async {
                         // Reject the request
                         if (request?.id != null) {
                           final controller = Get.find<NotificationController>();
                           controller.rejectRequest(request.id);
                         }
-                        Navigator.of(dialogContext).pop(); // Close dialog
-                        Get.back(); // Go back to notification screen
+                        // Close dialog first
+                        Navigator.of(dialogContext).pop();
+                        // Then navigate back with a delay to ensure dialog is closed
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        if (context.mounted) {
+                          Get.back();
+                        }
                       },
                       borderRadius: BorderRadius.circular(12.r),
                       child: Container(
@@ -447,14 +452,19 @@ class ServiceDetailDecisionView extends StatelessWidget {
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12.r),
                     child: InkWell(
-                      onTap: () {
+                      onTap: () async {
                         // Accept the request
                         if (request?.id != null) {
                           final controller = Get.find<NotificationController>();
                           controller.acceptRequest(request.id);
                         }
-                        Navigator.of(dialogContext).pop(); // Close dialog
-                        Get.back(); // Go back to notification screen
+                        // Close dialog first
+                        Navigator.of(dialogContext).pop();
+                        // Then navigate back with a delay to ensure dialog is closed
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        if (context.mounted) {
+                          Get.back();
+                        }
                       },
                       borderRadius: BorderRadius.circular(12.r),
                       child: Container(

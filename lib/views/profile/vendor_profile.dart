@@ -205,6 +205,7 @@ class VendorProfileView extends StatelessWidget {
                                     price: service.startingPrice,
                                     rating: vendor.ratingAvg,
                                     isBookmarked: false,
+                                    showBookmarkIcon: false,
                                     onTap: () {
                                       // TODO: Navigate to service detail
                                       // Get.to(() => sp.ServiceDetailView(service: service));
@@ -273,22 +274,22 @@ class VendorProfileView extends StatelessWidget {
                         'vendorName': vendor.name,
                         'vendorLogo': vendor.avatar,
                         'providerId': vendor.id,
-                        'serviceId': vendor.services.isNotEmpty ? vendor.services.first.id : null,
+                        'serviceId': vendor.services.isNotEmpty
+                            ? vendor.services.first.id
+                            : null,
                       },
                     );
                   } else if (value == 'certification') {
                     Get.toNamed(
                       AppRoutes.viewCertificate,
-                      arguments: {
-                        'providerId': vendor.id,
-                      },
+                      arguments: {'providerId': vendor.id},
                     );
-                   } else if (value == 'report') {
-                     Get.toNamed(
-                       AppRoutes.spamReport,
-                       arguments: {'providerId': vendor.id},
-                     );
-                   }
+                  } else if (value == 'report') {
+                    Get.toNamed(
+                      AppRoutes.spamReport,
+                      arguments: {'providerId': vendor.id},
+                    );
+                  }
                 },
                 itemBuilder: (context) => [
                   PopupMenuItem(
@@ -321,9 +322,20 @@ class VendorProfileView extends StatelessWidget {
 
   /// Convert VendorReviewModel to ReviewData for ReviewCard widget
   ReviewData _toReviewData(VendorReviewModel review) {
+    // Build full image URL from relative path
+    String fullAvatarUrl = '';
+    if (review.avatar.isNotEmpty) {
+      if (review.avatar.startsWith('http://') ||
+          review.avatar.startsWith('https://')) {
+        fullAvatarUrl = review.avatar;
+      } else {
+        fullAvatarUrl = '${ApiConstant.mediaBaseUrl}${review.avatar}';
+      }
+    }
+
     return ReviewData(
       userName: review.customerName,
-      userImageUrl: '',
+      userImageUrl: fullAvatarUrl,
       date: review.createdAt,
       rating: review.rating.toDouble(),
       reviewText: review.comment,

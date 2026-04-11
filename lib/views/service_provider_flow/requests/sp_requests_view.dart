@@ -11,6 +11,49 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
+class _TabListener extends StatefulWidget {
+  final Widget child;
+  final RequestsController controller;
+
+  const _TabListener({required this.child, required this.controller});
+
+  @override
+  State<_TabListener> createState() => _TabListenerState();
+}
+
+class _TabListenerState extends State<_TabListener> {
+  int _previousIndex = 0;
+  TabController? _tabController;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final controller = DefaultTabController.of(context);
+    if (_tabController != controller) {
+      _tabController?.removeListener(_onTabChanged);
+      _tabController = controller;
+      _previousIndex = _tabController!.index;
+      _tabController!.addListener(_onTabChanged);
+    }
+  }
+
+  void _onTabChanged() {
+    if (_tabController != null && _tabController!.index != _previousIndex) {
+      _previousIndex = _tabController!.index;
+      widget.controller.selectedTabIndex.value = _tabController!.index;
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController?.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 class SPRequestsView extends GetView<RequestsController> {
   const SPRequestsView({super.key});
 
@@ -18,58 +61,61 @@ class SPRequestsView extends GetView<RequestsController> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.white,
-        appBar: AppBar(
+      child: _TabListener(
+        controller: controller,
+        child: Scaffold(
           backgroundColor: AppColors.white,
-          elevation: 0,
-          titleSpacing: 24.w,
-          title: Text(
-            'requests'.tr,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+          appBar: AppBar(
+            backgroundColor: AppColors.white,
+            elevation: 0,
+            titleSpacing: 24.w,
+            title: Text(
+              'requests'.tr,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(40.h),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: TabBar(
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  dividerColor: Colors.transparent,
-                  indicator: const BoxDecoration(),
-                  splashFactory: NoSplash.splashFactory,
-                  overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  indicatorPadding: EdgeInsets.zero,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  labelPadding: EdgeInsets.only(right: 8.w),
-                  labelColor: AppColors.textPrimary,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(40.h),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: TabBar(
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    dividerColor: Colors.transparent,
+                    indicator: const BoxDecoration(),
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    indicatorPadding: EdgeInsets.zero,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelPadding: EdgeInsets.only(right: 8.w),
+                    labelColor: AppColors.textPrimary,
+                    unselectedLabelColor: AppColors.textSecondary,
+                    labelStyle: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    unselectedLabelStyle: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    onTap: (index) => controller.selectedTabIndex.value = index,
+                    tabs: [
+                      _buildTab('upcoming'.tr, 0),
+                      _buildTab('pastEvents'.tr, 1),
+                    ],
                   ),
-                  unselectedLabelStyle: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  onTap: (index) => controller.selectedTabIndex.value = index,
-                  tabs: [
-                    _buildTab('upcoming'.tr, 0),
-                    _buildTab('pastEvents'.tr, 1),
-                  ],
                 ),
               ),
             ),
           ),
-        ),
-        body: TabBarView(
-          children: [_UpcomingRequestsTab(), _PastRequestsTab()],
+          body: TabBarView(
+            children: [_UpcomingRequestsTab(), _PastRequestsTab()],
+          ),
         ),
       ),
     );
