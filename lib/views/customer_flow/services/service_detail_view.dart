@@ -412,13 +412,6 @@ class ServiceDetailView extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: Color(0xFFE6E8FF),
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(0.2),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
                                 ),
                                 padding: EdgeInsets.all(10.r),
                                 child: SvgPicture.asset(

@@ -32,7 +32,8 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
       body: SafeArea(
         child: Obx(
           () => Skeletonizer(
-            enabled: controller.isLoading.value && controller.allServices.isEmpty,
+            enabled:
+                controller.isLoading.value && controller.allServices.isEmpty,
             child: RefreshIndicator(
               onRefresh: controller.refreshHomeData,
               color: Get.theme.colorScheme.primary,
@@ -43,192 +44,196 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 20.h),
-                  // Home Screen Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Row(
-                          children: [
-                            // Avatar - uses API endpoint: GET /settings/personal-info/me -> avatar field
-                            _buildAvatar(controller.userAvatar),
-                            SizedBox(width: 12.w),
-                            // Location and greeting section
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Hi, ${controller.userName}!',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.black,
+                    // Home Screen Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Row(
+                            children: [
+                              // Avatar - uses API endpoint: GET /settings/personal-info/me -> avatar field
+                              _buildAvatar(controller.userAvatar),
+                              SizedBox(width: 12.w),
+                              // Location and greeting section
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Hi, ${controller.userName}!',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.black,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                  // SizedBox(height: 4.h),
-                                  Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                        'assets/icons/location.svg',
-                                        height: 16.h,
-                                        width: 16.w,
-                                      ),
-                                      SizedBox(width: 4.w),
-                                      Flexible(
-                                        child: Text(
-                                          controller.userLocation,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
+                                    // SizedBox(height: 4.h),
+                                    Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                          'assets/icons/location.svg',
+                                          height: 16.h,
+                                          width: 16.w,
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(width: 4.w),
+                                        Flexible(
+                                          child: Text(
+                                            controller.userLocation,
+                                            style: GoogleFonts.inter(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            // Search Icon
+                            GestureDetector(
+                              onTap: () {
+                                try {
+                                  Get.toNamed(AppRoutes.search);
+                                } catch (e) {
+                                  debugPrint('Navigation error: $e');
+                                }
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(10.r),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: SvgPicture.asset(
+                                  'assets/icons/search.svg',
+                                  height: 20.h,
+                                  colorFilter: const ColorFilter.mode(
+                                    AppColors.primary,
+                                    BlendMode.srcIn,
                                   ),
-                                ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            // Notification Icon
+                            GestureDetector(
+                              onTap: () =>
+                                  Get.toNamed(AppRoutes.customerNotifications),
+                              child: Container(
+                                padding: EdgeInsets.all(10.r),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: SvgPicture.asset(
+                                  'assets/icons/notification.svg',
+                                  height: 20.h,
+                                  colorFilter: const ColorFilter.mode(
+                                    AppColors.primary,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Row(
-                        children: [
-                          // Search Icon
-                          GestureDetector(
-                            onTap: () {
-                              try {
-                                Get.toNamed(AppRoutes.search);
-                              } catch (e) {
-                                debugPrint('Navigation error: $e');
-                              }
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(10.r),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: SvgPicture.asset(
-                                'assets/icons/search.svg',
-                                height: 20.h,
-                                colorFilter: const ColorFilter.mode(
-                                  AppColors.primary,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          // Notification Icon
-                          GestureDetector(
-                            onTap: () =>
-                                Get.toNamed(AppRoutes.customerNotifications),
-                            child: Container(
-                              padding: EdgeInsets.all(10.r),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: SvgPicture.asset(
-                                'assets/icons/notification.svg',
-                                height: 20.h,
-                                colorFilter: const ColorFilter.mode(
-                                  AppColors.primary,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  // Banner Image
-                  Container(
-                    width: double.infinity,
-                    height: 140.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/customer_banner.png'),
-                        fit: BoxFit.fill,
-                      ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 16.h),
-                  // Select Main Category
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    height: 40.h,
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: AppColors.lightGrey),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: controller.selectedMainCategory.value,
-                        isExpanded: true,
-                        icon: Icon(
-                          Icons.keyboard_arrow_down,
-                          color: AppColors.grey,
+                    SizedBox(height: 16.h),
+                    // Banner Image
+                    Container(
+                      width: double.infinity,
+                      height: 140.h,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.r),
+                        image: DecorationImage(
+                          image: AssetImage(
+                            'assets/images/customer_banner.png',
+                          ),
+                          fit: BoxFit.fill,
                         ),
-                        items: controller.mainCategories.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: GoogleFonts.inter(
-                                color: AppColors.black,
-                                fontSize: 14.sp,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            controller.setMainCategory(newValue);
-                          }
-                        },
                       ),
                     ),
-                  ),
-                  SizedBox(height: 18.h),
-
-// Service Categories
-                  _buildSectionHeader(
-                    'subCategoriesLabel'.tr,
-                    'all',
-                    'allCategories'.tr,
-                    navigateToCategories: true,
-                  ),
-                  _buildCategories(),
-                  SizedBox(height: 24.h),
-                  ...controller.displayServiceGroups.expand(
-                    (group) => [
-                      _buildSectionHeader(
-                        group.serviceAsName,
-                        controller.selectedMainCategory.value,
-                        group.serviceAsName,
+                    SizedBox(height: 16.h),
+                    // Select Main Category
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      height: 40.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(color: AppColors.lightGrey),
                       ),
-                      SizedBox(height: 16.h),
-                      _buildServiceGroupList(group),
-                      SizedBox(height: 24.h),
-                    ],
-                  ),
-                  SizedBox(height: 80.h),
-                ],
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: controller.selectedMainCategory.value,
+                          isExpanded: true,
+                          icon: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: AppColors.grey,
+                          ),
+                          items: controller.mainCategories.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: GoogleFonts.inter(
+                                  color: AppColors.black,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              controller.setMainCategory(newValue);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 18.h),
+
+                    // Service Categories
+                    _buildSectionHeader(
+                      'subCategoriesLabel'.tr,
+                      'all',
+                      'allCategories'.tr,
+                      navigateToCategories: true,
+                      showSeeAll: false,
+                    ),
+                    SizedBox(height: 12.h),
+                    _buildCategories(),
+                    SizedBox(height: 24.h),
+                    ...controller.displayServiceGroups.expand(
+                      (group) => [
+                        _buildSectionHeader(
+                          group.serviceAsName,
+                          controller.selectedMainCategory.value,
+                          group.serviceAsName,
+                        ),
+                        SizedBox(height: 16.h),
+                        _buildServiceGroupList(group),
+                        SizedBox(height: 24.h),
+                      ],
+                    ),
+                    SizedBox(height: 80.h),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -265,16 +270,18 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
     });
   }
 
-  /// Build section header with "See All" button
+  /// Build section header with optional "See All" button
   /// [title] - The section title
   /// [categoryType] - The category type for filtering services
   /// [categoryName] - The display name for the app bar in the next screen
   /// [navigateToCategories] - Whether to navigate to Categories screen or category services
+  /// [showSeeAll] - Whether to show the "See All" button (default: true)
   Widget _buildSectionHeader(
     String title,
     String categoryType,
     String categoryName, {
     bool navigateToCategories = false,
+    bool showSeeAll = true,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -287,7 +294,8 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
             color: AppColors.black,
           ),
         ),
-        TextButton(
+        if (showSeeAll)
+          TextButton(
           onPressed: () {
             if (navigateToCategories) {
               // Navigate to Categories screen
@@ -342,11 +350,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                 errorBuilder: (context, error, stackTrace) {
                   // Show initials fallback if image fails to load
                   return const Center(
-                    child: Icon(
-                      Icons.person,
-                      color: AppColors.grey,
-                      size: 20,
-                    ),
+                    child: Icon(Icons.person, color: AppColors.grey, size: 20),
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
@@ -357,11 +361,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                 },
               )
             : const Center(
-                child: Icon(
-                  Icons.person,
-                  color: AppColors.grey,
-                  size: 20,
-                ),
+                child: Icon(Icons.person, color: AppColors.grey, size: 20),
               ),
       ),
     );

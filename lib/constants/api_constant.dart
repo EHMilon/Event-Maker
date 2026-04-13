@@ -148,6 +148,10 @@ class ApiConstant {
   /// GET /services/my-bookmarked?page=1&page_size=10
   static const String myBookmarked = '/services/my-bookmarked';
 
+  /// Search customer services
+  /// GET /services/customer-services-search?search=decor
+  static const String customerServicesSearch = '/services/customer-services-search';
+
   // ===== BOOKING ENDPOINTS =====
 
   static const String bookings = '/bookings';

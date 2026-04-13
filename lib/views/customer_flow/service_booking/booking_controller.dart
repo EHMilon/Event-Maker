@@ -35,6 +35,9 @@ class BookingController extends GetxController {
   final RxList<String> months = <String>[].obs;
   final RxList<String> years = <String>[].obs;
 
+  // List of 15 consecutive dates starting from today
+  final RxList<DateTime> availableDates = <DateTime>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -73,6 +76,33 @@ class BookingController extends GetxController {
     // Initialize with empty defaults - will be populated when service is loaded
     selectedDuration.value = '';
     selectedLocation.value = '';
+    
+    // Generate 15 consecutive dates starting from today
+    _generateAvailableDates();
+  }
+
+  /// Generate 15 consecutive dates starting from today
+  void _generateAvailableDates() {
+    final dates = <DateTime>[];
+    for (int i = 0; i < 15; i++) {
+      dates.add(now.add(Duration(days: i)));
+    }
+    availableDates.assignAll(dates);
+  }
+
+  /// Get the selected date
+  DateTime get selectedDate {
+    if (availableDates.isEmpty || selectedDateIndex.value >= availableDates.length) {
+      return now;
+    }
+    return availableDates[selectedDateIndex.value];
+  }
+
+  /// Get day name abbreviation for a date
+  String getDayAbbrev(DateTime date) {
+    final weekDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    // weekday returns 1-7 (Monday = 1, Sunday = 7)
+    return weekDays[date.weekday - 1].tr;
   }
 
   /// Load availability from service model
@@ -90,7 +120,7 @@ class BookingController extends GetxController {
     for (final avail in service.availabilities) {
       weekDays.addAll(avail.weekDays);
     }
-    availableWeekDays.value = weekDays;
+    availableWeekDays.assignAll(weekDays);
     
     // Extract unique locations
     final locations = <String>{};

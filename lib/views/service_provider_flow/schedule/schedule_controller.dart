@@ -109,13 +109,12 @@ class ScheduleController extends GetxController {
     currentYear.value = DateFormat('yyyy').format(focusedDate.value);
   }
 
-  /// Returns a list of DateTime objects for the week containing the selected date.
+  /// Returns a list of DateTime objects for the next 15 days from the focused date.
   List<DateTime> getDaysInWeek() {
-    final now = selectedDate.value;
-    final firstDayOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    // Generate 15 consecutive days starting from focused date
     return List.generate(
-      7,
-      (index) => firstDayOfWeek.add(Duration(days: index)),
+      15,
+      (index) => focusedDate.value.add(Duration(days: index)),
     );
   }
 

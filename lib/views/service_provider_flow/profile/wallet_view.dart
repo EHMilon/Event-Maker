@@ -77,7 +77,7 @@ class WalletView extends GetView<ProfileController> {
       child: Column(
         children: [
           Text(
-            'totalEarnings'.tr,
+            'avilableBalance'.tr,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w500,
@@ -93,9 +93,10 @@ class WalletView extends GetView<ProfileController> {
               Text(
                 controller.walletBalance.value,
                 style: GoogleFonts.inter(
-                  fontSize: 48.sp,
+                  fontSize: 38.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
+                  
                 ),
               ),
               SizedBox(width: 8.w),

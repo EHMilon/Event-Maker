@@ -113,6 +113,14 @@ class AddServiceController extends GetxController {
       <dynamic>[].obs; // Can hold ServiceAs enum or String
 
   final selectedEventVenue = Rxn<EventVenue>();
+  final selectedEventVenueItems = <dynamic>[].obs; // Can hold EventVenue enum or String
+
+  /// Controller for the new Event Venue text input
+  final newEventVenueController = TextEditingController();
+
+  /// Toggle for showing/hiding the add Event Venue text field
+  var showAddEventVenueField = false.obs;
+
   final selectedSubOptions = <ServiceSubOption>[].obs;
   final selectedSubOptionsItems =
       <dynamic>[].obs; // Can hold ServiceSubOption enum or String
@@ -137,17 +145,9 @@ class AddServiceController extends GetxController {
           selectedServiceAs.value == ServiceAs.liveCooking ||
           selectedServiceAs.value == ServiceAs.outdoorCafeKiosk);
 
-  /// Returns available ProviderRole options based on selected category
-  /// - Event: only Business role is available
-  /// - Trainer: Business and Productive Family (no Freelancer)
-  /// - Hospitality: All roles available
+  /// Returns available ProviderRole options - all roles available for all categories
+  /// Freelancer, Business, and Productive Family are shown regardless of service type
   List<ProviderRole> get availableRoleOptions {
-    if (selectedCategory.value == ServiceCategory.event) {
-      return [ProviderRole.business];
-    }
-    if (selectedCategory.value == ServiceCategory.trainer) {
-      return [ProviderRole.business, ProviderRole.productiveFamily];
-    }
     return ProviderRole.values;
   }
 
@@ -268,6 +268,54 @@ class AddServiceController extends GetxController {
     }
   }
 
+  /// Show the add Event Venue text field (called when + button is clicked)
+  void addCustomEventVenueDirectly() {
+    showAddEventVenueField.value = true;
+  }
+
+  /// Close/hide the add Event Venue text field
+  void closeAddEventVenueField() {
+    showAddEventVenueField.value = false;
+    newEventVenueController.clear();
+  }
+
+  /// Add a new custom Event Venue to the selection
+  void addCustomEventVenue() {
+    final value = newEventVenueController.text.trim();
+    if (value.isNotEmpty) {
+      selectedEventVenueItems.clear(); // Enforce single selection
+      selectedEventVenueItems.add(value);
+      newEventVenueController.clear();
+      showAddEventVenueField.value = false;
+    }
+  }
+
+  /// Toggle EventVenue selection
+  void toggleEventVenue(dynamic item) {
+    if (selectedEventVenueItems.contains(item)) {
+      selectedEventVenueItems.remove(item);
+      if (item is EventVenue && selectedEventVenue.value == item) {
+        selectedEventVenue.value = null;
+      }
+    } else {
+      selectedEventVenueItems.clear(); // Enforce single selection
+      selectedEventVenueItems.add(item);
+      if (item is EventVenue) {
+        selectedEventVenue.value = item;
+      } else {
+        selectedEventVenue.value = null;
+      }
+    }
+  }
+
+  /// Remove an Event Venue from the selection
+  void removeEventVenue(dynamic item) {
+    selectedEventVenueItems.remove(item);
+    if (item is EventVenue && selectedEventVenue.value == item) {
+      selectedEventVenue.value = null;
+    }
+  }
+
   // Step 2: Packages
   var packages = <PackageFormData>[].obs;
   var needsConfirmationBeforePayment = false.obs;
@@ -327,7 +375,15 @@ class AddServiceController extends GetxController {
 
     // Event Venue
     if (service.eventVenue != null) {
-      selectedEventVenue.value = _eventVenueFromString(service.eventVenue);
+      final eventVenue = _eventVenueFromString(service.eventVenue);
+      selectedEventVenue.value = eventVenue;
+      selectedEventVenueItems.clear();
+      if (eventVenue != null) {
+        selectedEventVenueItems.add(eventVenue);
+      } else {
+        // If not mapped to enum, use as custom string
+        selectedEventVenueItems.add(service.eventVenue);
+      }
     }
 
     // Attendance Capacity
@@ -623,18 +679,10 @@ class AddServiceController extends GetxController {
     selectedServiceAsItems.clear();
     // Reset EventVenue when category changes
     selectedEventVenue.value = null;
+    selectedEventVenueItems.clear();
     // Reset subOptions when category changes
     selectedSubOptions.clear();
-    // When Event category is selected, auto-select Business role
-    if (category == ServiceCategory.event) {
-      selectedRole.value = ProviderRole.business;
-    }
-    // When Trainer category is selected, reset role if freelancer (not allowed)
-    else if (category == ServiceCategory.trainer) {
-      if (selectedRole.value == ProviderRole.freelancer) {
-        selectedRole.value = ProviderRole.business;
-      }
-    }
+    // Note: Role is no longer auto-changed - all roles available for all categories
     if (_categoryFromServiceType(selectedServiceType.value) == category) {
       return;
     }
@@ -728,10 +776,15 @@ class AddServiceController extends GetxController {
 
       // Event venue - only for Event category
       String? eventVenue;
-      if (showEventVenueDropdown) {
-        eventVenue = selectedEventVenue.value?.label;
+      if (showEventVenueDropdown && selectedEventVenueItems.isNotEmpty) {
+        final item = selectedEventVenueItems.first;
+        if (item is EventVenue) {
+          eventVenue = item.label;
+        } else if (item is String) {
+          eventVenue = item;
+        }
       }
-      
+
       // Backend validation: event_vanue only for Event type
       if (!isEventType) {
         eventVenue = null;
@@ -1064,6 +1117,9 @@ bool _isValidTimeRange(TimeOfDay start, TimeOfDay end) {
     descriptionController.dispose();
     locationController.dispose();
     attendanceCapacityController.dispose();
+    newEventVenueController.dispose();
+    newServiceAsController.dispose();
+    newSubOptionController.dispose();
     primaryAvailabilityCard.dispose();
     for (var card in additionalAvailabilityCards) {
       card.dispose();

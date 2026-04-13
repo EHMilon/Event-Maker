@@ -410,6 +410,57 @@ class ServiceRepository {
       throw ApiException(message: 'Failed to search map services: $e');
     }
   }
+
+  /// Search customer services by query string
+  /// Uses: GET /api/services/customer-services-search?search=decor
+  /// Response: { "success": true, "message": "...", "data": { "total_count": 5, "services": [...] } }
+  Future<CustomerServicesSearchResponse> searchCustomerServices(String query) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(
+        ApiConstant.customerServicesSearch,
+        queryParams: {'search': query},
+      );
+      return CustomerServicesSearchResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to search services: $e');
+    }
+  }
+}
+
+/// Response model for customer services search
+/// GET /services/customer-services-search?search=decor
+/// Response: { "success": true, "message": "...", "search": "v", "total": 8, "data": [...] }
+class CustomerServicesSearchResponse {
+  final bool success;
+  final String message;
+  final int totalCount;
+  final List<ServiceModel> services;
+
+  CustomerServicesSearchResponse({
+    required this.success,
+    required this.message,
+    required this.totalCount,
+    required this.services,
+  });
+
+  factory CustomerServicesSearchResponse.fromJson(Map<String, dynamic> json) {
+    // API returns: { "success": true, "message": "...", "total": 8, "data": [...] }
+    // Note: data is a direct array, not nested under data.services
+    final dataList = json['data'] as List<dynamic>? ?? [];
+    
+    return CustomerServicesSearchResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      totalCount: json['total'] as int? ?? 0,
+      services: dataList
+          .map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }
 
 /// Response model for customer services grouped by service_as_name

@@ -495,7 +495,21 @@ class ProfileController extends GetxController {
 
   /// Fetches service provider profile data (about section) from API
   /// API Endpoint: /providers/my-profile?section=about
+  /// Only for service providers - returns early if user is not a provider
   Future<void> fetchProviderProfile() async {
+    // Guard: Only providers can access this endpoint
+    // If isServiceProvider is not yet initialized, try to load it from storage
+    if (!isServiceProvider.value) {
+      final userType = await StorageService().getUserType();
+      final isProvider = userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
+      if (!isProvider) {
+        debugPrint('Skipping fetchProviderProfile: User is not a service provider');
+        return;
+      }
+      // Update the reactive value for future calls
+      isServiceProvider.value = true;
+    }
+
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
       return;
@@ -535,7 +549,21 @@ class ProfileController extends GetxController {
 
   /// Fetches service provider reviews from API
   /// API Endpoint: /providers/my-profile?section=reviews
+  /// Only for service providers - returns early if user is not a provider
   Future<void> fetchProviderReviews() async {
+    // Guard: Only providers can access this endpoint
+    // If isServiceProvider is not yet initialized, try to load it from storage
+    if (!isServiceProvider.value) {
+      final userType = await StorageService().getUserType();
+      final isProvider = userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
+      if (!isProvider) {
+        debugPrint('Skipping fetchProviderReviews: User is not a service provider');
+        return;
+      }
+      // Update the reactive value for future calls
+      isServiceProvider.value = true;
+    }
+
     if (!_connectivityService.isConnected.value) {
       _showConnectivityError();
       return;
@@ -624,6 +652,12 @@ class ProfileController extends GetxController {
         // Update availability status for service providers
         if (personalInfoResponse.data.isProvider) {
           isAvailable.value = personalInfoResponse.data.isAvailable;
+
+          // Update wallet balance from available_balance field for providers
+          if (personalInfoResponse.data.availableBalance != null &&
+              personalInfoResponse.data.availableBalance!.isNotEmpty) {
+            walletBalance.value = personalInfoResponse.data.availableBalance!;
+          }
         }
 
         // Update avatar if available

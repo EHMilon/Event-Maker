@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../app_routes.dart';
@@ -13,17 +14,17 @@ class OnboardingController extends GetxController {
     {
       "title": "onboardingTitle1".tr,
       "subtitle": "onboardingSubtitle1".tr,
-      "image": "assets/images/onbording_1.png",
+      "image": "assets/images/onboarding_1.png",
     },
     {
       "title": "onboardingTitle2".tr,
       "subtitle": "onboardingSubtitle2".tr,
-      "image": "assets/images/onbording_2.png",
+      "image": "assets/images/onboarding_2.png",
     },
     {
       "title": "onboardingTitle3".tr,
       "subtitle": "onboardingSubtitle3".tr,
-      "image": "assets/images/onbording_3.png",
+      "image": "assets/images/onboarding_3.png",
     },
   ];
 

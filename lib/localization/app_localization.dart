@@ -177,6 +177,8 @@ class AppLocalization extends Translations {
     'settings': 'Settings',
     'logout': 'Logout',
     'logoutConfirmation': 'Are you sure you want to logout?',
+    'emailCannotBeChanged': 'Email cannot be changed',
+
 
     // Navigation
     'home': 'Home',
@@ -207,6 +209,7 @@ class AppLocalization extends Translations {
     'completed': 'Completed',
     'pending': 'Pending',
     'totalBalance': 'Total Balance',
+    'avilableBalance': 'Avilable Balance',
     'addService': 'Add Service',
     'schedule': 'Schedule',
     'earnings': 'Earnings',
@@ -677,6 +680,7 @@ class AppLocalization extends Translations {
     'completed': 'مكتمل',
     'pending': 'قيد الانتظار',
     'totalBalance': 'إجمالي الرصيد',
+    'avilableBalance': 'الرصيد المتاح',
     'addService': 'إضافة خدمة',
     'schedule': 'الجدول الزمني',
     'earnings': 'الأرباح',
@@ -788,6 +792,7 @@ class AppLocalization extends Translations {
     'failedToCreateCertificate': 'فشل إنشاء الشهادة',
     'failedToUpdateCertificate': 'فشل تحديث الشهادة',
     'failedToDeleteCertificate': 'فشل حذف الشهادة',
+    'emailCannotBeChanged': 'لا يمكن تغيير البريد الإلكتروني',
 
     // Add Service Flow
     'editService': 'تعديل الخدمة',

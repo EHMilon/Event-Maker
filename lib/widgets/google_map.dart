@@ -751,7 +751,7 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                           child: Text(
                             'Select',
                             style: TextStyle(
-                              color: const Color.fromARGB(255, 110, 147, 250),
+                              color: Colors.black,
                               fontSize: 14.sp,
                             ),
                           ),

@@ -11,6 +11,7 @@ class PersonalInfoModel {
   final String? phoneNumber;
   final String? bio;
   final bool isAvailable;
+  final String? availableBalance; // Only for providers
 
   const PersonalInfoModel({
     required this.id,
@@ -22,6 +23,7 @@ class PersonalInfoModel {
     this.phoneNumber,
     this.bio,
     this.isAvailable = true,
+    this.availableBalance,
   });
 
   factory PersonalInfoModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class PersonalInfoModel {
       phoneNumber: json['phone_number'] as String?,
       bio: json['bio'] as String?,
       isAvailable: json['is_available'] as bool? ?? true,
+      availableBalance: json['available_balance'] as String?,
     );
   }
 
@@ -70,6 +73,7 @@ class PersonalInfoModel {
     String? phoneNumber,
     String? bio,
     bool? isAvailable,
+    String? availableBalance,
   }) {
     return PersonalInfoModel(
       id: id ?? this.id,
@@ -81,6 +85,7 @@ class PersonalInfoModel {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       bio: bio ?? this.bio,
       isAvailable: isAvailable ?? this.isAvailable,
+      availableBalance: availableBalance ?? this.availableBalance,
     );
   }
 }

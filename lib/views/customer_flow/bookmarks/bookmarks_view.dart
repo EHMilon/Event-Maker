@@ -2,6 +2,8 @@ import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/widgets/customer_bookmark_card.dart';
 import 'package:event_maker/views/customer_flow/services/service_detail_view.dart';
 import 'package:event_maker/views/profile/profile_controller.dart';
+import 'package:event_maker/services/service_repository.dart';
+import 'package:event_maker/services/api_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -71,8 +73,10 @@ class BookmarksView extends GetView<ProfileController> {
                         priceUnit: item.priceUnit,
                         rating: '${item.rating}',
                         showBookmarkButton: true,
-                        onTap: () =>
-                            Get.to(() => ServiceDetailView(service: item)),
+                        onTap: () => _openServiceDetail(
+                          context,
+                          serviceId: item.apiId,
+                        ),
                         onBookmarkTap: () => controller.removeBookmark(item.id),
                       ),
                     );
@@ -81,6 +85,52 @@ class BookmarksView extends GetView<ProfileController> {
         ),
       ),
     );
+  }
+
+  /// Fetches full service details from API and navigates to ServiceDetailView
+  Future<void> _openServiceDetail(BuildContext context, {required int serviceId}) async {
+    // Show loading indicator
+    Get.dialog(
+      const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final repository = const ServiceRepository();
+      final fullService = await repository.fetchCustomerServiceDetail(serviceId);
+      
+      // Close loading dialog
+      Get.back();
+
+      // Navigate with full service details
+      Get.to(() => ServiceDetailView(service: fullService));
+    } on ApiException catch (e) {
+      // Close loading dialog
+      Get.back();
+
+      Get.snackbar(
+        'error'.tr,
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      // Close loading dialog
+      Get.back();
+
+      Get.snackbar(
+        'error'.tr,
+        'failedToLoadServiceDetails'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   Widget _buildShimmerItem() {

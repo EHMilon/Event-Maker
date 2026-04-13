@@ -118,19 +118,22 @@ class _AddServiceViewState extends State<AddServiceView> {
                   }
                   return Padding(
                     padding: EdgeInsets.only(top: 16.h),
-                    child: CustomDropdownField<EventVenue>(
-                      value: controller.selectedEventVenue.value,
-                      labelText: 'eventVenue'.tr,
+                    child: DynamicDropdownField<EventVenue>(
+                      items: EventVenue.values,
+                      selectedItems: controller.selectedEventVenueItems,
+                      label: 'eventVenue'.tr,
                       hintText: 'selectEventVenue'.tr,
-                      items: EventVenue.values.map((venue) {
-                        return DropdownMenuItem(
-                          value: venue,
-                          child: Text(venue.label),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        controller.selectedEventVenue.value = value;
+                      enabled: !widget.isEdit,
+                      itemBuilder: (venue) => venue.label,
+                      onSelected: (item) {
+                        controller.toggleEventVenue(item);
                       },
+                      onRemoved: (item) => controller.removeEventVenue(item),
+                      onAddPressed: controller.addCustomEventVenueDirectly,
+                      isAdding: controller.showAddEventVenueField,
+                      addController: controller.newEventVenueController,
+                      onSaveAdd: controller.addCustomEventVenue,
+                      onCancelAdd: controller.closeAddEventVenueField,
                     ),
                   );
                 }),
@@ -138,8 +141,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                 SizedBox(height: 24.h),
                 Obx(
                   () => CustomDropdownField<ProviderRole>(
-                    value: controller.availableRoleOptions.contains(
-                            controller.selectedRole.value)
+                    value:
+                        controller.availableRoleOptions.contains(
+                          controller.selectedRole.value,
+                        )
                         ? controller.selectedRole.value
                         : null,
                     labelText: 'whatIsYourRole'.tr,
@@ -202,8 +207,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                       items: subOptions,
                       selectedItems: controller.selectedSubOptionsItems,
                       label: 'selectOptions'.tr,
-                      hintText:
-                          'selectOptions'.tr,
+                      hintText: 'selectOptions'.tr,
                       enabled: !widget.isEdit,
                       itemBuilder: (option) => option.label,
                       onSelected: (item) =>
@@ -400,7 +404,7 @@ class _AddServiceViewState extends State<AddServiceView> {
     // Access the length to trigger reactivity when packages are added/removed
     return Obx(() {
       final packageCount = controller.packages.length;
-      
+
       if (packageCount == 0) {
         return Container(
           padding: EdgeInsets.symmetric(vertical: 24.h),
@@ -533,137 +537,144 @@ class _AddServiceViewState extends State<AddServiceView> {
     return GestureDetector(
       onTap: () => _openPackages(context),
       child: Container(
-          margin: EdgeInsets.only(bottom: 12.h),
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.borderLight),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      packageName.isEmpty
-                          ? 'packageLabel'.trParams({'index': '${index + 1}'})
-                          : packageName,
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: AppColors.borderLight),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    packageName.isEmpty
+                        ? 'packageLabel'.trParams({'index': '${index + 1}'})
+                        : packageName,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      packagePrice.isEmpty ? '0.00 AED' : '$packagePrice AED',
                       style: GoogleFonts.inter(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: AppColors.primary,
                       ),
                     ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        packagePrice.isEmpty ? '0.00 AED' : '$packagePrice AED',
-                        style: GoogleFonts.inter(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      GestureDetector(
-                        onTap: () {
-                          controller.removePackage(index);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(4.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            size: 16.r,
-                            color: AppColors.error,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              // Features display
-              if (features.isNotEmpty)
-                Padding(
-                  padding: EdgeInsets.only(top: 8.h),
-                  child: Wrap(
-                    spacing: 8.w,
-                    runSpacing: 4.h,
-                    children: features.map((feature) {
-                      // Extract just the title if feature contains JSON
-                      // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
-                      String displayText = feature;
-                      if (feature.contains('title')) {
-                        try {
-                          // Try single-quoted JSON: {'title': 'value', ...}
-                          final singleMatch = RegExp(r"'title'\s*:\s*'([^']+)'").firstMatch(feature);
-                          // Try double-quoted JSON: {"title": "value", ...}
-                          final doubleMatch = RegExp(r'"title"\s*:\s*"([^"]+)"').firstMatch(feature);
-                          
-                          if (singleMatch != null && singleMatch.group(1) != null) {
-                            displayText = singleMatch.group(1)!;
-                          } else if (doubleMatch != null && doubleMatch.group(1) != null) {
-                            displayText = doubleMatch.group(1)!;
-                          }
-                        } catch (_) {
-                          // Fallback to original if regex fails
-                        }
-                      }
-                      
-                      return Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
-                        ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () {
+                        controller.removePackage(index);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(4.r),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.r),
+                          color: AppColors.error.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.check,
-                              size: 12.r,
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(width: 4.w),
-                            Flexible(
-                              child: Text(
-                                displayText,
-                                style: GoogleFonts.inter(
-                                  fontSize: 11.sp,
-                                  color: AppColors.primary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ],
+                        child: Icon(
+                          Icons.close,
+                          size: 16.r,
+                          color: AppColors.error,
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-            ],
-          ),
+              ],
+            ),
+            // Features display
+            if (features.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Wrap(
+                  spacing: 8.w,
+                  runSpacing: 4.h,
+                  children: features.map((feature) {
+                    // Extract just the title if feature contains JSON
+                    // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
+                    String displayText = feature;
+                    if (feature.contains('title')) {
+                      try {
+                        // Try single-quoted JSON: {'title': 'value', ...}
+                        final singleMatch = RegExp(
+                          r"'title'\s*:\s*'([^']+)'",
+                        ).firstMatch(feature);
+                        // Try double-quoted JSON: {"title": "value", ...}
+                        final doubleMatch = RegExp(
+                          r'"title"\s*:\s*"([^"]+)"',
+                        ).firstMatch(feature);
+
+                        if (singleMatch != null &&
+                            singleMatch.group(1) != null) {
+                          displayText = singleMatch.group(1)!;
+                        } else if (doubleMatch != null &&
+                            doubleMatch.group(1) != null) {
+                          displayText = doubleMatch.group(1)!;
+                        }
+                      } catch (_) {
+                        // Fallback to original if regex fails
+                      }
+                    }
+
+                    return Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check,
+                            size: 12.r,
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(width: 4.w),
+                          Flexible(
+                            child: Text(
+                              displayText,
+                              style: GoogleFonts.inter(
+                                fontSize: 11.sp,
+                                color: AppColors.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+          ],
         ),
+      ),
     );
   }
+  
 }

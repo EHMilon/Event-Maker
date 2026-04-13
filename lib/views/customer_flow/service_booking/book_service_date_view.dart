@@ -27,12 +27,9 @@ class BookServiceDateView extends StatelessWidget {
     // Initialize the booking controller with current selections
     void proceedToNext() {
       // Get selected date as YYYY-MM-DD format
-      final monthIndex =
-          controller.months.indexOf(controller.selectedMonth.value) + 1;
-      final day = 15 + controller.selectedDateIndex.value;
-      final year = controller.selectedYear.value;
+      final selectedDate = controller.selectedDate;
       final dateStr =
-          '$year-${monthIndex.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+          '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}';
 
       // Get selected time from dynamic times
       final timeStr = controller.availableTimes.isNotEmpty
@@ -143,27 +140,22 @@ class BookServiceDateView extends StatelessWidget {
 
             SizedBox(
               height: 70.h,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 7,
-                itemBuilder: (context, index) {
-                  return Obx(() {
+              child: Obx(() {
+                final dates = controller.availableDates;
+                if (dates.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: dates.length,
+                  itemBuilder: (context, index) {
                     final isSelected =
                         controller.selectedDateIndex.value == index;
-                    final day = 15 + index;
-                    final weekDays = [
-                      'mon'.tr,
-                      'tue'.tr,
-                      'wed'.tr,
-                      'thu'.tr,
-                      'fri'.tr,
-                      'sat'.tr,
-                      'sun'.tr,
-                    ];
+                    final date = dates[index];
+                    final dayAbbrev = controller.getDayAbbrev(date);
                     return GestureDetector(
                       onTap: () => controller.setSelectedDate(index),
                       child: Container(
-                        // width: 42.w,
                         margin: EdgeInsets.only(right: 6.w),
                         decoration: BoxDecoration(
                           color: isSelected
@@ -185,7 +177,7 @@ class BookServiceDateView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                weekDays[index % 7],
+                                dayAbbrev,
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   color: isSelected
@@ -195,7 +187,7 @@ class BookServiceDateView extends StatelessWidget {
                               ),
                               SizedBox(height: 4.h),
                               Text(
-                                '$day',
+                                '${date.day}',
                                 style: GoogleFonts.inter(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
@@ -209,9 +201,9 @@ class BookServiceDateView extends StatelessWidget {
                         ),
                       ),
                     );
-                  });
-                },
-              ),
+                  },
+                );
+              }),
             ),
             SizedBox(height: 24.h),
 
