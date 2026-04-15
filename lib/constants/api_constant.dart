@@ -133,7 +133,8 @@ class ApiConstant {
   static String serviceDetail(int id) => '/services/detail/$id';
 
   /// Get customer service detail by ID: /services/customer-services/{id}
-  static String customerServiceDetail(int id) => '/services/customer-services/$id';
+  static String customerServiceDetail(int id) =>
+      '/services/customer-services/$id';
 
   /// Update service by ID: /services/update/{id}
   /// Note: Uses POST with multipart/form-data for update
@@ -142,7 +143,8 @@ class ApiConstant {
   /// Toggle bookmark status for a service
   /// POST /services/bookmark-toggle/{serviceId}
   /// Response: { "success": true, "message": "Service bookmark status updated successfully.", "data": { "service_id": 16, "is_bookmarked": false } }
-  static String bookmarkToggle(int serviceId) => '/services/bookmark-toggle/$serviceId';
+  static String bookmarkToggle(int serviceId) =>
+      '/services/bookmark-toggle/$serviceId';
 
   /// Get user's bookmarked services
   /// GET /services/my-bookmarked?page=1&page_size=10
@@ -150,7 +152,14 @@ class ApiConstant {
 
   /// Search customer services
   /// GET /services/customer-services-search?search=decor
-  static const String customerServicesSearch = '/services/customer-services-search';
+  static const String customerServicesSearch =
+      '/services/customer-services-search';
+
+  /// Category master dropdown endpoint
+  /// Query params: service_type_name, role_name, service_as_name, sub_service_name
+  /// Returns: sub_sub_service_name dropdown items
+  static const String categoryMasterDropdown =
+      '/services/category-master/dropdown';
 
   // ===== BOOKING ENDPOINTS =====
 
@@ -172,7 +181,8 @@ class ApiConstant {
   static String customerBookingDetail(int id) => '/bookings/request/detail/$id';
 
   /// Get customer booking notifications
-  static const String customerBookingNotifications = '/bookings/notification-list';
+  static const String customerBookingNotifications =
+      '/bookings/notification-list';
 
   /// ===== PROVIDER BOOKING ENDPOINTS =====
 
@@ -242,7 +252,8 @@ class ApiConstant {
 
   /// Provider wallet history endpoint
   /// Returns wallet summary and transaction history with pagination
-  static const String providerWalletHistory = '/payments/provider-wallet-history';
+  static const String providerWalletHistory =
+      '/payments/provider-wallet-history';
 
   /// Customer payment history endpoint
   /// Returns paginated payment history for customers
@@ -252,7 +263,8 @@ class ApiConstant {
   /// POST /payments/stripe/create-checkout-session
   /// Body: { "booking_id": int }
   /// Response: { "success": true, "message": "...", "data": { "payment_id": int, "session_id": string, "checkout_url": string } }
-  static const String stripeCreateCheckoutSession = '/payments/stripe/create-checkout-session';
+  static const String stripeCreateCheckoutSession =
+      '/payments/stripe/create-checkout-session';
 
   /// PayPal order creation endpoint
   /// POST /payments/paypal/create-order
@@ -275,30 +287,30 @@ class ApiConstant {
   // ===== CHAT ENDPOINTS =====
 
   static const String chats = '/chats';
-  
+
   /// Query param for filtering chats: chat_type=normal | admin
   static const String chatTypeParam = 'chat_type';
   static const String chatTypeNormal = 'normal';
   static const String chatTypeAdmin = 'admin';
-  
+
   /// Create private chat with another user
   /// POST /chats/private
   /// Body: { "other_user_id": "userId" }
   static const String chatsPrivate = '/chats/private';
-  
+
   /// Create private admin chat
   /// POST /chats/private-admin
   static const String chatsPrivateAdmin = '/chats/private-admin';
-  
+
   /// Get chat details by ID: /chats/{chatId}
   static String chatDetail(String chatId) => '/chats/$chatId';
-  
+
   /// Get messages for a chat: /chats/{chatId}/messages
   static String chatMessages(String chatId) => '/chats/$chatId/messages';
-  
+
   /// Send message to a chat: /chats/{chatId}/messages
   static String sendChatMessage(String chatId) => '/chats/$chatId/messages';
-  
+
   static const String chatRead = '/chats/read';
   static const String chatCreate = '/chats/create';
 

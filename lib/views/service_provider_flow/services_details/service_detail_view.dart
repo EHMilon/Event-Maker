@@ -535,7 +535,7 @@ class ServiceDetailView extends StatelessWidget {
                         //   ),
                         // ),
                         SizedBox(height: 16.h),
-                        _buildLocationMap(context),
+                        _buildLocationMap(context, isServiceProvider: true),
                         SizedBox(height: 24.h),
 
                         // Pricing / Packages
@@ -989,7 +989,10 @@ class ServiceDetailView extends StatelessWidget {
   }
 
   /// Build location map using availability coordinates
-  Widget _buildLocationMap(BuildContext context) {
+  Widget _buildLocationMap(
+    BuildContext context, {
+    bool isServiceProvider = false,
+  }) {
     // Get first availability for map display
     final firstAvailability = service.availabilities.isNotEmpty
         ? service.availabilities.first
@@ -1011,6 +1014,9 @@ class ServiceDetailView extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        if (isServiceProvider) {
+          return;
+        }
         debugPrint('Map clicked - opening full map view');
         // Get first availability for coordinates
         final firstAvailability = service.availabilities.isNotEmpty

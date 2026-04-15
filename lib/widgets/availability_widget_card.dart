@@ -64,6 +64,7 @@ class AvailabilityWidgetCard extends StatefulWidget {
   final bool isPrimary;
   final bool isEnabled;
   final bool showCannotGoOutside;
+  final bool isServiceProvider;
 
   const AvailabilityWidgetCard({
     super.key,
@@ -76,6 +77,7 @@ class AvailabilityWidgetCard extends StatefulWidget {
     this.isPrimary = false,
     this.isEnabled = true,
     this.showCannotGoOutside = true,
+    this.isServiceProvider = false,
   });
 
   @override
@@ -383,7 +385,8 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
     final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked != null) {
       // Basic validation check
-      if (target == widget.card.startTime && widget.card.endTime.value != null) {
+      if (target == widget.card.startTime &&
+          widget.card.endTime.value != null) {
         if (!_isBefore(picked, widget.card.endTime.value!)) {
           Get.snackbar(
             'invalidTime'.tr,
@@ -408,7 +411,8 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
       target.value = picked;
 
       // Update string representation for consistency
-      final formattedTime = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
+      final formattedTime =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}:00';
       if (target == widget.card.startTime) {
         widget.card.startTimeString.value = formattedTime;
       } else {
@@ -424,6 +428,9 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
   }
 
   void _openMapScreen(BuildContext context) {
+    if (widget.isServiceProvider) {
+      return;
+    }
     Get.to(
       GoogleMapScreen(
         apiKey: AppConfig.googleMapsApiKey,

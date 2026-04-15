@@ -110,34 +110,6 @@ class _AddServiceViewState extends State<AddServiceView> {
                     },
                   ),
                 ),
-
-                // Event Venue dropdown - only shown when category is Event
-                Obx(() {
-                  if (!controller.showEventVenueDropdown) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: EdgeInsets.only(top: 16.h),
-                    child: DynamicDropdownField<EventVenue>(
-                      items: EventVenue.values,
-                      selectedItems: controller.selectedEventVenueItems,
-                      label: 'eventVenue'.tr,
-                      hintText: 'selectEventVenue'.tr,
-                      enabled: !widget.isEdit,
-                      itemBuilder: (venue) => venue.label,
-                      onSelected: (item) {
-                        controller.toggleEventVenue(item);
-                      },
-                      onRemoved: (item) => controller.removeEventVenue(item),
-                      onAddPressed: controller.addCustomEventVenueDirectly,
-                      isAdding: controller.showAddEventVenueField,
-                      addController: controller.newEventVenueController,
-                      onSaveAdd: controller.addCustomEventVenue,
-                      onCancelAdd: controller.closeAddEventVenueField,
-                    ),
-                  );
-                }),
-
                 SizedBox(height: 24.h),
                 Obx(
                   () => CustomDropdownField<ProviderRole>(
@@ -159,66 +131,127 @@ class _AddServiceViewState extends State<AddServiceView> {
                     onChanged: (value) {
                       if (value != null) {
                         controller.selectedRole.value = value;
-                        // Reset ServiceAs when role changes since options change
-                        controller.selectedServiceAs.value = null;
+                        controller.fetchServiceAsOptions();
                       }
                     },
                   ),
                 ),
-                SizedBox(height: 24.h),
 
-                // Service As section - only show when there are options available
+                // Service As section
                 Obx(() {
-                  final options = controller.availableServiceAsOptions;
-                  if (options.isEmpty) {
-                    return const SizedBox.shrink(); // Hide for Productive Family
-                  }
-                  return DynamicDropdownField<ServiceAs>(
-                    items: options,
-                    selectedItems: controller.selectedServiceAsItems,
-                    label: 'serviceAs'.tr,
-                    hintText: 'selectServiceAs'.tr,
-                    enabled: !widget.isEdit,
-                    itemBuilder: (serviceAs) => serviceAs.label,
-                    onSelected: (item) {
-                      controller.toggleServiceAs(item);
-                    },
-                    onRemoved: (item) => controller.removeServiceAs(item),
-                    onAddPressed: controller.addCustomServiceAsDirectly,
-                    isAdding: controller.showAddServiceAsField,
-                    addController: controller.newServiceAsController,
-                    onSaveAdd: controller.addCustomServiceAs,
-                    onCancelAdd: controller.closeAddServiceAsField,
+                  final backendOptions = controller.backendServiceAsOptions;
+                  final isLoading = controller.isLoadingDropdowns.value;
+
+                  return Padding(
+                    padding: EdgeInsets.only(top: 24.h),
+                    child: isLoading && backendOptions.isEmpty
+                        ? Container(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2.r,
+                              ),
+                            ),
+                          )
+                        : _buildStringDropdownField(
+                            items: backendOptions,
+                            selectedItems: controller.selectedServiceAsItems,
+                            label: 'serviceAs'.tr,
+                            hintText: 'selectServiceAs'.tr,
+                            onSelected: (item) {
+                              controller.toggleServiceAs(item);
+                            },
+                            onRemoved: (item) =>
+                                controller.removeServiceAs(item),
+                            onAddPressed: controller.addCustomServiceAsDirectly,
+                            isAdding: controller.showAddServiceAsField.value,
+                            addController: controller.newServiceAsController,
+                            onSaveAdd: controller.addCustomServiceAs,
+                            onCancelAdd: controller.closeAddServiceAsField,
+                          ),
                   );
                 }),
 
-                // Sub-Options dropdown - shown when Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk
+                // Sub-Options dropdown
                 Obx(() {
-                  if (!controller.showSubOptionsChecklist) {
+                  final options = controller.subOptions;
+                  final isLoading = controller.isLoadingDropdowns.value;
+
+                  if (options.isEmpty && !isLoading) {
                     return const SizedBox.shrink();
                   }
-                  final subOptions = controller.availableSubOptions;
-                  if (subOptions.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
+
                   return Padding(
                     padding: EdgeInsets.only(top: 24.h),
-                    child: DynamicDropdownField<ServiceSubOption>(
-                      items: subOptions,
-                      selectedItems: controller.selectedSubOptionsItems,
-                      label: 'selectOptions'.tr,
-                      hintText: 'selectOptions'.tr,
-                      enabled: !widget.isEdit,
-                      itemBuilder: (option) => option.label,
-                      onSelected: (item) =>
-                          controller.toggleSubOptionItem(item),
-                      onRemoved: (item) => controller.removeSubOptionItem(item),
-                      onAddPressed: controller.addCustomSubOptionDirectly,
-                      isAdding: controller.showAddSubOptionField,
-                      addController: controller.newSubOptionController,
-                      onSaveAdd: controller.addCustomSubOption,
-                      onCancelAdd: controller.closeAddSubOptionField,
-                    ),
+                    child: isLoading && options.isEmpty
+                        ? Container(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2.r,
+                              ),
+                            ),
+                          )
+                        : _buildStringDropdownField(
+                            items: options,
+                            selectedItems: controller.selectedSubServiceItems,
+                            label: 'selectOptions'.tr,
+                            hintText: 'selectOptions'.tr,
+                            onSelected: (item) {
+                              controller.toggleSubService(item);
+                            },
+                            onRemoved: (item) =>
+                                controller.selectedSubServiceItems.remove(item),
+                            onAddPressed: controller.addCustomSubOptionDirectly,
+                            isAdding: controller.showAddSubOptionField.value,
+                            addController: controller.newSubOptionController,
+                            onSaveAdd: controller.addCustomSubOption,
+                            onCancelAdd: controller.closeAddSubOptionField,
+                          ),
+                  );
+                }),
+
+                // Sub-Sub-Options dropdown
+                Obx(() {
+                  final options = controller.backendSubSubServiceOptions;
+                  final isLoading = controller.isLoadingDropdowns.value;
+
+                  if (options.isEmpty && !isLoading) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Padding(
+                    padding: EdgeInsets.only(top: 24.h),
+                    child: isLoading && options.isEmpty
+                        ? Container(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2.r,
+                              ),
+                            ),
+                          )
+                        : _buildStringDropdownField(
+                            items: options,
+                            selectedItems:
+                                controller.selectedSubSubServiceItems,
+                            label: 'selectSubOptions'.tr,
+                            hintText: 'selectSubOptions'.tr,
+                            onSelected: (item) {
+                              controller.toggleSubSubService(item);
+                            },
+                            onRemoved: (item) => controller
+                                .selectedSubSubServiceItems
+                                .remove(item),
+                            onAddPressed: controller.addCustomSubOptionDirectly,
+                            isAdding: controller.showAddSubOptionField.value,
+                            addController: controller.newSubOptionController,
+                            onSaveAdd: controller.addCustomSubOption,
+                            onCancelAdd: controller.closeAddSubOptionField,
+                          ),
                   );
                 }),
 
@@ -270,6 +303,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                   isPrimary: true,
                   isEnabled: true,
                   showCannotGoOutside: true,
+                  isServiceProvider: true,
                 ),
 
                 // Additional Availability Section
@@ -482,6 +516,7 @@ class _AddServiceViewState extends State<AddServiceView> {
               isPrimary: false,
               isEnabled: !isDisabled,
               showCannotGoOutside: false,
+              isServiceProvider: true,
             );
           }),
 
@@ -676,5 +711,118 @@ class _AddServiceViewState extends State<AddServiceView> {
       ),
     );
   }
-  
+
+  Widget _buildStringDropdownField({
+    required List<String> items,
+    required List<dynamic> selectedItems,
+    required String label,
+    required String hintText,
+    required Function(String) onSelected,
+    required Function(dynamic) onRemoved,
+    required VoidCallback onAddPressed,
+    required bool isAdding,
+    required TextEditingController addController,
+    required VoidCallback onSaveAdd,
+    required VoidCallback onCancelAdd,
+  }) {
+    // Get the display text for the field (either the selected item or the hint)
+    String fieldText = hintText;
+    if (selectedItems.isNotEmpty) {
+      final lastItem = selectedItems.last;
+      fieldText = lastItem is String ? lastItem : lastItem.toString();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        // Dropdown button
+        PopupMenuButton<String>(
+          enabled: !widget.isEdit,
+          onSelected: onSelected,
+          itemBuilder: (context) => items.map((item) {
+            return PopupMenuItem<String>(value: item, child: Text(item));
+          }).toList(),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.borderLight),
+              borderRadius: BorderRadius.circular(12.r),
+              color: Colors.white,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    fieldText,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: selectedItems.isNotEmpty
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppColors.textSecondary,
+                  size: 20.r,
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Add custom field - Commented out for now
+        /*
+        if (isAdding)
+          Padding(
+            padding: EdgeInsets.only(top: 12.h),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: addController,
+                    decoration: InputDecoration(
+                      hintText: 'Add custom $label',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                TextButton(onPressed: onSaveAdd, child: Text('add'.tr)),
+                TextButton(onPressed: onCancelAdd, child: Text('cancel'.tr)),
+              ],
+            ),
+          ),
+        */
+        // Add button - Commented out for now
+        /*
+        if (!isAdding)
+          Padding(
+            padding: EdgeInsets.only(top: 8.h),
+            child: TextButton.icon(
+              onPressed: onAddPressed,
+              icon: Icon(Icons.add, size: 18.r),
+              label: Text('addCustom'.tr),
+            ),
+          ),
+        */
+      ],
+    );
+  }
 }

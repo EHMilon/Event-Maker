@@ -13,21 +13,15 @@ enum ServiceCategory { hospitality, event, trainer }
 
 enum ProviderRole { freelancer, business, productiveFamily }
 
-/// Returns available ServiceAs options based on ProviderRole and ServiceCategory
-/// - Freelancer: Waitress, Barista, Juice Maker, Sandwich Maker, Burger Maker, Shawarma Maker, Chef
-/// - Business: Catering, Buffet, Live Cooking, Outdoor Cafe Kiosk, Coffee Hospitality Service
-/// - Productive Family: No Service As (empty list)
-/// - Professional Trainer (category): Furniture, Catering
-List<ServiceAs> getServiceAsOptions(
+/// Default ServiceAs options (fallback when backend is unavailable)
+List<ServiceAs> getDefaultServiceAsOptions(
   ProviderRole role,
   ServiceCategory category,
 ) {
-  // Professional Trainer category has Furniture, Catering
   if (category == ServiceCategory.trainer) {
     return [ServiceAs.furniture, ServiceAs.cateringTrainer];
   }
 
-  // For other categories, options depend on role
   switch (role) {
     case ProviderRole.freelancer:
       return [
@@ -48,16 +42,12 @@ List<ServiceAs> getServiceAsOptions(
         ServiceAs.coffeeHospitalityService,
       ];
     case ProviderRole.productiveFamily:
-      // Productive Family has no Service As field
       return [];
   }
 }
 
-/// Returns available ServiceSubOption based on ServiceAs selection
-/// - Buffet: Indian Buffet, International Buffet, Japanese Buffet, Thai Buffet
-/// - Live Cooking: Pastry Station, Shawarma Station, Burger Station/Pizza Station/Sushi Station
-/// - Outdoor Cafe Kiosk: Outdoor Mobile Food Truck, Mobile Coffee Car/Mini Car, Coffee Cart, Outdoor Coffee Kiosk, Coffee Hospitality Service
-List<ServiceSubOption> getServiceSubOptions(ServiceAs? serviceAs) {
+/// Default ServiceSubOption options (fallback when backend is unavailable)
+List<ServiceSubOption> getDefaultServiceSubOptions(ServiceAs? serviceAs) {
   if (serviceAs == null) return [];
 
   switch (serviceAs) {
@@ -113,7 +103,8 @@ class AddServiceController extends GetxController {
       <dynamic>[].obs; // Can hold ServiceAs enum or String
 
   final selectedEventVenue = Rxn<EventVenue>();
-  final selectedEventVenueItems = <dynamic>[].obs; // Can hold EventVenue enum or String
+  final selectedEventVenueItems =
+      <dynamic>[].obs; // Can hold EventVenue enum or String
 
   /// Controller for the new Event Venue text input
   final newEventVenueController = TextEditingController();
@@ -125,9 +116,23 @@ class AddServiceController extends GetxController {
   final selectedSubOptionsItems =
       <dynamic>[].obs; // Can hold ServiceSubOption enum or String
 
+  final selectedSubServiceItems = <dynamic>[].obs;
+  final selectedSubSubServiceItems = <dynamic>[].obs;
+
+  // Backend-fetched dropdown options
+  var backendServiceAsOptions = <String>[].obs;
+  var subOptions = <String>[].obs;
+  var backendSubSubServiceOptions = <String>[].obs;
+  var isLoadingDropdowns = false.obs;
+
+  // Selected string values (from backend)
+  final selectedServiceAsString = Rxn<String>();
+  final selectedSubServiceString = Rxn<String>();
+  final selectedSubSubServiceString = Rxn<String>();
+
   /// Returns available ServiceAs options based on current selected role and category
   List<ServiceAs> get availableServiceAsOptions =>
-      getServiceAsOptions(selectedRole.value, selectedCategory.value);
+      getDefaultServiceAsOptions(selectedRole.value, selectedCategory.value);
 
   /// Returns true if Event Venue dropdown should be shown (when category is Event)
   bool get showEventVenueDropdown =>
@@ -135,7 +140,7 @@ class AddServiceController extends GetxController {
 
   /// Returns available sub-options based on selected ServiceAs
   List<ServiceSubOption> get availableSubOptions =>
-      getServiceSubOptions(selectedServiceAs.value);
+      getDefaultServiceSubOptions(selectedServiceAs.value);
 
   /// Returns true if sub-options checklist should be shown (Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk)
   bool get showSubOptionsChecklist =>
@@ -202,14 +207,19 @@ class AddServiceController extends GetxController {
       if (item is ServiceAs && selectedServiceAs.value == item) {
         selectedServiceAs.value = null;
       }
+      selectedServiceAsString.value = null;
+      subOptions.clear();
     } else {
       selectedServiceAsItems.clear(); // Enforce single selection
       selectedServiceAsItems.add(item);
       if (item is ServiceAs) {
         selectedServiceAs.value = item;
-      } else {
+        selectedServiceAsString.value = item.label;
+      } else if (item is String) {
         selectedServiceAs.value = null;
+        selectedServiceAsString.value = item;
       }
+      fetchSubServiceOptions();
     }
   }
 
@@ -243,10 +253,49 @@ class AddServiceController extends GetxController {
     }
   }
 
+  /// Toggle Level 2 Sub Service selection
+  void toggleSubService(String item) {
+    if (selectedSubServiceItems.contains(item)) {
+      selectedSubServiceItems.remove(item);
+      selectedSubServiceString.value = null;
+      subOptions
+          .clear(); // This is Level 2 list? No subOptions is Level 2 list.
+      // Wait, let's be careful with names.
+    } else {
+      selectedSubServiceItems.clear();
+      selectedSubServiceItems.add(item);
+      selectedSubServiceString.value = item;
+
+      // Clear Level 3
+      selectedSubSubServiceItems.clear();
+      selectedSubSubServiceString.value = null;
+      backendSubSubServiceOptions.clear();
+
+      fetchSubSubServiceOptions();
+    }
+  }
+
+  /// Toggle Level 3 Sub Sub Service selection
+  void toggleSubSubService(String item) {
+    if (selectedSubSubServiceItems.contains(item)) {
+      selectedSubSubServiceItems.remove(item);
+      selectedSubSubServiceString.value = null;
+    } else {
+      selectedSubSubServiceItems.clear();
+      selectedSubSubServiceItems.add(item);
+      selectedSubSubServiceString.value = item;
+    }
+  }
+
   /// Toggle SubOption selection
   void toggleSubOptionItem(dynamic item) {
     if (selectedSubOptionsItems.contains(item)) {
       selectedSubOptionsItems.remove(item);
+      if (item is String) {
+        if (selectedSubSubServiceString.value == item) {
+          selectedSubSubServiceString.value = null;
+        }
+      }
       if (item is ServiceSubOption) {
         selectedSubOptions.remove(item);
       }
@@ -254,6 +303,9 @@ class AddServiceController extends GetxController {
       selectedSubOptionsItems.clear(); // Enforce single selection
       selectedSubOptions.clear();
       selectedSubOptionsItems.add(item);
+      if (item is String) {
+        selectedSubSubServiceString.value = item;
+      }
       if (item is ServiceSubOption) {
         selectedSubOptions.add(item);
       }
@@ -543,6 +595,136 @@ class AddServiceController extends GetxController {
     selectedCategory.value = ServiceCategory.hospitality;
     selectedServiceType.value = ServiceType.catering;
     selectedRole.value = ProviderRole.freelancer;
+
+    // Initial fetch of service_as_name options
+    fetchServiceAsOptions();
+  }
+
+  /// Fetch dropdown options from backend based on current selections
+  /// level: 'service_as_name' | 'sub_service_name' | 'sub_sub_service_name'
+  Future<void> fetchDropdownOptions({String? level}) async {
+    isLoadingDropdowns.value = true;
+    try {
+      final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+      final roleName = _getRoleNameForApi(selectedRole.value);
+
+      String? serviceAsName;
+      String? subServiceName;
+
+      // Determine what to fetch based on current selection state
+      if (level == 'service_as_name' ||
+          (level == null && selectedServiceAsString.value == null)) {
+        // Fetch service_as_name options (only type and role)
+        serviceAsName = null;
+        subServiceName = null;
+      } else if (level == 'sub_service_name' ||
+          (level == null &&
+              selectedServiceAsString.value != null &&
+              selectedSubServiceString.value == null)) {
+        // Fetch sub_service_name options (type, role, and serviceAsName)
+        serviceAsName = selectedServiceAsString.value;
+        subServiceName = null;
+      } else {
+        // Fetch sub_sub_service_name options (type, role, serviceAsName, and subServiceName)
+        serviceAsName = selectedServiceAsString.value;
+        subServiceName = selectedSubServiceString.value;
+      }
+
+      Log.d(
+        '=======> fetchDropdownOptions - level: ${level ?? "auto"}, serviceAsName: $serviceAsName, subServiceName: $subServiceName',
+      );
+
+      final response = await const ServiceRepository()
+          .fetchCategoryMasterDropdown(
+            serviceTypeName: serviceTypeName,
+            roleName: roleName,
+            serviceAsName: serviceAsName,
+            subServiceName: subServiceName,
+          );
+
+      if (response.success) {
+        final items = response.data.items;
+        Log.d(
+          '=======> fetchDropdownOptions - level: ${response.data.level}, items: $items',
+        );
+
+        // Store based on the level returned by API
+        switch (response.data.level) {
+          case 'service_as_name':
+            backendServiceAsOptions.value = items;
+            break;
+          case 'sub_service_name':
+            subOptions.value = items;
+            break;
+          case 'sub_sub_service_name':
+            backendSubSubServiceOptions.value = items;
+            break;
+        }
+      }
+    } on ApiException catch (e) {
+      Log.e('=======> fetchDropdownOptions - ApiException: ${e.message}');
+    } catch (e) {
+      Log.e('=======> fetchDropdownOptions - Error: $e');
+    } finally {
+      isLoadingDropdowns.value = false;
+    }
+  }
+
+  /// Fetch service_as_name options when category or role changes
+  void fetchServiceAsOptions() {
+    // Clear downstream selections
+    selectedServiceAsString.value = null;
+    selectedSubServiceString.value = null;
+    selectedSubSubServiceString.value = null;
+    subOptions.clear();
+    backendSubSubServiceOptions.clear();
+
+    fetchDropdownOptions(level: 'service_as_name');
+  }
+
+  /// Fetch sub_service_name options when service_as is selected
+  void fetchSubServiceOptions() {
+    // Clear downstream selections
+    selectedSubServiceString.value = null;
+    selectedSubSubServiceString.value = null;
+    backendSubSubServiceOptions.clear();
+
+    if (selectedServiceAsString.value != null) {
+      fetchDropdownOptions(level: 'sub_service_name');
+    }
+  }
+
+  /// Fetch sub_sub_service_name options when sub_service is selected
+  void fetchSubSubServiceOptions() {
+    // Clear Level 3 selections
+    selectedSubSubServiceString.value = null;
+    selectedSubOptionsItems.clear();
+
+    if (selectedSubServiceString.value != null) {
+      fetchDropdownOptions(level: 'sub_sub_service_name');
+    }
+  }
+
+  String _getServiceTypeNameForApi(ServiceCategory category) {
+    switch (category) {
+      case ServiceCategory.hospitality:
+        return 'Hospitality';
+      case ServiceCategory.event:
+        return 'Event';
+      case ServiceCategory.trainer:
+        return 'Professional Trainer';
+    }
+  }
+
+  String _getRoleNameForApi(ProviderRole role) {
+    switch (role) {
+      case ProviderRole.freelancer:
+        return 'Freelancer';
+      case ProviderRole.business:
+        return 'Business';
+      case ProviderRole.productiveFamily:
+        return 'Productive Family';
+    }
   }
 
   /// Add a new additional availability card
@@ -674,19 +856,24 @@ class AddServiceController extends GetxController {
 
   void updateCategory(ServiceCategory category) {
     selectedCategory.value = category;
-    // Reset ServiceAs when category changes since options depend on category
+    // Reset dependent fields
     selectedServiceAs.value = null;
     selectedServiceAsItems.clear();
-    // Reset EventVenue when category changes
+    selectedServiceAsString.value = null;
+    selectedSubServiceString.value = null;
+    selectedSubSubServiceString.value = null;
+    backendServiceAsOptions.clear();
+    subOptions.clear();
+    backendSubSubServiceOptions.clear();
     selectedEventVenue.value = null;
     selectedEventVenueItems.clear();
-    // Reset subOptions when category changes
     selectedSubOptions.clear();
-    // Note: Role is no longer auto-changed - all roles available for all categories
-    if (_categoryFromServiceType(selectedServiceType.value) == category) {
-      return;
+    // Update service type
+    if (_categoryFromServiceType(selectedServiceType.value) != category) {
+      selectedServiceType.value = _defaultTypeForCategory(category);
     }
-    selectedServiceType.value = _defaultTypeForCategory(category);
+    // Fetch service_as_name options from backend
+    fetchServiceAsOptions();
   }
 
   /// Toggle a sub-option selection
@@ -714,9 +901,12 @@ class AddServiceController extends GetxController {
       }
 
       // Validate at least one availability has days selected
-      final hasPrimaryAvailability = primaryAvailabilityCard.selectedDays.isNotEmpty;
-      final hasAdditionalAvailability = additionalAvailabilityCards.any((card) => card.selectedDays.isNotEmpty);
-      
+      final hasPrimaryAvailability =
+          primaryAvailabilityCard.selectedDays.isNotEmpty;
+      final hasAdditionalAvailability = additionalAvailabilityCards.any(
+        (card) => card.selectedDays.isNotEmpty,
+      );
+
       if (!hasPrimaryAvailability && !hasAdditionalAvailability) {
         Get.snackbar(
           'Required',
@@ -729,26 +919,26 @@ class AddServiceController extends GetxController {
       }
 
       // TODO: Move repeated validation logic into form validator mixin when we modularize this flow further.
-      
+
       // Get all field values early for validation and conditional logic
       // Use serviceTypeName string to determine allowed fields - more reliable than category enum
       final serviceTypeName = _getServiceTypeName(selectedServiceType.value);
       final roleName = _getRoleName(selectedRole.value);
       final serviceAsValue = selectedServiceAs.value;
-      
+
       // Determine if this is an Event-type service based on service type name
       final isEventType = serviceTypeName == 'Event';
-      
+
       // Get service as name if selected
-      String? serviceAsName;
-      if (selectedServiceAsItems.isNotEmpty) {
-        final item = selectedServiceAsItems.first;
-        if (item is ServiceAs) {
-          serviceAsName = item.label;
-        } else if (item is String) {
-          serviceAsName = item;
-        }
-      }
+      String? serviceAsName = selectedServiceAsString.value;
+
+      // Get sub service and sub-sub service names from hierarchical selections
+      String? subServiceName = selectedSubServiceString.value;
+      String? subSubServiceName = selectedSubSubServiceString.value;
+
+      Log.d(
+        '=======> saveService - Hierarchical selection: serviceAsName=$serviceAsName, subServiceName=$subServiceName, subSubServiceName=$subSubServiceName',
+      );
 
       // Attendance capacity - only for Event and Trainer categories
       int? attendanceValue;
@@ -768,7 +958,7 @@ class AddServiceController extends GetxController {
           }
         }
       }
-      
+
       // Backend validation: attendance_capacity only for Event type
       if (!isEventType && serviceTypeName != 'Professional Trainer') {
         attendanceValue = null; // Don't send attendance for Hospitality
@@ -795,7 +985,7 @@ class AddServiceController extends GetxController {
       if (showSubOptionsChecklist && selectedSubOptionsItems.isNotEmpty) {
         options = _getSubOptionLabel(selectedSubOptionsItems.first);
       }
-      
+
       // Backend validation: options only for Event type
       if (!isEventType) {
         options = null;
@@ -803,9 +993,11 @@ class AddServiceController extends GetxController {
 
       // Validate Primary Availability Times
       if (primaryAvailabilityCard.selectedDays.isNotEmpty) {
-        final start = primaryAvailabilityCard.startTime.value ??
+        final start =
+            primaryAvailabilityCard.startTime.value ??
             const TimeOfDay(hour: 9, minute: 0);
-        final end = primaryAvailabilityCard.endTime.value ??
+        final end =
+            primaryAvailabilityCard.endTime.value ??
             const TimeOfDay(hour: 17, minute: 0);
 
         if (!_isValidTimeRange(start, end)) {
@@ -922,7 +1114,8 @@ class AddServiceController extends GetxController {
           newOptions: options, // Use pre-computed filtered value
           newAttendanceCapacity: attendanceValue,
           newCanGoOutsideLocation: primaryAvailabilityCard.canGoOutside.value,
-          newCannotGoOutsideLocation: primaryAvailabilityCard.cannotGoOutside.value,
+          newCannotGoOutsideLocation:
+              primaryAvailabilityCard.cannotGoOutside.value,
           newRequiresConfirmation: needsConfirmationBeforePayment.value,
           newImagePath: selectedImagePath.value,
         );
@@ -948,9 +1141,12 @@ class AddServiceController extends GetxController {
         serviceTypeName: serviceTypeName,
         roleName: roleName,
         serviceAsName: serviceAsName,
+        subServiceName: subServiceName,
+        subSubServiceName: subSubServiceName,
         eventVenue: eventVenue, // Already filtered by category above
         options: options, // Already filtered by category above
-        attendanceCapacity: attendanceValue, // Already filtered by category above
+        attendanceCapacity:
+            attendanceValue, // Already filtered by category above
         packages: apiPackages,
         availabilities: apiAvailabilities,
         canGoOutsideLocation: primaryAvailabilityCard.canGoOutside.value,
@@ -964,7 +1160,9 @@ class AddServiceController extends GetxController {
       final repository = const ServiceRepository();
       ServiceModel savedService;
 
-      Log.d('=======> saveService - Request being sent: serviceTypeName=${request.serviceTypeName}, eventVenue=${request.eventVenue}');
+      Log.d(
+        '=======> saveService - Request being sent: serviceTypeName=${request.serviceTypeName}, eventVenue=${request.eventVenue}',
+      );
 
       if (isEdit && existingService != null) {
         savedService = await repository.updateService(request);
@@ -980,8 +1178,9 @@ class AddServiceController extends GetxController {
         providerId: savedService.providerId,
         title: savedService.title,
         coverImage: savedService.coverImage,
-        createdAt:
-            '${savedService.createdAt.day}${_getDaySuffix(savedService.createdAt.day)} ${_getMonthShort(savedService.createdAt.month)} - ${_getWeekdayShort(savedService.createdAt.weekday)} - ${savedService.createdAt.hour > 12 ? savedService.createdAt.hour - 12 : (savedService.createdAt.hour == 0 ? 12 : savedService.createdAt.hour)}:${savedService.createdAt.minute.toString().padLeft(2, '0')} ${savedService.createdAt.hour >= 12 ? 'PM' : 'AM'}',
+        createdAt: isEdit && existingService != null
+            ? (existingService.createdAt as String)
+            : '${savedService.createdAt.day}${_getDaySuffix(savedService.createdAt.day)} ${_getMonthShort(savedService.createdAt.month)} - ${_getWeekdayShort(savedService.createdAt.weekday)} - ${savedService.createdAt.hour > 12 ? savedService.createdAt.hour - 12 : (savedService.createdAt.hour == 0 ? 12 : savedService.createdAt.hour)}:${savedService.createdAt.minute.toString().padLeft(2, '0')} ${savedService.createdAt.hour >= 12 ? 'PM' : 'AM'}',
       );
       if (isEdit && existingService != null) {
         spController.updateService(myService);
@@ -1039,14 +1238,15 @@ class AddServiceController extends GetxController {
       }
     }).toList();
   }
-/// Check if start time is before end time
-bool _isValidTimeRange(TimeOfDay start, TimeOfDay end) {
-  final startMinutes = start.hour * 60 + start.minute;
-  final endMinutes = end.hour * 60 + end.minute;
-  return startMinutes < endMinutes;
-}
 
-/// Format time for API (HH:MM:SS format)
+  /// Check if start time is before end time
+  bool _isValidTimeRange(TimeOfDay start, TimeOfDay end) {
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+    return startMinutes < endMinutes;
+  }
+
+  /// Format time for API (HH:MM:SS format)
   String _formatTimeForApi(String time) {
     if (time.isEmpty) return '09:00:00';
     // If already in correct format, return as is

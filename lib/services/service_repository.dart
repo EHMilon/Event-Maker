@@ -174,7 +174,7 @@ class ServiceRepository {
         return ServiceModel.fromJson(response['data']);
       }
     } on ApiException {
-          rethrow;
+      rethrow;
     } catch (e) {
       throw ApiException(message: 'Failed to create service: $e');
     }
@@ -237,8 +237,8 @@ class ServiceRepository {
       Log.d('=======> updateService - Response data: $data');
       return ServiceModel.fromJson(data);
     } on ApiException catch (e) {
-          Log.e('=======> updateService - ApiException: ${e.message}');
-          rethrow;
+      Log.e('=======> updateService - ApiException: ${e.message}');
+      rethrow;
     } catch (e) {
       Log.e('=======> updateService - Error: $e');
       throw ApiException(message: 'Failed to update service: $e');
@@ -390,7 +390,9 @@ class ServiceRepository {
 
   /// Search for services on Map
   /// Uses: GET api/services/search
-  Future<Map<String, dynamic>> searchMapServices(Map<String, dynamic> params) async {
+  Future<Map<String, dynamic>> searchMapServices(
+    Map<String, dynamic> params,
+  ) async {
     final api = ApiService();
     try {
       final queryParams = <String, String>{};
@@ -414,7 +416,9 @@ class ServiceRepository {
   /// Search customer services by query string
   /// Uses: GET /api/services/customer-services-search?search=decor
   /// Response: { "success": true, "message": "...", "data": { "total_count": 5, "services": [...] } }
-  Future<CustomerServicesSearchResponse> searchCustomerServices(String query) async {
+  Future<CustomerServicesSearchResponse> searchCustomerServices(
+    String query,
+  ) async {
     final api = ApiService();
 
     try {
@@ -427,6 +431,43 @@ class ServiceRepository {
       throw ApiException(message: e.message);
     } catch (e) {
       throw ApiException(message: 'Failed to search services: $e');
+    }
+  }
+
+  /// Fetch category master dropdown data
+  /// Uses: GET api/services/category-master/dropdown?service_type_name=Hospitality&role_name=Business&service_as_name=Catering&sub_service_name=Buffet
+  /// Response: { "success": true, "message": "sub_sub_service_name dropdown retrieved successfully.", "data": { "level": "sub_sub_service_name", "items": [...], "has_next": true } }
+  Future<CategoryMasterDropdownResponse> fetchCategoryMasterDropdown({
+    required String serviceTypeName,
+    String? roleName,
+    String? serviceAsName,
+    String? subServiceName,
+  }) async {
+    final api = ApiService();
+
+    try {
+      final queryParams = <String, String>{
+        'service_type_name': serviceTypeName,
+      };
+      if (roleName != null && roleName.isNotEmpty) {
+        queryParams['role_name'] = roleName;
+      }
+      if (serviceAsName != null && serviceAsName.isNotEmpty) {
+        queryParams['service_as_name'] = serviceAsName;
+      }
+      if (subServiceName != null && subServiceName.isNotEmpty) {
+        queryParams['sub_service_name'] = subServiceName;
+      }
+
+      final response = await api.get(
+        ApiConstant.categoryMasterDropdown,
+        queryParams: queryParams,
+      );
+      return CategoryMasterDropdownResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch dropdown data: $e');
     }
   }
 }
@@ -451,7 +492,7 @@ class CustomerServicesSearchResponse {
     // API returns: { "success": true, "message": "...", "total": 8, "data": [...] }
     // Note: data is a direct array, not nested under data.services
     final dataList = json['data'] as List<dynamic>? ?? [];
-    
+
     return CustomerServicesSearchResponse(
       success: json['success'] as bool? ?? false,
       message: json['message'] as String? ?? '',
@@ -631,7 +672,8 @@ class BookmarkedServicesResponse {
       pagination: BookmarkedPagination.fromJson(
         json['pagination'] as Map<String, dynamic>? ?? {},
       ),
-      data: (json['data'] as List<dynamic>?)
+      data:
+          (json['data'] as List<dynamic>?)
               ?.map((e) => ServiceModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -659,6 +701,55 @@ class BookmarkedPagination {
       pageSize: json['page_size'] as int? ?? 10,
       totalPages: json['total_pages'] as int? ?? 1,
       totalItems: json['total_items'] as int? ?? 0,
+    );
+  }
+}
+
+/// Response model for category master dropdown
+/// GET /services/category-master/dropdown
+/// Response: { "success": true, "message": "sub_sub_service_name dropdown retrieved successfully.", "data": { "level": "sub_sub_service_name", "items": [...], "has_next": true } }
+class CategoryMasterDropdownResponse {
+  final bool success;
+  final String message;
+  final CategoryMasterDropdownData data;
+
+  CategoryMasterDropdownResponse({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory CategoryMasterDropdownResponse.fromJson(Map<String, dynamic> json) {
+    return CategoryMasterDropdownResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: CategoryMasterDropdownData.fromJson(
+        json['data'] as Map<String, dynamic>? ?? {},
+      ),
+    );
+  }
+}
+
+class CategoryMasterDropdownData {
+  final String level;
+  final List<String> items;
+  final bool hasNext;
+
+  CategoryMasterDropdownData({
+    required this.level,
+    required this.items,
+    required this.hasNext,
+  });
+
+  factory CategoryMasterDropdownData.fromJson(Map<String, dynamic> json) {
+    return CategoryMasterDropdownData(
+      level: json['level'] as String? ?? '',
+      items:
+          (json['items'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      hasNext: json['has_next'] as bool? ?? false,
     );
   }
 }

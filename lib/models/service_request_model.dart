@@ -4,9 +4,12 @@ class ServiceRequestModel {
   final int? id; // Only for updates
   final String title;
   final String description;
-  final String serviceTypeName; // Event, Professional Trainer, Photography, etc.
+  final String
+  serviceTypeName; // Event, Professional Trainer, Photography, etc.
   final String roleName; // Business, Freelancer, Productive Family
   final String? serviceAsName; // Decoration, Fitness Trainer, etc.
+  final String? subServiceName; // Optional - sub-service name
+  final String? subSubServiceName; // Optional - sub-sub-service name
   final String? eventVenue; // Optional - for event category
   final String? options; // Optional - sub-options like "Indoor"
   final int? attendanceCapacity; // Optional - for event/trainer categories
@@ -25,6 +28,8 @@ class ServiceRequestModel {
     required this.serviceTypeName,
     required this.roleName,
     this.serviceAsName,
+    this.subServiceName,
+    this.subSubServiceName,
     this.eventVenue,
     this.options,
     this.attendanceCapacity,
@@ -45,6 +50,8 @@ class ServiceRequestModel {
       'service_type_name': serviceTypeName,
       'role_name': roleName,
       if (serviceAsName != null) 'service_as_name': serviceAsName,
+      if (subServiceName != null) 'sub_service_name': subServiceName,
+      if (subSubServiceName != null) 'sub_sub_service_name': subSubServiceName,
       if (eventVenue != null) 'event_vanue': eventVenue, // Note: backend typo
       if (options != null) 'options': options,
       if (attendanceCapacity != null) 'attendance_capacity': attendanceCapacity,
@@ -67,8 +74,14 @@ class ServiceRequestModel {
       'description': description,
       'service_type_name': serviceTypeName,
       'role_name': roleName,
-      if (serviceAsName != null && serviceAsName!.isNotEmpty) 'service_as_name': serviceAsName!,
-      if (eventVenue != null && eventVenue!.isNotEmpty) 'event_vanue': eventVenue!,
+      if (serviceAsName != null && serviceAsName!.isNotEmpty)
+        'service_as_name': serviceAsName!,
+      if (subServiceName != null && subServiceName!.isNotEmpty)
+        'sub_service_name': subServiceName!,
+      if (subSubServiceName != null && subSubServiceName!.isNotEmpty)
+        'sub_sub_service_name': subSubServiceName!,
+      if (eventVenue != null && eventVenue!.isNotEmpty)
+        'event_vanue': eventVenue!,
       if (options != null && options!.isNotEmpty) 'options': options!,
       if (attendanceCapacity != null)
         'attendance_capacity': attendanceCapacity.toString(),
@@ -100,6 +113,8 @@ class ServiceRequestModel {
     String? serviceTypeName,
     String? roleName,
     String? serviceAsName,
+    String? subServiceName,
+    String? subSubServiceName,
     String? eventVenue,
     String? options,
     int? attendanceCapacity,
@@ -118,6 +133,8 @@ class ServiceRequestModel {
       serviceTypeName: serviceTypeName ?? this.serviceTypeName,
       roleName: roleName ?? this.roleName,
       serviceAsName: serviceAsName ?? this.serviceAsName,
+      subServiceName: subServiceName ?? this.subServiceName,
+      subSubServiceName: subSubServiceName ?? this.subSubServiceName,
       eventVenue: eventVenue ?? this.eventVenue,
       options: options ?? this.options,
       attendanceCapacity: attendanceCapacity ?? this.attendanceCapacity,
@@ -161,9 +178,13 @@ class PackageRequestModel {
     return PackageRequestModel(
       name: json['name'] as String,
       price: json['price'].toString(),
-      features: (json['features'] as List<dynamic>?)
-              ?.map((e) =>
-                  e is Map<String, dynamic> ? e['title'] as String : e.toString())
+      features:
+          (json['features'] as List<dynamic>?)
+              ?.map(
+                (e) => e is Map<String, dynamic>
+                    ? e['title'] as String
+                    : e.toString(),
+              )
               .toList() ??
           [],
       sortOrder: json['sort_order'] as int? ?? 1,
@@ -209,7 +230,8 @@ class AvailabilityRequestModel {
   factory AvailabilityRequestModel.fromJson(Map<String, dynamic> json) {
     return AvailabilityRequestModel(
       id: json['id'] as int?,
-      weekDays: (json['week_days'] as List<dynamic>?)
+      weekDays:
+          (json['week_days'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -237,8 +259,9 @@ class _JsonEncoder {
       return '[${value.map(convert).join(',')}]';
     }
     if (value is Map) {
-      final entries =
-          value.entries.map((e) => '"${e.key}":${convert(e.value)}').join(',');
+      final entries = value.entries
+          .map((e) => '"${e.key}":${convert(e.value)}')
+          .join(',');
       return '{$entries}';
     }
     return '"$value"';

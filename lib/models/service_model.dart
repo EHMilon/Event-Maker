@@ -470,12 +470,8 @@ class ServiceModel {
           (json['provider'] as Map<String, dynamic>?)?['total_reviews']
               as int? ??
           0,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : DateTime.now(),
+      createdAt: _parseDateTime(json['created_at'] as String?),
+      updatedAt: _parseDateTime(json['updated_at'] as String?),
       availabilities:
           (json['availabilities'] as List<dynamic>?)
               ?.map(
@@ -518,6 +514,75 @@ class ServiceModel {
       // Map starting_price from API to basePrice
       basePrice: double.tryParse(json['starting_price'] as String? ?? '0'),
     );
+  }
+
+  static DateTime _parseDateTime(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return DateTime.now();
+    try {
+      return DateTime.parse(dateStr);
+    } catch (e) {
+      // Handle "13th Apr - Mon - 5:30 PM" or "13th Apr - Mon - 12:03 PM"
+      try {
+        final now = DateTime.now();
+        final parts = dateStr.split(' - ');
+        if (parts.length >= 3) {
+          // Part 0: "13th Apr"
+          final dateParts = parts[0].split(' ');
+          int day = int.parse(dateParts[0].replaceAll(RegExp(r'[^0-9]'), ''));
+          int month = _monthFromName(dateParts[1]);
+
+          // Part 2: "5:30 PM"
+          final timeParts = parts[2].split(' ');
+          final hourMin = timeParts[0].split(':');
+          int hour = int.parse(hourMin[0]);
+          int minute = int.parse(hourMin[1]);
+
+          if (timeParts.length > 1 &&
+              timeParts[1].toUpperCase() == 'PM' &&
+              hour < 12) {
+            hour += 12;
+          } else if (timeParts.length > 1 &&
+              timeParts[1].toUpperCase() == 'AM' &&
+              hour == 12) {
+            hour = 0;
+          }
+
+          return DateTime(now.year, month, day, hour, minute);
+        }
+      } catch (_) {}
+      return DateTime.now();
+    }
+  }
+
+  static int _monthFromName(String name) {
+    switch (name.toLowerCase()) {
+      case 'jan':
+        return 1;
+      case 'feb':
+        return 2;
+      case 'mar':
+        return 3;
+      case 'apr':
+        return 4;
+      case 'may':
+        return 5;
+      case 'jun':
+        return 6;
+      case 'jul':
+        return 7;
+      case 'aug':
+        return 8;
+      case 'sep':
+        return 9;
+      case 'oct':
+        return 10;
+      case 'nov':
+        return 11;
+      case 'dec':
+        return 12;
+      default:
+        return DateTime.now().month;
+    }
   }
 
   static ServiceType _parseServiceType(String? typeName) {
