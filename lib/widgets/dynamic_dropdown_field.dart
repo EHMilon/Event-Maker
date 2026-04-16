@@ -36,7 +36,8 @@ class DynamicDropdownField<T> extends StatefulWidget {
   });
 
   @override
-  State<DynamicDropdownField<T>> createState() => _DynamicDropdownFieldState<T>();
+  State<DynamicDropdownField<T>> createState() =>
+      _DynamicDropdownFieldState<T>();
 }
 
 class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
@@ -72,6 +73,16 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+    var screenHeight = MediaQuery.of(context).size.height;
+    var keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    var availableHeightBelow =
+        screenHeight - offset.dy - size.height - keyboardHeight - 20.h;
+    var dropdownHeight = 400.h;
+
+    // Check if dropdown should show above or below
+    bool showAbove =
+        availableHeightBelow < dropdownHeight && offset.dy > dropdownHeight;
 
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -79,13 +90,16 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
         child: CompositedTransformFollower(
           link: _layerLink,
           showWhenUnlinked: false,
-          offset: Offset(0, size.height + 0.h),
+          offset: Offset(
+            0,
+            showAbove ? -dropdownHeight - 4.h : size.height + 0.h,
+          ),
           child: Material(
             elevation: 8,
             borderRadius: BorderRadius.circular(12.r),
             color: Colors.white,
             child: Container(
-              constraints: BoxConstraints(maxHeight: 400.h),
+              constraints: BoxConstraints(maxHeight: dropdownHeight),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12.r),
@@ -103,130 +117,190 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Obx(() => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ...widget.items.map((item) {
-                            final isSelected = widget.selectedItems.contains(item);
-                            return ListTile(
-                              title: Text(
-                                widget.itemBuilder(item),
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                ),
-                              ),
-                              onTap: () {
-                                widget.onSelected(item);
-                                _closeDropdown();
-                              },
-                            );
-                          }),
-                          // Selected custom items that are not in the main items list
-                          ...widget.selectedItems
-                              .where((e) => !widget.items.contains(e))
-                              .map((item) {
-                            return ListTile(
-                              title: Text(
-                                item.toString(),
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(Icons.close,
-                                    size: 18.r, color: AppColors.error),
-                                onPressed: () {
-                                  widget.onRemoved(item);
-                                },
-                              ),
-                              onTap: () {
-                                widget.onSelected(item);
-                                _closeDropdown();
-                              },
-                            );
-                          }),
-                        ],
-                      )),
-                      
-                      // Add custom service item
-                      Obx(() => widget.isAdding.value 
-                        ? Padding(
-                            padding: EdgeInsets.all(12.w),
-                            child: Column(
-                              children: [
-                                TextField(
-                                  controller: widget.addController,
-                                  autofocus: true,
-                                  decoration: InputDecoration(
-                                    hintText: 'Type Here',
-                                    hintStyle: TextStyle(color: AppColors.grey.withOpacity(0.5)),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12.r),
-                                      borderSide: BorderSide(color: AppColors.lightGrey),
-                                    ),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      Obx(
+                        () => Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ...widget.items.map((item) {
+                              final isSelected = widget.selectedItems.contains(
+                                item,
+                              );
+                              return ListTile(
+                                title: Text(
+                                  widget.itemBuilder(item),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textPrimary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
                                   ),
                                 ),
-                                SizedBox(height: 12.h),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton(
-                                      onPressed: widget.onCancelAdd,
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: AppColors.lightGrey.withOpacity(0.3),
-                                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                                onTap: () {
+                                  widget.onSelected(item);
+                                  _closeDropdown();
+                                },
+                              );
+                            }),
+                            // Selected custom items that are not in the main items list
+                            ...widget.selectedItems
+                                .where((e) => !widget.items.contains(e))
+                                .map((item) {
+                                  return ListTile(
+                                    title: Text(
+                                      item.toString(),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
                                     ),
-                                    SizedBox(width: 8.w),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        widget.onSaveAdd();
-                                        _closeDropdown();
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                                    trailing: IconButton(
+                                      icon: Icon(
+                                        Icons.close,
+                                        size: 18.r,
+                                        color: AppColors.error,
                                       ),
-                                      child: Text('Save', style: TextStyle(color: Colors.white)),
+                                      onPressed: () {
+                                        widget.onRemoved(item);
+                                      },
+                                    ),
+                                    onTap: () {
+                                      widget.onSelected(item);
+                                      _closeDropdown();
+                                    },
+                                  );
+                                }),
+                          ],
+                        ),
+                      ),
+
+                      // Add custom service item
+                      Obx(
+                        () => widget.isAdding.value
+                            ? Padding(
+                                padding: EdgeInsets.all(12.w),
+                                child: Column(
+                                  children: [
+                                    TextField(
+                                      controller: widget.addController,
+                                      autofocus: true,
+                                      decoration: InputDecoration(
+                                        hintText: 'Type Here',
+                                        hintStyle: TextStyle(
+                                          color: AppColors.grey.withOpacity(
+                                            0.5,
+                                          ),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12.r,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: AppColors.lightGrey,
+                                          ),
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 16.w,
+                                          vertical: 12.h,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 12.h),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        TextButton(
+                                          onPressed: widget.onCancelAdd,
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: AppColors.lightGrey
+                                                .withOpacity(0.3),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 20.w,
+                                              vertical: 10.h,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Cancel',
+                                            style: TextStyle(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            widget.onSaveAdd();
+                                            _closeDropdown();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 20.w,
+                                              vertical: 10.h,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12.r),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Save',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          )
-                        : InkWell(
-                            onTap: widget.onAddPressed,
-                            child: Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
-                              decoration: BoxDecoration(
-                                color: AppColors.grey100, // Darker/Grey background for the last option
-                                border: Border(top: BorderSide(color: AppColors.lightGrey.withOpacity(0.5))),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.add_box_outlined, color: AppColors.textSecondary, size: 25.r),
-                                  SizedBox(width: 12.w),
-                                  Text(
-                                    'Add your custom service',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w400,
+                              )
+                            : InkWell(
+                                onTap: widget.onAddPressed,
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 16.h,
+                                    horizontal: 16.w,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors
+                                        .grey100, // Darker/Grey background for the last option
+                                    border: Border(
+                                      top: BorderSide(
+                                        color: AppColors.lightGrey.withOpacity(
+                                          0.5,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ],
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.add_box_outlined,
+                                        color: AppColors.textSecondary,
+                                        size: 25.r,
+                                      ),
+                                      SizedBox(width: 12.w),
+                                      Text(
+                                        'Add your custom service',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
                       ),
                     ],
                   ),
@@ -262,7 +336,9 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
               decoration: BoxDecoration(
                 color: AppColors.white,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: _isExpanded ? AppColors.primary : AppColors.lightGrey),
+                border: Border.all(
+                  color: _isExpanded ? AppColors.primary : AppColors.lightGrey,
+                ),
               ),
               child: Row(
                 children: [
@@ -290,8 +366,8 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    item is T 
-                                        ? widget.itemBuilder(item) 
+                                    item is T
+                                        ? widget.itemBuilder(item)
                                         : item.toString(),
                                     style: TextStyle(
                                       fontSize: 14.sp,
@@ -304,7 +380,11 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
                                 ),
                                 GestureDetector(
                                   onTap: () => widget.onRemoved(item),
-                                  child: Icon(Icons.close, size: 18.r, color: AppColors.textSecondary),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 18.r,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                                 SizedBox(width: 8.w),
                               ],
@@ -312,7 +392,9 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
                           }),
                   ),
                   Icon(
-                    _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    _isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: AppColors.textSecondary,
                   ),
                 ],

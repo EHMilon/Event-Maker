@@ -895,7 +895,10 @@ class AddServiceController extends GetxController {
     selectedRole.value = ProviderRole.freelancer;
 
     // Initial fetch of nested dropdown data
-    fetchNestedDropdownData();
+    fetchNestedDropdownData().then((_) {
+      // Refresh options after data is loaded to ensure default selections are reflected in options
+      _refreshOptionsFromNestedData();
+    });
   }
 
   /// Fetch all nested dropdown data from backend in a single call

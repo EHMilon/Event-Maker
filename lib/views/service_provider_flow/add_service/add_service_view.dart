@@ -7,6 +7,7 @@ import '../../../constants/app_colors.dart';
 import '../../../models/service_model.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../../../widgets/unified_dropdown_field.dart';
+import '../../../widgets/searchable_unified_dropdown_field.dart';
 import '../../../widgets/primary_text_button.dart';
 import '../../../widgets/upload_widget.dart';
 import '../../../widgets/availability_widget_card.dart';
@@ -98,6 +99,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     onSingleSelect: (value) {
                       if (value != null) {
                         controller.updateCategory(value);
+                        setState(() {});
                       }
                     },
                     enabled: true,
@@ -119,6 +121,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     onSingleSelect: (value) {
                       if (value != null) {
                         controller.updateRole(value);
+                        setState(() {});
                       }
                     },
                     enabled: true,
@@ -141,12 +144,16 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : UnifiedDropdownField<String>(
+                        : SearchableUnifiedDropdownField<String>(
+                            key: ValueKey(
+                              'serviceAs_${controller.selectedCategory.value}_${controller.selectedRole.value}_${backendOptions.length}',
+                            ),
                             label: 'serviceAs'.tr,
                             hint: 'selectServiceAs'.tr,
                             items: backendOptions,
                             itemLabel: (item) => item,
                             selectedItems: controller.selectedServiceAsItems,
+                            isMulti: true,
                             onMultiSelect: (value) {
                               controller.toggleServiceAs(value);
                               setState(() {});
@@ -155,16 +162,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                               controller.removeServiceAs(value);
                               setState(() {});
                             },
-                            onAddCustom: controller.addCustomServiceAsDirectly,
-                            isAdding: controller.showAddServiceAsField,
-                            addController: controller.newServiceAsController,
-                            onSaveAdd: () {
-                              controller.addCustomSubOption();
-                              setState(() {});
-                            },
-                            onCancelAdd: controller.closeAddSubOptionField,
                             enabled: true,
-                            mode: DropdownMode.multi,
                           ),
                   );
                 }),
@@ -189,12 +187,13 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : UnifiedDropdownField<String>(
+                        : SearchableUnifiedDropdownField<String>(
                             label: 'selectOptions'.tr,
                             hint: 'selectOptions'.tr,
                             items: options,
                             itemLabel: (item) => item,
                             selectedItems: controller.selectedSubServiceItems,
+                            isMulti: true,
                             onMultiSelect: (value) {
                               controller.toggleSubService(value);
                               setState(() {});
@@ -203,16 +202,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                               controller.selectedSubServiceItems.remove(item);
                               setState(() {});
                             },
-                            onAddCustom: controller.addCustomSubOptionDirectly,
-                            isAdding: controller.showAddSubOptionField,
-                            addController: controller.newSubOptionController,
-                            onSaveAdd: () {
-                              controller.addCustomSubOption();
-                              setState(() {});
-                            },
-                            onCancelAdd: controller.closeAddSubOptionField,
                             enabled: true,
-                            mode: DropdownMode.multi,
                           ),
                   );
                 }),
@@ -254,7 +244,8 @@ class _AddServiceViewState extends State<AddServiceView> {
                               );
                               setState(() {});
                             },
-                            onAddCustom: controller.addCustomSubSubOptionDirectly,
+                            onAddCustom:
+                                controller.addCustomSubSubOptionDirectly,
                             isAdding: controller.showAddSubOptionField,
                             addController: controller.newSubOptionController,
                             onSaveAdd: () {
