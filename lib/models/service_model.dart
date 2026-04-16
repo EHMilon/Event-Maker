@@ -452,7 +452,7 @@ class ServiceModel {
       serviceAsName: json['service_as_name'] as String? ?? '',
       subServiceName: json['sub_service_name'] as String?,
       subSubServiceName: json['sub_sub_service_name'] as String?,
-      eventVenue: json['event_vanue'] as String?, // Note: API has typo "vanue"
+      eventVenue: json['event_venue'] as String?, // Fixed: API now uses correct spelling
       attendanceCapacity: json['attendance_capacity'] as int?,
       options: json['options'] as String?,
       // Convert cover_image to full media URL
@@ -655,7 +655,7 @@ class ServiceModel {
       'service_type_name': serviceTypeName,
       'role_name': roleName,
       'service_as_name': serviceAsName,
-      'event_vanue': eventVenue, // Note: API has typo "vanue"
+      'event_venue': eventVenue, // Fixed: API now uses correct spelling
       'attendance_capacity': attendanceCapacity,
       'options': options,
       'cover_image': coverImage,

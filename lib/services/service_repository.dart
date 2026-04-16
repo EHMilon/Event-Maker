@@ -471,6 +471,23 @@ class ServiceRepository {
     }
   }
 
+  /// Fetch category master nested dropdown data (single API call)
+  /// Uses: GET api/services/category-master/nested-dropdown
+  /// Response: { "success": true, "message": "Nested category master retrieved successfully.", "data": [{ "service_type_name": "Event", "roles": [{ "role_name": "Business", "service_as_names": [{ "service_as_name": "...", "sub_services": [{ "sub_service_name": "...", "sub_sub_services": [...] }] }] }] }
+  Future<CategoryMasterNestedDropdownResponse>
+  fetchCategoryMasterNestedDropdown() async {
+    final api = ApiService();
+
+    try {
+      final response = await api.get(ApiConstant.categoryMasterNestedDropdown);
+      return CategoryMasterNestedDropdownResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw ApiException(message: e.message);
+    } catch (e) {
+      throw ApiException(message: 'Failed to fetch nested dropdown data: $e');
+    }
+  }
+
   /// Create custom service category master
   /// Uses: POST api/services/category-master/create
   /// Body: { service_type_name, role_name, service_as_name, sub_service_name, sub_sub_service_name, sort_order }
@@ -815,6 +832,104 @@ class CategoryMasterDropdownData {
               .toList() ??
           [],
       hasNext: json['has_next'] as bool? ?? false,
+    );
+  }
+}
+
+/// Response model for category master nested dropdown
+/// GET /services/category-master/nested-dropdown
+/// Response: { "success": true, "message": "Nested category master retrieved successfully.", "data": [{ "service_type_name": "Event", "roles": [{ "role_name": "Business", "service_as_names": [{ "service_as_name": "Accessories Rental Company", "sub_services": [] }] }] }] }
+class CategoryMasterNestedDropdownResponse {
+  final bool success;
+  final String message;
+  final List<CategoryServiceType> data;
+
+  CategoryMasterNestedDropdownResponse({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory CategoryMasterNestedDropdownResponse.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final dataList = (json['data'] as List<dynamic>?) ?? [];
+    return CategoryMasterNestedDropdownResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: dataList
+          .map((e) => CategoryServiceType.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class CategoryServiceType {
+  final String serviceTypeName;
+  final List<CategoryRole> roles;
+
+  CategoryServiceType({required this.serviceTypeName, required this.roles});
+
+  factory CategoryServiceType.fromJson(Map<String, dynamic> json) {
+    final rolesList = (json['roles'] as List<dynamic>?) ?? [];
+    return CategoryServiceType(
+      serviceTypeName: json['service_type_name'] as String? ?? '',
+      roles: rolesList
+          .map((e) => CategoryRole.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class CategoryRole {
+  final String roleName;
+  final List<CategoryServiceAs> serviceAsNames;
+
+  CategoryRole({required this.roleName, required this.serviceAsNames});
+
+  factory CategoryRole.fromJson(Map<String, dynamic> json) {
+    final serviceAsList = (json['service_as_names'] as List<dynamic>?) ?? [];
+    return CategoryRole(
+      roleName: json['role_name'] as String? ?? '',
+      serviceAsNames: serviceAsList
+          .map((e) => CategoryServiceAs.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class CategoryServiceAs {
+  final String serviceAsName;
+  final List<CategorySubService> subServices;
+
+  CategoryServiceAs({required this.serviceAsName, required this.subServices});
+
+  factory CategoryServiceAs.fromJson(Map<String, dynamic> json) {
+    final subServicesList = (json['sub_services'] as List<dynamic>?) ?? [];
+    return CategoryServiceAs(
+      serviceAsName: json['service_as_name'] as String? ?? '',
+      subServices: subServicesList
+          .map((e) => CategorySubService.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
+class CategorySubService {
+  final String subServiceName;
+  final List<String> subSubServices;
+
+  CategorySubService({
+    required this.subServiceName,
+    required this.subSubServices,
+  });
+
+  factory CategorySubService.fromJson(Map<String, dynamic> json) {
+    final subSubServicesList =
+        (json['sub_sub_services'] as List<dynamic>?) ?? [];
+    return CategorySubService(
+      subServiceName: json['sub_service_name'] as String? ?? '',
+      subSubServices: subSubServicesList.map((e) => e.toString()).toList(),
     );
   }
 }

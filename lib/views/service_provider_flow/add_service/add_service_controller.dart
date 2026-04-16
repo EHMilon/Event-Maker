@@ -14,70 +14,6 @@ enum ServiceCategory { hospitality, event, trainer }
 
 enum ProviderRole { freelancer, business, productiveFamily }
 
-/// Default ServiceAs options (fallback when backend is unavailable)
-List<ServiceAs> getDefaultServiceAsOptions(
-  ProviderRole role,
-  ServiceCategory category,
-) {
-  if (category == ServiceCategory.trainer) {
-    return [ServiceAs.furniture, ServiceAs.cateringTrainer];
-  }
-
-  switch (role) {
-    case ProviderRole.freelancer:
-      return [
-        ServiceAs.waitress,
-        ServiceAs.barista,
-        ServiceAs.juiceMaker,
-        ServiceAs.sandwichMaker,
-        ServiceAs.burgerMaker,
-        ServiceAs.shawarmaMaker,
-        ServiceAs.chef,
-      ];
-    case ProviderRole.business:
-      return [
-        ServiceAs.cateringBusiness,
-        ServiceAs.buffet,
-        ServiceAs.liveCooking,
-        ServiceAs.outdoorCafeKiosk,
-        ServiceAs.coffeeHospitalityService,
-      ];
-    case ProviderRole.productiveFamily:
-      return [];
-  }
-}
-
-/// Default ServiceSubOption options (fallback when backend is unavailable)
-List<ServiceSubOption> getDefaultServiceSubOptions(ServiceAs? serviceAs) {
-  if (serviceAs == null) return [];
-
-  switch (serviceAs) {
-    case ServiceAs.buffet:
-      return [
-        ServiceSubOption.indianBuffet,
-        ServiceSubOption.internationalBuffet,
-        ServiceSubOption.japaneseBuffet,
-        ServiceSubOption.thaiBuffet,
-      ];
-    case ServiceAs.liveCooking:
-      return [
-        ServiceSubOption.pastryStation,
-        ServiceSubOption.shawarmaStation,
-        ServiceSubOption.burgerPizzaSushiStation,
-      ];
-    case ServiceAs.outdoorCafeKiosk:
-      return [
-        ServiceSubOption.outdoorMobileFoodTruck,
-        ServiceSubOption.mobileCoffeeCarMiniCar,
-        ServiceSubOption.coffeeCart,
-        ServiceSubOption.outdoorCoffeeKiosk,
-        ServiceSubOption.coffeeHospitalityServiceSub,
-      ];
-    default:
-      return [];
-  }
-}
-
 class AddServiceController extends GetxController {
   static const int primaryDayLimit = 7;
 
@@ -120,36 +56,186 @@ class AddServiceController extends GetxController {
   final selectedSubServiceItems = <dynamic>[].obs;
   final selectedSubSubServiceItems = <dynamic>[].obs;
 
-  // Backend-fetched dropdown options
+  // Nested dropdown data from backend
+  var nestedDropdownData = <CategoryServiceType>[].obs;
+  var isLoadingDropdowns = false.obs;
+
+  // Options lists (populated from nestedDropdownData based on category/role)
   var backendServiceAsOptions = <String>[].obs;
   var subOptions = <String>[].obs;
   var backendSubSubServiceOptions = <String>[].obs;
-  var isLoadingDropdowns = false.obs;
 
   // Selected string values (from backend)
   final selectedServiceAsString = Rxn<String>();
   final selectedSubServiceString = Rxn<String>();
   final selectedSubSubServiceString = Rxn<String>();
 
+  /// Refresh options from nested data based on current category/role
+  void _refreshOptionsFromNestedData() {
+    final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+    final roleName = _getRoleNameForApi(selectedRole.value);
+
+    backendServiceAsOptions.clear();
+    subOptions.clear();
+    backendSubSubServiceOptions.clear();
+
+    for (var serviceType in nestedDropdownData) {
+      if (serviceType.serviceTypeName == serviceTypeName) {
+        for (var role in serviceType.roles) {
+          if (role.roleName == roleName) {
+            backendServiceAsOptions.value = role.serviceAsNames
+                .map((e) => e.serviceAsName)
+                .toList();
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  /// Refresh sub options when service_as is selected
+  void _refreshSubOptionsFromNestedData() {
+    subOptions.clear();
+    backendSubSubServiceOptions.clear();
+
+    if (selectedServiceAsString.value == null) return;
+
+    final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+    final roleName = _getRoleNameForApi(selectedRole.value);
+
+    for (var serviceType in nestedDropdownData) {
+      if (serviceType.serviceTypeName == serviceTypeName) {
+        for (var role in serviceType.roles) {
+          if (role.roleName == roleName) {
+            for (var serviceAs in role.serviceAsNames) {
+              if (serviceAs.serviceAsName == selectedServiceAsString.value) {
+                subOptions.value = serviceAs.subServices
+                    .map((e) => e.subServiceName)
+                    .toList();
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /// Refresh sub-sub options when sub_service is selected
+  void _refreshSubSubOptionsFromNestedData() {
+    backendSubSubServiceOptions.clear();
+
+    if (selectedSubServiceString.value == null) return;
+
+    final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+    final roleName = _getRoleNameForApi(selectedRole.value);
+
+    for (var serviceType in nestedDropdownData) {
+      if (serviceType.serviceTypeName == serviceTypeName) {
+        for (var role in serviceType.roles) {
+          if (role.roleName == roleName) {
+            for (var serviceAs in role.serviceAsNames) {
+              if (serviceAs.serviceAsName == selectedServiceAsString.value) {
+                for (var subService in serviceAs.subServices) {
+                  if (subService.subServiceName ==
+                      selectedSubServiceString.value) {
+                    backendSubSubServiceOptions.value =
+                        subService.subSubServices;
+                    return;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   /// Returns available ServiceAs options based on current selected role and category
-  List<ServiceAs> get availableServiceAsOptions =>
-      getDefaultServiceAsOptions(selectedRole.value, selectedCategory.value);
+  /// Now populated from backend nested dropdown data
+  List<String> get availableServiceAsOptions {
+    if (nestedDropdownData.isEmpty) return [];
 
-  /// Returns true if Event Venue dropdown should be shown (when category is Event)
-  bool get showEventVenueDropdown =>
-      selectedCategory.value == ServiceCategory.event;
+    final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+    final roleName = _getRoleNameForApi(selectedRole.value);
 
-  /// Returns available sub-options based on selected ServiceAs
-  List<ServiceSubOption> get availableSubOptions =>
-      getDefaultServiceSubOptions(selectedServiceAs.value);
+    for (var serviceType in nestedDropdownData) {
+      if (serviceType.serviceTypeName == serviceTypeName) {
+        for (var role in serviceType.roles) {
+          if (role.roleName == roleName) {
+            return role.serviceAsNames.map((e) => e.serviceAsName).toList();
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  /// Returns available sub-service options based on selected ServiceAs
+  List<String> get availableSubOptions {
+    if (selectedServiceAsString.value == null || nestedDropdownData.isEmpty) {
+      return [];
+    }
+
+    final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+    final roleName = _getRoleNameForApi(selectedRole.value);
+
+    for (var serviceType in nestedDropdownData) {
+      if (serviceType.serviceTypeName == serviceTypeName) {
+        for (var role in serviceType.roles) {
+          if (role.roleName == roleName) {
+            for (var serviceAs in role.serviceAsNames) {
+              if (serviceAs.serviceAsName == selectedServiceAsString.value) {
+                return serviceAs.subServices
+                    .map((e) => e.subServiceName)
+                    .toList();
+              }
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  /// Returns available sub-sub-service options based on selected SubService
+  List<String> get availableSubSubOptions {
+    if (selectedSubServiceString.value == null || nestedDropdownData.isEmpty) {
+      return [];
+    }
+
+    final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
+    final roleName = _getRoleNameForApi(selectedRole.value);
+
+    for (var serviceType in nestedDropdownData) {
+      if (serviceType.serviceTypeName == serviceTypeName) {
+        for (var role in serviceType.roles) {
+          if (role.roleName == roleName) {
+            for (var serviceAs in role.serviceAsNames) {
+              if (serviceAs.serviceAsName == selectedServiceAsString.value) {
+                for (var subService in serviceAs.subServices) {
+                  if (subService.subServiceName ==
+                      selectedSubServiceString.value) {
+                    return subService.subSubServices;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
 
   /// Returns true if sub-options checklist should be shown (Event + Business + Buffet/LiveCooking/OutdoorCafeKiosk)
   bool get showSubOptionsChecklist =>
       selectedCategory.value == ServiceCategory.event &&
       selectedRole.value == ProviderRole.business &&
-      (selectedServiceAs.value == ServiceAs.buffet ||
-          selectedServiceAs.value == ServiceAs.liveCooking ||
-          selectedServiceAs.value == ServiceAs.outdoorCafeKiosk);
+      (selectedServiceAsString.value == 'Buffet' ||
+          selectedServiceAsString.value == 'Live Cooking' ||
+          selectedServiceAsString.value == 'Outdoor Cafe Kiosk');
 
   /// Returns available ProviderRole options - all roles available for all categories
   /// Freelancer, Business, and Productive Family are shown regardless of service type
@@ -196,15 +282,13 @@ class AddServiceController extends GetxController {
           );
 
           if (response.success) {
-            // Add to dropdown options and select it
+            // Add to options list and select it
             backendServiceAsOptions.add(value);
+            _refreshSubOptionsFromNestedData();
+
             selectedServiceAsItems.clear();
             selectedServiceAsItems.add(value);
             selectedServiceAsString.value = value;
-            selectedServiceAs.value = null;
-
-            // Fetch sub options for the new service_as
-            fetchSubServiceOptions();
 
             Get.snackbar('Success', 'Custom service added successfully');
           }
@@ -238,9 +322,6 @@ class AddServiceController extends GetxController {
     if (selectedServiceAsItems.contains(item)) {
       // Deselecting - clear everything
       selectedServiceAsItems.remove(item);
-      if (item is ServiceAs && selectedServiceAs.value == item) {
-        selectedServiceAs.value = null;
-      }
       selectedServiceAsString.value = null;
       // Clear downstream selections when Service As is deselected
       selectedSubServiceItems.clear();
@@ -262,33 +343,28 @@ class AddServiceController extends GetxController {
       subOptions.clear();
       backendSubSubServiceOptions.clear();
 
-      if (item is ServiceAs) {
-        selectedServiceAs.value = item;
-        selectedServiceAsString.value = item.label;
-      } else if (item is String) {
-        selectedServiceAs.value = null;
+      if (item is String) {
         selectedServiceAsString.value = item;
       }
-      fetchSubServiceOptions();
+      // Refresh sub options from nested data
+      _refreshSubOptionsFromNestedData();
     }
   }
 
   /// Remove a Service As from the selection
   void removeServiceAs(dynamic item) {
     selectedServiceAsItems.remove(item);
-    if (item is ServiceAs && selectedServiceAs.value == item) {
-      selectedServiceAs.value = null;
-    }
   }
 
   /// Show popup to add custom Sub Service (Level 2)
   void addCustomSubOptionDirectly() {
     // Need Level 1 selected first
-    if (selectedServiceAsString.value == null || selectedServiceAsString.value!.isEmpty) {
+    if (selectedServiceAsString.value == null ||
+        selectedServiceAsString.value!.isEmpty) {
       Get.snackbar('Error', 'Please select Service As first');
       return;
     }
-    
+
     AddCustomServiceDialog.show(
       context: Get.context!,
       title: 'Add Custom Sub Service',
@@ -303,17 +379,16 @@ class AddServiceController extends GetxController {
             subServiceName: value,
             sortOrder: 1,
           );
-          
+
           if (response.success) {
-            // Add to dropdown options and select it
+            // Add to sub options list and select it
             subOptions.add(value);
+            _refreshSubSubOptionsFromNestedData();
+
             selectedSubServiceItems.clear();
             selectedSubServiceItems.add(value);
             selectedSubServiceString.value = value;
-            
-            // Fetch sub-sub options for the new sub_service
-            fetchSubSubServiceOptions();
-            
+
             Get.snackbar('Success', 'Custom sub service added successfully');
           }
         } catch (e) {
@@ -327,15 +402,17 @@ class AddServiceController extends GetxController {
   /// Show popup to add custom Sub Service (Level 3)
   void addCustomSubSubOptionDirectly() {
     // Need Level 1 and Level 2 selected first
-    if (selectedServiceAsString.value == null || selectedServiceAsString.value!.isEmpty) {
+    if (selectedServiceAsString.value == null ||
+        selectedServiceAsString.value!.isEmpty) {
       Get.snackbar('Error', 'Please select Service As first');
       return;
     }
-    if (selectedSubServiceString.value == null || selectedSubServiceString.value!.isEmpty) {
+    if (selectedSubServiceString.value == null ||
+        selectedSubServiceString.value!.isEmpty) {
       Get.snackbar('Error', 'Please select Sub Service first');
       return;
     }
-    
+
     AddCustomServiceDialog.show(
       context: Get.context!,
       title: 'Add Custom Sub Service',
@@ -351,15 +428,18 @@ class AddServiceController extends GetxController {
             subSubServiceName: value,
             sortOrder: 1,
           );
-          
+
           if (response.success) {
             // Add to dropdown options and select it
             backendSubSubServiceOptions.add(value);
             selectedSubSubServiceItems.clear();
             selectedSubSubServiceItems.add(value);
             selectedSubSubServiceString.value = value;
-            
-            Get.snackbar('Success', 'Custom sub sub service added successfully');
+
+            Get.snackbar(
+              'Success',
+              'Custom sub sub service added successfully',
+            );
           }
         } catch (e) {
           Log.e('=======> addCustomSubSubOptionDirectly - Error: $e');
@@ -391,9 +471,7 @@ class AddServiceController extends GetxController {
     if (selectedSubServiceItems.contains(item)) {
       selectedSubServiceItems.remove(item);
       selectedSubServiceString.value = null;
-      subOptions
-          .clear(); // This is Level 2 list? No subOptions is Level 2 list.
-      // Wait, let's be careful with names.
+      subOptions.clear();
     } else {
       selectedSubServiceItems.clear();
       selectedSubServiceItems.add(item);
@@ -404,7 +482,8 @@ class AddServiceController extends GetxController {
       selectedSubSubServiceString.value = null;
       backendSubSubServiceOptions.clear();
 
-      fetchSubSubServiceOptions();
+      // Refresh sub-sub options from nested data
+      _refreshSubSubOptionsFromNestedData();
     }
   }
 
@@ -551,26 +630,14 @@ class AddServiceController extends GetxController {
       selectedRole.value = _roleFromString(service.roleName);
     }
 
-    // ServiceAs (Level 1) - map from serviceAsName string
+    // ServiceAs (Level 1) - use string from serviceAsName
     if (service.serviceAsName.isNotEmpty) {
-      final serviceAs = _serviceAsFromString(service.serviceAsName);
       selectedServiceAsItems.clear();
-      if (serviceAs != null) {
-        selectedServiceAs.value = serviceAs;
-        selectedServiceAsItems.add(serviceAs);
-        selectedServiceAsString.value = serviceAs.label;
-      } else {
-        // Fallback for custom strings
-        selectedServiceAsItems.add(service.serviceAsName);
-        selectedServiceAsString.value = service.serviceAsName;
-      }
+      selectedServiceAsItems.add(service.serviceAsName);
+      selectedServiceAsString.value = service.serviceAsName;
 
-      // Update Level 1 options list to include selected value if missing
-      if (serviceAs != null &&
-          !backendServiceAsOptions.contains(serviceAs.label)) {
-        backendServiceAsOptions.add(serviceAs.label);
-      } else if (serviceAs == null &&
-          !backendServiceAsOptions.contains(service.serviceAsName)) {
+      // Ensure the selected value is in the options list
+      if (!backendServiceAsOptions.contains(service.serviceAsName)) {
         backendServiceAsOptions.add(service.serviceAsName);
       }
     }
@@ -717,12 +784,17 @@ class AddServiceController extends GetxController {
 
   /// Fetch dropdown options for edit mode to ensure selected values are available
   Future<void> _fetchDropdownOptionsForEdit() async {
-    // Fetch Level 1 options first
-    await fetchDropdownOptions(level: 'service_as_name');
+    // Wait for nested dropdown data to load if not already loaded
+    if (nestedDropdownData.isEmpty) {
+      await fetchNestedDropdownData();
+    }
+
+    // Refresh Level 1 options based on current category/role
+    _refreshOptionsFromNestedData();
 
     // Fetch Level 2 options if Level 1 is selected
     if (selectedServiceAsString.value != null) {
-      await fetchDropdownOptions(level: 'sub_service_name');
+      _refreshSubOptionsFromNestedData();
 
       // Ensure selected Level 2 value is in the options list
       if (selectedSubServiceString.value != null &&
@@ -733,7 +805,7 @@ class AddServiceController extends GetxController {
 
     // Fetch Level 3 options if Level 2 is selected
     if (selectedSubServiceString.value != null) {
-      await fetchDropdownOptions(level: 'sub_sub_service_name');
+      _refreshSubSubOptionsFromNestedData();
 
       // Ensure selected Level 3 value is in the options list
       if (selectedSubSubServiceString.value != null &&
@@ -822,115 +894,72 @@ class AddServiceController extends GetxController {
     selectedServiceType.value = ServiceType.catering;
     selectedRole.value = ProviderRole.freelancer;
 
-    // Initial fetch of service_as_name options
-    fetchServiceAsOptions();
+    // Initial fetch of nested dropdown data
+    fetchNestedDropdownData();
   }
 
-  /// Fetch dropdown options from backend based on current selections
-  /// level: 'service_as_name' | 'sub_service_name' | 'sub_sub_service_name'
-  Future<void> fetchDropdownOptions({String? level}) async {
+  /// Fetch all nested dropdown data from backend in a single call
+  Future<void> fetchNestedDropdownData() async {
     isLoadingDropdowns.value = true;
     try {
-      final serviceTypeName = _getServiceTypeNameForApi(selectedCategory.value);
-      final roleName = _getRoleNameForApi(selectedRole.value);
-
-      String? serviceAsName;
-      String? subServiceName;
-
-      // Determine what to fetch based on current selection state
-      if (level == 'service_as_name' ||
-          (level == null && selectedServiceAsString.value == null)) {
-        // Fetch service_as_name options (only type and role)
-        serviceAsName = null;
-        subServiceName = null;
-      } else if (level == 'sub_service_name' ||
-          (level == null &&
-              selectedServiceAsString.value != null &&
-              selectedSubServiceString.value == null)) {
-        // Fetch sub_service_name options (type, role, and serviceAsName)
-        serviceAsName = selectedServiceAsString.value;
-        subServiceName = null;
-      } else {
-        // Fetch sub_sub_service_name options (type, role, serviceAsName, and subServiceName)
-        serviceAsName = selectedServiceAsString.value;
-        subServiceName = selectedSubServiceString.value;
-      }
-
-      Log.d(
-        '=======> fetchDropdownOptions - level: ${level ?? "auto"}, serviceAsName: $serviceAsName, subServiceName: $subServiceName',
-      );
-
       final response = await const ServiceRepository()
-          .fetchCategoryMasterDropdown(
-            serviceTypeName: serviceTypeName,
-            roleName: roleName,
-            serviceAsName: serviceAsName,
-            subServiceName: subServiceName,
-          );
+          .fetchCategoryMasterNestedDropdown();
 
       if (response.success) {
-        final items = response.data.items;
+        nestedDropdownData.value = response.data;
         Log.d(
-          '=======> fetchDropdownOptions - level: ${response.data.level}, items: $items',
+          '=======> fetchNestedDropdownData - loaded ${response.data.length} service types',
         );
-
-        // Store based on the level returned by API
-        switch (response.data.level) {
-          case 'service_as_name':
-            backendServiceAsOptions.value = items;
-            break;
-          case 'sub_service_name':
-            subOptions.value = items;
-            break;
-          case 'sub_sub_service_name':
-            backendSubSubServiceOptions.value = items;
-            break;
-        }
       }
     } on ApiException catch (e) {
-      Log.e('=======> fetchDropdownOptions - ApiException: ${e.message}');
+      Log.e('=======> fetchNestedDropdownData - ApiException: ${e.message}');
     } catch (e) {
-      Log.e('=======> fetchDropdownOptions - Error: $e');
+      Log.e('=======> fetchNestedDropdownData - Error: $e');
     } finally {
       isLoadingDropdowns.value = false;
     }
   }
 
+  /// Fetch dropdown options from backend based on current selections
+  /// Now using local filtering from nestedDropdownData
+  /// Kept for backward compatibility - just refreshes the current options
+  Future<void> fetchDropdownOptions({String? level}) async {
+    // No longer needed - data is loaded once and filtered locally
+    // This method is kept for backward compatibility
+    return;
+  }
+
   /// Fetch service_as_name options when category or role changes
+  /// Now uses local data from nestedDropdownData
   void fetchServiceAsOptions() {
-    // Clear downstream selections
+    // Clear downstream selections when category/role changes
     selectedServiceAsString.value = null;
     selectedSubServiceString.value = null;
     selectedSubSubServiceString.value = null;
-    subOptions.clear();
-    backendSubSubServiceOptions.clear();
-
-    fetchDropdownOptions(level: 'service_as_name');
+    selectedServiceAsItems.clear();
+    selectedSubServiceItems.clear();
+    selectedSubSubServiceItems.clear();
+    // Data is already in nestedDropdownData - UI will use availableServiceAsOptions
   }
 
   /// Fetch sub_service_name options when service_as is selected
+  /// Now uses local data from nestedDropdownData
   void fetchSubServiceOptions() {
-    // Clear downstream selections - both the string and the items list
+    // Clear downstream selections when ServiceAs changes
     selectedSubServiceString.value = null;
-    selectedSubServiceItems.clear();
     selectedSubSubServiceString.value = null;
+    selectedSubServiceItems.clear();
     selectedSubSubServiceItems.clear();
-    backendSubSubServiceOptions.clear();
-
-    if (selectedServiceAsString.value != null) {
-      fetchDropdownOptions(level: 'sub_service_name');
-    }
+    // Data is already in nestedDropdownData - UI will use availableSubOptions
   }
 
   /// Fetch sub_sub_service_name options when sub_service is selected
+  /// Now uses local data from nestedDropdownData
   void fetchSubSubServiceOptions() {
     // Clear Level 3 selections
     selectedSubSubServiceString.value = null;
-    selectedSubOptionsItems.clear();
-
-    if (selectedSubServiceString.value != null) {
-      fetchDropdownOptions(level: 'sub_sub_service_name');
-    }
+    selectedSubSubServiceItems.clear();
+    // Data is already in nestedDropdownData - UI will use availableSubSubOptions
   }
 
   String _getServiceTypeNameForApi(ServiceCategory category) {
@@ -1090,15 +1119,14 @@ class AddServiceController extends GetxController {
     if (_categoryFromServiceType(selectedServiceType.value) != category) {
       selectedServiceType.value = _defaultTypeForCategory(category);
     }
-    // Fetch service_as_name options from backend
-    fetchServiceAsOptions();
+    // Refresh options from nested data based on new category/role
+    _refreshOptionsFromNestedData();
   }
 
   /// Clear all service-related fields when category/role changes
   /// This ensures no stale data is sent to the backend
   void _clearAllServiceFields() {
     // Clear Level 1 (Service As)
-    selectedServiceAs.value = null;
     selectedServiceAsItems.clear();
     selectedServiceAsString.value = null;
 
@@ -1138,8 +1166,8 @@ class AddServiceController extends GetxController {
     selectedRole.value = role;
     // Clear all service-related fields when role changes
     _clearAllServiceFields();
-    // Fetch service_as_name options from backend with new role
-    fetchServiceAsOptions();
+    // Refresh options from nested data based on new role
+    _refreshOptionsFromNestedData();
   }
 
   /// Toggle a sub-option selection

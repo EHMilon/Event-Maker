@@ -155,11 +155,15 @@ class ApiConstant {
   static const String customerServicesSearch =
       '/services/customer-services-search';
 
-  /// Category master dropdown endpoint
+  /// Category master dropdown endpoint (legacy)
   /// Query params: service_type_name, role_name, service_as_name, sub_service_name
-  /// Returns: sub_sub_service_name dropdown items
   static const String categoryMasterDropdown =
       '/services/category-master/dropdown';
+
+  /// Category master nested dropdown endpoint (new - returns all data in one call)
+  /// Returns: { service_type_name, roles: [{ role_name, service_as_names: [{ service_as_name, sub_services: [{ sub_service_name, sub_sub_services: [] }] }] }] }
+  static const String categoryMasterNestedDropdown =
+      '/services/category-master/nested-dropdown';
 
   /// Create custom service category master
   /// POST /services/category-master

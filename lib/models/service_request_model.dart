@@ -52,7 +52,7 @@ class ServiceRequestModel {
       if (serviceAsName != null) 'service_as_name': serviceAsName,
       if (subServiceName != null) 'sub_service_name': subServiceName,
       if (subSubServiceName != null) 'sub_sub_service_name': subSubServiceName,
-      if (eventVenue != null) 'event_vanue': eventVenue, // Note: backend typo
+      if (eventVenue != null) 'event_venue': eventVenue, // Fixed: backend now uses correct spelling
       if (options != null) 'options': options,
       if (attendanceCapacity != null) 'attendance_capacity': attendanceCapacity,
       if (packages.isNotEmpty)
@@ -85,7 +85,7 @@ class ServiceRequestModel {
       if (serviceAsName != null && serviceAsName!.isNotEmpty)
         'sub_sub_service_name': subSubServiceName ?? '',
       if (eventVenue != null && eventVenue!.isNotEmpty)
-        'event_vanue': eventVenue!,
+        'event_venue': eventVenue!,
       if (options != null && options!.isNotEmpty) 'options': options!,
       // Only include attendance_capacity for Event and Trainer categories
       // For Hospitality, explicitly send empty string to clear any existing value
