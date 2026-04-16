@@ -197,7 +197,8 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initialize();
+    // Use Future.microtask to delay initialization slightly and avoid circular dependency during constructor execution
+    Future.microtask(() => _initialize());
     _loadLanguage();
   }
 
@@ -219,7 +220,11 @@ class ProfileController extends GetxController {
   Future<void> _initialize() async {
     await loadUserData();
     await fetchPersonalInfo();
-    await fetchBookmarks();
+
+    // Only fetch bookmarks if the user is a customer to avoid 403 errors
+    if (!isServiceProvider.value) {
+      await fetchBookmarks();
+    }
   }
 
   /// Loads user data from local storage.
@@ -243,7 +248,8 @@ class ProfileController extends GetxController {
         emailController.text = userEmail.value;
       } else {
         final userType = await StorageService().getUserType();
-        isServiceProvider.value = userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
+        isServiceProvider.value =
+            userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
       }
     } catch (e) {
       Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
@@ -287,10 +293,17 @@ class ProfileController extends GetxController {
     try {
       if (Get.isRegistered<HomeController>()) {
         final HomeController homeController = Get.find<HomeController>();
-        homeController.toggleBookmark(serviceId); // Assuming toggle exists
+
+        // Safety check: Don't call toggle if it would cause recursion or if we are just syncing state
+        // In a real app, we might need a more robust sync mechanism
+        final currentState = homeController.isBookmarked(serviceId);
+        if (currentState != isBookmarked) {
+          homeController.toggleBookmark(serviceId);
+        }
       }
     } catch (e) {
       // HomeController not active
+      debugPrint('HomeController sync skipped: $e');
     }
   }
 
@@ -357,6 +370,11 @@ class ProfileController extends GetxController {
     // Clear all user data and tokens from local storage
     await StorageService().clearUserData();
     await StorageService().resetOnboarding();
+
+    // Reset controllers or delete from memory to prevent stale data
+    if (Get.isRegistered<HomeController>()) {
+      Get.delete<HomeController>(force: true);
+    }
 
     // Navigate to onboarding screen and clear navigation stack
     Get.offAllNamed(AppRoutes.onboarding);
@@ -503,7 +521,9 @@ class ProfileController extends GetxController {
       final userType = await StorageService().getUserType();
       final isProvider = userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
       if (!isProvider) {
-        debugPrint('Skipping fetchProviderProfile: User is not a service provider');
+        debugPrint(
+          'Skipping fetchProviderProfile: User is not a service provider',
+        );
         return;
       }
       // Update the reactive value for future calls
@@ -557,7 +577,9 @@ class ProfileController extends GetxController {
       final userType = await StorageService().getUserType();
       final isProvider = userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
       if (!isProvider) {
-        debugPrint('Skipping fetchProviderReviews: User is not a service provider');
+        debugPrint(
+          'Skipping fetchProviderReviews: User is not a service provider',
+        );
         return;
       }
       // Update the reactive value for future calls

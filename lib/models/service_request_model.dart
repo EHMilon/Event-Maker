@@ -76,15 +76,21 @@ class ServiceRequestModel {
       'role_name': roleName,
       if (serviceAsName != null && serviceAsName!.isNotEmpty)
         'service_as_name': serviceAsName!,
-      if (subServiceName != null && subServiceName!.isNotEmpty)
-        'sub_service_name': subServiceName!,
-      if (subSubServiceName != null && subSubServiceName!.isNotEmpty)
-        'sub_sub_service_name': subSubServiceName!,
+      // Handle sub_service_name: include if service_as_name is provided
+      // Send empty string to clear if not selected, otherwise send the value
+      if (serviceAsName != null && serviceAsName!.isNotEmpty)
+        'sub_service_name': subServiceName ?? '',
+      // Handle sub_sub_service_name: include if service_as_name is provided
+      // Send empty string to clear if not selected, otherwise send the value
+      if (serviceAsName != null && serviceAsName!.isNotEmpty)
+        'sub_sub_service_name': subSubServiceName ?? '',
       if (eventVenue != null && eventVenue!.isNotEmpty)
         'event_vanue': eventVenue!,
       if (options != null && options!.isNotEmpty) 'options': options!,
-      if (attendanceCapacity != null)
-        'attendance_capacity': attendanceCapacity.toString(),
+      // Only include attendance_capacity for Event and Trainer categories
+      // For Hospitality, explicitly send empty string to clear any existing value
+      if (serviceTypeName == 'Event' || serviceTypeName == 'Professional Trainer')
+        'attendance_capacity': attendanceCapacity?.toString() ?? '',
       'can_go_outside_location': canGoOutsideLocation.toString(),
       'can_not_go_outside_location': cannotGoOutsideLocation.toString(),
       'requires_confirmation': requiresConfirmation.toString(),

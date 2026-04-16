@@ -346,6 +346,8 @@ class ServiceModel {
   final String serviceTypeName;
   final String roleName;
   final String serviceAsName;
+  final String? subServiceName;
+  final String? subSubServiceName;
   final String? eventVenue;
   final int? attendanceCapacity;
   final String? options;
@@ -392,6 +394,8 @@ class ServiceModel {
     this.serviceTypeName = '',
     this.roleName = '',
     this.serviceAsName = '',
+    this.subServiceName,
+    this.subSubServiceName,
     this.eventVenue,
     this.attendanceCapacity,
     this.options,
@@ -446,6 +450,8 @@ class ServiceModel {
       serviceTypeName: json['service_type_name'] as String? ?? '',
       roleName: json['role_name'] as String? ?? '',
       serviceAsName: json['service_as_name'] as String? ?? '',
+      subServiceName: json['sub_service_name'] as String?,
+      subSubServiceName: json['sub_sub_service_name'] as String?,
       eventVenue: json['event_vanue'] as String?, // Note: API has typo "vanue"
       attendanceCapacity: json['attendance_capacity'] as int?,
       options: json['options'] as String?,
@@ -679,6 +685,8 @@ class ServiceModel {
     String? serviceTypeName,
     String? roleName,
     String? serviceAsName,
+    String? subServiceName,
+    String? subSubServiceName,
     String? eventVenue,
     int? attendanceCapacity,
     String? options,
@@ -721,6 +729,8 @@ class ServiceModel {
       serviceTypeName: serviceTypeName ?? this.serviceTypeName,
       roleName: roleName ?? this.roleName,
       serviceAsName: serviceAsName ?? this.serviceAsName,
+      subServiceName: subServiceName ?? this.subServiceName,
+      subSubServiceName: subSubServiceName ?? this.subSubServiceName,
       eventVenue: eventVenue ?? this.eventVenue,
       attendanceCapacity: attendanceCapacity ?? this.attendanceCapacity,
       options: options ?? this.options,

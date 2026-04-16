@@ -428,9 +428,6 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
   }
 
   void _openMapScreen(BuildContext context) {
-    if (widget.isServiceProvider) {
-      return;
-    }
     Get.to(
       GoogleMapScreen(
         apiKey: AppConfig.googleMapsApiKey,

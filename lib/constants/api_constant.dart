@@ -161,6 +161,10 @@ class ApiConstant {
   static const String categoryMasterDropdown =
       '/services/category-master/dropdown';
 
+  /// Create custom service category master
+  /// POST /services/category-master
+  static const String createCategoryMaster = '/services/category-master';
+
   // ===== BOOKING ENDPOINTS =====
 
   static const String bookings = '/bookings';

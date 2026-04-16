@@ -6,7 +6,8 @@ import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
-  final ProfileController _profileController = Get.find<ProfileController>();
+  // Use a getter for ProfileController to avoid immediate circular dependency during initialization
+  ProfileController get _profileController => Get.find<ProfileController>();
   final ServiceRepository _serviceRepository = const ServiceRepository();
 
   final isLoading = true.obs;

@@ -470,6 +470,71 @@ class ServiceRepository {
       throw ApiException(message: 'Failed to fetch dropdown data: $e');
     }
   }
+
+  /// Create custom service category master
+  /// Uses: POST api/services/category-master/create
+  /// Body: { service_type_name, role_name, service_as_name, sub_service_name, sub_sub_service_name, sort_order }
+  Future<CreateCategoryMasterResponse> createCategoryMaster({
+    required String serviceTypeName,
+    required String roleName,
+    required String serviceAsName,
+    String? subServiceName,
+    String? subSubServiceName,
+    int sortOrder = 1,
+  }) async {
+    final api = ApiService();
+
+    try {
+      final body = {
+        'service_type_name': serviceTypeName,
+        'role_name': roleName,
+        'service_as_name': serviceAsName,
+        'sort_order': sortOrder,
+      };
+
+      if (subServiceName != null && subServiceName.isNotEmpty) {
+        body['sub_service_name'] = subServiceName;
+      }
+      if (subSubServiceName != null && subSubServiceName.isNotEmpty) {
+        body['sub_sub_service_name'] = subSubServiceName;
+      }
+
+      Log.d('=======> createCategoryMaster - Body: $body');
+
+      final response = await api.post(
+        ApiConstant.createCategoryMaster,
+        body: body,
+      );
+      return CreateCategoryMasterResponse.fromJson(response);
+    } on ApiException catch (e) {
+      Log.e('=======> createCategoryMaster - ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> createCategoryMaster - Error: $e');
+      throw ApiException(message: 'Failed to create category master: $e');
+    }
+  }
+}
+
+/// Response model for creating category master
+class CreateCategoryMasterResponse {
+  final bool success;
+  final String message;
+  final Map<String, dynamic>? data;
+
+  CreateCategoryMasterResponse({
+    required this.success,
+    required this.message,
+    this.data,
+  });
+
+  factory CreateCategoryMasterResponse.fromJson(Map<String, dynamic> json) {
+    return CreateCategoryMasterResponse(
+      success: json['success'] as bool? ?? false,
+      message: json['message'] as String? ?? '',
+      data: json['data'] as Map<String, dynamic>?,
+    );
+  }
 }
 
 /// Response model for customer services search

@@ -389,6 +389,7 @@ class AppLocalization extends Translations {
     'endTime': 'End Time',
     'select': 'Select',
     'needConfirmationBeforePayment': 'Need confirmation before payment',
+    'selectSubOptions': 'Select Sub Options',
 
     // Days
     'mon': 'Mon',
@@ -838,6 +839,7 @@ class AppLocalization extends Translations {
     'endTime': 'وقت الانتهاء',
     'select': 'اختر',
     'needConfirmationBeforePayment': 'هل تحتاج إلى تأكيد قبل الدفع؟',
+    'selectSubOptions': 'اختر الخيارات الفرعية',
 
     // Days
     'mon': 'الاثنين',

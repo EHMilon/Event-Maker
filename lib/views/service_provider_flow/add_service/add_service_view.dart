@@ -6,11 +6,10 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/service_model.dart';
 import '../../../widgets/custom_text_field.dart';
-import '../../../widgets/custom_dropdown_field.dart';
+import '../../../widgets/unified_dropdown_field.dart';
 import '../../../widgets/primary_text_button.dart';
 import '../../../widgets/upload_widget.dart';
 import '../../../widgets/availability_widget_card.dart';
-import '../../../widgets/dynamic_dropdown_field.dart';
 import 'add_service_controller.dart';
 
 import 'packages_pricings_view.dart';
@@ -37,14 +36,12 @@ class _AddServiceViewState extends State<AddServiceView> {
     {'key': 'Sun', 'label': 'sun'.tr},
   ];
 
-  // Flag to track if edit data has been initialized
   bool _isEditInitialized = false;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<AddServiceController>();
-    // Initialize with service data if editing - do synchronously before first build
     if (widget.isEdit && widget.service != null) {
       controller.initWithService(widget.service!);
       _isEditInitialized = true;
@@ -92,52 +89,42 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ),
                 SizedBox(height: 24.h),
                 Obx(
-                  () => CustomDropdownField<ServiceCategory>(
+                  () => UnifiedDropdownField<ServiceCategory>(
                     value: controller.selectedCategory.value,
-                    labelText: 'selectServiceType'.tr,
-                    hintText: 'selectServiceType'.tr,
-                    enabled: !widget.isEdit,
-                    items: ServiceCategory.values.map((category) {
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Text(_categoryLabel(category)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
+                    label: 'selectServiceType'.tr,
+                    hint: 'selectServiceType'.tr,
+                    items: ServiceCategory.values,
+                    itemLabel: _categoryLabel,
+                    onSingleSelect: (value) {
                       if (value != null) {
                         controller.updateCategory(value);
                       }
                     },
+                    enabled: true,
                   ),
                 ),
                 SizedBox(height: 24.h),
                 Obx(
-                  () => CustomDropdownField<ProviderRole>(
+                  () => UnifiedDropdownField<ProviderRole>(
                     value:
                         controller.availableRoleOptions.contains(
                           controller.selectedRole.value,
                         )
                         ? controller.selectedRole.value
                         : null,
-                    labelText: 'whatIsYourRole'.tr,
-                    hintText: 'selectRole'.tr,
-                    enabled: !widget.isEdit,
-                    items: controller.availableRoleOptions.map((role) {
-                      return DropdownMenuItem(
-                        value: role,
-                        child: Text(_roleLabel(role)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
+                    label: 'whatIsYourRole'.tr,
+                    hint: 'selectRole'.tr,
+                    items: controller.availableRoleOptions,
+                    itemLabel: _roleLabel,
+                    onSingleSelect: (value) {
                       if (value != null) {
-                        controller.selectedRole.value = value;
-                        controller.fetchServiceAsOptions();
+                        controller.updateRole(value);
                       }
                     },
+                    enabled: true,
                   ),
                 ),
 
-                // Service As section
                 Obx(() {
                   final backendOptions = controller.backendServiceAsOptions;
                   final isLoading = controller.isLoadingDropdowns.value;
@@ -154,26 +141,34 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : _buildStringDropdownField(
-                            items: backendOptions,
-                            selectedItems: controller.selectedServiceAsItems,
+                        : UnifiedDropdownField<String>(
                             label: 'serviceAs'.tr,
-                            hintText: 'selectServiceAs'.tr,
-                            onSelected: (item) {
-                              controller.toggleServiceAs(item);
+                            hint: 'selectServiceAs'.tr,
+                            items: backendOptions,
+                            itemLabel: (item) => item,
+                            selectedItems: controller.selectedServiceAsItems,
+                            onMultiSelect: (value) {
+                              controller.toggleServiceAs(value);
+                              setState(() {});
                             },
-                            onRemoved: (item) =>
-                                controller.removeServiceAs(item),
-                            onAddPressed: controller.addCustomServiceAsDirectly,
-                            isAdding: controller.showAddServiceAsField.value,
+                            onRemoveItem: (value) {
+                              controller.removeServiceAs(value);
+                              setState(() {});
+                            },
+                            onAddCustom: controller.addCustomServiceAsDirectly,
+                            isAdding: controller.showAddServiceAsField,
                             addController: controller.newServiceAsController,
-                            onSaveAdd: controller.addCustomServiceAs,
-                            onCancelAdd: controller.closeAddServiceAsField,
+                            onSaveAdd: () {
+                              controller.addCustomSubOption();
+                              setState(() {});
+                            },
+                            onCancelAdd: controller.closeAddSubOptionField,
+                            enabled: true,
+                            mode: DropdownMode.multi,
                           ),
                   );
                 }),
 
-                // Sub-Options dropdown
                 Obx(() {
                   final options = controller.subOptions;
                   final isLoading = controller.isLoadingDropdowns.value;
@@ -194,26 +189,34 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : _buildStringDropdownField(
-                            items: options,
-                            selectedItems: controller.selectedSubServiceItems,
+                        : UnifiedDropdownField<String>(
                             label: 'selectOptions'.tr,
-                            hintText: 'selectOptions'.tr,
-                            onSelected: (item) {
-                              controller.toggleSubService(item);
+                            hint: 'selectOptions'.tr,
+                            items: options,
+                            itemLabel: (item) => item,
+                            selectedItems: controller.selectedSubServiceItems,
+                            onMultiSelect: (value) {
+                              controller.toggleSubService(value);
+                              setState(() {});
                             },
-                            onRemoved: (item) =>
-                                controller.selectedSubServiceItems.remove(item),
-                            onAddPressed: controller.addCustomSubOptionDirectly,
-                            isAdding: controller.showAddSubOptionField.value,
+                            onRemoveItem: (item) {
+                              controller.selectedSubServiceItems.remove(item);
+                              setState(() {});
+                            },
+                            onAddCustom: controller.addCustomSubOptionDirectly,
+                            isAdding: controller.showAddSubOptionField,
                             addController: controller.newSubOptionController,
-                            onSaveAdd: controller.addCustomSubOption,
+                            onSaveAdd: () {
+                              controller.addCustomSubOption();
+                              setState(() {});
+                            },
                             onCancelAdd: controller.closeAddSubOptionField,
+                            enabled: true,
+                            mode: DropdownMode.multi,
                           ),
                   );
                 }),
 
-                // Sub-Sub-Options dropdown
                 Obx(() {
                   final options = controller.backendSubSubServiceOptions;
                   final isLoading = controller.isLoadingDropdowns.value;
@@ -234,23 +237,33 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : _buildStringDropdownField(
+                        : UnifiedDropdownField<String>(
+                            label: 'selectSubOptions'.tr,
+                            hint: 'selectSubOptions'.tr,
                             items: options,
+                            itemLabel: (item) => item,
                             selectedItems:
                                 controller.selectedSubSubServiceItems,
-                            label: 'selectSubOptions'.tr,
-                            hintText: 'selectSubOptions'.tr,
-                            onSelected: (item) {
-                              controller.toggleSubSubService(item);
+                            onMultiSelect: (value) {
+                              controller.toggleSubSubService(value);
+                              setState(() {});
                             },
-                            onRemoved: (item) => controller
-                                .selectedSubSubServiceItems
-                                .remove(item),
-                            onAddPressed: controller.addCustomSubOptionDirectly,
-                            isAdding: controller.showAddSubOptionField.value,
+                            onRemoveItem: (item) {
+                              controller.selectedSubSubServiceItems.remove(
+                                item,
+                              );
+                              setState(() {});
+                            },
+                            onAddCustom: controller.addCustomSubSubOptionDirectly,
+                            isAdding: controller.showAddSubOptionField,
                             addController: controller.newSubOptionController,
-                            onSaveAdd: controller.addCustomSubOption,
+                            onSaveAdd: () {
+                              controller.addCustomSubOption();
+                              setState(() {});
+                            },
                             onCancelAdd: controller.closeAddSubOptionField,
+                            enabled: true,
+                            mode: DropdownMode.multi,
                           ),
                   );
                 }),
@@ -265,7 +278,6 @@ class _AddServiceViewState extends State<AddServiceView> {
                   maxLines: 5,
                 ),
 
-                // Attendance Capacity field - only shown when category is Event
                 Obx(() {
                   if (!controller.showAttendanceCapacity) {
                     return const SizedBox.shrink();
@@ -281,20 +293,8 @@ class _AddServiceViewState extends State<AddServiceView> {
                   );
                 }),
 
-                // SizedBox(height: 16.h),
-                // CustomTextField(
-                //   controller: controller.locationController,
-                //   labelText: 'selectLocation'.tr,
-                //   hintText: 'selectAddressHint'.tr,
-                //   prefixIcon: Icon(
-                //     Icons.location_on_outlined,
-                //     color: AppColors.primary,
-                //     size: 20.r,
-                //   ),
-                // ),
                 SizedBox(height: 24.h),
 
-                // Primary Availability Card
                 AvailabilityWidgetCard(
                   card: controller.primaryAvailabilityCard,
                   days: _days,
@@ -306,12 +306,10 @@ class _AddServiceViewState extends State<AddServiceView> {
                   isServiceProvider: true,
                 ),
 
-                // Additional Availability Section
                 _buildAdditionalAvailabilitySection(),
 
                 SizedBox(height: 16.h),
 
-                // Need confirmation before payment toggle
                 Obx(
                   () => Container(
                     padding: EdgeInsets.symmetric(
@@ -378,14 +376,12 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ),
                 SizedBox(height: 8.h),
 
-                // Display added packages - rebuilds when setState is called after returning from packages view
                 _buildPackagesList(),
 
                 SizedBox(height: 40.h),
                 PrimaryTextButton(
                   text: widget.isEdit ? 'updateService'.tr : 'addService'.tr,
                   onPressed: () async {
-                    // TODO: Implement field validation before saving
                     await controller.saveService(
                       isEdit: widget.isEdit,
                       existingService: widget.service,
@@ -425,17 +421,13 @@ class _AddServiceViewState extends State<AddServiceView> {
 
   void _openPackages(BuildContext context) async {
     final result = await Get.to(() => const PackagesPricingsView());
-    // If result is true, packages were modified - force a complete UI refresh
     if (result == true) {
-      // Force the packages list to notify listeners
       controller.packages.refresh();
-      // Force rebuild the entire widget to show updated packages
       setState(() {});
     }
   }
 
   Widget _buildPackagesList() {
-    // Access the length to trigger reactivity when packages are added/removed
     return Obx(() {
       final packageCount = controller.packages.length;
 
@@ -470,7 +462,6 @@ class _AddServiceViewState extends State<AddServiceView> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Disabled message when "cannot go outside location" is enabled
           if (isDisabled)
             Container(
               padding: EdgeInsets.all(16.w),
@@ -501,7 +492,6 @@ class _AddServiceViewState extends State<AddServiceView> {
               ),
             ),
 
-          // List of additional availability cards
           ...controller.additionalAvailabilityCards.map((card) {
             return AvailabilityWidgetCard(
               key: ValueKey(card.id),
@@ -520,7 +510,6 @@ class _AddServiceViewState extends State<AddServiceView> {
             );
           }),
 
-          // Add Additional Availability Button (at the bottom)
           if (!isDisabled)
             GestureDetector(
               onTap: controller.addAdditionalAvailabilityCard,
@@ -561,7 +550,6 @@ class _AddServiceViewState extends State<AddServiceView> {
   }
 
   Widget _buildPackageSummaryCard(int index, PackageFormData package) {
-    // Read directly from controllers - these are populated when returning from PackagesPricingsView
     final packageName = package.nameController.text;
     final packagePrice = package.priceController.text;
     final features = package.featureControllers
@@ -637,7 +625,6 @@ class _AddServiceViewState extends State<AddServiceView> {
                 ),
               ],
             ),
-            // Features display
             if (features.isNotEmpty)
               Padding(
                 padding: EdgeInsets.only(top: 8.h),
@@ -645,16 +632,12 @@ class _AddServiceViewState extends State<AddServiceView> {
                   spacing: 8.w,
                   runSpacing: 4.h,
                   children: features.map((feature) {
-                    // Extract just the title if feature contains JSON
-                    // Backend sends: {'title': 'value', 'sort_order': 0} with single quotes
                     String displayText = feature;
                     if (feature.contains('title')) {
                       try {
-                        // Try single-quoted JSON: {'title': 'value', ...}
                         final singleMatch = RegExp(
                           r"'title'\s*:\s*'([^']+)'",
                         ).firstMatch(feature);
-                        // Try double-quoted JSON: {"title": "value", ...}
                         final doubleMatch = RegExp(
                           r'"title"\s*:\s*"([^"]+)"',
                         ).firstMatch(feature);
@@ -666,9 +649,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                             doubleMatch.group(1) != null) {
                           displayText = doubleMatch.group(1)!;
                         }
-                      } catch (_) {
-                        // Fallback to original if regex fails
-                      }
+                      } catch (_) {}
                     }
 
                     return Container(
@@ -709,120 +690,6 @@ class _AddServiceViewState extends State<AddServiceView> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStringDropdownField({
-    required List<String> items,
-    required List<dynamic> selectedItems,
-    required String label,
-    required String hintText,
-    required Function(String) onSelected,
-    required Function(dynamic) onRemoved,
-    required VoidCallback onAddPressed,
-    required bool isAdding,
-    required TextEditingController addController,
-    required VoidCallback onSaveAdd,
-    required VoidCallback onCancelAdd,
-  }) {
-    // Get the display text for the field (either the selected item or the hint)
-    String fieldText = hintText;
-    if (selectedItems.isNotEmpty) {
-      final lastItem = selectedItems.last;
-      fieldText = lastItem is String ? lastItem : lastItem.toString();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w400,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        // Dropdown button
-        PopupMenuButton<String>(
-          enabled: !widget.isEdit,
-          onSelected: onSelected,
-          itemBuilder: (context) => items.map((item) {
-            return PopupMenuItem<String>(value: item, child: Text(item));
-          }).toList(),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.borderLight),
-              borderRadius: BorderRadius.circular(12.r),
-              color: Colors.white,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    fieldText,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: selectedItems.isNotEmpty
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  color: AppColors.textSecondary,
-                  size: 20.r,
-                ),
-              ],
-            ),
-          ),
-        ),
-        // Add custom field - Commented out for now
-        /*
-        if (isAdding)
-          Padding(
-            padding: EdgeInsets.only(top: 12.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: addController,
-                    decoration: InputDecoration(
-                      hintText: 'Add custom $label',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                TextButton(onPressed: onSaveAdd, child: Text('add'.tr)),
-                TextButton(onPressed: onCancelAdd, child: Text('cancel'.tr)),
-              ],
-            ),
-          ),
-        */
-        // Add button - Commented out for now
-        /*
-        if (!isAdding)
-          Padding(
-            padding: EdgeInsets.only(top: 8.h),
-            child: TextButton.icon(
-              onPressed: onAddPressed,
-              icon: Icon(Icons.add, size: 18.r),
-              label: Text('addCustom'.tr),
-            ),
-          ),
-        */
-      ],
     );
   }
 }
