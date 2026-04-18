@@ -50,78 +50,133 @@ class _FAQViewState extends State<FAQView> {
           ),
         ),
       ),
-      body: Obx(
-        () => Skeletonizer(
-          enabled: controller.isFaqsLoading.value,
-          child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-            itemCount: controller.faqs.length,
-            separatorBuilder: (context, index) => Divider(
-              color: AppColors.lightGrey.withOpacity(0.5),
-              height: 32.h,
-            ),
-            itemBuilder: (context, index) {
-              final FaqModel faq = controller.faqs[index];
-              final isExpanded = _getExpandedState(faq.id);
-              
-              return Column(
+      body: Obx(() {
+        if (controller.isFaqsLoading.value) {
+          return Skeletonizer(
+            enabled: true,
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+              itemCount: 5,
+              separatorBuilder: (context, index) => Divider(
+                color: AppColors.lightGrey.withOpacity(0.5),
+                height: 32.h,
+              ),
+              itemBuilder: (context, index) => Column(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      isExpanded.value = !isExpanded.value;
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          isExpanded.value
-                              ? Icons.remove_circle_outline
-                              : Icons.add_circle_outline,
-                          color: AppColors.primary,
-                          size: 20.sp,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.add_circle_outline,
+                        color: AppColors.primary,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Container(
+                          height: 16.h,
+                          width: double.infinity,
+                          color: Colors.grey[300],
                         ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Text(
-                            faq.question.tr,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Obx(
-                    () => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      height: isExpanded.value ? null : 0,
-                      child: isExpanded.value
-                          ? Padding(
-                              padding: EdgeInsets.only(
-                                left: 32.w,
-                                top: 12.h,
-                                bottom: 8.h,
-                              ),
-                              child: Text(
-                                faq.answer.tr,
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: AppColors.textSecondary,
-                                  height: 1.5,
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
+                      ),
+                    ],
                   ),
                 ],
-              );
-            },
+              ),
+            ),
+          );
+        }
+
+        if (controller.faqs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.help_outline,
+                  size: 64.sp,
+                  color: AppColors.textSecondary,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'noFaq'.tr,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+          itemCount: controller.faqs.length,
+          separatorBuilder: (context, index) => Divider(
+            color: AppColors.lightGrey.withOpacity(0.5),
+            height: 32.h,
           ),
-        ),
-      ),
+          itemBuilder: (context, index) {
+            final FaqModel faq = controller.faqs[index];
+            final isExpanded = _getExpandedState(faq.id);
+
+            return Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    isExpanded.value = !isExpanded.value;
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        isExpanded.value
+                            ? Icons.remove_circle_outline
+                            : Icons.add_circle_outline,
+                        color: AppColors.primary,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Text(
+                          faq.question.tr,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Obx(
+                  () => AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: isExpanded.value ? null : 0,
+                    child: isExpanded.value
+                        ? Padding(
+                            padding: EdgeInsets.only(
+                              left: 32.w,
+                              top: 12.h,
+                              bottom: 8.h,
+                            ),
+                            child: Text(
+                              faq.answer.tr,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textSecondary,
+                                height: 1.5,
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }),
     );
   }
 }

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Reusable Request Card widget for displaying service requests
-/// Used in SP Requests view and My Services view
 class RequestCard extends StatelessWidget {
   const RequestCard({
     super.key,
@@ -13,6 +11,8 @@ class RequestCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.onMoreTap,
+    this.showMoreButton = false,
   });
 
   final String image;
@@ -20,6 +20,8 @@ class RequestCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final VoidCallback? onMoreTap;
+  final bool showMoreButton;
 
   @override
   Widget build(BuildContext context) {
@@ -91,17 +93,22 @@ class RequestCard extends StatelessWidget {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      // TODO: Uncomment if subtitle is needed
-                      // SizedBox(height: 4.h),
-                      // Text(
-                      //   subtitle,
-                      //   overflow: TextOverflow.ellipsis,
-                      //   style: GoogleFonts.inter(fontSize: 12.sp, color: AppColors.textSecondary),
-                      // ),
                     ],
                   ),
                 ),
               ),
+              if (showMoreButton)
+                GestureDetector(
+                  onTap: onMoreTap,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8.w),
+                    child: Icon(
+                      Icons.more_vert,
+                      color: AppColors.textSecondary,
+                      size: 24.r,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

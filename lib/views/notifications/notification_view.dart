@@ -50,6 +50,27 @@ class NotificationView extends GetView<NotificationController> {
               ),
             );
           }
+
+          if (controller.serviceRequests.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_none,
+                    size: 64.sp,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'noNotifications'.tr,
+                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
           return RefreshIndicator(
             onRefresh: controller.fetchNotifications,
             color: Get.theme.colorScheme.primary,

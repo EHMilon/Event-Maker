@@ -342,6 +342,25 @@ class ServiceRepository {
     }
   }
 
+  /// Delete a service by ID
+  /// Uses: DELETE api/services/delete/{id}
+  /// Response: { "success": true, "message": "Service deleted successfully." }
+  Future<bool> deleteService(int serviceId) async {
+    final api = ApiService();
+
+    try {
+      final response = await api.delete(ApiConstant.serviceDelete(serviceId));
+      Log.d('=======> deleteService - Response: $response');
+      return response['success'] as bool? ?? false;
+    } on ApiException catch (e) {
+      Log.e('=======> deleteService - ApiException: ${e.message}');
+      throw ApiException(message: e.message);
+    } catch (e) {
+      Log.e('=======> deleteService - Error: $e');
+      throw ApiException(message: 'Failed to delete service: $e');
+    }
+  }
+
   /// Toggle bookmark status for a service
   /// Uses: POST api/services/bookmark-toggle/{serviceId}
   /// Response: { "success": true, "message": "Service bookmark status updated successfully.", "data": { "service_id": 16, "is_bookmarked": false } }

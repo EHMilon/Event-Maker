@@ -1,5 +1,6 @@
 import 'package:event_maker/models/my_service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
+import 'package:event_maker/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -58,8 +59,8 @@ class SPServicesController extends GetxController {
     } else {
       filteredServices.value = services.where((service) {
         return service.title.toLowerCase().contains(
-              searchQuery.value.toLowerCase(),
-            );
+          searchQuery.value.toLowerCase(),
+        );
       }).toList();
     }
   }
@@ -87,5 +88,20 @@ class SPServicesController extends GetxController {
   void deleteService(int serviceId) {
     services.removeWhere((s) => s.id == serviceId);
     _filterServices();
+  }
+
+  /// Delete service via API
+  Future<bool> deleteServiceApi(int serviceId) async {
+    try {
+      final success = await _repository.deleteService(serviceId);
+      if (success) {
+        deleteService(serviceId);
+        Log.d('=======> Service deleted successfully: $serviceId');
+      }
+      return success;
+    } catch (e) {
+      Log.e('=======> Failed to delete service: $e');
+      rethrow;
+    }
   }
 }

@@ -137,7 +137,7 @@ class _UnifiedDropdownFieldState<T> extends State<UnifiedDropdownField<T>> {
     var keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     var availableHeightBelow =
         screenHeight - offset.dy - size.height - keyboardHeight - 20.h;
-    var dropdownHeight = 150.h;
+    var dropdownHeight = 180.h;
 
     // Check if dropdown should show above or below
     bool showAbove =

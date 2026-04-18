@@ -286,12 +286,16 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black,
+        Container(
+          width: 200.w,
+          child: Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (showSeeAll)

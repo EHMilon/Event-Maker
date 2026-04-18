@@ -140,6 +140,9 @@ class ApiConstant {
   /// Note: Uses POST with multipart/form-data for update
   static String serviceUpdate(int id) => '/services/update/$id';
 
+  /// Delete service by ID: /services/delete/{id}
+  static String serviceDelete(int id) => '/services/delete/$id';
+
   /// Toggle bookmark status for a service
   /// POST /services/bookmark-toggle/{serviceId}
   /// Response: { "success": true, "message": "Service bookmark status updated successfully.", "data": { "service_id": 16, "is_bookmarked": false } }

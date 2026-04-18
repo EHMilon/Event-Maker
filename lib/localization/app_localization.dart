@@ -179,7 +179,6 @@ class AppLocalization extends Translations {
     'logoutConfirmation': 'Are you sure you want to logout?',
     'emailCannotBeChanged': 'Email cannot be changed',
 
-
     // Navigation
     'home': 'Home',
     'bookings': 'Bookings',
@@ -257,6 +256,9 @@ class AppLocalization extends Translations {
     'noServicesFound': 'No services found',
     'tapToAddService': 'Tap the + button to add your first service',
     'servicesCount': '@count services',
+    'deleteService': 'Delete Service',
+    'deleteServiceConfirmation': 'Are you sure you want to delete the service',
+    'serviceDeletedSuccessfully': 'Service deleted successfully',
 
     // Service Types
     'event': 'Event',
@@ -321,6 +323,10 @@ class AppLocalization extends Translations {
     'failedToCreateCertificate': 'Failed to create certification',
     'failedToUpdateCertificate': 'Failed to update certification',
     'failedToDeleteCertificate': 'Failed to delete certification',
+    'noCertificates': 'No certifications',
+    'noBio': 'No bio available',
+    'noServices': 'No services available',
+    'noReviews': 'No reviews yet',
 
     // Documents
     'viewDocument': 'View Document',
@@ -411,6 +417,7 @@ class AppLocalization extends Translations {
     'deleteDocument': 'Delete Document',
     'deleteDocumentConfirm': 'Are you sure you want to delete "{title}"?',
     'delete': 'Delete',
+    'failedToDeleteService': 'Failed to delete service',
     'selectCategory': 'Select Category',
     'services': 'Services',
     'events': 'Events',
@@ -434,6 +441,7 @@ class AppLocalization extends Translations {
     'today': 'Today',
     'clearAll': 'Clear All',
     'noNotifications': 'No notifications yet',
+    'noFaq': 'No FAQs available',
     'acceptedBookingBody': 'Your booking request has been accepted',
     'rejectedBookingBody': 'Your booking request has been rejected',
     'confirmedBookingBody': 'Your booking is confirmed for tomorrow',
@@ -494,9 +502,9 @@ class AppLocalization extends Translations {
         'Your booking request has been sent to the service provider. You will be notified once they accept it.',
 
     // Provider Request Sent
-    'accountVerifiedPendingApproval': 'Account Verified Successfully!',
+    'accountPending': 'Account Pending Request Sent!',
     'providerApprovalSubtitle':
-        'Your account has been verified and is now pending admin approval. You will be notified once your account is approved.',
+        'Your account has been pending for admin approval. You will be notified once your account is approved.',
     'backToLogin': 'Back to Login',
   };
 
@@ -728,6 +736,9 @@ class AppLocalization extends Translations {
     'noServicesFound': 'لم يتم العثور على خدمات',
     'tapToAddService': 'اضغط على زر + لإضافة خدمتك الأولى',
     'servicesCount': '@count خدمة',
+    'deleteService': 'حذف الخدمة',
+    'deleteServiceConfirmation': 'هل أنت متأكد أنك تريد حذف الخدمة؟',
+    'serviceDeletedSuccessfully': 'تم حذف الخدمة بنجاح',
 
     // Service Types
     'event': 'فعالية',
@@ -794,6 +805,10 @@ class AppLocalization extends Translations {
     'failedToUpdateCertificate': 'فشل تحديث الشهادة',
     'failedToDeleteCertificate': 'فشل حذف الشهادة',
     'emailCannotBeChanged': 'لا يمكن تغيير البريد الإلكتروني',
+    'noCertificates': 'لا توجد شهادات',
+    'noBio': 'لا توجد سيرة ذاتية',
+    'noServices': 'لا توجد خدمات',
+    'noReviews': 'لا توجد مراجعات بعد',
 
     // Add Service Flow
     'editService': 'تعديل الخدمة',
@@ -861,6 +876,8 @@ class AppLocalization extends Translations {
     'deleteDocument': 'حذف المستند',
     'deleteDocumentConfirm': 'هل أنت متأكد أنك تريد حذف "{title}"؟',
     'delete': 'حذف',
+
+    'failedToDeleteService': 'فشل حذف الخدمة',
     'pleaseSelectFile': 'يرجى اختيار ملف',
     'pleaseEnterTitle': 'يرجى إدخال العنوان',
     'documentUploadedSuccess': 'تم تحميل المستند بنجاح',
@@ -891,6 +908,7 @@ class AppLocalization extends Translations {
     'today': 'اليوم',
     'clearAll': 'مسح الكل',
     'noNotifications': 'لا توجد إشعارات بعد',
+    'noFaq': 'لا توجد أسئلة متكررة',
     'acceptedBookingBody': 'تم قبول طلب الحجز الخاص بك',
     'rejectedBookingBody': 'تم رفض طلب الحجز الخاص بك',
     'confirmedBookingBody': 'تم تأكيد حجزك ليوم غد',
@@ -951,9 +969,9 @@ class AppLocalization extends Translations {
         'تم إرسال طلب الحجز الخاص بك إلى مقدم الخدمة. سيتم إخطارك بمجرد قبوله.',
 
     // Provider Request Sent
-    'accountVerifiedPendingApproval': 'تم التحقق من الحساب بنجاح!',
+    'accountPending': 'تم إرسال طلب الحساب المعلق!',
     'providerApprovalSubtitle':
-        'تم التحقق من حسابك وهو الآن بانتظار موافقة المسؤول. سيتم إخطارك بمجرد الموافقة على حسابك.',
+        'تم تعليق حسابك لانتظار موافقة المسؤول. سيتم إخطارك بمجرد الموافقة على حسابك.',
     'backToLogin': 'العودة لتسجيل الدخول',
   };
 }

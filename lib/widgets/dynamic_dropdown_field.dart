@@ -78,7 +78,7 @@ class _DynamicDropdownFieldState<T> extends State<DynamicDropdownField<T>> {
     var keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     var availableHeightBelow =
         screenHeight - offset.dy - size.height - keyboardHeight - 20.h;
-    var dropdownHeight = 400.h;
+    var dropdownHeight = 250.h;
 
     // Check if dropdown should show above or below
     bool showAbove =

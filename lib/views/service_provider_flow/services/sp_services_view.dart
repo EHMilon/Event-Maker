@@ -59,7 +59,13 @@ class ServicesView extends GetView<SPServicesController> {
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
               border: Border.all(color: AppColors.lightGrey),
             ),
             child: TextField(
@@ -67,10 +73,20 @@ class ServicesView extends GetView<SPServicesController> {
               onChanged: controller.onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'searchServices'.tr,
-                hintStyle: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary.withOpacity(0.6)),
-                prefixIcon: Icon(Icons.search, color: AppColors.primary, size: 20.r),
+                hintStyle: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary.withOpacity(0.6),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: AppColors.primary,
+                  size: 20.r,
+                ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 12.h,
+                ),
               ),
             ),
           ),
@@ -78,7 +94,15 @@ class ServicesView extends GetView<SPServicesController> {
         SizedBox(width: 12.w),
         // Add Button (Icon + Text)
         InkWell(
-          onTap: () => Get.to(() => const AddServiceView(), binding: AddScreensBinding()),
+          onTap: () async {
+            final result = await Get.to(
+              () => const AddServiceView(),
+              binding: AddScreensBinding(),
+            );
+            if (result == true) {
+              controller.refreshServices();
+            }
+          },
           borderRadius: BorderRadius.circular(12.r),
           child: Container(
             height: 50.h,
@@ -86,7 +110,13 @@ class ServicesView extends GetView<SPServicesController> {
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -95,7 +125,11 @@ class ServicesView extends GetView<SPServicesController> {
                 SizedBox(width: 4.w),
                 Text(
                   'add'.tr,
-                  style: GoogleFonts.inter(fontSize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.white),
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.white,
+                  ),
                 ),
               ],
             ),
@@ -129,10 +163,16 @@ class ServicesView extends GetView<SPServicesController> {
               image: ApiConstant.getFullMediaUrl(service.coverImage),
               date: service.createdAt,
               title: service.title,
-              subtitle: '', // Location not available in lightweight model
+              subtitle: '',
+              showMoreButton: true,
               onTap: () {
-                Get.toNamed(AppRoutes.spServiceDetail, arguments: {'serviceId': service.id});
+                Get.toNamed(
+                  AppRoutes.spServiceDetail,
+                  arguments: {'serviceId': service.id},
+                );
               },
+              onMoreTap: () =>
+                  _showServiceOptions(context, service.id, service.title),
             );
           },
         ),
@@ -151,15 +191,29 @@ class ServicesView extends GetView<SPServicesController> {
           child: Container(
             height: 110.h,
             width: double.infinity,
-            decoration: BoxDecoration(color: AppColors.white, borderRadius: BorderRadius.circular(20.r)),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
             child: ListTile(
               leading: Container(
                 width: 80.w,
                 height: 80.w,
-                decoration: BoxDecoration(color: AppColors.lightGrey, borderRadius: BorderRadius.circular(14.r)),
+                decoration: BoxDecoration(
+                  color: AppColors.lightGrey,
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
               ),
-              title: Container(height: 16.h, width: 100.w, color: AppColors.lightGrey),
-              subtitle: Container(height: 12.h, width: 150.w, color: AppColors.lightGrey),
+              title: Container(
+                height: 16.h,
+                width: 100.w,
+                color: AppColors.lightGrey,
+              ),
+              subtitle: Container(
+                height: 12.h,
+                width: 150.w,
+                color: AppColors.lightGrey,
+              ),
             ),
           ),
         );
@@ -173,20 +227,101 @@ class ServicesView extends GetView<SPServicesController> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(isSearching ? Icons.search_off : Icons.inventory_2_outlined, size: 64.r, color: AppColors.grey.withOpacity(0.5)),
+          Icon(
+            isSearching ? Icons.search_off : Icons.inventory_2_outlined,
+            size: 64.r,
+            color: AppColors.grey.withOpacity(0.5),
+          ),
           SizedBox(height: 16.h),
           Text(
             isSearching ? 'noServicesFound'.tr : 'noServicesYet'.tr,
-            style: GoogleFonts.inter(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           SizedBox(height: 8.h),
           Text(
             isSearching ? '' : 'tapToAddService'.tr,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14.sp, color: AppColors.textSecondary),
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
     );
+  }
+
+  void _showServiceOptions(
+    BuildContext context,
+    int serviceId,
+    String serviceTitle,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: AppColors.lightGrey,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              ListTile(
+                leading: Icon(Icons.delete_outline, color: Colors.red),
+                title: Text('delete'.tr, style: TextStyle(color: Colors.red)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _confirmDelete(serviceId, serviceTitle);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(int serviceId, String serviceTitle) async {
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text('deleteService'.tr),
+        content: Text(
+          'deleteServiceConfirmation'.trParams({'title': serviceTitle}),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text('delete'.tr, style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await controller.deleteServiceApi(serviceId);
+        Get.snackbar('success'.tr, 'serviceDeletedSuccessfully'.tr);
+      } catch (e) {
+        Get.snackbar('error'.tr, 'failedToDeleteService'.tr);
+      }
+    }
   }
 }

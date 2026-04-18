@@ -8,6 +8,7 @@ import 'package:event_maker/constants/app_colors.dart';
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/models/chat_model.dart';
 import 'chat_view_controller.dart';
+import 'chat_repository.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChatView extends StatefulWidget {
@@ -53,6 +54,39 @@ class _ChatViewState extends State<ChatView>
     // Only clear search when tab actually changes (not during animation)
     if (!_tabController.indexIsChanging) {
       controller.updateSearchQuery('');
+      // For service provider, check if admin tab opened for first time
+      if (widget.isServiceProvider && _tabController.index == 1) {
+        _checkAndCreateAdminChat();
+      }
+    }
+  }
+
+  Future<void> _checkAndCreateAdminChat() async {
+    final adminChats = controller.adminChats;
+    if (adminChats.isEmpty && !controller.isLoading.value) {
+      final chatRepo = ChatRepository();
+      final adminChat = await chatRepo.createOrGetAdminChat();
+      if (adminChat != null) {
+        controller.adminChats.add(adminChat);
+        final adminMember = adminChat.members.firstWhereOrNull(
+          (m) => m.role == 'admin',
+        );
+        final displayName = adminMember?.fullName?.isNotEmpty == true
+            ? adminMember!.fullName!
+            : 'Event Link';
+        final avatarUrl = adminMember?.avatar?.isNotEmpty == true
+            ? ApiConstant.getFullMediaUrl(adminMember!.avatar)
+            : 'assets/icons/icon.svg';
+        Get.toNamed(
+          AppRoutes.chatDetail,
+          arguments: {
+            'id': adminChat.id,
+            'name': displayName,
+            'image': avatarUrl,
+            'isAdmin': true,
+          },
+        );
+      }
     }
   }
 

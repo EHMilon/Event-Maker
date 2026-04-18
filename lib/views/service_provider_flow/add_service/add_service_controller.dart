@@ -1469,9 +1469,11 @@ class AddServiceController extends GetxController {
         providerId: savedService.providerId,
         title: savedService.title,
         coverImage: savedService.coverImage,
-        createdAt: isEdit && existingService != null
-            ? existingService.createdAt.toString()
-            : savedService.createdAt.toString(),
+        createdAt: _formatDateTime(
+          isEdit && existingService != null
+              ? existingService.createdAt
+              : savedService.createdAt,
+        ),
       );
       if (isEdit && existingService != null) {
         spController.updateService(myService);
@@ -1682,6 +1684,24 @@ class AddServiceController extends GetxController {
       default:
         return null;
     }
+  }
+
+  /// Format DateTime to "13th Apr - Mon - 5:30 PM"
+  String _formatDateTime(DateTime dateTime) {
+    final day = dateTime.day;
+    final suffix = _getDaySuffix(day);
+    final month = _getMonthShort(dateTime.month);
+    final weekday = _getWeekdayShort(dateTime.weekday);
+
+    // Format time: "5:30 PM"
+    int hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+
+    if (hour > 12) hour -= 12;
+    if (hour == 0) hour = 12;
+
+    return '$day$suffix $month - $weekday - $hour:$minute $period';
   }
 
   /// Get day suffix for date formatting (1st, 2nd, 3rd, etc.)

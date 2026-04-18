@@ -63,55 +63,102 @@ class CertificationListView extends GetView<CertificationController> {
           ),
         ],
       ),
-      body: Obx(
-        () => Skeletonizer(
-          enabled: controller.isLoading.value,
-          child: ListView.builder(
-            padding: EdgeInsets.all(24.w),
-            itemCount: controller.certifications.length,
-            itemBuilder: (context, index) {
-              final cert = controller.certifications[index];
-              return Padding(
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Skeletonizer(
+            enabled: true,
+            child: ListView.builder(
+              padding: EdgeInsets.all(24.w),
+              itemCount: 5,
+              itemBuilder: (context, index) => Padding(
                 padding: EdgeInsets.only(bottom: 24.h),
-                child: InkWell(
-                  onTap: () => Get.toNamed(
-                    AppRoutes.spViewCertification,
-                    arguments: cert,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cert.title,
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        cert.formattedIssueDate,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      Text(
-                        cert.institute,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 20.h,
+                      width: 150.w,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(height: 8.h),
+                    Container(
+                      height: 14.h,
+                      width: 100.w,
+                      color: Colors.grey[300],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (controller.certifications.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.workspace_premium_outlined,
+                  size: 64.sp,
+                  color: AppColors.textSecondary,
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'noCertificates'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    color: AppColors.textSecondary,
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.all(24.w),
+          itemCount: controller.certifications.length,
+          itemBuilder: (context, index) {
+            final cert = controller.certifications[index];
+            return Padding(
+              padding: EdgeInsets.only(bottom: 24.h),
+              child: InkWell(
+                onTap: () =>
+                    Get.toNamed(AppRoutes.spViewCertification, arguments: cert),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cert.title,
+                      style: GoogleFonts.inter(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      cert.formattedIssueDate,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      cert.institute,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }
