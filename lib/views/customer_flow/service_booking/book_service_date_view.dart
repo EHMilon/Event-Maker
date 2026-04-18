@@ -142,6 +142,7 @@ class BookServiceDateView extends StatelessWidget {
               height: 70.h,
               child: Obx(() {
                 final dates = controller.availableDates;
+                final selectedIndex = controller.selectedDateIndex.value;
                 if (dates.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -149,8 +150,7 @@ class BookServiceDateView extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   itemCount: dates.length,
                   itemBuilder: (context, index) {
-                    final isSelected =
-                        controller.selectedDateIndex.value == index;
+                    final isSelected = selectedIndex == index;
                     final date = dates[index];
                     final dayAbbrev = controller.getDayAbbrev(date);
                     return GestureDetector(

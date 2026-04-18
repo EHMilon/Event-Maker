@@ -19,8 +19,7 @@ class _TransactionsViewState extends State<TransactionsView> {
   @override
   void initState() {
     super.initState();
-    // Fetch customer payment history on first load
-    controller.fetchCustomerPaymentHistory();
+    controller.fetchCustomerPaymentHistory(refresh: true);
   }
 
   @override

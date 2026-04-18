@@ -2,6 +2,7 @@ import 'package:event_maker/views/customer_flow/map/map_results_view.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:event_maker/constants/app_config.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -35,10 +36,17 @@ class MapController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Listen to main category changes and update sub-categories
+    _requestLocationPermission();
     ever(selectedMainCategory, (_) => fetchSubCategories());
-    // Fetch initial subcategories
     fetchSubCategories();
+  }
+
+  Future<void> _requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
   }
 
   /// Fetch subcategories from API based on selected main category

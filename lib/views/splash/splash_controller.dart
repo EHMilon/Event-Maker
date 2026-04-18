@@ -17,11 +17,14 @@ class SplashController extends GetxController {
   void onInit() {
     super.onInit();
     Log.i("SplashView initialized");
+    print("Milon: onInit started");
     _navigateToNextScreen();
   }
 
   void _navigateToNextScreen() async {
+    print("Milon: _navigateToNextScreen started, waiting 2 seconds");
     await Future.delayed(const Duration(seconds: 2));
+    print("Milon: 2 seconds passed");
 
     try {
       final isFirstTime = await _storage.isFirstTime();
@@ -33,6 +36,7 @@ class SplashController extends GetxController {
       Log.i(
         "Splash navigation state -> firstTime: $isFirstTime, onboardingDone: $hasCompletedOnboarding, loggedIn: $isLoggedIn, hasValidTokens: $hasValidTokens, tokenExpired: $isTokenExpired",
       );
+      print("Milon: Splash navigation state -> firstTime: $isFirstTime");
 
       // Priority 1: Onboarding not completed
       if (!hasCompletedOnboarding) {

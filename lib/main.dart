@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:event_maker/services/storage_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -9,13 +13,23 @@ import 'localization/app_localization.dart';
 import 'global/init_binding.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize StorageService before using it
-  await StorageService.init();
+    GoogleFonts.config.allowRuntimeFetching = true;
 
-  final savedLanguageCode = await StorageService().getLanguageCode();
-  runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
+    await StorageService.init();
+
+    final savedLanguageCode = await StorageService().getLanguageCode();
+    runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
+  }, (error, stack) {
+    if (error.toString().contains('Failed to load font') ||
+        error.toString().contains('fonts.gstatic.com')) {
+      debugPrint('GoogleFonts offline fetch failed. Using fallback system font.');
+    } else {
+      debugPrint('Unhandled error: $error');
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {

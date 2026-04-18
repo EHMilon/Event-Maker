@@ -948,7 +948,10 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     _searchDelayTimer?.cancel();
 
     _searchDelayTimer = Timer(const Duration(milliseconds: 500), () async {
+      if (!mounted) return;
+
       if (value.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _searchResults = [];
         });
@@ -958,6 +961,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
 
       final autoComplete = await fetchAutocompletePredictions(value);
       if (autoComplete == null) return;
+      if (!mounted) return;
 
       setState(() {
         _searchResults = autoComplete.map((item) {

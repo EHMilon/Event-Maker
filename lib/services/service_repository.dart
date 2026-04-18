@@ -1,8 +1,6 @@
 import 'dart:io';
-import '../mock_data/mock_data.dart';
 import '../services/storage_service.dart';
 import '../utils/logger.dart';
-import '../mock_data/review_mock.dart';
 import '../models/service_model.dart';
 import '../models/my_service_model.dart';
 import '../models/service_request_model.dart';
@@ -32,35 +30,43 @@ class ServiceRepository {
     return _categoryLookup[category.toLowerCase()];
   }
 
-  /// Fetches services either for a provider dashboard or filtered views.
-  ///
-  /// TODO: Replace the mock delay and data with a real API call and handle
-  /// network errors/pagination, caching, etc.
+  /// Fetches services from the backend API.
   Future<ServiceResponse> fetchServices({
     ServiceType? filterType,
     String? category,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 350));
-    final resolvedType =
-        filterType ?? (category != null ? _typeFromCategory(category) : null);
-    final rawData = resolvedType == null
-        ? MockData.homeServices
-        : MockData.getServicesByType(resolvedType);
-    final data = rawData
-        .map(
-          (service) => service.date != null
-              ? service
-              : service.copyWith(date: DateTime.now()),
-        )
-        .toList();
+    final api = ApiService();
 
-    return ServiceResponse.mock(
-      data,
-      extraMetadata: {
-        'requestedType': resolvedType?.name ?? 'all',
-        'category': category ?? resolvedType?.name ?? 'all',
-      },
-    );
+    try {
+      final queryParams = <String, String>{};
+      if (category != null) {
+        queryParams['service_type_name'] = category;
+      }
+
+      final response = await api.get(
+        ApiConstant.services,
+        queryParams: queryParams,
+      );
+
+      final dataList = response['data'] as List<dynamic>? ?? [];
+      final services = dataList
+          .map((json) => ServiceModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      return ServiceResponse(
+        services: services,
+        metadata: {
+          'requestedType': filterType?.name ?? category ?? 'all',
+          'category': category ?? filterType?.name ?? 'all',
+        },
+      );
+    } on ApiException catch (e) {
+      Log.e('fetchServices - ApiException: ${e.message}');
+      rethrow;
+    } catch (e) {
+      Log.e('fetchServices - Error: $e');
+      throw ApiException(message: 'Failed to fetch services: $e');
+    }
   }
 
   /// Simple helper for fetching a single service. Backend can implement server
@@ -100,41 +106,12 @@ class ServiceRepository {
     ServiceProvider provider, {
     int? providerId,
   }) async {
-    // If providerId is provided, use API
     if (providerId != null) {
       return fetchVendorProfileById(providerId);
     }
 
-    // Fallback to mock data for backward compatibility
-    await Future.delayed(const Duration(milliseconds: 300));
-    final providerServices = MockData.homeServices
-        .where((service) => service.provider.name == provider.name)
-        .toList();
-    final reviews = ReviewMock.getReviewsForProvider(provider.name);
-    final rating = providerServices.isEmpty
-        ? 0.0
-        : providerServices.map((s) => s.rating ?? 0).reduce((a, b) => a + b) /
-              providerServices.length;
-
-    // Return mock data using legacy format
-    return VendorProfileModel(
-      id: 'mock_${provider.name.hashCode}',
-      name: provider.name,
-      avatar: provider.imageUrl ?? '',
-      ratingAvg: rating.toStringAsFixed(2),
-      totalReviews: reviews.length,
-      isAvailable: true,
-      services: const [],
-      reviews: const [],
-      provider: provider,
-      bannerUrl:
-          'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop',
-      certifications: ['Professional Chef', 'Pizza Artisan'],
-      bio:
-          'Amazing service! The team made our wedding day stress-free and truly magical. Everything was perfectly organized from the décor to the timeline. Highly recommend them.',
-      rating: rating,
-      serviceModels: providerServices,
-      reviewModels: reviews,
+    throw ApiException(
+      message: 'providerId is required to fetch vendor profile',
     );
   }
 

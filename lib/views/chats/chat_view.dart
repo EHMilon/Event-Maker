@@ -26,6 +26,7 @@ class _ChatViewState extends State<ChatView>
   late TabController _tabController;
   late TextEditingController _searchController;
   bool _isFirstBuild = true;
+  String? _lastChatDetailRoute;
 
   @override
   void initState() {
@@ -77,7 +78,8 @@ class _ChatViewState extends State<ChatView>
         final avatarUrl = adminMember?.avatar?.isNotEmpty == true
             ? ApiConstant.getFullMediaUrl(adminMember!.avatar)
             : 'assets/icons/icon.svg';
-        Get.toNamed(
+        _lastChatDetailRoute = '/chat/detail';
+        await Get.toNamed(
           AppRoutes.chatDetail,
           arguments: {
             'id': adminChat.id,
@@ -86,6 +88,9 @@ class _ChatViewState extends State<ChatView>
             'isAdmin': true,
           },
         );
+        if (mounted) {
+          controller.refreshChats();
+        }
       }
     }
   }
@@ -101,9 +106,11 @@ class _ChatViewState extends State<ChatView>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Refresh chats when app comes back to foreground or when returning to this screen
     if (state == AppLifecycleState.resumed) {
-      controller.refreshChats();
+      if (_lastChatDetailRoute == '/chat/detail') {
+        controller.refreshChats();
+      }
+      _lastChatDetailRoute = null;
     }
   }
 
@@ -395,8 +402,9 @@ class _ChatViewState extends State<ChatView>
     }
 
     return InkWell(
-      onTap: () {
-        Get.toNamed(
+      onTap: () async {
+        _lastChatDetailRoute = '/chat/detail';
+        await Get.toNamed(
           AppRoutes.chatDetail,
           arguments: {
             'id': chat.id,
@@ -405,6 +413,9 @@ class _ChatViewState extends State<ChatView>
             'isAdmin': isAdminChat,
           },
         );
+        if (mounted) {
+          controller.refreshChats();
+        }
       },
       borderRadius: BorderRadius.circular(12.r),
       child: Row(

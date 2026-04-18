@@ -581,45 +581,29 @@ class MapResultsController extends GetxController {
   }
 
   /// Get current user location
-  Future<LatLng?> getCurrentLocation() async {
+  Future<LatLng?> getCurrentLocation({bool requestPermission = true}) async {
     try {
       // Check location permission
       LocationPermission permission = await Geolocator.checkPermission();
+      
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          Get.snackbar(
-            'Permission Denied',
-            'Location permission is required for navigation',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange,
-            colorText: Colors.white,
-          );
+        if (requestPermission) {
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            return null;
+          }
+        } else {
           return null;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        Get.snackbar(
-          'Permission Denied',
-          'Please enable location permission in settings',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
         return null;
       }
 
       // Check if location services are enabled
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        Get.snackbar(
-          'Location Disabled',
-          'Please enable location services',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
         return null;
       }
 
@@ -633,13 +617,6 @@ class MapResultsController extends GetxController {
       currentLocation.value = loc;
       return loc;
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to get current location',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
       return null;
     }
   }
@@ -650,8 +627,49 @@ class MapResultsController extends GetxController {
     if (service == null) return;
 
     // Get current location
-    final myLocation = await getCurrentLocation();
-    if (myLocation == null) return;
+    final myLocation = await getCurrentLocation(requestPermission: true);
+    
+    if (myLocation == null) {
+      final permission = await Geolocator.checkPermission();
+      
+      if (permission == LocationPermission.denied) {
+        Get.snackbar(
+          'Permission Denied',
+          'Location permission is required for navigation',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      } else if (permission == LocationPermission.deniedForever) {
+        Get.snackbar(
+          'Permission Denied',
+          'Please enable location permission in settings',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      } else {
+        final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          Get.snackbar(
+            'Location Disabled',
+            'Please enable location services',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Error',
+            'Failed to get current location',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+      return;
+    }
 
     isNavigating.value = true;
 

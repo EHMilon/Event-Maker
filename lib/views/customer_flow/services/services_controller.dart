@@ -1,5 +1,4 @@
 import 'package:event_maker/models/service_model.dart';
-import 'package:event_maker/mock_data/services_mock.dart';
 import 'package:event_maker/services/service_repository.dart';
 import 'package:get/get.dart';
 
@@ -25,15 +24,14 @@ class ServicesController extends GetxController {
     });
   }
 
-  /// Load all services from the mock database
+  /// Load all services from the API
   Future<void> loadServices() async {
     try {
       isLoading.value = true;
 
-      // Use ServicesMock API-like method with simulated network delay
-      services.value = await ServicesMock.fetchAllServices(
-        delay: const Duration(seconds: 2),
-      );
+      final response = await _serviceRepository.fetchServices();
+      services.value = response.services;
+      filteredServices.value = response.services;
     } catch (e) {
       Get.snackbar('Error', 'Failed to load services: $e');
     } finally {
@@ -45,14 +43,18 @@ class ServicesController extends GetxController {
     selectedPackageIndex.value = index;
   }
 
-  /// Search services by query using mock database
+  /// Search services by query using API
   Future<void> search(String query) async {
     searchQuery.value = query;
     if (query.isEmpty) {
       filteredServices.value = services;
     } else {
-      // Use the search method from ServicesMock
-      filteredServices.value = await ServicesMock.searchServices(query);
+      filteredServices.value = services.where((service) {
+        final title = service.title.toLowerCase();
+        final desc = service.description?.toLowerCase() ?? '';
+        final searchLower = query.toLowerCase();
+        return title.contains(searchLower) || desc.contains(searchLower);
+      }).toList();
     }
   }
 

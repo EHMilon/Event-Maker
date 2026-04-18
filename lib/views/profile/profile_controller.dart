@@ -644,7 +644,9 @@ class ProfileController extends GetxController {
       return;
     }
 
-    isPersonalInfoLoading.value = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      isPersonalInfoLoading.value = true;
+    });
     personalInfoError.value = '';
 
     try {
@@ -776,7 +778,9 @@ class ProfileController extends GetxController {
       return;
     }
 
-    isPersonalInfoLoading.value = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      isPersonalInfoLoading.value = true;
+    });
 
     try {
       final requestBody = <String, dynamic>{

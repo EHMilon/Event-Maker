@@ -307,6 +307,7 @@ class AppLocalization extends Translations {
     'about': 'About',
     'reviews': 'Reviews',
     'bio': 'Bio',
+    'bioPlaceholder': 'Tell us about yourself, your experience and skills...',
     'withdraw': 'Withdraw',
     'transactions': 'Transactions',
     'viewCertification': 'View Certification',
@@ -396,6 +397,8 @@ class AppLocalization extends Translations {
     'select': 'Select',
     'needConfirmationBeforePayment': 'Need confirmation before payment',
     'selectSubOptions': 'Select Sub Options',
+    'invalidTime': 'Invalid time.',
+    'startTimeBeforeEndTime': 'Start time must be before end time.',
 
     // Days
     'mon': 'Mon',
@@ -506,6 +509,10 @@ class AppLocalization extends Translations {
     'providerApprovalSubtitle':
         'Your account has been pending for admin approval. You will be notified once your account is approved.',
     'backToLogin': 'Back to Login',
+
+    'setupStripeAccount': 'Setup Stripe Account',
+    'stripeOnboardingRequired': 'Stripe Onboarding Required',
+    'setupNow': 'Setup Now',
   };
 
   // Arabic translations
@@ -788,6 +795,7 @@ class AppLocalization extends Translations {
     'about': 'حول',
     'reviews': 'المراجعات',
     'bio': 'السيرة الذاتية',
+    'bioPlaceholder': 'أخبرنا عن نفسك، تجربتك ومهاراتك...',
     'withdraw': 'سحب',
     'transactions': 'المعاملات',
     'viewCertification': 'عرض الشهادة',
@@ -855,6 +863,8 @@ class AppLocalization extends Translations {
     'select': 'اختر',
     'needConfirmationBeforePayment': 'هل تحتاج إلى تأكيد قبل الدفع؟',
     'selectSubOptions': 'اختر الخيارات الفرعية',
+    'invalidTime': 'وقت غير صالح',
+    'startTimeBeforeEndTime': 'يجب أن يكون وقت البدء قبل وقت الانتهاء',
 
     // Days
     'mon': 'الاثنين',
@@ -973,5 +983,9 @@ class AppLocalization extends Translations {
     'providerApprovalSubtitle':
         'تم تعليق حسابك لانتظار موافقة المسؤول. سيتم إخطارك بمجرد الموافقة على حسابك.',
     'backToLogin': 'العودة لتسجيل الدخول',
+
+    'setupStripeAccount': 'إعداد حساب سترايب',
+    'stripeOnboardingRequired': 'مطلوب إعداد حساب سترايب',
+    'setupNow': 'إعداد الآن',
   };
 }

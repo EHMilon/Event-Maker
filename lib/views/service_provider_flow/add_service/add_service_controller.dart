@@ -1405,6 +1405,7 @@ class AddServiceController extends GetxController {
               primaryAvailabilityCard.cannotGoOutside.value,
           newRequiresConfirmation: needsConfirmationBeforePayment.value,
           newImagePath: selectedImagePath.value,
+          newAvailabilities: apiAvailabilities,
         );
 
         if (!hasChanges) {
@@ -1758,8 +1759,9 @@ class AddServiceController extends GetxController {
     required bool newCannotGoOutsideLocation,
     required bool newRequiresConfirmation,
     String? newImagePath,
+    List<AvailabilityRequestModel>? newAvailabilities,
   }) {
-    return newTitle != existingService.title ||
+    final basicChanges = newTitle != existingService.title ||
         newDescription != existingService.description ||
         newServiceTypeName != existingService.serviceTypeName ||
         newRoleName != existingService.roleName ||
@@ -1774,6 +1776,37 @@ class AddServiceController extends GetxController {
             newImagePath.isNotEmpty &&
             !newImagePath.startsWith('/media/') &&
             !newImagePath.startsWith('http'));
+
+    if (basicChanges) return true;
+
+    if (newAvailabilities == null) {
+      return existingService.availabilities.isEmpty;
+    }
+
+    if (newAvailabilities.length != existingService.availabilities.length) {
+      return true;
+    }
+
+    for (var i = 0; i < newAvailabilities.length; i++) {
+      final newAvail = newAvailabilities[i];
+      final existingAvail = existingService.availabilities[i];
+
+      if (newAvail.weekDays.length != existingAvail.weekDays.length) {
+        return true;
+      }
+      for (var j = 0; j < newAvail.weekDays.length; j++) {
+        if (newAvail.weekDays[j] != existingAvail.weekDays[j]) {
+          return true;
+        }
+      }
+      if (newAvail.startTime != existingAvail.startTime ||
+          newAvail.endTime != existingAvail.endTime ||
+          newAvail.address != existingAvail.address) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 
