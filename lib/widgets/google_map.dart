@@ -92,9 +92,16 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      debugPrint('');
-      debugPrint('Location services are disabled.');
-      debugPrint('');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Location services are disabled. Please enable them to use this feature.',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -103,16 +110,38 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Location permission denied. Please grant permission to use this feature.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      debugPrint('');
-      debugPrint(
-        'Location permissions are permanently denied. Please enable them from settings.',
-      );
-      debugPrint('');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Location permissions are permanently denied. Please enable them from settings.',
+            ),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Settings',
+              textColor: Colors.white,
+              onPressed: () {
+                Geolocator.openAppSettings();
+              },
+            ),
+          ),
+        );
+      }
       return;
     }
 
@@ -271,15 +300,15 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
     debugPrint('=== getPlaceIdFromLatLng called ===');
     debugPrint('API Key: ${widget.apiKey}');
     debugPrint('Lat: $lat, Lng: $lng');
-    
+
     final url = Uri.parse(
       'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=${widget.apiKey}',
     );
-    
+
     debugPrint('Request URL: $url');
 
     final response = await http.get(url);
-    
+
     debugPrint('Response status: ${response.statusCode}');
     debugPrint('Response body: ${response.body}');
 
@@ -291,7 +320,9 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
         debugPrint('Found placeId: $placeId');
         return placeId;
       } else {
-        debugPrint('API Error: ${data['status']} - ${data['error_message'] ?? 'No error message'}');
+        debugPrint(
+          'API Error: ${data['status']} - ${data['error_message'] ?? 'No error message'}',
+        );
       }
     }
 
@@ -597,17 +628,17 @@ class _GoogleMapScreenState extends State<GoogleMapScreen> {
                     }
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
                       'Retry',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 12.sp),
                     ),
                   ),
                 ),

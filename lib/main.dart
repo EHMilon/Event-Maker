@@ -1,35 +1,41 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:event_maker/services/storage_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app_routes.dart';
 import 'constants/app_themes.dart';
 import 'localization/app_localization.dart';
 import 'global/init_binding.dart';
 
 Future<void> main() async {
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-    GoogleFonts.config.allowRuntimeFetching = true;
+      await dotenv.load(fileName: '.env');
 
-    await StorageService.init();
+      GoogleFonts.config.allowRuntimeFetching = true;
 
-    final savedLanguageCode = await StorageService().getLanguageCode();
-    runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
-  }, (error, stack) {
-    if (error.toString().contains('Failed to load font') ||
-        error.toString().contains('fonts.gstatic.com')) {
-      debugPrint('GoogleFonts offline fetch failed. Using fallback system font.');
-    } else {
-      debugPrint('Unhandled error: $error');
-    }
-  });
+      await StorageService.init();
+
+      final savedLanguageCode = await StorageService().getLanguageCode();
+      runApp(MyApp(initialLocale: Locale(savedLanguageCode)));
+    },
+    (error, stack) {
+      if (error.toString().contains('Failed to load font') ||
+          error.toString().contains('fonts.gstatic.com')) {
+        debugPrint(
+          'GoogleFonts offline fetch failed. Using fallback system font.',
+        );
+      } else {
+        debugPrint('Unhandled error: $error');
+      }
+    },
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -60,10 +66,12 @@ class MyApp extends StatelessWidget {
             final brightness = Theme.of(context).brightness;
             final overlayStyle = SystemUiOverlayStyle(
               statusBarColor: Colors.transparent,
-              statusBarIconBrightness:
-                  brightness == Brightness.dark ? Brightness.light : Brightness.dark,
-              statusBarBrightness:
-                  brightness == Brightness.dark ? Brightness.dark : Brightness.light,
+              statusBarIconBrightness: brightness == Brightness.dark
+                  ? Brightness.light
+                  : Brightness.dark,
+              statusBarBrightness: brightness == Brightness.dark
+                  ? Brightness.dark
+                  : Brightness.light,
             );
 
             return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -79,4 +87,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

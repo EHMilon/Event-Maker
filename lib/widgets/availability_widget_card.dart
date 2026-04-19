@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../constants/app_colors.dart';
-import '../../constants/app_config.dart';
+import '../../constants/env_config.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/google_map.dart';
 
@@ -430,7 +430,7 @@ class _AvailabilityWidgetCardState extends State<AvailabilityWidgetCard> {
   void _openMapScreen(BuildContext context) {
     Get.to(
       GoogleMapScreen(
-        apiKey: AppConfig.googleMapsApiKey,
+        apiKey: EnvConfig.googleMapsApiKey,
         onLocationSelect: (location) {
           // Update the address controller with selected location name
           widget.card.addressController.text = location.name;

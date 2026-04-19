@@ -1,7 +1,7 @@
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/constants/app_config.dart';
+import 'package:event_maker/constants/env_config.dart';
 import 'package:event_maker/models/booking_request_model.dart';
 import 'package:event_maker/models/service_model.dart';
 import 'package:event_maker/services/service_repository.dart';
@@ -1103,7 +1103,7 @@ class ServiceDetailView extends StatelessWidget {
   /// Build Google Maps Static API URL
   String _buildStaticMapUrl(double latitude, double longitude) {
     // Using Google Maps Static API
-    final String apiKey = AppConfig.googleMapsApiKey;
+    final String apiKey = EnvConfig.googleMapsApiKey;
     const int width = 600;
     const int height = 300;
     const int zoom = 15;

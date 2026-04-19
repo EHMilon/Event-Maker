@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:event_maker/constants/app_colors.dart';
-import 'package:event_maker/constants/app_config.dart';
+import 'package:event_maker/constants/env_config.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -585,7 +585,7 @@ class MapResultsController extends GetxController {
     try {
       // Check location permission
       LocationPermission permission = await Geolocator.checkPermission();
-      
+
       if (permission == LocationPermission.denied) {
         if (requestPermission) {
           permission = await Geolocator.requestPermission();
@@ -628,10 +628,10 @@ class MapResultsController extends GetxController {
 
     // Get current location
     final myLocation = await getCurrentLocation(requestPermission: true);
-    
+
     if (myLocation == null) {
       final permission = await Geolocator.checkPermission();
-      
+
       if (permission == LocationPermission.denied) {
         Get.snackbar(
           'Permission Denied',
@@ -726,8 +726,8 @@ class MapResultsController extends GetxController {
     LatLng destination,
   ) async {
     try {
-      // Get API key from AppConfig
-      final apiKey = AppConfig.googleMapsApiKey;
+      // Get API key from EnvConfig
+      final apiKey = EnvConfig.googleMapsApiKey;
 
       if (apiKey.isEmpty) {
         // If no API key, draw a straight line as fallback
