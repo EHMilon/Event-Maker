@@ -513,6 +513,7 @@ class AppLocalization extends Translations {
     'setupStripeAccount': 'Setup Stripe Account',
     'stripeOnboardingRequired': 'Stripe Onboarding Required',
     'setupNow': 'Setup Now',
+    'selectService': 'Select Service',
   };
 
   // Arabic translations
@@ -987,5 +988,6 @@ class AppLocalization extends Translations {
     'setupStripeAccount': 'إعداد حساب سترايب',
     'stripeOnboardingRequired': 'مطلوب إعداد حساب سترايب',
     'setupNow': 'إعداد الآن',
+    'selectService': 'اختر الخدمة',
   };
 }

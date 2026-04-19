@@ -1,3 +1,4 @@
+import 'package:event_maker/views/service_provider_flow/add_service/drop_down_selector_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,7 +8,6 @@ import '../../../constants/app_colors.dart';
 import '../../../models/service_model.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../../../widgets/unified_dropdown_field.dart';
-import '../../../widgets/searchable_unified_dropdown_field.dart';
 import '../../../widgets/primary_text_button.dart';
 import '../../../widgets/upload_widget.dart';
 import '../../../widgets/availability_widget_card.dart';
@@ -128,42 +128,78 @@ class _AddServiceViewState extends State<AddServiceView> {
                   ),
                 ),
 
+                SizedBox(height: 24.h),
                 Obx(() {
                   final backendOptions = controller.backendServiceAsOptions;
-                  final isLoading = controller.isLoadingDropdowns.value;
-
-                  return Padding(
-                    padding: EdgeInsets.only(top: 24.h),
-                    child: isLoading && backendOptions.isEmpty
-                        ? Container(
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.primary,
-                                strokeWidth: 2.r,
+                  if (backendOptions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final selectedService =
+                      controller.selectedServiceAsItems.isNotEmpty
+                      ? controller.selectedServiceAsItems.first
+                      : null;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'selectService'.tr,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => DropdownSelectorScreen(
+                                options: controller.backendServiceAsOptions,
+                                onSelected: (selectedOption) {
+                                  controller.toggleServiceAs(selectedOption);
+                                  setState(() {});
+                                },
                               ),
                             ),
-                          )
-                        : SearchableUnifiedDropdownField<String>(
-                            key: ValueKey(
-                              'serviceAs_${controller.selectedCategory.value}_${controller.selectedRole.value}_${backendOptions.length}',
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          height: 50.h,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.grey200,
+                              style: BorderStyle.solid,
                             ),
-                            label: 'serviceAs'.tr,
-                            hint: 'selectServiceAs'.tr,
-                            items: backendOptions,
-                            itemLabel: (item) => item,
-                            selectedItems: controller.selectedServiceAsItems,
-                            isMulti: true,
-                            onMultiSelect: (value) {
-                              controller.toggleServiceAs(value);
-                              setState(() {});
-                            },
-                            onRemoveItem: (value) {
-                              controller.removeServiceAs(value);
-                              setState(() {});
-                            },
-                            enabled: true,
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12.w),
+                            child: Row(
+                              children: [
+                                Text(
+                                  selectedService ?? 'Select Service',
+                                  style: TextStyle(
+                                    color: selectedService != null
+                                        ? AppColors.textPrimary
+                                        : Colors.grey,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
+                                const Spacer(),
+                                Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 24.sp,
+                                  color: AppColors.textSecondary,
+                                ),
+                                SizedBox(width: 5.w,)
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 }),
 
@@ -187,22 +223,80 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : SearchableUnifiedDropdownField<String>(
-                            label: 'selectOptions'.tr,
-                            hint: 'selectOptions'.tr,
-                            items: options,
-                            itemLabel: (item) => item,
-                            selectedItems: controller.selectedSubServiceItems,
-                            isMulti: true,
-                            onMultiSelect: (value) {
-                              controller.toggleSubService(value);
-                              setState(() {});
-                            },
-                            onRemoveItem: (item) {
-                              controller.selectedSubServiceItems.remove(item);
-                              setState(() {});
-                            },
-                            enabled: true,
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'selectOptions'.tr,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => DropdownSelectorScreen(
+                                        options: controller.subOptions,
+                                        onSelected: (selectedOption) {
+                                          controller.toggleSubService(
+                                            selectedOption,
+                                          );
+                                          setState(() {});
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 50.h,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: AppColors.grey200,
+                                      style: BorderStyle.solid,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          controller
+                                                  .selectedSubServiceItems
+                                                  .isNotEmpty
+                                              ? controller
+                                                    .selectedSubServiceItems
+                                                    .first
+                                              : 'Select Options',
+                                          style: TextStyle(
+                                            color:
+                                                controller
+                                                    .selectedSubServiceItems
+                                                    .isNotEmpty
+                                                ? AppColors.textPrimary
+                                                : Colors.grey,
+                                            fontSize: 14.sp,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Icon(
+                                          Icons.arrow_drop_down,
+                                          size: 20.sp,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                   );
                 }),
@@ -227,34 +321,81 @@ class _AddServiceViewState extends State<AddServiceView> {
                               ),
                             ),
                           )
-                        : UnifiedDropdownField<String>(
-                            label: 'selectSubOptions'.tr,
-                            hint: 'selectSubOptions'.tr,
-                            items: options,
-                            itemLabel: (item) => item,
-                            selectedItems:
-                                controller.selectedSubSubServiceItems,
-                            onMultiSelect: (value) {
-                              controller.toggleSubSubService(value);
-                              setState(() {});
-                            },
-                            onRemoveItem: (item) {
-                              controller.selectedSubSubServiceItems.remove(
-                                item,
-                              );
-                              setState(() {});
-                            },
-                            onAddCustom:
-                                controller.addCustomSubSubOptionDirectly,
-                            isAdding: controller.showAddSubOptionField,
-                            addController: controller.newSubOptionController,
-                            onSaveAdd: () {
-                              controller.addCustomSubOption();
-                              setState(() {});
-                            },
-                            onCancelAdd: controller.closeAddSubOptionField,
-                            enabled: true,
-                            mode: DropdownMode.multi,
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'selectSubOptions'.tr,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => DropdownSelectorScreen(
+                                        options: controller
+                                            .backendSubSubServiceOptions,
+                                        onSelected: (selectedOption) {
+                                          controller.toggleSubSubService(
+                                            selectedOption,
+                                          );
+                                          setState(() {});
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 50.h,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: AppColors.grey200,
+                                      style: BorderStyle.solid,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          controller
+                                                  .selectedSubSubServiceItems
+                                                  .isNotEmpty
+                                              ? controller
+                                                    .selectedSubSubServiceItems
+                                                    .first
+                                              : 'Select Sub Options',
+                                          style: TextStyle(
+                                            color:
+                                                controller
+                                                    .selectedSubSubServiceItems
+                                                    .isNotEmpty
+                                                ? AppColors.textPrimary
+                                                : Colors.grey,
+                                            fontSize: 14.sp,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Icon(
+                                          Icons.arrow_drop_down,
+                                          size: 20.sp,
+                                          color: Colors.grey,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                   );
                 }),
@@ -274,7 +415,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                     return const SizedBox.shrink();
                   }
                   return Padding(
-                    padding: EdgeInsets.only(top: 24.h),
+                    padding: EdgeInsets.only(top: 0.h),
                     child: CustomTextField(
                       controller: controller.attendanceCapacityController,
                       labelText: 'attendanceCapacity'.tr,
