@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:event_maker/models/auth_models.dart';
 import 'package:event_maker/global/base_controller.dart';
 import 'package:event_maker/utils/logger.dart';
@@ -9,6 +12,10 @@ import 'package:event_maker/services/storage_service.dart';
 import 'package:event_maker/app_routes.dart';
 import 'package:event_maker/services/api_service.dart';
 import 'package:event_maker/services/api_exception.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:event_maker/constants/api_constant.dart';
 
 /// Controller for handling authentication state and operations.
@@ -55,6 +62,16 @@ class AuthController extends BaseController {
   final canResendOtp = false.obs;
   final verificationUserId = ''.obs;
   final resetSecretKey = ''.obs;
+
+  // Signup documents & certifications
+  final signupDocuments = <Map<String, dynamic>>[].obs;
+  final signupCertifications = <Map<String, dynamic>>[].obs;
+  final selectedSignupFile = Rxn<File>();
+  final selectedSignupFileName = ''.obs;
+  final selectedCertificationImage = Rxn<File>();
+  final selectedDocumentType = 'National ID'.obs; // Default to National ID
+
+  String get fileName => selectedSignupFileName.value;
 
   Timer? _otpTimer;
   bool _controllersDisposed = false;
@@ -138,6 +155,7 @@ class AuthController extends BaseController {
   }
 
   void selectType(String type) {
+    Log.i("AuthController: selectType called with $type");
     selectedType.value = type;
   }
 
@@ -326,6 +344,92 @@ class AuthController extends BaseController {
     if (value != null) selectedServiceCategory.value = value;
   }
 
+  Future<void> pickSignupDocument() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'],
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          selectedSignupFile.value = File(file.path!);
+          selectedSignupFileName.value = file.name;
+        }
+      }
+    } catch (e) {
+      Log.e('Error picking document', e);
+      showError('Failed to pick document');
+    }
+  }
+
+  void addSignupDocument(String title, String documentType) {
+    if (selectedSignupFile.value == null) {
+      showWarning('Please select a file');
+      return;
+    }
+    final fileName = selectedSignupFileName.value;
+    final isPdf = fileName.toLowerCase().endsWith('.pdf');
+    signupDocuments.add({
+      'title': title,
+      'document_type': documentType,
+      'fileName': fileName,
+      'file': selectedSignupFile.value,
+      'isPdf': isPdf,
+    });
+    selectedSignupFile.value = null;
+    selectedSignupFileName.value = '';
+    Get.back();
+    // showSuccess('Document added');
+  }
+
+  void removeSignupDocument(int index) {
+    if (index >= 0 && index < signupDocuments.length) {
+      signupDocuments.removeAt(index);
+      // showSuccess('Document removed');
+    }
+  }
+
+  Future<void> pickSignupCertificationImage() async {
+    try {
+      final picker = ImagePicker();
+      final image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        selectedCertificationImage.value = File(image.path);
+      }
+    } catch (e) {
+      Log.e('Error picking image', e);
+      showError('Failed to pick image');
+    }
+  }
+
+  void addSignupCertification(String title, String institute, String date) {
+    if (selectedCertificationImage.value == null) {
+      showWarning('Please select a certification image');
+      return;
+    }
+    signupCertifications.add({
+      'title': title,
+      'institute': institute,
+      'date': date,
+      'image': selectedCertificationImage.value,
+    });
+    selectedCertificationImage.value = null;
+    Get.back();
+    // showSuccess('Certification added');
+  }
+
+  void removeSignupCertification(int index) {
+    if (index >= 0 && index < signupCertifications.length) {
+      signupCertifications.removeAt(index);
+      // showSuccess('Certification removed');
+    }
+  }
+
+  Future<void> onContinueToOtp() async {
+    await submitProviderSignupWithDocuments();
+  }
+
   void onSignup() {
     if (signupNameController.text.trim().isEmpty) {
       showWarning('Please enter your name');
@@ -356,6 +460,18 @@ class AuthController extends BaseController {
       return;
     }
 
+    if (selectedType.value.isEmpty) {
+      // If for some reason type is missing, try restoring it
+      await restoreUserType();
+      
+      // If still missing, force selection
+      if (selectedType.value.isEmpty) {
+        showError('Please select user type');
+        Get.offAllNamed(AppRoutes.userType);
+        return;
+      }
+    }
+
     await _storage.setUserType(selectedType.value);
 
     if (selectedType.value == 'provider') {
@@ -373,7 +489,7 @@ class AuthController extends BaseController {
       return;
     }
 
-    await _completeProviderSignup();
+    Get.toNamed(AppRoutes.signupDocuments);
   }
 
   Future<void> _completeCustomerSignup() async {
@@ -419,34 +535,109 @@ class AuthController extends BaseController {
   }
 
   Future<void> _completeProviderSignup() async {
+    if (selectedServiceType.value.isEmpty ||
+        selectedRole.value.isEmpty ||
+        selectedServiceCategory.value.isEmpty) {
+      showWarning('Please select all fields');
+      return;
+    }
+
+    Get.toNamed(AppRoutes.signupDocuments);
+  }
+
+  Future<void> submitProviderSignupWithDocuments() async {
     if (isLoading.value) return;
 
     setLoading(true);
 
     try {
-      final request = SignUpRequestModel(
-        role: 'provider',
-        fullName: signupNameController.text.trim(),
-        emailAddress: signupEmailController.text.trim(),
-        password: signupPasswordController.text,
-        nationality: selectedNationality.value,
-        phoneNumber: signupPhoneController.text.trim(),
-        termsAgreed: true,
-        serviceTypeName: selectedServiceType.value,
-        providerType: selectedRole.value,
-        serviceCategoryName: selectedServiceCategory.value,
-      );
+      // 1. Prepare text fields
+      final fields = {
+        'role': 'provider',
+        'full_name': signupNameController.text.trim(),
+        'email_address': signupEmailController.text.trim(),
+        'password': signupPasswordController.text,
+        'nationality': selectedNationality.value,
+        'phone_number': signupPhoneController.text.trim(),
+        'terms_agreed': 'true',
+        'service_type_name': selectedServiceType.value,
+        'provider_type': selectedRole.value,
+        'service_category_name': selectedServiceCategory.value,
+      };
 
-      final response = await _apiService.post(
+      // 2. Prepare documents JSON string
+      final List<Map<String, String>> docsMetadata = signupDocuments.map((doc) {
+        return {
+          'title': doc['title'] as String,
+          'document_type': doc['document_type'] as String,
+        };
+      }).toList();
+      fields['documents'] = jsonEncode(docsMetadata);
+
+      // 3. Prepare certificates JSON string
+      final List<Map<String, String>> certsMetadata =
+          signupCertifications.map((cert) {
+        return {
+          'title': cert['title'] as String,
+          'institute': cert['institute'] as String,
+          'issue_date': cert['date'] as String,
+        };
+      }).toList();
+      fields['certificates'] = jsonEncode(certsMetadata);
+
+      // 4. Prepare files
+      final List<http.MultipartFile> multipartFiles = [];
+
+      // Add document files
+      for (var doc in signupDocuments) {
+        final File file = doc['file'];
+        final mimeType = lookupMimeType(file.path)?.split('/');
+
+        multipartFiles.add(
+          await http.MultipartFile.fromPath(
+            'document_files',
+            file.path,
+            contentType: mimeType != null
+                ? MediaType(mimeType[0], mimeType[1])
+                : MediaType('application', 'octet-stream'),
+          ),
+        );
+      }
+
+      // Add certificate files
+      for (var cert in signupCertifications) {
+        if (cert['image'] != null) {
+          final File file = cert['image'];
+          final mimeType = lookupMimeType(file.path)?.split('/');
+
+          multipartFiles.add(
+            await http.MultipartFile.fromPath(
+              'certificate_files',
+              file.path,
+              contentType: mimeType != null
+                  ? MediaType(mimeType[0], mimeType[1])
+                  : MediaType('application', 'octet-stream'),
+            ),
+          );
+        }
+      }
+
+      Log.d('Sending Provider Signup FormData: $fields');
+
+      final response = await _apiService.postFormData(
         ApiConstant.signUp,
-        body: request.toJson(),
-        requiresAuth: false, // Signup doesn't require auth
+        body: fields,
+        files: multipartFiles,
+        requiresAuth: false,
       );
 
       final data = SignUpResponseModel.fromJson(response);
 
       await _persistUserId(data.userId);
       signupPasswordController.clear();
+      // Clear data after success
+      signupDocuments.clear();
+      signupCertifications.clear();
       clearError();
       Get.toNamed('/otp-verification');
       _startOtpTimer();
@@ -473,7 +664,9 @@ class AuthController extends BaseController {
   void onLoginFromSignup() {
     _clearSignupForm();
     _clearPersistedUserId();
-    Get.offAllNamed(AppRoutes.login);
+    // Navigate to UserType first, then Login to ensure back button works
+    Get.offAllNamed(AppRoutes.userType);
+    Future.microtask(() => Get.toNamed(AppRoutes.login));
   }
 
   Future<void> onResetPassword() async {
@@ -993,15 +1186,13 @@ class AuthController extends BaseController {
 
   /// Parses API exceptions into user-friendly error messages for signup
   String _parseSignupError(ApiException exception) {
+    Log.d('Parsing signup error: ${exception.statusCode}, data: ${exception.data}');
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response
     if (data != null && data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      // 1. Prioritize specific validation errors if they exist
       final errors = data['errors'];
-
-      // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
         if (errors.containsKey('full_name') || errors.containsKey('name')) {
           return 'Please enter your full name';
@@ -1014,26 +1205,30 @@ class AuthController extends BaseController {
           }
           return 'Please enter a valid email address';
         }
-        if (errors.containsKey('password')) {
-          return 'Password must be at least 8 characters';
-        }
         if (errors.containsKey('phone_number') || errors.containsKey('phone')) {
           return 'Please enter a valid phone number';
         }
-        if (errors.containsKey('nationality')) {
-          return 'Please select your nationality';
-        }
-        if (errors.containsKey('terms_agreed')) {
-          return 'You must accept the terms and conditions';
-        }
       }
 
-      // Match common backend messages
-      if (backendMessage.contains('already') ||
-          backendMessage.contains('exists') ||
-          backendMessage.contains('taken')) {
-        return 'This email is already registered. Please use a different email';
+      // 2. Use the 'message' field from the backend if it's present and not generic
+      final String backendMessage = data['message']?.toString() ?? '';
+      if (backendMessage.isNotEmpty && 
+          !backendMessage.toLowerCase().contains('validation') &&
+          !backendMessage.toLowerCase().contains('invalid')) {
+        return backendMessage;
       }
+      
+      // 3. Fallback to any remaining message
+      if (backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
+    }
+
+    // 4. If data is null or empty, check the exception message itself
+    if (exception.message.isNotEmpty && 
+        !exception.message.contains('ApiException') &&
+        !exception.message.contains('unknown')) {
+      return exception.message;
     }
 
     // Fallback to status code based messages

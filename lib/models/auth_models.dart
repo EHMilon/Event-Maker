@@ -130,10 +130,13 @@ class SignUpResponseModel {
   });
 
   factory SignUpResponseModel.fromJson(Map<String, dynamic> json) {
+    // Some endpoints nest the data, some don't
+    final dataMap = json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+    
     return SignUpResponseModel(
-      message: json['message'] ?? '',
-      userId: json['user_id'] ?? json['userId'] ?? '',
-      role: json['role'] ?? '',
+      message: json['message'] ?? dataMap['message'] ?? '',
+      userId: (dataMap['user_id'] ?? dataMap['userId'] ?? json['user_id'] ?? json['userId'] ?? '').toString(),
+      role: json['role'] ?? dataMap['role'] ?? '',
     );
   }
 
@@ -358,14 +361,17 @@ class VerifyEmailResponseModel {
   });
 
   factory VerifyEmailResponseModel.fromJson(Map<String, dynamic> json) {
+    final dataMap = json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+    final tokensMap = dataMap['tokens'] ?? json['tokens'] ?? json;
+
     return VerifyEmailResponseModel(
-      message: json['message'] ?? '',
-      accessToken: json['access_token'],
-      refreshToken: json['refresh_token'],
-      expiresIn: json['expires_in'],
-      expiresAt: json['expires_at'],
-      userId: json['user_id'] ?? json['userId'] ?? '',
-      role: json['role'] ?? '',
+      message: json['message'] ?? dataMap['message'] ?? '',
+      accessToken: tokensMap['access_token'] ?? tokensMap['accessToken'] ?? json['access_token'],
+      refreshToken: tokensMap['refresh_token'] ?? tokensMap['refreshToken'] ?? json['refresh_token'],
+      expiresIn: tokensMap['expires_in'] ?? tokensMap['expiresIn'] ?? json['expires_in'],
+      expiresAt: tokensMap['expires_at'] ?? tokensMap['expiresAt'] ?? json['expires_at'],
+      userId: (dataMap['user_id'] ?? dataMap['userId'] ?? json['user_id'] ?? json['userId'] ?? '').toString(),
+      role: json['role'] ?? dataMap['role'] ?? '',
     );
   }
 
@@ -434,9 +440,10 @@ class ForgotPasswordResponseModel {
   });
 
   factory ForgotPasswordResponseModel.fromJson(Map<String, dynamic> json) {
+    final dataMap = json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
     return ForgotPasswordResponseModel(
-      message: json['message'] ?? '',
-      userId: json['user_id'] ?? json['userId'] ?? '',
+      message: json['message'] ?? dataMap['message'] ?? '',
+      userId: (dataMap['user_id'] ?? dataMap['userId'] ?? json['user_id'] ?? json['userId'] ?? '').toString(),
     );
   }
 }

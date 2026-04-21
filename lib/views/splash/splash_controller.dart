@@ -95,8 +95,11 @@ class SplashController extends GetxController {
       // Priority 5: Has user type selected
       final hasUserType = await _storage.hasUserType();
       if (hasUserType) {
-        Log.i("User type already selected; navigating to Login");
-        Get.offAllNamed(AppRoutes.login);
+        Log.i("User type already selected; navigating to Login with UserType as base");
+        // We navigate to UserType first, then Login to ensure back button works
+        Get.offAllNamed(AppRoutes.userType);
+        // Use a microtask to ensure UserType's binding is fully registered before pushing Login
+        Future.microtask(() => Get.toNamed(AppRoutes.login));
         return;
       }
 

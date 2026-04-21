@@ -241,6 +241,61 @@ class ApiService {
     );
   }
 
+  Future<dynamic> postFormData(
+    String endpoint, {
+    Map<String, String> body = const {},
+    List<http.MultipartFile> files = const [],
+    bool requiresAuth = false,
+  }) async {
+    if (!await _connectivity.hasConnection) {
+      throw ApiException.noInternet();
+    }
+
+    final Map<String, String> headers;
+    if (requiresAuth) {
+      // Ensure token is valid before making request
+      final tokenValid = await _ensureValidToken();
+      if (!tokenValid) {
+        throw ApiException.unauthorized('Session expired. Please login again.');
+      }
+      headers = await _getHeadersAsync();
+    } else {
+      headers = {
+        'Accept': 'application/json',
+      };
+    }
+
+    try {
+      final request = http.MultipartRequest('POST', _buildUri(endpoint));
+      request.headers.addAll(headers);
+      request.fields.addAll(body);
+
+      for (final file in files) {
+        request.files.add(file);
+      }
+
+      final streamed = await request.send().timeout(
+        Duration(seconds: AppConstants.connectTimeout),
+      );
+      final response = await http.Response.fromStream(streamed);
+
+      Log.d(
+        '=======> FORMDATA POST ${request.url} → ${response.statusCode}',
+      );
+
+      return _processResponse(response);
+    } on TimeoutException {
+      throw ApiException.timeout();
+    } on SocketException {
+      throw ApiException(message: 'Could not connect to server');
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      Log.e('FormData error', e);
+      throw ApiException.unknown(e);
+    }
+  }
+
   Future<dynamic> post(
     String endpoint, {
     dynamic body,

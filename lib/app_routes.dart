@@ -77,6 +77,11 @@ import 'package:event_maker/views/service_provider_flow/certifications/view_cert
     as sp_view;
 import 'package:event_maker/views/service_provider_flow/certifications/add_edit_certificate_view.dart';
 import 'package:event_maker/views/service_provider_flow/certifications/certification_controller.dart';
+import 'package:event_maker/views/auth/signup_documents_view.dart';
+import 'package:event_maker/views/auth/signup_documents_list_view.dart';
+import 'package:event_maker/views/auth/signup_add_document_view.dart';
+import 'package:event_maker/views/auth/signup_certification_list_view.dart';
+import 'package:event_maker/views/auth/signup_add_edit_certificate_view.dart';
 import 'package:event_maker/views/service_provider_flow/active_orders/sp_active_orders_view.dart';
 import 'package:event_maker/views/chats/chat_detail_view.dart';
 import 'package:event_maker/views/chats/chat_view_binding.dart';
@@ -144,6 +149,12 @@ class AppRoutes {
   static const String search = '/search';
   static const String categories = '/categories';
   static const String spServiceDetail = '/sp-service-detail';
+  static const String signupDocuments = '/signup-documents';
+  static const String signupDocumentsList = '/signup-documents-list';
+  static const String signupAddDocument = '/signup-add-document';
+  static const String signupCertifications = '/signup-certifications';
+  static const String signupAddCertification = '/signup-add-certification';
+  static const String signupAddEditCertificate = '/signup-add-edit-certificate';
 
   static final routes = [
     GetPage(
@@ -449,6 +460,31 @@ class AppRoutes {
             : int.tryParse(providerIdRaw?.toString() ?? '0') ?? 0;
         return ViewCertificate(providerId: providerId);
       },
+    ),
+    GetPage(
+      name: signupDocuments,
+      page: () => const SignupDocumentsView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: signupDocumentsList,
+      page: () => const SignupDocumentsListView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: signupAddDocument,
+      page: () => const SignupAddDocumentView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: signupCertifications,
+      page: () => const SignupCertificationListView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: signupAddCertification,
+      page: () => const SignupAddEditCertificateView(),
+      binding: AuthBinding(),
     ),
     GetPage(
       name: spamReport,

@@ -70,7 +70,11 @@ class UserTypeView extends GetView<AuthController> {
 
   Widget _imageButton(String type, String imagePath) {
     return GestureDetector(
-      onTap: () => controller.selectType(type),
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        debugPrint("UserTypeView: Tapped on role: $type");
+        controller.selectType(type);
+      },
       child: Obx(() {
         final isSelected = controller.selectedType.value == type;
         return AnimatedContainer(

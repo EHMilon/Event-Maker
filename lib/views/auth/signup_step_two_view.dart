@@ -150,17 +150,21 @@ class SignupStepTwoView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 100.h), // Space for button
-              Obx(
-                () => PrimaryTextButton(
-                  text: "Continue",
-                  onPressed: controller.onContinueSignup,
-                  isLoading: controller.isLoading.value,
-                ),
-              ),
-              SizedBox(height: 40.h),
+
             ],
           ),
         ),
+        
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Obx(
+                  () => PrimaryTextButton(
+                    text: "Continue",
+                    onPressed: controller.onContinueSignup,
+                    isLoading: controller.isLoading.value,
+                  ),
+                ),
       ),
     );
   }
