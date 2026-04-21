@@ -40,6 +40,7 @@ class AuthController extends BaseController {
   final obscureSignupPassword = true.obs;
   final acceptedTerms = false.obs;
   final selectedNationality = 'Emirati'.obs;
+  final selectedCountryCode = 'AE'.obs;
   final selectedServiceType = ''.obs;
   final selectedRole = ''.obs;
   final selectedServiceCategory = ''.obs;
@@ -67,6 +68,7 @@ class AuthController extends BaseController {
   void onInit() {
     super.onInit();
     _loadPersistedUserId();
+    selectedCountryCode.value = nationalityCountryCodes[selectedNationality.value] ?? 'AE';
   }
 
   /// Load persisted user ID from SharedPreferences
@@ -293,8 +295,19 @@ class AuthController extends BaseController {
     acceptedTerms.value = value ?? false;
   }
 
+  static const Map<String, String> nationalityCountryCodes = {
+    'Emirati': 'AE',
+    'American': 'US',
+    'British': 'GB',
+    'Indian': 'IN',
+    'Bangladeshi': 'BD',
+  };
+
   void updateNationality(String? value) {
-    if (value != null) selectedNationality.value = value;
+    if (value != null) {
+      selectedNationality.value = value;
+      selectedCountryCode.value = nationalityCountryCodes[value] ?? 'AE';
+    }
   }
 
   void updatePhoneNumber(String phone) {

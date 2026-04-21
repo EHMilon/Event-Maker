@@ -112,22 +112,23 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
                 ),
 
               SizedBox(height: 40.h),
-
-              PrimaryTextButton(
-                text: 'savePackages'.tr,
-                onPressed: () {
-                  // Sync all packages' controller values to reactive properties
-                  // This ensures the AddServiceView will display updated values
-                  for (var package in controller.packages) {
-                    package.syncToReactive();
-                  }
-                  // Return true to indicate packages were saved/updated
-                  Get.back(result: true);
-                },
-              ),
-              SizedBox(height: 20.h),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.all(20.w),
+        child: PrimaryTextButton(
+          text: 'savePackages'.tr,
+          onPressed: () {
+            // Sync all packages' controller values to reactive properties
+            // This ensures the AddServiceView will display updated values
+            for (var package in controller.packages) {
+              package.syncToReactive();
+            }
+            // Return true to indicate packages were saved/updated
+            Get.back(result: true);
+          },
         ),
       ),
     );
@@ -232,86 +233,96 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
           SizedBox(height: 8.h),
 
           // Features list - uses Obx to listen to featureControllers changes
-          Obx(() => Column(
-            children: List.generate(package.featureControllers.length, (featureIndex) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: 8.h),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 20.r,
-                      color: AppColors.primary,
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: TextField(
-                        controller: package.featureControllers[featureIndex],
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textPrimary,
-                        ),
-                        maxLines: 3,
-                        minLines: 1,
-                        keyboardType: TextInputType.multiline,
-                        textInputAction: TextInputAction.newline,
-                        decoration: InputDecoration(
-                          hintText: 'enterFeatureHint'.tr,
-                          hintStyle: GoogleFonts.inter(
+          Obx(
+            () => Column(
+              children: List.generate(package.featureControllers.length, (
+                featureIndex,
+              ) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 8.h),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle_outline,
+                        size: 20.r,
+                        color: AppColors.primary,
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: TextField(
+                          controller: package.featureControllers[featureIndex],
+                          style: GoogleFonts.inter(
                             fontSize: 14.sp,
-                            color: AppColors.textSecondary,
+                            color: AppColors.textPrimary,
                           ),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 10.h,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: AppColors.borderLight),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: AppColors.borderLight),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: AppColors.primary),
-                          ),
-                          suffixIcon: IconButton(
-                            constraints: const BoxConstraints(
-                              minWidth: 32,
-                              minHeight: 32,
+                          maxLines: 3,
+                          minLines: 1,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          decoration: InputDecoration(
+                            hintText: 'enterFeatureHint'.tr,
+                            hintStyle: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              color: AppColors.textSecondary,
                             ),
-                            onPressed: () {
-                              package.removeFeature(featureIndex);
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              size: 18.r,
-                              color: AppColors.grey,
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                              borderSide: BorderSide(
+                                color: AppColors.borderLight,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                              borderSide: BorderSide(
+                                color: AppColors.borderLight,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                              borderSide: BorderSide(color: AppColors.primary),
+                            ),
+                            suffixIcon: IconButton(
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              onPressed: () {
+                                package.removeFeature(featureIndex);
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                size: 18.r,
+                                color: AppColors.grey,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          )),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
 
           // Empty features placeholder
-          Obx(() => package.featureControllers.isEmpty
-              ? Text(
-                  'noFeaturesAdded'.tr,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: AppColors.textSecondary,
-                    fontStyle: FontStyle.italic,
-                  ),
-                )
-              : const SizedBox.shrink()),
+          Obx(
+            () => package.featureControllers.isEmpty
+                ? Text(
+                    'noFeaturesAdded'.tr,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );

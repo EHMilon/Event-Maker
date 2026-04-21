@@ -112,7 +112,11 @@ class _DropdownSelectorScreenState extends State<DropdownSelectorScreen> {
                           child: Container(
                             width: double.infinity,
                             height: 40,
-                            child: Text(option),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              option,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         );
                       }).toList(),

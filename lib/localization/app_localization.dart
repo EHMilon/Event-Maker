@@ -509,6 +509,7 @@ class AppLocalization extends Translations {
     'providerApprovalSubtitle':
         'Your account has been pending for admin approval. You will be notified once your account is approved.',
     'backToLogin': 'Back to Login',
+    'accountVerifiedPendingApproval': 'Account Verified, Pending Admin Approval',
 
     'setupStripeAccount': 'Setup Stripe Account',
     'stripeOnboardingRequired': 'Stripe Onboarding Required',
@@ -984,6 +985,7 @@ class AppLocalization extends Translations {
     'providerApprovalSubtitle':
         'تم تعليق حسابك لانتظار موافقة المسؤول. سيتم إخطارك بمجرد الموافقة على حسابك.',
     'backToLogin': 'العودة لتسجيل الدخول',
+    'accountVerifiedPendingApproval': 'تم التحقق من الحساب، في انتظار موافقة المسؤول',
 
     'setupStripeAccount': 'إعداد حساب سترايب',
     'stripeOnboardingRequired': 'مطلوب إعداد حساب سترايب',

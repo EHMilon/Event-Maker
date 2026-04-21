@@ -320,16 +320,8 @@ class AddServiceController extends GetxController {
   /// Toggle ServiceAs selection
   void toggleServiceAs(dynamic item) {
     if (selectedServiceAsItems.contains(item)) {
-      // Deselecting - clear everything
-      selectedServiceAsItems.remove(item);
-      selectedServiceAsString.value = null;
-      // Clear downstream selections when Service As is deselected
-      selectedSubServiceItems.clear();
-      selectedSubServiceString.value = null;
-      selectedSubSubServiceItems.clear();
-      selectedSubSubServiceString.value = null;
-      subOptions.clear();
-      backendSubSubServiceOptions.clear();
+      // Already selected - do nothing, keep it selected
+      return;
     } else {
       // Selecting new Service As - clear previous selections first
       selectedServiceAsItems.clear(); // Enforce single selection
@@ -469,9 +461,8 @@ class AddServiceController extends GetxController {
   /// Toggle Level 2 Sub Service selection
   void toggleSubService(String item) {
     if (selectedSubServiceItems.contains(item)) {
-      selectedSubServiceItems.remove(item);
-      selectedSubServiceString.value = null;
-      subOptions.clear();
+      // Already selected - do nothing, keep it selected
+      return;
     } else {
       selectedSubServiceItems.clear();
       selectedSubServiceItems.add(item);
@@ -490,8 +481,8 @@ class AddServiceController extends GetxController {
   /// Toggle Level 3 Sub Sub Service selection
   void toggleSubSubService(String item) {
     if (selectedSubSubServiceItems.contains(item)) {
-      selectedSubSubServiceItems.remove(item);
-      selectedSubSubServiceString.value = null;
+      // Already selected - do nothing, keep it selected
+      return;
     } else {
       selectedSubSubServiceItems.clear();
       selectedSubSubServiceItems.add(item);

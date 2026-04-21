@@ -178,22 +178,24 @@ class _AddServiceViewState extends State<AddServiceView> {
                             padding: EdgeInsets.symmetric(horizontal: 12.w),
                             child: Row(
                               children: [
-                                Text(
-                                  selectedService ?? 'Select Service',
-                                  style: TextStyle(
-                                    color: selectedService != null
-                                        ? AppColors.textPrimary
-                                        : Colors.grey,
-                                    fontSize: 14.sp,
+                                Flexible(
+                                  child: Text(
+                                    selectedService ?? 'Select Service',
+                                    style: TextStyle(
+                                      color: selectedService != null
+                                          ? AppColors.textPrimary
+                                          : Colors.grey,
+                                      fontSize: 14.sp,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const Spacer(),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  size: 24.sp,
-                                  color: AppColors.textSecondary,
-                                ),
-                                SizedBox(width: 5.w,)
+                                // const Spacer(),
+                                // Icon(
+                                //   Icons.keyboard_arrow_down,
+                                //   size: 24.sp,
+                                //   color: AppColors.textSecondary,
+                                // ),
                               ],
                             ),
                           ),
@@ -267,30 +269,34 @@ class _AddServiceViewState extends State<AddServiceView> {
                                     ),
                                     child: Row(
                                       children: [
-                                        Text(
-                                          controller
-                                                  .selectedSubServiceItems
-                                                  .isNotEmpty
-                                              ? controller
-                                                    .selectedSubServiceItems
-                                                    .first
-                                              : 'Select Options',
-                                          style: TextStyle(
-                                            color:
-                                                controller
+                                        Flexible(
+                                          child: Text(
+                                            controller
                                                     .selectedSubServiceItems
                                                     .isNotEmpty
-                                                ? AppColors.textPrimary
-                                                : Colors.grey,
-                                            fontSize: 14.sp,
+                                                ? controller
+                                                      .selectedSubServiceItems
+                                                      .first
+                                                : 'Select Options',
+                                            style: TextStyle(
+                                              color:
+                                                  controller
+                                                      .selectedSubServiceItems
+                                                      .isNotEmpty
+                                                  ? AppColors.textPrimary
+                                                  : Colors.grey,
+                                              fontSize: 14.sp,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        const Spacer(),
-                                        Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 20.sp,
-                                          color: Colors.grey,
-                                        ),
+                                        // const Spacer(),
+                                        // Icon(
+                                        //   Icons.keyboard_arrow_down,
+                                        //   size: 24.sp,
+                                        //   color: AppColors.textSecondary,
+                                        // ),
+                                        // SizedBox(width: 5.w),
                                       ],
                                     ),
                                   ),
@@ -366,30 +372,34 @@ class _AddServiceViewState extends State<AddServiceView> {
                                     ),
                                     child: Row(
                                       children: [
-                                        Text(
-                                          controller
-                                                  .selectedSubSubServiceItems
-                                                  .isNotEmpty
-                                              ? controller
-                                                    .selectedSubSubServiceItems
-                                                    .first
-                                              : 'Select Sub Options',
-                                          style: TextStyle(
-                                            color:
-                                                controller
+                                        Flexible(
+                                          child: Text(
+                                            controller
                                                     .selectedSubSubServiceItems
                                                     .isNotEmpty
-                                                ? AppColors.textPrimary
-                                                : Colors.grey,
-                                            fontSize: 14.sp,
+                                                ? controller
+                                                      .selectedSubSubServiceItems
+                                                      .first
+                                                : 'Select Sub Options',
+                                            style: TextStyle(
+                                              color:
+                                                  controller
+                                                      .selectedSubSubServiceItems
+                                                      .isNotEmpty
+                                                  ? AppColors.textPrimary
+                                                  : Colors.grey,
+                                              fontSize: 14.sp,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        const Spacer(),
-                                        Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 20.sp,
-                                          color: Colors.grey,
-                                        ),
+                                        // const Spacer(),
+                                        // Icon(
+                                        //   Icons.keyboard_arrow_down,
+                                        //   size: 24.sp,
+                                        //   color: AppColors.textSecondary,
+                                        // ),
+                                        // SizedBox(width: 5.w),
                                       ],
                                     ),
                                   ),

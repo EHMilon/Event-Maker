@@ -118,33 +118,36 @@ class SignupStepTwoView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 8.h),
-              IntlPhoneField(
-                style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
-                decoration: InputDecoration(
-                  hintText: 'Phone Number',
-                  hintStyle: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.grey.withOpacity(0.5),
+              Obx(
+                () => IntlPhoneField(
+                  key: ValueKey(controller.selectedCountryCode.value),
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+                  decoration: InputDecoration(
+                    hintText: 'Phone Number',
+                    hintStyle: TextStyle(
+                      fontSize: 14.sp,
+                      color: AppColors.grey.withOpacity(0.5),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.lightGrey),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.lightGrey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
                   ),
-                  filled: true,
-                  fillColor: AppColors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: AppColors.lightGrey),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: AppColors.lightGrey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    borderSide: const BorderSide(color: AppColors.primary),
-                  ),
+                  initialCountryCode: controller.selectedCountryCode.value,
+                  onChanged: (phone) {
+                    controller.updatePhoneNumber(phone.completeNumber);
+                  },
                 ),
-                initialCountryCode: 'AE',
-                onChanged: (phone) {
-                  controller.updatePhoneNumber(phone.completeNumber);
-                },
               ),
               SizedBox(height: 100.h), // Space for button
               Obx(
