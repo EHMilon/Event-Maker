@@ -104,6 +104,23 @@ class ServiceRequestModel {
     return fields;
   }
 
+  /// Get all images from packages and features for multipart upload
+  Map<String, String> getFeatureImages() {
+    final imageMap = <String, String>{};
+    for (var package in packages) {
+      for (var feature in package.features) {
+        if (feature.imageKey != null &&
+            feature.imagePath != null &&
+            feature.imagePath!.isNotEmpty &&
+            !feature.imagePath!.startsWith('/media/') &&
+            !feature.imagePath!.startsWith('http')) {
+          imageMap[feature.imageKey!] = feature.imagePath!;
+        }
+      }
+    }
+    return imageMap;
+  }
+
   String _encodePackages(List<PackageRequestModel> packages) {
     return jsonEncode(packages.map((p) => p.toJson()).toList());
   }
@@ -160,7 +177,7 @@ class ServiceRequestModel {
 class PackageRequestModel {
   final String name;
   final String price;
-  final List<String> features;
+  final List<FeatureRequestModel> features;
   final int sortOrder;
 
   PackageRequestModel({
@@ -175,8 +192,7 @@ class PackageRequestModel {
       'name': name,
       'price': price,
       'sort_order': sortOrder,
-      // Send features as simple strings, not as objects
-      'features': features,
+      'features': features.map((f) => f.toJson()).toList(),
     };
   }
 
@@ -184,16 +200,42 @@ class PackageRequestModel {
     return PackageRequestModel(
       name: json['name'] as String,
       price: json['price'].toString(),
-      features:
-          (json['features'] as List<dynamic>?)
-              ?.map(
-                (e) => e is Map<String, dynamic>
-                    ? e['title'] as String
-                    : e.toString(),
-              )
+      features: (json['features'] as List<dynamic>?)
+              ?.map((e) => FeatureRequestModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       sortOrder: json['sort_order'] as int? ?? 1,
+    );
+  }
+}
+
+/// Feature request model for package features
+class FeatureRequestModel {
+  final String title;
+  final int sortOrder;
+  final String? imageKey; // img1, img2, etc.
+  final String? imagePath; // Local path for the file
+
+  FeatureRequestModel({
+    required this.title,
+    required this.sortOrder,
+    this.imageKey,
+    this.imagePath,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'sort_order': sortOrder,
+      if (imageKey != null) 'image_key': imageKey,
+    };
+  }
+
+  factory FeatureRequestModel.fromJson(Map<String, dynamic> json) {
+    return FeatureRequestModel(
+      title: json['title'] as String? ?? json['name'] as String? ?? '',
+      sortOrder: json['sort_order'] as int? ?? 1,
+      imageKey: json['image_key'] as String?,
     );
   }
 }

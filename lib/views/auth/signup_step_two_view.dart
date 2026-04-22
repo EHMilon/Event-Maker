@@ -33,12 +33,14 @@ class SignupStepTwoView extends GetView<AuthController> {
                   children: [
                     Image.asset('assets/images/icon.png', height: 40.h),
                     SizedBox(height: 20.h),
-                    Text(
-                      "Register New Account",
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Center(
+                      child: Text(
+                        "Personal Information",
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                     SizedBox(height: 8.h),

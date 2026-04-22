@@ -303,19 +303,19 @@ class DocumentsView extends GetView<DocumentsController> {
               ),
             ),
             // Delete button
-            Obx(
-              () => controller.isDeleting.value
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      color: Colors.red.shade400,
-                      onPressed: () => controller.confirmDelete(doc),
-                    ),
-            ),
+            // Obx(
+            //   () => controller.isDeleting.value
+            //       ? const SizedBox(
+            //           width: 24,
+            //           height: 24,
+            //           child: CircularProgressIndicator(strokeWidth: 2),
+            //         )
+            //       : IconButton(
+            //           icon: const Icon(Icons.delete_outline),
+            //           color: Colors.red.shade400,
+            //           onPressed: () => controller.confirmDelete(doc),
+            //         ),
+            // ),
           ],
         ),
       ),

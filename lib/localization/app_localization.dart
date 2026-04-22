@@ -167,6 +167,8 @@ class AppLocalization extends Translations {
     'bookNow': 'Book Now',
     'reviewsCount': '@count reviews',
     'details': 'Details',
+    'viewAll': 'View All',
+    'viewDetails': 'View Details',
     'mobileNumber': 'Mobile Number',
     'dateTime': 'Date & Time',
     'subTotal': 'Sub Total',
@@ -218,6 +220,8 @@ class AppLocalization extends Translations {
     'fromLastMonth': 'from last month',
     'noActiveOrdersFound': 'No active orders found',
     'retry': 'Retry',
+    'noSchedulesFound': 'No schedules found',
+    'noSchedulesForDate': 'No schedules found for selected date',
 
     // Service Provider Requests
     'requests': 'Requests',
@@ -660,6 +664,8 @@ class AppLocalization extends Translations {
     'bookNow': 'احجز الآن',
     'reviewsCount': '@count تقييم',
     'details': 'التفاصيل',
+    'viewAll': 'عرض الكل',
+    'viewDetails': 'عرض التفاصيل',
     'mobileNumber': 'رقم الهاتف المتحرك',
     'dateTime': 'التاريخ والوقت',
     'subTotal': 'المجموع الفرعي',
@@ -708,6 +714,8 @@ class AppLocalization extends Translations {
     'fromLastMonth': 'منذ الشهر الماضي',
     'noActiveOrdersFound': 'لم يتم العثور على طلبات نشطة',
     'retry': 'إعادة المحاولة',
+    'noSchedulesFound': 'لم يتم العثور على جداول',
+    'noSchedulesForDate': 'لم يتم العثور على جداول لالتاريخ المحدد',
 
     // Service Provider Requests
     'requests': 'الطلبات',

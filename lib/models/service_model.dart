@@ -1,3 +1,5 @@
+import 'package:event_maker/constants/api_constant.dart';
+
 import 'review_model.dart';
 
 enum ServiceType { event, photography, training, catering, cleaning, filming }
@@ -207,11 +209,15 @@ class PackageFeature {
   final int id;
   final String title;
   final int sortOrder;
+  final String? imageKey;
+  final String? imageUrl;
 
   const PackageFeature({
     required this.id,
     required this.title,
     required this.sortOrder,
+    this.imageKey,
+    this.imageUrl,
   });
 
   factory PackageFeature.fromJson(Map<String, dynamic> json) {
@@ -219,11 +225,21 @@ class PackageFeature {
       id: json['id'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       sortOrder: json['sort_order'] as int? ?? 0,
+      imageKey: json['image_key'] as String?,
+      imageUrl: ServiceModel._getFullMediaUrl(
+        json['package_image'] as String? ?? json['image'] as String?,
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'title': title, 'sort_order': sortOrder};
+    return {
+      'id': id,
+      'title': title,
+      'sort_order': sortOrder,
+      if (imageKey != null) 'image_key': imageKey,
+      if (imageUrl != null) 'image': imageUrl,
+    };
   }
 
   /// Convert to string for display
@@ -643,7 +659,7 @@ class ServiceModel {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }
-    return 'http://10.10.12.62:8005$path';
+    return '${ApiConstant.mediaBaseUrl}$path';
   }
 
   Map<String, dynamic> toJson() {

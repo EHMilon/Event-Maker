@@ -726,13 +726,11 @@ class AddServiceController extends GetxController {
         sp.nameController.text = package.name;
         sp.priceController.text = package.price;
         // Clear default empty feature first
-        sp.featureControllers.clear();
-        // Add each feature title with initial value using feature controllers
+        sp.features.clear();
+        // Add each feature with its title and image
         for (var feature in package.features) {
-          // Extract the title string from the PackageFeature object
-          final featureTitle = feature.title;
-          if (featureTitle.isNotEmpty) {
-            sp.addFeature(featureTitle);
+          if (feature.title.isNotEmpty) {
+            sp.addFeature(feature.title, feature.imageUrl);
           }
         }
         packages.add(sp);
@@ -1311,6 +1309,7 @@ class AddServiceController extends GetxController {
           }
         }
       }
+      int featureImageCounter = 1;
       // Build packages for API
       final apiPackages = packages.asMap().entries.map((entry) {
         final index = entry.key;
@@ -1318,7 +1317,26 @@ class AddServiceController extends GetxController {
         return PackageRequestModel(
           name: p.nameController.text.trim(),
           price: p.priceController.text.trim(),
-          features: p.features.where((f) => f.isNotEmpty).toList(),
+          features: p.validFeatures.asMap().entries.map((featureEntry) {
+            final fIndex = featureEntry.key;
+            final f = featureEntry.value;
+
+            // Generate image key only if a local image is selected (not a URL/media path)
+            String? imageKey;
+            final imagePath = f.selectedImagePath.value;
+            if (imagePath != null &&
+                !imagePath.startsWith('http') &&
+                !imagePath.startsWith('/media/')) {
+              imageKey = 'img${featureImageCounter++}';
+            }
+
+            return FeatureRequestModel(
+              title: f.titleController.text.trim(),
+              sortOrder: fIndex + 1,
+              imageKey: imageKey,
+              imagePath: imagePath,
+            );
+          }).toList(),
           sortOrder: index + 1,
         );
       }).toList();
@@ -1397,6 +1415,7 @@ class AddServiceController extends GetxController {
           newRequiresConfirmation: needsConfirmationBeforePayment.value,
           newImagePath: selectedImagePath.value,
           newAvailabilities: apiAvailabilities,
+          newPackages: apiPackages,
         );
 
         if (!hasChanges) {
@@ -1751,6 +1770,7 @@ class AddServiceController extends GetxController {
     required bool newRequiresConfirmation,
     String? newImagePath,
     List<AvailabilityRequestModel>? newAvailabilities,
+    List<PackageRequestModel>? newPackages,
   }) {
     final basicChanges = newTitle != existingService.title ||
         newDescription != existingService.description ||
@@ -1770,34 +1790,85 @@ class AddServiceController extends GetxController {
 
     if (basicChanges) return true;
 
-    if (newAvailabilities == null) {
-      return existingService.availabilities.isEmpty;
-    }
+    if (newAvailabilities != null &&
+        newAvailabilities.length == existingService.availabilities.length) {
+      for (var i = 0; i < newAvailabilities.length; i++) {
+        final newAvail = newAvailabilities[i];
+        final existingAvail = existingService.availabilities[i];
 
-    if (newAvailabilities.length != existingService.availabilities.length) {
-      return true;
-    }
-
-    for (var i = 0; i < newAvailabilities.length; i++) {
-      final newAvail = newAvailabilities[i];
-      final existingAvail = existingService.availabilities[i];
-
-      if (newAvail.weekDays.length != existingAvail.weekDays.length) {
-        return true;
-      }
-      for (var j = 0; j < newAvail.weekDays.length; j++) {
-        if (newAvail.weekDays[j] != existingAvail.weekDays[j]) {
+        if (newAvail.weekDays.length != existingAvail.weekDays.length) {
+          return true;
+        }
+        for (var j = 0; j < newAvail.weekDays.length; j++) {
+          if (newAvail.weekDays[j] != existingAvail.weekDays[j]) {
+            return true;
+          }
+        }
+        if (newAvail.startTime != existingAvail.startTime ||
+            newAvail.endTime != existingAvail.endTime ||
+            newAvail.address != existingAvail.address) {
           return true;
         }
       }
-      if (newAvail.startTime != existingAvail.startTime ||
-          newAvail.endTime != existingAvail.endTime ||
-          newAvail.address != existingAvail.address) {
-        return true;
+    } else if (newAvailabilities != null ||
+        existingService.availabilities.isNotEmpty) {
+      return true;
+    }
+
+    // Packages changes
+    if (newPackages != null &&
+        newPackages.length == existingService.packages.length) {
+      for (var i = 0; i < newPackages.length; i++) {
+        final newPkg = newPackages[i];
+        final existingPkg = existingService.packages[i];
+
+        if (newPkg.name != existingPkg.name ||
+            newPkg.price != existingPkg.price) {
+          return true;
+        }
+
+        if (newPkg.features.length != existingPkg.features.length) {
+          return true;
+        }
+
+        for (var j = 0; j < newPkg.features.length; j++) {
+          final newFeat = newPkg.features[j];
+          final existingFeat = existingPkg.features[j];
+
+          if (newFeat.title != existingFeat.title) {
+            return true;
+          }
+
+          // Check if image changed (local path vs media path)
+          final imagePath = newFeat.imagePath;
+          if (imagePath != null &&
+              imagePath.isNotEmpty &&
+              !imagePath.startsWith('/media/') &&
+              !imagePath.startsWith('http')) {
+            return true;
+          }
+        }
       }
+    } else if (newPackages != null || existingService.packages.isNotEmpty) {
+      return true;
     }
 
     return false;
+  }
+}
+
+/// Form data class for a single feature with image
+class FeatureFormData {
+  final titleController = TextEditingController();
+  final selectedImagePath = Rxn<String>();
+
+  FeatureFormData([String initialValue = '', String? initialImagePath]) {
+    titleController.text = initialValue;
+    selectedImagePath.value = initialImagePath;
+  }
+
+  void dispose() {
+    titleController.dispose();
   }
 }
 
@@ -1807,7 +1878,7 @@ class AddServiceController extends GetxController {
 class PackageFormData {
   final nameController = TextEditingController();
   final priceController = TextEditingController();
-  final featureControllers = <TextEditingController>[].obs;
+  final features = <FeatureFormData>[].obs;
 
   // Reactive properties for UI updates when returning from packages view
   final name = ''.obs;
@@ -1815,16 +1886,16 @@ class PackageFormData {
 
   PackageFormData(); // No default empty feature - user adds explicitly
 
-  /// Add a new feature controller
-  void addFeature([String initialValue = '']) {
-    featureControllers.add(TextEditingController(text: initialValue));
+  /// Add a new feature
+  void addFeature([String initialValue = '', String? initialImagePath]) {
+    features.add(FeatureFormData(initialValue, initialImagePath));
   }
 
-  /// Remove a feature controller at the given index
+  /// Remove a feature at the given index
   void removeFeature(int index) {
-    if (index >= 0 && index < featureControllers.length) {
-      featureControllers[index].dispose();
-      featureControllers.removeAt(index);
+    if (index >= 0 && index < features.length) {
+      features[index].dispose();
+      features.removeAt(index);
     }
   }
 
@@ -1834,18 +1905,16 @@ class PackageFormData {
     price.value = priceController.text;
   }
 
-  /// Get feature values as strings (only non-empty values)
-  List<String> get features => featureControllers
-      .map((c) => c.text.trim())
-      .where((f) => f.isNotEmpty)
-      .toList();
+  /// Get feature objects (only non-empty values)
+  List<FeatureFormData> get validFeatures =>
+      features.where((f) => f.titleController.text.trim().isNotEmpty).toList();
 
   /// Dispose all controllers
   void dispose() {
     nameController.dispose();
     priceController.dispose();
-    for (var controller in featureControllers) {
-      controller.dispose();
+    for (var feature in features) {
+      feature.dispose();
     }
   }
 }

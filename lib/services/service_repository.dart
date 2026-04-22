@@ -134,12 +134,23 @@ class ServiceRepository {
     try {
       // Check if we have a cover image to upload
       if (request.coverImage != null && request.coverImage!.isNotEmpty) {
+        // Collect all images (cover + features)
+        final Map<String, File> files = {
+          'cover_image': File(request.coverImage!),
+        };
+
+        // Add feature images
+        final featureImages = request.getFeatureImages();
+        featureImages.forEach((key, path) {
+          files[key] = File(path);
+        });
+
         // Use multipart request for image upload
         final response = await api.multipart(
           'POST',
           ApiConstant.services,
           fields: request.toMultipartFields(),
-          files: {'cover_image': File(request.coverImage!)},
+          files: files,
         );
         return ServiceModel.fromJson(response['data']);
       } else {
@@ -196,11 +207,18 @@ class ServiceRepository {
       // Backend expects PATCH method with multipart/form-data for update
       Map<String, File> files = {};
       if (isNewImage) {
-        files = {'cover_image': File(coverImage)};
-        Log.d('=======> updateService - Using multipart PATCH with new image');
-      } else {
-        Log.d('=======> updateService - Using multipart PATCH without image');
+        files['cover_image'] = File(coverImage);
+        Log.d(
+          '=======> updateService - Using multipart PATCH with new cover image',
+        );
       }
+
+      // Add feature images (always check for new local files in features)
+      final featureImages = request.getFeatureImages();
+      featureImages.forEach((key, path) {
+        files[key] = File(path);
+        Log.d('=======> updateService - Adding feature image: $key -> $path');
+      });
 
       final response = await api.multipart(
         'PATCH',

@@ -694,9 +694,8 @@ class _AddServiceViewState extends State<AddServiceView> {
   Widget _buildPackageSummaryCard(int index, PackageFormData package) {
     final packageName = package.nameController.text;
     final packagePrice = package.priceController.text;
-    final features = package.featureControllers
-        .map((c) => c.text.trim())
-        .where((f) => f.isNotEmpty)
+    final features = package.validFeatures
+        .map((f) => f.titleController.text.trim())
         .toList();
 
     return GestureDetector(
@@ -734,9 +733,9 @@ class _AddServiceViewState extends State<AddServiceView> {
                     ),
                   ),
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                // Row(
+                //   mainAxisSize: MainAxisSize.min,
+                //   children: [
                     Text(
                       packagePrice.isEmpty ? '0.00 AED' : '$packagePrice AED',
                       style: GoogleFonts.inter(
@@ -745,26 +744,26 @@ class _AddServiceViewState extends State<AddServiceView> {
                         color: AppColors.primary,
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () {
-                        controller.removePackage(index);
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(4.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close,
-                          size: 16.r,
-                          color: AppColors.error,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                    // SizedBox(width: 8.w),
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     controller.removePackage(index);
+                    //   },
+                    //   child: Container(
+                    //     padding: EdgeInsets.all(4.r),
+                    //     decoration: BoxDecoration(
+                    //       color: AppColors.error.withOpacity(0.1),
+                    //       shape: BoxShape.circle,
+                    //     ),
+                    //     child: Icon(
+                    //       Icons.close,
+                    //       size: 16.r,
+                    //       color: AppColors.error,
+                    //     ),
+                    //   ),
+                    // ),
+                  // ],
+                // ),
               ],
             ),
             if (features.isNotEmpty)

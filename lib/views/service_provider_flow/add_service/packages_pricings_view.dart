@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../constants/app_colors.dart';
 import '../../../widgets/custom_text_field.dart';
 import '../../../widgets/primary_text_button.dart';
@@ -17,6 +19,7 @@ class PackagesPricingsView extends StatefulWidget {
 
 class _PackagesPricingsViewState extends State<PackagesPricingsView> {
   final AddServiceController controller = Get.find<AddServiceController>();
+  bool _isPickingImage = false;
 
   @override
   Widget build(BuildContext context) {
@@ -232,33 +235,87 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
           ),
           SizedBox(height: 8.h),
 
-          // Features list - uses Obx to listen to featureControllers changes
+          // Features list - uses Obx to listen to features changes
           Obx(
             () => Column(
-              children: List.generate(package.featureControllers.length, (
+              children: List.generate(package.features.length, (
                 featureIndex,
               ) {
+                final feature = package.features[featureIndex];
                 return Padding(
-                  padding: EdgeInsets.only(bottom: 8.h),
+                  padding: EdgeInsets.only(bottom: 12.h),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.check_circle_outline,
-                        size: 20.r,
-                        color: AppColors.primary,
+                      // Feature Image Picker
+                      Obx(
+                        () => GestureDetector(
+                          onTap: () async {
+                            if (_isPickingImage) return;
+                            _isPickingImage = true;
+                            
+                            try {
+                              final ImagePicker picker = ImagePicker();
+                              final XFile? image = await picker.pickImage(
+                                source: ImageSource.gallery,
+                                imageQuality: 70,
+                              );
+                              if (image != null) {
+                                feature.selectedImagePath.value = image.path;
+                              }
+                            } finally {
+                              _isPickingImage = false;
+                            }
+                          },
+                          child: Container(
+                            width: 45.r,
+                            height: 45.r,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(color: AppColors.borderLight),
+                              image:
+                                  feature.selectedImagePath.value != null
+                                      ? DecorationImage(
+                                          image: feature.selectedImagePath.value!
+                                                  .startsWith('http')
+                                              ? NetworkImage(
+                                                  feature.selectedImagePath.value!,
+                                                )
+                                              : FileImage(
+                                                  File(
+                                                    feature
+                                                        .selectedImagePath
+                                                        .value!,
+                                                  ),
+                                                ) as ImageProvider,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
+                            ),
+                            child:
+                                feature.selectedImagePath.value == null
+                                    ? Icon(
+                                        Icons.add_a_photo_outlined,
+                                        size: 20.r,
+                                        color: AppColors.textSecondary,
+                                      )
+                                    : null,
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 10.w),
+                      // Feature Title Field
                       Expanded(
                         child: TextField(
-                          controller: package.featureControllers[featureIndex],
+                          controller: feature.titleController,
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
                             color: AppColors.textPrimary,
                           ),
-                          maxLines: 3,
+                          maxLines: 2,
                           minLines: 1,
                           keyboardType: TextInputType.multiline,
-                          textInputAction: TextInputAction.newline,
                           decoration: InputDecoration(
                             hintText: 'enterFeatureHint'.tr,
                             hintStyle: GoogleFonts.inter(
@@ -312,7 +369,7 @@ class _PackagesPricingsViewState extends State<PackagesPricingsView> {
 
           // Empty features placeholder
           Obx(
-            () => package.featureControllers.isEmpty
+            () => package.features.isEmpty
                 ? Text(
                     'noFeaturesAdded'.tr,
                     style: GoogleFonts.inter(
