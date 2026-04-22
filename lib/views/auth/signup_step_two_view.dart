@@ -70,7 +70,9 @@ class SignupStepTwoView extends GetView<AuthController> {
               SizedBox(height: 8.h),
               Obx(
                 () => DropdownButtonFormField<String>(
-                  initialValue: controller.selectedNationality.value,
+                  initialValue: controller.selectedNationality.value.isEmpty
+                      ? null
+                      : controller.selectedNationality.value,
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: AppColors.textPrimary,
@@ -123,7 +125,10 @@ class SignupStepTwoView extends GetView<AuthController> {
               Obx(
                 () => IntlPhoneField(
                   key: ValueKey(controller.selectedCountryCode.value),
-                  style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    color: AppColors.textPrimary,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Phone Number',
                     hintStyle: TextStyle(
@@ -152,21 +157,19 @@ class SignupStepTwoView extends GetView<AuthController> {
                 ),
               ),
               SizedBox(height: 100.h), // Space for button
-
             ],
           ),
         ),
-        
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Obx(
-                  () => PrimaryTextButton(
-                    text: "Continue",
-                    onPressed: controller.onContinueSignup,
-                    isLoading: controller.isLoading.value,
-                  ),
-                ),
+          () => PrimaryTextButton(
+            text: "Continue",
+            onPressed: controller.onContinueSignup,
+            isLoading: controller.isLoading.value,
+          ),
+        ),
       ),
     );
   }

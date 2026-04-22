@@ -727,10 +727,17 @@ class AddServiceController extends GetxController {
         sp.priceController.text = package.price;
         // Clear default empty feature first
         sp.features.clear();
-        // Add each feature with its title and image
+        // Add each feature with its title, image, id and image_key
         for (var feature in package.features) {
           if (feature.title.isNotEmpty) {
-            sp.addFeature(feature.title, feature.imageUrl);
+            sp.features.add(
+              FeatureFormData(
+                feature.title,
+                feature.imageUrl,
+                feature.id,
+                feature.imageKey,
+              ),
+            );
           }
         }
         packages.add(sp);
@@ -1314,14 +1321,22 @@ class AddServiceController extends GetxController {
       final apiPackages = packages.asMap().entries.map((entry) {
         final index = entry.key;
         final p = entry.value;
+        // Get original package id if this is an existing package from edit mode
+        int? packageId;
+        if (isEdit &&
+            existingService != null &&
+            index < existingService!.packages.length) {
+          packageId = existingService!.packages[index].id;
+        }
         return PackageRequestModel(
+          id: packageId,
           name: p.nameController.text.trim(),
           price: p.priceController.text.trim(),
           features: p.validFeatures.asMap().entries.map((featureEntry) {
             final fIndex = featureEntry.key;
             final f = featureEntry.value;
 
-            // Generate image key only if a local image is selected (not a URL/media path)
+            // Generate image key ONLY if a new local image is selected (not a URL/media path)
             String? imageKey;
             final imagePath = f.selectedImagePath.value;
             if (imagePath != null &&
@@ -1329,8 +1344,13 @@ class AddServiceController extends GetxController {
                 !imagePath.startsWith('/media/')) {
               imageKey = 'img${featureImageCounter++}';
             }
+            // IMPORTANT: DO NOT send existing image_key when no new image is selected
+            // Backend will preserve existing image automatically if image_key is omitted
 
             return FeatureRequestModel(
+              // ONLY send id if this is an existing feature (id > 0)
+              // New features added in UI have id = null, don't send id field for them
+              id: f.id != null && f.id! > 0 ? f.id : null,
               title: f.titleController.text.trim(),
               sortOrder: fIndex + 1,
               imageKey: imageKey,
@@ -1772,7 +1792,8 @@ class AddServiceController extends GetxController {
     List<AvailabilityRequestModel>? newAvailabilities,
     List<PackageRequestModel>? newPackages,
   }) {
-    final basicChanges = newTitle != existingService.title ||
+    final basicChanges =
+        newTitle != existingService.title ||
         newDescription != existingService.description ||
         newServiceTypeName != existingService.serviceTypeName ||
         newRoleName != existingService.roleName ||
@@ -1859,10 +1880,17 @@ class AddServiceController extends GetxController {
 
 /// Form data class for a single feature with image
 class FeatureFormData {
+  final int? id;
+  final String? existingImageKey;
   final titleController = TextEditingController();
   final selectedImagePath = Rxn<String>();
 
-  FeatureFormData([String initialValue = '', String? initialImagePath]) {
+  FeatureFormData([
+    String initialValue = '',
+    String? initialImagePath,
+    this.id,
+    this.existingImageKey,
+  ]) {
     titleController.text = initialValue;
     selectedImagePath.value = initialImagePath;
   }
@@ -1887,8 +1915,15 @@ class PackageFormData {
   PackageFormData(); // No default empty feature - user adds explicitly
 
   /// Add a new feature
-  void addFeature([String initialValue = '', String? initialImagePath]) {
-    features.add(FeatureFormData(initialValue, initialImagePath));
+  void addFeature([
+    String initialValue = '',
+    String? initialImagePath,
+    int? id,
+    String? existingImageKey,
+  ]) {
+    features.add(
+      FeatureFormData(initialValue, initialImagePath, id, existingImageKey),
+    );
   }
 
   /// Remove a feature at the given index

@@ -47,6 +47,7 @@ class ApiConstant {
   static const String resetPassword = '/auth/reset-password';
   static const String refreshToken = '/auth/refresh';
   static const String changePassword = '/auth/change-password';
+  static const String onboard = '/auth/onboard';
 
   // Legacy aliases for backward compatibility
   static const String login = signIn;

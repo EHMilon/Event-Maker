@@ -52,7 +52,8 @@ class ServiceRequestModel {
       if (serviceAsName != null) 'service_as_name': serviceAsName,
       if (subServiceName != null) 'sub_service_name': subServiceName,
       if (subSubServiceName != null) 'sub_sub_service_name': subSubServiceName,
-      if (eventVenue != null) 'event_venue': eventVenue, // Fixed: backend now uses correct spelling
+      if (eventVenue != null)
+        'event_venue': eventVenue, // Fixed: backend now uses correct spelling
       if (options != null) 'options': options,
       if (attendanceCapacity != null) 'attendance_capacity': attendanceCapacity,
       if (packages.isNotEmpty)
@@ -89,7 +90,8 @@ class ServiceRequestModel {
       if (options != null && options!.isNotEmpty) 'options': options!,
       // Only include attendance_capacity for Event and Trainer categories
       // For Hospitality, explicitly send empty string to clear any existing value
-      if (serviceTypeName == 'Event' || serviceTypeName == 'Professional Trainer')
+      if (serviceTypeName == 'Event' ||
+          serviceTypeName == 'Professional Trainer')
         'attendance_capacity': attendanceCapacity?.toString() ?? '',
       'can_go_outside_location': canGoOutsideLocation.toString(),
       'can_not_go_outside_location': cannotGoOutsideLocation.toString(),
@@ -175,12 +177,14 @@ class ServiceRequestModel {
 
 /// Package request model for service packages
 class PackageRequestModel {
+  final int? id;
   final String name;
   final String price;
   final List<FeatureRequestModel> features;
   final int sortOrder;
 
   PackageRequestModel({
+    this.id,
     required this.name,
     required this.price,
     this.features = const [],
@@ -189,6 +193,7 @@ class PackageRequestModel {
 
   Map<String, dynamic> toJson() {
     return {
+      if (id != null && id! > 0) 'id': id,
       'name': name,
       'price': price,
       'sort_order': sortOrder,
@@ -198,10 +203,14 @@ class PackageRequestModel {
 
   factory PackageRequestModel.fromJson(Map<String, dynamic> json) {
     return PackageRequestModel(
+      id: json['id'] as int?,
       name: json['name'] as String,
       price: json['price'].toString(),
-      features: (json['features'] as List<dynamic>?)
-              ?.map((e) => FeatureRequestModel.fromJson(e as Map<String, dynamic>))
+      features:
+          (json['features'] as List<dynamic>?)
+              ?.map(
+                (e) => FeatureRequestModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       sortOrder: json['sort_order'] as int? ?? 1,
@@ -211,12 +220,14 @@ class PackageRequestModel {
 
 /// Feature request model for package features
 class FeatureRequestModel {
+  final int? id;
   final String title;
   final int sortOrder;
   final String? imageKey; // img1, img2, etc.
   final String? imagePath; // Local path for the file
 
   FeatureRequestModel({
+    this.id,
     required this.title,
     required this.sortOrder,
     this.imageKey,
@@ -225,6 +236,7 @@ class FeatureRequestModel {
 
   Map<String, dynamic> toJson() {
     return {
+      if (id != null) 'id': id,
       'title': title,
       'sort_order': sortOrder,
       if (imageKey != null) 'image_key': imageKey,
@@ -233,6 +245,7 @@ class FeatureRequestModel {
 
   factory FeatureRequestModel.fromJson(Map<String, dynamic> json) {
     return FeatureRequestModel(
+      id: json['id'] as int?,
       title: json['title'] as String? ?? json['name'] as String? ?? '',
       sortOrder: json['sort_order'] as int? ?? 1,
       imageKey: json['image_key'] as String?,

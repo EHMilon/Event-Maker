@@ -122,21 +122,57 @@ class SignUpResponseModel {
   final String message;
   final String userId;
   final String role;
+  final bool? isVerified;
+  final bool? isOnboarded;
+  final bool? isActive;
+  final bool? onboardingRequired;
 
   const SignUpResponseModel({
     required this.message,
     required this.userId,
     required this.role,
+    this.isVerified,
+    this.isOnboarded,
+    this.isActive,
+    this.onboardingRequired,
   });
 
   factory SignUpResponseModel.fromJson(Map<String, dynamic> json) {
     // Some endpoints nest the data, some don't
-    final dataMap = json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
-    
+    final dataMap = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
+
     return SignUpResponseModel(
       message: json['message'] ?? dataMap['message'] ?? '',
-      userId: (dataMap['user_id'] ?? dataMap['userId'] ?? json['user_id'] ?? json['userId'] ?? '').toString(),
+      userId:
+          (dataMap['user_id'] ??
+                  dataMap['userId'] ??
+                  json['user_id'] ??
+                  json['userId'] ??
+                  '')
+              .toString(),
       role: json['role'] ?? dataMap['role'] ?? '',
+      isVerified:
+          dataMap['is_verified'] ??
+          dataMap['isVerified'] ??
+          json['is_verified'] ??
+          json['isVerified'],
+      isOnboarded:
+          dataMap['is_onboarded'] ??
+          dataMap['isOnboarded'] ??
+          json['is_onboarded'] ??
+          json['isOnboarded'],
+      isActive:
+          dataMap['is_active'] ??
+          dataMap['isActive'] ??
+          json['is_active'] ??
+          json['isActive'],
+      onboardingRequired:
+          dataMap['onboarding_required'] ??
+          dataMap['onboardingRequired'] ??
+          json['onboarding_required'] ??
+          json['onboardingRequired'],
     );
   }
 
@@ -209,13 +245,18 @@ class SignInResponseModel {
   });
 
   factory SignInResponseModel.fromJson(Map<String, dynamic> json) {
+    // Backend returns data nested inside "data" field
+    final dataMap = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
+
     return SignInResponseModel(
-      message: json['message'] ?? '',
-      accessToken: json['access_token'] ?? '',
-      refreshToken: json['refresh_token'] ?? '',
-      expiresIn: json['expires_in'] ?? 864000000,
-      expiresAt: json['expires_at'],
-      user: AuthUserModel.fromJson(json['user'] ?? {}),
+      message: json['message'] ?? dataMap['message'] ?? '',
+      accessToken: dataMap['access_token'] ?? dataMap['accessToken'] ?? '',
+      refreshToken: dataMap['refresh_token'] ?? dataMap['refreshToken'] ?? '',
+      expiresIn: dataMap['expires_in'] ?? dataMap['expiresIn'] ?? 864000000,
+      expiresAt: dataMap['expires_at'] ?? dataMap['expiresAt'],
+      user: AuthUserModel.fromJson(dataMap['user'] ?? {}),
     );
   }
 
@@ -349,6 +390,11 @@ class VerifyEmailResponseModel {
   final int? expiresAt;
   final String userId;
   final String role;
+  final String? onboardKey;
+  final bool? onboardingRequired;
+  final bool? isVerified;
+  final bool? isOnboarded;
+  final bool? isActive;
 
   const VerifyEmailResponseModel({
     required this.message,
@@ -358,20 +404,70 @@ class VerifyEmailResponseModel {
     this.expiresAt,
     required this.userId,
     required this.role,
+    this.onboardKey,
+    this.onboardingRequired,
+    this.isVerified,
+    this.isOnboarded,
+    this.isActive,
   });
 
   factory VerifyEmailResponseModel.fromJson(Map<String, dynamic> json) {
-    final dataMap = json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+    final dataMap = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
     final tokensMap = dataMap['tokens'] ?? json['tokens'] ?? json;
 
     return VerifyEmailResponseModel(
       message: json['message'] ?? dataMap['message'] ?? '',
-      accessToken: tokensMap['access_token'] ?? tokensMap['accessToken'] ?? json['access_token'],
-      refreshToken: tokensMap['refresh_token'] ?? tokensMap['refreshToken'] ?? json['refresh_token'],
-      expiresIn: tokensMap['expires_in'] ?? tokensMap['expiresIn'] ?? json['expires_in'],
-      expiresAt: tokensMap['expires_at'] ?? tokensMap['expiresAt'] ?? json['expires_at'],
-      userId: (dataMap['user_id'] ?? dataMap['userId'] ?? json['user_id'] ?? json['userId'] ?? '').toString(),
+      accessToken:
+          tokensMap['access_token'] ??
+          tokensMap['accessToken'] ??
+          json['access_token'],
+      refreshToken:
+          tokensMap['refresh_token'] ??
+          tokensMap['refreshToken'] ??
+          json['refresh_token'],
+      expiresIn:
+          tokensMap['expires_in'] ??
+          tokensMap['expiresIn'] ??
+          json['expires_in'],
+      expiresAt:
+          tokensMap['expires_at'] ??
+          tokensMap['expiresAt'] ??
+          json['expires_at'],
+      userId:
+          (dataMap['user_id'] ??
+                  dataMap['userId'] ??
+                  json['user_id'] ??
+                  json['userId'] ??
+                  '')
+              .toString(),
       role: json['role'] ?? dataMap['role'] ?? '',
+      onboardKey:
+          dataMap['onboard_key'] ??
+          dataMap['onboardKey'] ??
+          json['onboard_key'] ??
+          json['onboardKey'],
+      onboardingRequired:
+          dataMap['onboarding_required'] ??
+          dataMap['onboardingRequired'] ??
+          json['onboarding_required'] ??
+          json['onboardingRequired'],
+      isVerified:
+          dataMap['is_verified'] ??
+          dataMap['isVerified'] ??
+          json['is_verified'] ??
+          json['isVerified'],
+      isOnboarded:
+          dataMap['is_onboarded'] ??
+          dataMap['isOnboarded'] ??
+          json['is_onboarded'] ??
+          json['isOnboarded'],
+      isActive:
+          dataMap['is_active'] ??
+          dataMap['isActive'] ??
+          json['is_active'] ??
+          json['isActive'],
     );
   }
 
@@ -440,10 +536,18 @@ class ForgotPasswordResponseModel {
   });
 
   factory ForgotPasswordResponseModel.fromJson(Map<String, dynamic> json) {
-    final dataMap = json['data'] is Map<String, dynamic> ? json['data'] as Map<String, dynamic> : json;
+    final dataMap = json['data'] is Map<String, dynamic>
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return ForgotPasswordResponseModel(
       message: json['message'] ?? dataMap['message'] ?? '',
-      userId: (dataMap['user_id'] ?? dataMap['userId'] ?? json['user_id'] ?? json['userId'] ?? '').toString(),
+      userId:
+          (dataMap['user_id'] ??
+                  dataMap['userId'] ??
+                  json['user_id'] ??
+                  json['userId'] ??
+                  '')
+              .toString(),
     );
   }
 }

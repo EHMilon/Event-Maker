@@ -61,6 +61,7 @@ class AuthController extends BaseController {
   final otpResendTimer = 0.obs;
   final canResendOtp = false.obs;
   final verificationUserId = ''.obs;
+  final verificationOnboardKey = ''.obs;
   final resetSecretKey = ''.obs;
 
   // Signup documents & certifications
@@ -85,7 +86,8 @@ class AuthController extends BaseController {
   void onInit() {
     super.onInit();
     _loadPersistedUserId();
-    selectedCountryCode.value = nationalityCountryCodes[selectedNationality.value] ?? 'AE';
+    selectedCountryCode.value =
+        nationalityCountryCodes[selectedNationality.value] ?? 'AE';
   }
 
   /// Load persisted user ID from SharedPreferences
@@ -215,29 +217,17 @@ class AuthController extends BaseController {
     try {
       var userType = await _storage.getUserType();
 
-      if (userType == USER_TYPE_CUSTOMER) {
-        final hasUserType = await _storage.hasUserType();
-        if (!hasUserType) {
-          if (selectedType.value.isNotEmpty) {
-            userType = selectedType.value;
-            await _storage.setUserType(userType);
-          } else {
-            showError('Please select user type');
-            Get.offAllNamed('/user-type');
-            return;
-          }
-        }
-      }
-
-      if (selectedType.value.isEmpty && userType.isNotEmpty) {
-        selectedType.value = userType;
+      if (userType.isEmpty) {
+        userType = selectedType.value;
       }
 
       if (userType.isEmpty) {
         showError('Please select user type');
-        Get.offAllNamed('/user-type');
+        // Don't redirect - let user go back manually or select again
         return;
       }
+
+      await _storage.setUserType(userType);
 
       final request = SignInRequestModel(
         role: userType,
@@ -254,28 +244,22 @@ class AuthController extends BaseController {
       final data = SignInResponseModel.fromJson(response);
 
       // Save session using StorageService
-      await Future.wait([
-        _storage.saveUserDetails(
-          userId: data.user.id,
-          name: data.user.fullName,
-          email: data.user.emailAddress,
-          userType: data.user.role,
-        ),
-        _storage.saveTokens(
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          expiresIn: data.expiresIn,
-        ),
-      ]);
+      await _storage.saveTokens(
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+        expiresIn: data.expiresIn,
+      );
+
+      await _storage.saveUserDetails(
+        userId: data.user.id,
+        name: data.user.fullName,
+        email: data.user.emailAddress,
+        userType: data.user.role,
+      );
 
       loginEmailController.clear();
       loginPasswordController.clear();
       clearError();
-
-      if (!data.user.isVerified) {
-        showSuccess('accountCreatedSuccessfully'.tr);
-        return;
-      }
 
       if (userType == USER_TYPE_SERVICE_PROVIDER) {
         Get.offAllNamed(AppRoutes.serviceProviderHome);
@@ -283,6 +267,27 @@ class AuthController extends BaseController {
         Get.offAllNamed(AppRoutes.customerHome);
       }
     } on ApiException catch (e) {
+      // Check if onboarding is required
+      if (e.statusCode == 403 &&
+          e.data != null &&
+          e.data is Map<String, dynamic>) {
+        final responseData = e.data['data'] as Map<String, dynamic>?;
+        if (responseData != null &&
+            responseData['onboarding_required'] == true) {
+          // Auto start onboarding flow
+          verificationUserId.value = responseData['user_id']?.toString() ?? '';
+          verificationOnboardKey.value =
+              responseData['onboard_key']?.toString() ?? '';
+          selectedType.value = responseData['role']?.toString() ?? '';
+
+          showWarning(e.data['message'] ?? 'Please complete onboarding.');
+
+          // Navigate to signup step 2 to start onboarding
+          Get.offAllNamed(AppRoutes.signupStepTwo);
+          return;
+        }
+      }
+
       final errorMessage = _parseLoginError(e);
       setError(errorMessage);
       showError(errorMessage);
@@ -430,7 +435,7 @@ class AuthController extends BaseController {
     await submitProviderSignupWithDocuments();
   }
 
-  void onSignup() {
+  Future<void> onSignup() async {
     if (signupNameController.text.trim().isEmpty) {
       showWarning('Please enter your name');
       return;
@@ -451,7 +456,12 @@ class AuthController extends BaseController {
       return;
     }
 
-    Get.toNamed('/signup-step-two');
+    // Call sign up API immediately - ONLY name, email, password
+    if (selectedType.value == 'customer') {
+      await _completeCustomerSignup();
+    } else {
+      await _completeProviderSignup();
+    }
   }
 
   Future<void> onContinueSignup() async {
@@ -463,7 +473,7 @@ class AuthController extends BaseController {
     if (selectedType.value.isEmpty) {
       // If for some reason type is missing, try restoring it
       await restoreUserType();
-      
+
       // If still missing, force selection
       if (selectedType.value.isEmpty) {
         showError('Please select user type');
@@ -475,9 +485,11 @@ class AuthController extends BaseController {
     await _storage.setUserType(selectedType.value);
 
     if (selectedType.value == 'provider') {
+      // After phone/nationality, continue to provider details onboarding
       Get.toNamed(AppRoutes.providerDetails);
     } else {
-      await _completeCustomerSignup();
+      // For customer, this is final onboarding step
+      await _submitCustomerOnboarding();
     }
   }
 
@@ -503,9 +515,9 @@ class AuthController extends BaseController {
         fullName: signupNameController.text.trim(),
         emailAddress: signupEmailController.text.trim(),
         password: signupPasswordController.text,
-        nationality: selectedNationality.value,
-        phoneNumber: signupPhoneController.text.trim(),
-        termsAgreed: true,
+        nationality: '',
+        phoneNumber: '',
+        termsAgreed: acceptedTerms.value,
       );
 
       final response = await _apiService.post(
@@ -519,6 +531,10 @@ class AuthController extends BaseController {
       await _persistUserId(data.userId);
       signupPasswordController.clear();
       clearError();
+
+      // Always show backend message
+      showSuccess(data.message);
+
       Get.toNamed('/otp-verification');
       _startOtpTimer();
     } on ApiException catch (e) {
@@ -534,15 +550,95 @@ class AuthController extends BaseController {
     }
   }
 
-  Future<void> _completeProviderSignup() async {
-    if (selectedServiceType.value.isEmpty ||
-        selectedRole.value.isEmpty ||
-        selectedServiceCategory.value.isEmpty) {
-      showWarning('Please select all fields');
-      return;
-    }
+  Future<void> _submitCustomerOnboarding() async {
+    if (isLoading.value) return;
 
-    Get.toNamed(AppRoutes.signupDocuments);
+    setLoading(true);
+
+    try {
+      final fields = {
+        'user_id': verificationUserId.value,
+        'onboard_key': verificationOnboardKey.value,
+        'nationality': selectedNationality.value,
+        'phone_number': signupPhoneController.text.trim(),
+      };
+
+      final response = await _apiService.post(
+        ApiConstant.onboard,
+        body: fields,
+        requiresAuth: false,
+      );
+
+      // Always show backend message
+      // final message =
+      //     response['message'] ?? 'Onboarding completed successfully.';
+      // showSuccess(message);
+
+      // Clear data and navigate to login screen
+      _clearPersistedUserId();
+      verificationOnboardKey.value = '';
+      signupPhoneController.clear();
+      selectedNationality.value = 'Emirati';
+      clearError();
+
+      Get.offAllNamed(AppRoutes.login);
+    } on ApiException catch (e) {
+      final errorMessage = e.message ?? 'Onboarding failed. Please try again.';
+      setError(errorMessage);
+      showError(errorMessage);
+    } catch (e, stackTrace) {
+      Log.e('Customer onboarding failed', e, stackTrace);
+      setError('Onboarding failed. Please try again.');
+      showError('Onboarding failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> _completeProviderSignup() async {
+    if (isLoading.value) return;
+
+    setLoading(true);
+
+    try {
+      final request = SignUpRequestModel(
+        role: 'provider',
+        fullName: signupNameController.text.trim(),
+        emailAddress: signupEmailController.text.trim(),
+        password: signupPasswordController.text,
+        nationality: '',
+        phoneNumber: '',
+        termsAgreed: acceptedTerms.value,
+      );
+
+      final response = await _apiService.post(
+        ApiConstant.signUp,
+        body: request.toJson(),
+        requiresAuth: false,
+      );
+
+      final data = SignUpResponseModel.fromJson(response);
+
+      await _persistUserId(data.userId);
+      signupPasswordController.clear();
+      clearError();
+
+      // Always show backend message
+      showSuccess(data.message);
+
+      Get.toNamed('/otp-verification');
+      _startOtpTimer();
+    } on ApiException catch (e) {
+      final errorMessage = _parseSignupError(e);
+      setError(errorMessage);
+      showError(errorMessage);
+    } catch (e, stackTrace) {
+      Log.e('Provider signup failed', e, stackTrace);
+      setError('Signup failed. Please try again.');
+      showError('Signup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   Future<void> submitProviderSignupWithDocuments() async {
@@ -551,15 +647,12 @@ class AuthController extends BaseController {
     setLoading(true);
 
     try {
-      // 1. Prepare text fields
+      // 1. Prepare text fields for onboarding
       final fields = {
-        'role': 'provider',
-        'full_name': signupNameController.text.trim(),
-        'email_address': signupEmailController.text.trim(),
-        'password': signupPasswordController.text,
+        'user_id': verificationUserId.value,
+        'onboard_key': verificationOnboardKey.value,
         'nationality': selectedNationality.value,
         'phone_number': signupPhoneController.text.trim(),
-        'terms_agreed': 'true',
         'service_type_name': selectedServiceType.value,
         'provider_type': selectedRole.value,
         'service_category_name': selectedServiceCategory.value,
@@ -575,8 +668,9 @@ class AuthController extends BaseController {
       fields['documents'] = jsonEncode(docsMetadata);
 
       // 3. Prepare certificates JSON string
-      final List<Map<String, String>> certsMetadata =
-          signupCertifications.map((cert) {
+      final List<Map<String, String>> certsMetadata = signupCertifications.map((
+        cert,
+      ) {
         return {
           'title': cert['title'] as String,
           'institute': cert['institute'] as String,
@@ -622,25 +716,34 @@ class AuthController extends BaseController {
         }
       }
 
-      Log.d('Sending Provider Signup FormData: $fields');
+      Log.d('Sending Provider Onboarding FormData: $fields');
 
       final response = await _apiService.postFormData(
-        ApiConstant.signUp,
+        ApiConstant.onboard,
         body: fields,
         files: multipartFiles,
         requiresAuth: false,
       );
 
-      final data = SignUpResponseModel.fromJson(response);
+      // Always show backend message
+      final message =
+          response['message'] ?? 'Onboarding completed successfully.';
+      showSuccess(message);
 
-      await _persistUserId(data.userId);
+      // Clear data and navigate to login screen
+      _clearPersistedUserId();
+      verificationOnboardKey.value = '';
       signupPasswordController.clear();
-      // Clear data after success
+      signupPhoneController.clear();
+      selectedNationality.value = 'Emirati';
+      selectedServiceType.value = '';
+      selectedRole.value = '';
+      selectedServiceCategory.value = '';
       signupDocuments.clear();
       signupCertifications.clear();
       clearError();
-      Get.toNamed('/otp-verification');
-      _startOtpTimer();
+
+      Get.offAllNamed(AppRoutes.login);
     } on ApiException catch (e) {
       final errorMessage = _parseSignupError(e);
       setError(errorMessage);
@@ -775,8 +878,8 @@ class AuthController extends BaseController {
 
         final data = VerifyEmailResponseModel.fromJson(response);
 
-        // Save tokens if present
-        if (data.tokens != null) {
+        // Save tokens ONLY if onboarding is NOT required
+        if (data.tokens != null && !(data.onboardingRequired ?? false)) {
           await _storage.saveTokens(
             accessToken: data.tokens!.accessToken,
             refreshToken: data.tokens!.refreshToken,
@@ -791,13 +894,23 @@ class AuthController extends BaseController {
         }
 
         _otpTimer?.cancel();
-        _clearPersistedUserId();
         clearError();
 
-        if (data.isProviderPending) {
-          Get.toNamed('/request-sent');
+        // Always show backend message
+        // showSuccess(data.message ?? 'Account verified successfully.');
+
+        // Check if onboarding is required
+        if (data.onboardingRequired ?? false) {
+          // Store onboard key for onboarding process
+          verificationOnboardKey.value = data.onboardKey ?? '';
+
+          // BOTH customer AND provider first go to signup step 2 (phone + nationality)
+          Get.offAllNamed(AppRoutes.signupStepTwo);
         } else {
-          Get.offAllNamed(AppRoutes.getStarted);
+          // No onboarding required, navigate to login screen
+          _clearPersistedUserId();
+          verificationOnboardKey.value = '';
+          Get.offAllNamed(AppRoutes.login);
         }
       }
     } on ApiException catch (e) {
@@ -831,14 +944,16 @@ class AuthController extends BaseController {
         userId: verificationUserId.value,
       );
 
-      await _apiService.post(
+      final response = await _apiService.post(
         ApiConstant.resendVerificationCode,
         body: request.toJson(),
         requiresAuth: false,
       );
 
       _startOtpTimer();
-      showSuccess('OTP resent successfully');
+
+      // _startOtpTimer();
+      // showSuccess('OTP resent successfully');
     } on ApiException catch (e) {
       final errorMessage = _parseResendOtpError(e);
       setError(errorMessage);
@@ -1128,14 +1243,21 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response
+    // Try to extract message from backend response FIRST - use backend message if available
     if (data != null && data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final String? backendMessage = data['message']?.toString();
+
+      // Use backend message directly if it exists
+      if (backendMessage != null && backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
+
       final errors = data['errors'];
 
       // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
-        if (errors.containsKey('email_address') || errors.containsKey('email')) {
+        if (errors.containsKey('email_address') ||
+            errors.containsKey('email')) {
           return 'Please enter a valid email address';
         }
         if (errors.containsKey('password')) {
@@ -1144,26 +1266,6 @@ class AuthController extends BaseController {
         if (errors.containsKey('role')) {
           return 'Please select a user type';
         }
-      }
-
-      // Match common backend messages
-      if (backendMessage.contains('invalid') ||
-          backendMessage.contains('credentials') ||
-          backendMessage.contains('password')) {
-        return 'Incorrect email or password';
-      }
-      if (backendMessage.contains('not found') ||
-          backendMessage.contains('does not exist')) {
-        return 'No account found with this email';
-      }
-      if (backendMessage.contains('verified') ||
-          backendMessage.contains('verify')) {
-        return 'Please verify your email before logging in';
-      }
-      if (backendMessage.contains('active') ||
-          backendMessage.contains('disabled') ||
-          backendMessage.contains('suspended')) {
-        return 'Your account has been disabled. Please contact support';
       }
     }
 
@@ -1186,18 +1288,27 @@ class AuthController extends BaseController {
 
   /// Parses API exceptions into user-friendly error messages for signup
   String _parseSignupError(ApiException exception) {
-    Log.d('Parsing signup error: ${exception.statusCode}, data: ${exception.data}');
+    Log.d(
+      'Parsing signup error: ${exception.statusCode}, data: ${exception.data}',
+    );
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
     if (data != null && data is Map<String, dynamic>) {
-      // 1. Prioritize specific validation errors if they exist
+      // 1. PRIORITIZE backend message FIRST - always use backend message if available
+      final String? backendMessage = data['message']?.toString();
+      if (backendMessage != null && backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
+
+      // 2. Handle specific validation errors
       final errors = data['errors'];
       if (errors != null && errors is Map<String, dynamic>) {
         if (errors.containsKey('full_name') || errors.containsKey('name')) {
           return 'Please enter your full name';
         }
-        if (errors.containsKey('email_address') || errors.containsKey('email')) {
+        if (errors.containsKey('email_address') ||
+            errors.containsKey('email')) {
           final emailError = errors['email_address'] ?? errors['email'];
           if (emailError.toString().contains('taken') ||
               emailError.toString().contains('exists')) {
@@ -1209,23 +1320,10 @@ class AuthController extends BaseController {
           return 'Please enter a valid phone number';
         }
       }
-
-      // 2. Use the 'message' field from the backend if it's present and not generic
-      final String backendMessage = data['message']?.toString() ?? '';
-      if (backendMessage.isNotEmpty && 
-          !backendMessage.toLowerCase().contains('validation') &&
-          !backendMessage.toLowerCase().contains('invalid')) {
-        return backendMessage;
-      }
-      
-      // 3. Fallback to any remaining message
-      if (backendMessage.isNotEmpty) {
-        return backendMessage;
-      }
     }
 
-    // 4. If data is null or empty, check the exception message itself
-    if (exception.message.isNotEmpty && 
+    // 3. If data is null or empty, check the exception message itself
+    if (exception.message.isNotEmpty &&
         !exception.message.contains('ApiException') &&
         !exception.message.contains('unknown')) {
       return exception.message;
@@ -1247,22 +1345,21 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response
+    // Try to extract message from backend response FIRST
     if (data != null && data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final String? backendMessage = data['message']?.toString();
+      if (backendMessage != null && backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
+
       final errors = data['errors'];
 
       // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
-        if (errors.containsKey('email_address') || errors.containsKey('email')) {
+        if (errors.containsKey('email_address') ||
+            errors.containsKey('email')) {
           return 'Please enter a valid email address';
         }
-      }
-
-      // Match common backend messages
-      if (backendMessage.contains('not found') ||
-          backendMessage.contains('does not exist')) {
-        return 'No account found with this email address';
       }
     }
 
@@ -1282,9 +1379,13 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response
+    // Try to extract message from backend response FIRST
     if (data != null && data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
+      final String? backendMessage = data['message']?.toString();
+      if (backendMessage != null && backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
+
       final errors = data['errors'];
 
       // Handle validation errors
@@ -1293,16 +1394,6 @@ class AuthController extends BaseController {
             errors.containsKey('otp')) {
           return 'Please enter a valid verification code';
         }
-      }
-
-      // Match common backend messages
-      if (backendMessage.contains('invalid') ||
-          backendMessage.contains('incorrect') ||
-          backendMessage.contains('wrong')) {
-        return 'Invalid verification code. Please check and try again';
-      }
-      if (backendMessage.contains('expired')) {
-        return 'Verification code has expired. Please request a new one';
       }
     }
 
@@ -1332,8 +1423,13 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response
+    // Try to extract message from backend response FIRST
     if (data != null && data is Map<String, dynamic>) {
+      final String? backendMessage = data['message']?.toString();
+      if (backendMessage != null && backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
+
       final errors = data['errors'];
 
       // Handle validation errors
