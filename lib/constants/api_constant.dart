@@ -222,6 +222,19 @@ class ApiConstant {
   static const String reviews = '/reviews';
   static const String createReview = '/reviews/create';
 
+  /// Customer review endpoints for services
+  /// POST /services/customer/submit-review/{service_id}
+  static String submitReview(int serviceId) =>
+      '/services/customer/submit-review/$serviceId';
+
+  /// PUT /services/customer/update-review/{service_id}
+  static String updateReview(int serviceId) =>
+      '/services/customer/update-review/$serviceId';
+
+  /// GET /services/customer/review-detail/{service_id}
+  static String reviewDetail(int serviceId) =>
+      '/services/customer/review-detail/$serviceId';
+
   // ===== REPORT ENDPOINTS =====
 
   static const String submitProviderReport = '/providers/submit-report';

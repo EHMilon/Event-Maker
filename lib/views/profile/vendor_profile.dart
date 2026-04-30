@@ -13,11 +13,13 @@ import 'package:google_fonts/google_fonts.dart';
 class VendorProfileView extends StatelessWidget {
   final VendorProfileModel vendor;
   final bool showCustomerActions;
+  final int? serviceId;
 
   const VendorProfileView({
     super.key,
     required this.vendor,
     this.showCustomerActions = false,
+    this.serviceId,
   });
 
   /// Get avatar image provider based on URL
@@ -274,9 +276,11 @@ class VendorProfileView extends StatelessWidget {
                         'vendorName': vendor.name,
                         'vendorLogo': vendor.avatar,
                         'providerId': vendor.id,
-                        'serviceId': vendor.services.isNotEmpty
-                            ? vendor.services.first.id
-                            : null,
+                        'serviceId':
+                            serviceId ??
+                            (vendor.services.isNotEmpty
+                                ? vendor.services.first.id
+                                : null),
                       },
                     );
                   } else if (value == 'certification') {

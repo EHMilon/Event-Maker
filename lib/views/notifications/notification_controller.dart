@@ -28,6 +28,11 @@ class NotificationController extends GetxController {
     fetchNotifications();
   }
 
+  /// Refresh when screen is navigated to
+  void onResume() {
+    fetchNotifications();
+  }
+
   /// Fetch booking notifications from API
   Future<void> fetchNotifications() async {
     // Check connectivity first
@@ -74,7 +79,9 @@ class NotificationController extends GetxController {
         ServiceRequest(
           id: notification.id.toString(),
           customerName: notification.customer.fullName,
-          customerImage: ApiConstant.getFullMediaUrl(notification.customer.avatar),
+          customerImage: ApiConstant.getFullMediaUrl(
+            notification.customer.avatar,
+          ),
           serviceTitle: notification.title,
           serviceDescription: '',
           date: DateTime.now(),

@@ -113,7 +113,7 @@ class _UploadWidgetState extends State<UploadWidget> {
               color: Colors.black.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.edit, color: Colors.white, size: 18.r),
+            // child: Icon(Icons.edit, color: Colors.white, size: 18.r),
           ),
         ),
         Positioned(

@@ -32,13 +32,17 @@ class SPHomeView extends GetView<SPHomeController> {
               return _buildErrorView();
             }
             return Skeletonizer(
-              enabled: controller.isLoading.value && controller.activeOrders.isEmpty,
+              enabled:
+                  controller.isLoading.value && controller.activeOrders.isEmpty,
               child: RefreshIndicator(
                 onRefresh: controller.refreshData,
                 color: Get.theme.colorScheme.primary,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 18.w,
+                    vertical: 16.h,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -149,19 +153,21 @@ class SPHomeView extends GetView<SPHomeController> {
               Row(
                 children: [
                   Flexible(
-                    child: Text(
-                      controller.businessName.value.isEmpty
-                          ? (controller.userName.value.isEmpty
-                                ? 'Good morning'
-                                : controller.userName.value)
-                          : controller.businessName.value,
-                      style: GoogleFonts.inter(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                    child: Obx(
+                      () => Text(
+                        controller.businessName.isEmpty
+                            ? (controller.userName.isEmpty
+                                  ? 'Good morning'
+                                  : controller.userName)
+                            : controller.businessName,
+                        style: GoogleFonts.inter(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   SizedBox(width: 8.w),

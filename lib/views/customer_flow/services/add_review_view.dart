@@ -36,7 +36,7 @@ Widget _buildVendorLogo(String? vendorLogo, String vendorName) {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
               strokeWidth: 2,
               color: Colors.white,
@@ -67,7 +67,11 @@ Widget _buildVendorLogo(String? vendorLogo, String vendorName) {
 /// Build vendor initials fallback widget
 Widget _buildVendorInitials(String vendorName) {
   final initials = vendorName.isNotEmpty
-      ? vendorName.split(' ').map((e) => e.isNotEmpty ? e[0] : '').join('').toUpperCase()
+      ? vendorName
+            .split(' ')
+            .map((e) => e.isNotEmpty ? e[0] : '')
+            .join('')
+            .toUpperCase()
       : 'V';
 
   return Center(
@@ -92,7 +96,7 @@ class AddReviewView extends StatefulWidget {
 class _AddReviewViewState extends State<AddReviewView> {
   final TextEditingController _reviewController = TextEditingController();
   final ReviewRepository _reviewRepository = ReviewRepository();
-  
+
   int _rating = 0;
   int? _serviceId;
   int? _existingReviewId;
@@ -110,8 +114,9 @@ class _AddReviewViewState extends State<AddReviewView> {
   /// Fetch existing review when view loads
   Future<void> _loadExistingReview() async {
     final args = Get.arguments;
-    final serviceId = (args is Map<String, dynamic> ? args['serviceId'] : null) as int?;
-    
+    final serviceId =
+        (args is Map<String, dynamic> ? args['serviceId'] : null) as int?;
+
     if (serviceId == null) {
       setState(() {
         _isCheckingExisting = false;
@@ -123,7 +128,7 @@ class _AddReviewViewState extends State<AddReviewView> {
     _serviceId = serviceId;
 
     final result = await _reviewRepository.getReviewDetail(serviceId);
-    
+
     if (mounted) {
       setState(() {
         _isCheckingExisting = false;
@@ -131,24 +136,38 @@ class _AddReviewViewState extends State<AddReviewView> {
 
       switch (result) {
         case Success<Map<String, dynamic>>(data: final data):
+          Log.d('=======> Review Success case - data: $data');
+          Log.d('=======> Review Success - review_id: ${data['review_id']}');
+          Log.d('=======> Review Success - rating: ${data['rating']}');
+          Log.d('=======> Review Success - comment: ${data['comment']}');
           // Check if we got actual review data
           if (data.isNotEmpty && data['review_id'] != null) {
             setState(() {
               _existingReviewId = data['review_id'] as int?;
               _rating = (data['rating'] as num?)?.toInt() ?? 0;
               _reviewController.text = (data['comment'] as String?) ?? '';
-              
+
               // Parse can_update_until if available
               final canUpdateStr = data['can_update_until'] as String?;
               if (canUpdateStr != null) {
                 _canUpdateUntil = DateTime.tryParse(canUpdateStr);
               }
             });
-            
+            Log.d(
+              '=======> Review loaded: id=$_existingReviewId, rating=$_rating',
+            );
+          } else {
+            Log.d('=======> Review data empty or missing review_id');
           }
         case Error<Map<String, dynamic>>(message: final message):
           // No existing review - that's fine, user can create new one
           Log.d('No existing review found: $message');
+          // Reset state for new review
+          setState(() {
+            _existingReviewId = null;
+            _rating = 0;
+            _reviewController.clear();
+          });
         case Loading<Map<String, dynamic>>():
           break;
       }
@@ -191,7 +210,7 @@ class _AddReviewViewState extends State<AddReviewView> {
     });
 
     final Result<Map<String, dynamic>> result;
-    
+
     // Check if we're updating or creating
     if (_existingReviewId != null) {
       // Update existing review
@@ -219,8 +238,8 @@ class _AddReviewViewState extends State<AddReviewView> {
           Get.back();
           Get.snackbar(
             'Success',
-            _existingReviewId != null 
-                ? 'Review updated successfully' 
+            _existingReviewId != null
+                ? 'Review updated successfully'
                 : 'Review submitted successfully',
             backgroundColor: AppColors.primary.withValues(alpha: 0.1),
             colorText: AppColors.primary,
@@ -249,8 +268,11 @@ class _AddReviewViewState extends State<AddReviewView> {
     // Get vendor data from arguments if available
     // Using safe navigation to handle null arguments
     final args = Get.arguments;
-    final vendorName = (args is Map<String, dynamic> ? args['vendorName'] : null) as String? ?? 'Vendor';
-    final vendorLogo = (args is Map<String, dynamic> ? args['vendorLogo'] : null) as String?;
+    final vendorName =
+        (args is Map<String, dynamic> ? args['vendorName'] : null) as String? ??
+        'Vendor';
+    final vendorLogo =
+        (args is Map<String, dynamic> ? args['vendorLogo'] : null) as String?;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -342,7 +364,7 @@ class _AddReviewViewState extends State<AddReviewView> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      _existingReviewId != null 
+                      _existingReviewId != null
                           ? 'Update your review'
                           : 'What did you enjoy the most?',
                       style: GoogleFonts.inter(
@@ -401,7 +423,9 @@ class _AddReviewViewState extends State<AddReviewView> {
               width: double.infinity,
               height: 56.h,
               child: ElevatedButton(
-                onPressed: _isLoading || _isCheckingExisting ? null : _submitReview,
+                onPressed: _isLoading || _isCheckingExisting
+                    ? null
+                    : _submitReview,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(

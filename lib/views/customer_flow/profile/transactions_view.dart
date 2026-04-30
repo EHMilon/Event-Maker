@@ -34,7 +34,7 @@ class _TransactionsViewState extends State<TransactionsView> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'My Transactions',
+          'myTransactions'.tr,
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20.sp,

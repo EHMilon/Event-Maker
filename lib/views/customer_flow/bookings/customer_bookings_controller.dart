@@ -13,6 +13,7 @@ class CustomerBookingsController extends GetxController
   final errorMessage = Rxn<String>();
   final upcomingRequests = <CustomerBookingItem>[].obs;
   final pastRequests = <CustomerBookingItem>[].obs;
+  final requestedRequests = <CustomerBookingItem>[].obs;
   final selectedTabIndex = 0.obs;
   final skeletonRequests = <CustomerBookingItem>[].obs;
 
@@ -20,6 +21,13 @@ class CustomerBookingsController extends GetxController
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    _loadData();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Always reload data when screen is fully presented
     _loadData();
   }
 
@@ -69,15 +77,17 @@ class CustomerBookingsController extends GetxController
       ),
     );
 
-    // Fetch both upcoming and past bookings in parallel
+    // Fetch upcoming, past and requested bookings in parallel
     try {
       final results = await Future.wait([
         _repository.fetchBookings(tab: 'upcoming'),
         _repository.fetchBookings(tab: 'past'),
+        _repository.fetchBookings(tab: 'requested'),
       ]);
 
       final upcomingResponse = results[0];
       final pastResponse = results[1];
+      final requestedResponse = results[2];
 
       if (upcomingResponse.success) {
         upcomingRequests.assignAll(upcomingResponse.data);
@@ -85,6 +95,10 @@ class CustomerBookingsController extends GetxController
 
       if (pastResponse.success) {
         pastRequests.assignAll(pastResponse.data);
+      }
+
+      if (requestedResponse.success) {
+        requestedRequests.assignAll(requestedResponse.data);
       }
 
       Log.d(
@@ -118,13 +132,36 @@ class CustomerBookingsController extends GetxController
   ];
 
   /// Get bookings for the selected tab
-  List<CustomerBookingItem> get selectedTabBookings =>
-      selectedTabIndex.value == 0 ? upcomingRequests : pastRequests;
+  List<CustomerBookingItem> get selectedTabBookings {
+    switch (selectedTabIndex.value) {
+      case 0:
+        return upcomingRequests;
+      case 1:
+        return requestedRequests;
+      case 2:
+        return pastRequests;
+      default:
+        return upcomingRequests;
+    }
+  }
 
   /// Check if there are no bookings at all
-  bool get hasNoBookings => upcomingRequests.isEmpty && pastRequests.isEmpty;
+  bool get hasNoBookings =>
+      upcomingRequests.isEmpty &&
+      pastRequests.isEmpty &&
+      requestedRequests.isEmpty;
 
   /// Check if a specific tab has no bookings
-  bool tabHasNoBookings(int tabIndex) =>
-      tabIndex == 0 ? upcomingRequests.isEmpty : pastRequests.isEmpty;
+  bool tabHasNoBookings(int tabIndex) {
+    switch (tabIndex) {
+      case 0:
+        return upcomingRequests.isEmpty;
+      case 1:
+        return requestedRequests.isEmpty;
+      case 2:
+        return pastRequests.isEmpty;
+      default:
+        return upcomingRequests.isEmpty;
+    }
+  }
 }

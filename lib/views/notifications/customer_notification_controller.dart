@@ -3,8 +3,9 @@ import '../../app_routes.dart';
 import '../../services/customer_booking_repository.dart';
 import '../../services/api_exception.dart';
 import '../../constants/api_constant.dart';
+import '../../global/base_controller.dart';
 
-class CustomerNotificationController extends GetxController {
+class CustomerNotificationController extends BaseController {
   final RxList<CustomerNotificationModel> notifications =
       <CustomerNotificationModel>[].obs;
   final RxBool isLoading = false.obs;
@@ -18,6 +19,11 @@ class CustomerNotificationController extends GetxController {
     _loadNotifications();
   }
 
+  /// Refresh notifications when screen is resumed
+  void onResume() {
+    refreshNotifications();
+  }
+
   Future<void> _loadNotifications() async {
     try {
       isLoading.value = true;
@@ -25,6 +31,9 @@ class CustomerNotificationController extends GetxController {
 
       // Fetch from API: GET /bookings/notification-list
       final response = await _repository.fetchNotifications();
+
+      // Minimum shimmer display delay
+      await Future.delayed(const Duration(milliseconds: 350));
 
       // Map API response to local model
       notifications.assignAll(

@@ -3,7 +3,7 @@ import 'package:event_maker/models/order_model.dart';
 import 'package:event_maker/models/provider_home_model.dart';
 import 'package:event_maker/services/connectivity_service.dart';
 import 'package:event_maker/services/provider_home_repository.dart';
-import '../../../../services/storage_service.dart';
+import 'package:event_maker/views/profile/profile_controller.dart';
 import 'package:get/get.dart';
 
 /// Controller for Service Provider Home Screen
@@ -17,14 +17,18 @@ class SPHomeController extends GetxController {
       Get.find<ConnectivityService>();
   final ProviderHomeRepository _repository = ProviderHomeRepository();
 
+  // Use ProfileController directly for realtime user data
+  ProfileController get _profileController => Get.find<ProfileController>();
+
   // Loading and error states
   final isLoading = true.obs;
   final hasError = false.obs;
   final errorMessage = ''.obs;
 
-  // User info
-  final userName = ''.obs;
-  final businessName = ''.obs;
+  // Realtime user info from ProfileController (api/providers/my-profile)
+  String get userName => _profileController.userName.value;
+  String get businessName =>
+      _profileController.providerProfile.value?.companyName ?? '';
 
   // Legacy dashboard stats (for backward compatibility with UI)
   final stats = DashboardStats.empty().obs;
@@ -38,23 +42,7 @@ class SPHomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchUserInfo();
     fetchDashboardData();
-  }
-
-  /// Fetches user information from local storage
-  Future<void> fetchUserInfo() async {
-    try {
-      final userDetails = await StorageService().getUserDetails();
-      if (userDetails != null) {
-        userName.value = userDetails['name'] ?? '';
-        // TODO: Fetch business name from provider profile when backend is ready
-        // For now, use user name as business name
-        businessName.value = userName.value;
-      }
-    } catch (e) {
-      // Silently fail - business name will be empty
-    }
   }
 
   /// Fetches dashboard data from API
@@ -137,6 +125,9 @@ class SPHomeController extends GetxController {
   /// Refreshes data (for pull-to-refresh)
   Future<void> refreshData() async {
     try {
+      // Refresh provider profile data to get latest name/company
+      await _profileController.fetchProviderProfile();
+
       final data = await _repository.refreshProviderHomeData();
       providerHomeData.value = data;
       _updateStatsFromApi(data);

@@ -29,6 +29,11 @@ class ChatViewController extends GetxController {
     ever(searchQuery, (_) => _filterChats());
   }
 
+  /// Reload data when screen is navigated back to
+  void onResume() {
+    refreshChats();
+  }
+
   /// Loads both customer chats and admin chats from API.
   Future<void> loadChats() async {
     isLoading.value = true;

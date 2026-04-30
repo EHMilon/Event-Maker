@@ -32,7 +32,7 @@ class BookmarksView extends GetView<ProfileController> {
               )
             : null,
         title: Text(
-          'My Bookmarks',
+          'myBookmarks'.tr,
           style: GoogleFonts.inter(
             color: AppColors.textPrimary,
             fontSize: 20.sp,

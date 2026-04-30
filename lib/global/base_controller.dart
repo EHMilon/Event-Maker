@@ -164,6 +164,9 @@ abstract class BaseController extends GetxController {
     try {
       final result = await operation();
 
+      // Minimum 350ms display time for skeleton/shimmer effect to prevent flash
+      await Future.delayed(const Duration(milliseconds: 350));
+
       // Clear loading state
       _setLoadingByType(loadingType, false);
 

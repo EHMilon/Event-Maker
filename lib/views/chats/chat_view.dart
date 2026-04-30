@@ -238,37 +238,63 @@ class _ChatViewState extends State<ChatView>
           children: [
             _buildSearchBar(controller),
             SizedBox(height: 24.h),
-            if (chats.isEmpty && !isLoading)
-              Expanded(
-                child: Center(
-                  child: Text(
-                    hasQuery ? 'noResultsFound'.tr : 'postVibeFirstChat'.tr,
-                    style: GoogleFonts.inter(
-                      color: AppColors.textSecondary,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              )
-            else
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: controller.refreshChats,
-                  color: AppColors.primary,
-                  child: Skeletonizer(
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: controller.refreshChats,
+                color: AppColors.primary,
+                child: Obx(() {
+                  final isLoading = controller.isLoading.value;
+                  final chats = isCustomerTab
+                      ? controller.filteredCustomerChats
+                      : controller.filteredAdminChats;
+
+                  if (isLoading) {
+                    return Skeletonizer(
+                      child: ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: 4,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 20.h),
+                        itemBuilder: (context, index) {
+                          return _buildChatTileMock();
+                        },
+                      ),
+                    );
+                  }
+
+                  if (chats.isEmpty) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.25,
+                        ),
+                        Center(
+                          child: Text(
+                            hasQuery
+                                ? 'noResultsFound'.tr
+                                : 'postVibeFirstChat'.tr,
+                            style: GoogleFonts.inter(
+                              color: AppColors.textSecondary,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Skeletonizer(
                     enabled: isLoading,
                     child: ListView.separated(
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
                       ),
-                      itemCount: isLoading ? 4 : chats.length,
+                      itemCount: chats.length,
                       separatorBuilder: (context, index) =>
                           SizedBox(height: 20.h),
                       itemBuilder: (context, index) {
-                        if (isLoading) {
-                          return _buildChatTileMock();
-                        }
                         final chat = chats[index];
                         return _buildChatTile(
                           chat,
@@ -277,9 +303,10 @@ class _ChatViewState extends State<ChatView>
                         );
                       },
                     ),
-                  ),
-                ),
+                  );
+                }),
               ),
+            ),
           ],
         ),
       );

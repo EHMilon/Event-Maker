@@ -205,13 +205,17 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                     SizedBox(height: 18.h),
 
                     // Service Categories
-                    _buildSectionHeader(
-                      'subCategoriesLabel'.tr,
-                      'all',
-                      'allCategories'.tr,
-                      navigateToCategories: true,
-                      showSeeAll: false,
-                    ),
+                    Obx(() {
+                      final HomeController controller =
+                          Get.find<HomeController>();
+                      return _buildSectionHeader(
+                        'subCategoriesLabel'.tr,
+                        'all',
+                        'allCategories'.tr,
+                        navigateToCategories: true,
+                        showSeeAll: controller.currentSubCategories.length > 1,
+                      );
+                    }),
                     SizedBox(height: 12.h),
                     _buildCategories(),
                     SizedBox(height: 24.h),
@@ -221,6 +225,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
                           group.serviceAsName,
                           controller.selectedMainCategory.value,
                           group.serviceAsName,
+                          showSeeAll: group.totalServices > 1,
                         ),
                         SizedBox(height: 16.h),
                         _buildServiceGroupList(group),
@@ -287,7 +292,7 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
-          width: 200.w,
+          width: 250.w,
           child: Text(
             title,
             style: GoogleFonts.inter(
@@ -300,34 +305,34 @@ class _CustomerHomeViewState extends State<CustomerHomeView> {
         ),
         if (showSeeAll)
           TextButton(
-          onPressed: () {
-            if (navigateToCategories) {
-              // Navigate to Categories screen
-              Get.toNamed(AppRoutes.categories);
-            } else {
-              // Navigate to CategoryServicesView with the category type and name
-              Get.toNamed(
-                AppRoutes.categoryServices,
-                arguments: {
-                  'categoryType': categoryType,
-                  'categoryName': categoryName,
-                },
-              );
-            }
-          },
-          child: Row(
-            children: [
-              Text(
-                'seeAll'.tr,
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: AppColors.grey,
+            onPressed: () {
+              if (navigateToCategories) {
+                // Navigate to Categories screen
+                Get.toNamed(AppRoutes.categories);
+              } else {
+                // Navigate to CategoryServicesView with the category type and name
+                Get.toNamed(
+                  AppRoutes.categoryServices,
+                  arguments: {
+                    'categoryType': categoryType,
+                    'categoryName': categoryName,
+                  },
+                );
+              }
+            },
+            child: Row(
+              children: [
+                Text(
+                  'seeAll'.tr,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: AppColors.grey,
+                  ),
                 ),
-              ),
-              Icon(Icons.chevron_right, size: 16.r, color: AppColors.grey),
-            ],
+                Icon(Icons.chevron_right, size: 16.r, color: AppColors.grey),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }

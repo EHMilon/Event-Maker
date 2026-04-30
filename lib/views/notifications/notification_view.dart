@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../widgets/empty_widget.dart';
 import '../../widgets/notification_card.dart';
 import 'notification_controller.dart';
 
@@ -41,44 +42,42 @@ class NotificationView extends GetView<NotificationController> {
             ),
           ),
         ),
-        body: Obx(() {
-          if (controller.isLoading.value &&
-              controller.serviceRequests.isEmpty) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: Get.theme.colorScheme.primary,
-              ),
-            );
-          }
-
-          if (controller.serviceRequests.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+        body: RefreshIndicator(
+          onRefresh: controller.fetchNotifications,
+          color: Get.theme.colorScheme.primary,
+          child: Obx(() {
+            if (controller.isLoading.value &&
+                controller.serviceRequests.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Icon(
-                    Icons.notifications_none,
-                    size: 64.sp,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'noNotifications'.tr,
-                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.4),
+                  Center(
+                    child: CircularProgressIndicator(
+                      color: Get.theme.colorScheme.primary,
+                    ),
                   ),
                 ],
-              ),
-            );
-          }
+              );
+            }
 
-          return RefreshIndicator(
-            onRefresh: controller.fetchNotifications,
-            color: Get.theme.colorScheme.primary,
-            child: ListView.builder(
+            if (controller.serviceRequests.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                  const EmptyWidget(
+                    message: 'No notifications yet',
+                    icon: Icons.notifications_none,
+                  ),
+                ],
+              );
+            }
+
+            return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              itemCount: controller.serviceRequests.isEmpty
-                  ? 0
-                  : controller.serviceRequests.length,
+              itemCount: controller.serviceRequests.length,
               itemBuilder: (context, index) {
                 final request = controller.serviceRequests[index];
                 return NotificationCard(
@@ -90,9 +89,9 @@ class NotificationView extends GetView<NotificationController> {
                   onTap: () => _handleNotificationClick(request),
                 );
               },
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

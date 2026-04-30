@@ -237,20 +237,17 @@ class ProfileController extends GetxController {
     isLoading.value = true;
 
     try {
-      final userData = await StorageService().getUserDetails();
-      if (userData != null) {
-        userName.value = userData['name'] ?? '';
-        userEmail.value = userData['email'] ?? '';
-        isServiceProvider.value =
-            userData['type'] == StorageService.USER_TYPE_SERVICE_PROVIDER;
+      // DO NOT LOAD OLD NAME FROM LOCAL STORAGE
+      // Always wait for fresh backend data
+      final userType = await StorageService().getUserType();
+      isServiceProvider.value =
+          userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
 
-        nameController.text = userName.value;
-        emailController.text = userEmail.value;
-      } else {
-        final userType = await StorageService().getUserType();
-        isServiceProvider.value =
-            userType == StorageService.USER_TYPE_SERVICE_PROVIDER;
-      }
+      // Clear old stored values
+      userName.value = '';
+      userEmail.value = '';
+      nameController.clear();
+      emailController.clear();
     } catch (e) {
       Get.snackbar('error'.tr, 'somethingWentWrong'.tr);
     } finally {

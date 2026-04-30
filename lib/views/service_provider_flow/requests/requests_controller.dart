@@ -63,10 +63,7 @@ class RequestsController extends GetxController {
     errorMessage.value = '';
 
     // Fetch both tabs in parallel
-    await Future.wait([
-      fetchUpcomingRequests(),
-      fetchPastRequests(),
-    ]);
+    await Future.wait([fetchUpcomingRequests(), fetchPastRequests()]);
   }
 
   /// Fetch upcoming booking requests
@@ -76,6 +73,9 @@ class RequestsController extends GetxController {
       upcomingError.value = '';
 
       final response = await _repository.fetchBookingRequests(tab: 'upcoming');
+
+      // Minimum shimmer display delay
+      await Future.delayed(const Duration(milliseconds: 350));
 
       if (response.success) {
         upcomingRequests.assignAll(response.data);
@@ -100,6 +100,9 @@ class RequestsController extends GetxController {
       pastError.value = '';
 
       final response = await _repository.fetchBookingRequests(tab: 'past');
+
+      // Minimum shimmer display delay
+      await Future.delayed(const Duration(milliseconds: 350));
 
       if (response.success) {
         pastRequests.assignAll(response.data);

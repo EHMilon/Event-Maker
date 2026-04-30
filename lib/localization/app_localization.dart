@@ -2,14 +2,14 @@ import 'package:get/get.dart';
 
 /// Supported languages in the application
 enum SupportedLanguage {
-  english('en', 'English', '🇺🇸'),
-  arabic('ar', 'العربية', '🇸🇦');
+  english('en', 'English', 'assets/icons/usa-flag.png'),
+  arabic('ar', 'العربية', 'assets/icons/uae-flag.png');
 
   final String code;
   final String name;
-  final String flag;
+  final String flagAssetPath;
 
-  const SupportedLanguage(this.code, this.name, this.flag);
+  const SupportedLanguage(this.code, this.name, this.flagAssetPath);
 }
 
 /// Application localization class extending GetX Translations
@@ -96,7 +96,7 @@ class AppLocalization extends Translations {
     'confirm': 'Confirm',
     'congratulations': 'Congratulations !',
     'resetSuccessful':
-        'Password Reset successful! You\'ll be redirected to the login screen now',
+        'You\'ll be redirected to the login screen now',
 
     // Auth - Signup Step Two
     'phoneNumber': 'Phone Number',
@@ -180,6 +180,7 @@ class AppLocalization extends Translations {
     'logout': 'Logout',
     'logoutConfirmation': 'Are you sure you want to logout?',
     'emailCannotBeChanged': 'Email cannot be changed',
+    'avatarUpdate': 'Avatar Update',
 
     // Navigation
     'home': 'Home',
@@ -222,6 +223,7 @@ class AppLocalization extends Translations {
     'retry': 'Retry',
     'noSchedulesFound': 'No schedules found',
     'noSchedulesForDate': 'No schedules found for selected date',
+    'requested': 'Requested',
 
     // Service Provider Requests
     'requests': 'Requests',
@@ -593,7 +595,7 @@ class AppLocalization extends Translations {
     'confirm': 'تأكيد',
     'congratulations': 'تهانينا!',
     'resetSuccessful':
-        'تم إعادة تعيين كلمة المرور بنجاح! سيتم توجيهك إلى شاشة تسجيل الدخول الآن',
+        'سيتم إعادة توجيهك إلى شاشة تسجيل الدخول الآن',
 
     // Auth - Signup Step Two
     'phoneNumber': 'رقم الهاتف',
@@ -827,6 +829,7 @@ class AppLocalization extends Translations {
     'noBio': 'لا توجد سيرة ذاتية',
     'noServices': 'لا توجد خدمات',
     'noReviews': 'لا توجد مراجعات بعد',
+    'avatarUpdate': 'تحديث الصورة الشخصية',
 
     // Add Service Flow
     'editService': 'تعديل الخدمة',
@@ -999,5 +1002,7 @@ class AppLocalization extends Translations {
     'stripeOnboardingRequired': 'مطلوب إعداد حساب سترايب',
     'setupNow': 'إعداد الآن',
     'selectService': 'اختر الخدمة',
+    'requested': 'تم الطلب',
+
   };
 }

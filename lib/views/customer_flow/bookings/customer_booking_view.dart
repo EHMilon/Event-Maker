@@ -61,7 +61,7 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: _TabListener(
         controller: controller,
         child: Scaffold(
@@ -107,7 +107,8 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
                     onTap: (index) => controller.selectedTabIndex.value = index,
                     tabs: [
                       _buildTab('upcoming'.tr, 0),
-                      _buildTab('history'.tr, 1),
+                      _buildTab('requested'.tr, 1),
+                      _buildTab('history'.tr, 2),
                     ],
                   ),
                 ),
@@ -115,7 +116,11 @@ class CustomerBookingView extends GetView<CustomerBookingsController> {
             ),
           ),
           body: TabBarView(
-            children: [_UpcomingRequestsTab(), _HistoryRequestsTab()],
+            children: [
+              _UpcomingRequestsTab(),
+              _RequestedRequestsTab(),
+              _HistoryRequestsTab(),
+            ],
           ),
         ),
       ),
@@ -172,6 +177,51 @@ class _UpcomingRequestsTab extends GetView<CustomerBookingsController> {
           if (list.isEmpty) {
             return EmptyWidget(
               message: 'noUpcomingRequests'.tr,
+              icon: Icons.event_available,
+            );
+          }
+          return ListView.separated(
+            itemCount: list.length,
+            separatorBuilder: (context, index) => SizedBox(height: 8.h),
+            itemBuilder: (context, index) {
+              final item = list[index];
+              return _RequestCard(request: item);
+            },
+          );
+        }),
+      ),
+    );
+  }
+}
+
+/// Requested requests tab widget
+class _RequestedRequestsTab extends GetView<CustomerBookingsController> {
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () => controller.refreshBookings(),
+      color: AppColors.primary,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return Skeletonizer(
+              enabled: true,
+              child: ListView.separated(
+                itemCount: controller.skeletonRequests.length,
+                separatorBuilder: (context, index) => SizedBox(height: 8.h),
+                itemBuilder: (context, index) {
+                  final item = controller.skeletonRequests[index];
+                  return _RequestCard(request: item);
+                },
+              ),
+            );
+          }
+
+          final list = controller.requestedRequests;
+          if (list.isEmpty) {
+            return EmptyWidget(
+              message: 'No requested bookings',
               icon: Icons.event_available,
             );
           }

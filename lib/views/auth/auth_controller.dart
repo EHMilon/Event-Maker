@@ -215,9 +215,17 @@ class AuthController extends BaseController {
     setLoading(true);
 
     try {
+      // ALWAYS restore user type from storage FIRST - never rely on reactive state
       var userType = await _storage.getUserType();
 
+      // If storage empty, use current selected type (fallback)
       if (userType.isEmpty) {
+        userType = selectedType.value;
+      }
+
+      // If still empty, try restore again
+      if (userType.isEmpty) {
+        await restoreUserType();
         userType = selectedType.value;
       }
 
@@ -227,7 +235,9 @@ class AuthController extends BaseController {
         return;
       }
 
+      // ALWAYS persist user type before login attempt - prevents loss on failed login
       await _storage.setUserType(userType);
+      selectedType.value = userType;
 
       final request = SignInRequestModel(
         role: userType,
@@ -278,7 +288,13 @@ class AuthController extends BaseController {
           verificationUserId.value = responseData['user_id']?.toString() ?? '';
           verificationOnboardKey.value =
               responseData['onboard_key']?.toString() ?? '';
-          selectedType.value = responseData['role']?.toString() ?? '';
+
+          // NEVER overwrite existing selectedType unless we have a valid role
+          if (responseData['role'] != null &&
+              responseData['role'].toString().isNotEmpty) {
+            selectedType.value = responseData['role'].toString();
+            await _storage.setUserType(selectedType.value);
+          }
 
           showWarning(e.data['message'] ?? 'Please complete onboarding.');
 
@@ -307,6 +323,13 @@ class AuthController extends BaseController {
 
   void onSignUp() {
     currentAuthFlow.value = 'signup';
+    // Clear all auth fields before opening signup
+    loginEmailController.clear();
+    loginPasswordController.clear();
+    signupNameController.clear();
+    signupEmailController.clear();
+    signupPasswordController.clear();
+    otpController.clear();
     Get.toNamed('/signup');
   }
 
@@ -574,14 +597,41 @@ class AuthController extends BaseController {
       //     response['message'] ?? 'Onboarding completed successfully.';
       // showSuccess(message);
 
-      // Clear data and navigate to login screen
-      _clearPersistedUserId();
-      verificationOnboardKey.value = '';
-      signupPhoneController.clear();
-      selectedNationality.value = 'Emirati';
-      clearError();
+      // Check if we received tokens in response
+      if (response['data'] != null &&
+          response['data']['access_token'] != null) {
+        // Save tokens from onboarding response
+        final tokensData = response['data'] as Map<String, dynamic>;
+        await _storage.saveTokens(
+          accessToken: tokensData['access_token'],
+          refreshToken: tokensData['refresh_token'],
+          expiresIn: tokensData['expires_in'],
+        );
+        await _storage.saveUserDetails(
+          userId: tokensData['user_id'],
+          name: '',
+          email: '',
+          userType: tokensData['role'],
+        );
 
-      Get.offAllNamed(AppRoutes.login);
+        _clearPersistedUserId();
+        verificationOnboardKey.value = '';
+        signupPhoneController.clear();
+        selectedNationality.value = 'Emirati';
+        clearError();
+
+        // Navigate directly to home
+        _navigateToHome();
+      } else {
+        // Clear data and navigate to congratulations screen
+        _clearPersistedUserId();
+        verificationOnboardKey.value = '';
+        signupPhoneController.clear();
+        selectedNationality.value = 'Emirati';
+        clearError();
+
+        Get.offAllNamed('/congratulations');
+      }
     } on ApiException catch (e) {
       final errorMessage = e.message ?? 'Onboarding failed. Please try again.';
       setError(errorMessage);
@@ -767,6 +817,9 @@ class AuthController extends BaseController {
   void onLoginFromSignup() {
     _clearSignupForm();
     _clearPersistedUserId();
+    // Clear login fields as well
+    loginEmailController.clear();
+    loginPasswordController.clear();
     // Navigate to UserType first, then Login to ensure back button works
     Get.offAllNamed(AppRoutes.userType);
     Future.microtask(() => Get.toNamed(AppRoutes.login));
@@ -1121,51 +1174,38 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response
+    // ALWAYS use backend message FIRST if available
     if (data != null && data is Map<String, dynamic>) {
-      final backendMessage = data['message']?.toString().toLowerCase() ?? '';
-      final errors = data['errors'];
+      final String? backendMessage = data['message']?.toString();
+      if (backendMessage != null && backendMessage.isNotEmpty) {
+        return backendMessage;
+      }
 
-      // Handle validation errors
+      final errors = data['errors'];
       if (errors != null && errors is Map<String, dynamic>) {
         if (errors.containsKey('current_password')) {
-          return 'Current password is incorrect';
+          return errors['current_password'].toString();
         }
         if (errors.containsKey('new_password')) {
           return errors['new_password'].toString();
         }
         if (errors.containsKey('confirm_password')) {
-          return 'Passwords do not match';
+          return errors['confirm_password'].toString();
         }
-      }
-
-      // Match common backend messages
-      if (backendMessage.contains('current password') ||
-          backendMessage.contains('incorrect') ||
-          backendMessage.contains('wrong')) {
-        return 'Current password is incorrect';
-      }
-      if (backendMessage.contains('match') ||
-          backendMessage.contains('confirm')) {
-        return 'New password and confirm password do not match';
-      }
-      if (backendMessage.contains('new password') ||
-          backendMessage.contains('weak') ||
-          backendMessage.contains('stronger')) {
-        return 'New password is too weak. Use at least 8 characters';
       }
     }
 
-    // Fallback to status code based messages
+    // Also check exception message directly
+    if (exception.message.isNotEmpty &&
+        !exception.message.contains('ApiException') &&
+        !exception.message.contains('unknown')) {
+      return exception.message;
+    }
+
+    // Fallback to status code based messages ONLY if no backend message
     switch (statusCode) {
-      case 400:
-        return 'Invalid request. Please check your password and try again';
       case 401:
         return 'Session expired. Please login again';
-      case 403:
-        return 'You do not have permission to change password';
-      case 422:
-        return 'Invalid password format. Please check all fields';
       default:
         return 'Failed to change password. Please try again';
     }
@@ -1227,6 +1267,20 @@ class AuthController extends BaseController {
 
     try {
       _clearPersistedUserId();
+      // Clear all auth fields on logout
+      loginEmailController.clear();
+      loginPasswordController.clear();
+      signupNameController.clear();
+      signupEmailController.clear();
+      signupPasswordController.clear();
+      signupPhoneController.clear();
+      otpController.clear();
+      forgotEmailController.clear();
+      newPasswordController.clear();
+      confirmPasswordController.clear();
+      currentPasswordController.clear();
+      changeNewPasswordController.clear();
+      changeConfirmPasswordController.clear();
       disposeAllControllers();
       await _storage.clearUserData();
       Get.offAllNamed(AppRoutes.onboarding);
@@ -1247,7 +1301,7 @@ class AuthController extends BaseController {
     if (data != null && data is Map<String, dynamic>) {
       final String? backendMessage = data['message']?.toString();
 
-      // Use backend message directly if it exists
+      // Use backend message DIRECTLY if it exists - NO FALLBACK! ALWAYS show server message first
       if (backendMessage != null && backendMessage.isNotEmpty) {
         return backendMessage;
       }
@@ -1269,7 +1323,14 @@ class AuthController extends BaseController {
       }
     }
 
-    // Fallback to status code based messages
+    // Also check exception message directly
+    if (exception.message.isNotEmpty &&
+        !exception.message.contains('ApiException') &&
+        !exception.message.contains('unknown')) {
+      return exception.message;
+    }
+
+    // Fallback to status code based messages ONLY if no backend message
     switch (statusCode) {
       case 400:
         return 'Invalid login credentials';
@@ -1345,7 +1406,7 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response FIRST
+    // ALWAYS use backend message FIRST if available
     if (data != null && data is Map<String, dynamic>) {
       final String? backendMessage = data['message']?.toString();
       if (backendMessage != null && backendMessage.isNotEmpty) {
@@ -1353,25 +1414,24 @@ class AuthController extends BaseController {
       }
 
       final errors = data['errors'];
-
-      // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
         if (errors.containsKey('email_address') ||
             errors.containsKey('email')) {
-          return 'Please enter a valid email address';
+          return errors['email_address']?.toString() ??
+              errors['email'].toString();
         }
       }
     }
 
-    // Fallback to status code based messages
-    switch (statusCode) {
-      case 404:
-        return 'No account found with this email address';
-      case 422:
-        return 'Invalid email address. Please check and try again';
-      default:
-        return 'Failed to send reset email. Please try again';
+    // Also check exception message directly
+    if (exception.message.isNotEmpty &&
+        !exception.message.contains('ApiException') &&
+        !exception.message.contains('unknown')) {
+      return exception.message;
     }
+
+    // Fallback only if no backend message
+    return 'Failed to send reset email. Please try again';
   }
 
   /// Parses API exceptions into user-friendly error messages for OTP
@@ -1379,7 +1439,7 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response FIRST
+    // ALWAYS use backend message FIRST if available
     if (data != null && data is Map<String, dynamic>) {
       final String? backendMessage = data['message']?.toString();
       if (backendMessage != null && backendMessage.isNotEmpty) {
@@ -1387,29 +1447,24 @@ class AuthController extends BaseController {
       }
 
       final errors = data['errors'];
-
-      // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
         if (errors.containsKey('verification_code') ||
             errors.containsKey('otp')) {
-          return 'Please enter a valid verification code';
+          return errors['verification_code']?.toString() ??
+              errors['otp'].toString();
         }
       }
     }
 
-    // Fallback to status code based messages
-    switch (statusCode) {
-      case 400:
-        return 'Invalid verification code. Please check and try again';
-      case 401:
-        return 'Session expired. Please start the process again';
-      case 404:
-        return 'User not found. Please signup again';
-      case 422:
-        return 'Invalid verification code format';
-      default:
-        return 'Verification failed. Please try again';
+    // Also check exception message directly
+    if (exception.message.isNotEmpty &&
+        !exception.message.contains('ApiException') &&
+        !exception.message.contains('unknown')) {
+      return exception.message;
     }
+
+    // Fallback only if no backend message
+    return 'Verification failed. Please try again';
   }
 
   /// Parses resend OTP error messages
@@ -1423,7 +1478,7 @@ class AuthController extends BaseController {
     final int? statusCode = exception.statusCode;
     final dynamic data = exception.data;
 
-    // Try to extract message from backend response FIRST
+    // ALWAYS use backend message FIRST if available
     if (data != null && data is Map<String, dynamic>) {
       final String? backendMessage = data['message']?.toString();
       if (backendMessage != null && backendMessage.isNotEmpty) {
@@ -1431,31 +1486,27 @@ class AuthController extends BaseController {
       }
 
       final errors = data['errors'];
-
-      // Handle validation errors
       if (errors != null && errors is Map<String, dynamic>) {
         if (errors.containsKey('new_password')) {
-          return 'Password must be at least 8 characters';
+          return errors['new_password'].toString();
         }
         if (errors.containsKey('confirm_password')) {
-          return 'Passwords do not match';
+          return errors['confirm_password'].toString();
         }
         if (errors.containsKey('secret_key')) {
-          return 'Session expired. Please start the reset process again';
+          return errors['secret_key'].toString();
         }
       }
     }
 
-    // Fallback to status code based messages
-    switch (statusCode) {
-      case 400:
-        return 'Invalid reset request. Please check your password';
-      case 401:
-        return 'Session expired. Please start the reset process again';
-      case 404:
-        return 'Reset session not found. Please try again';
-      default:
-        return 'Failed to reset password. Please try again';
+    // Also check exception message directly
+    if (exception.message.isNotEmpty &&
+        !exception.message.contains('ApiException') &&
+        !exception.message.contains('unknown')) {
+      return exception.message;
     }
+
+    // Fallback only if no backend message
+    return 'Failed to reset password. Please try again';
   }
 }

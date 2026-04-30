@@ -177,7 +177,11 @@ class ServiceDetailView extends StatelessWidget {
                         color: AppColors.lightGrey.withOpacity(0.5),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.close, size: 20.r, color: AppColors.grey),
+                      child: Icon(
+                        Icons.close,
+                        size: 20.r,
+                        color: AppColors.grey,
+                      ),
                     ),
                   ),
                 ],
@@ -246,7 +250,9 @@ class ServiceDetailView extends StatelessWidget {
                                     color: AppColors.lightGrey,
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
-                                  child: const Icon(Icons.image_not_supported_outlined),
+                                  child: const Icon(
+                                    Icons.image_not_supported_outlined,
+                                  ),
                                 ),
                               ),
                             ),
@@ -370,6 +376,7 @@ class ServiceDetailView extends StatelessWidget {
                                     () => VendorProfileView(
                                       vendor: profile,
                                       showCustomerActions: true,
+                                      serviceId: service.apiId,
                                     ),
                                   );
                                 },
@@ -1075,40 +1082,35 @@ class ServiceDetailView extends StatelessWidget {
               color: AppColors.primary,
             ),
           ),
-          ...package.features.take(3).map(
-            (feature) {
-              final hasImage =
-                  feature.imageUrl != null && feature.imageUrl!.isNotEmpty;
-              return Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: Row(
-                  children: [
+          ...package.features.take(3).map((feature) {
+            final hasImage =
+                feature.imageUrl != null && feature.imageUrl!.isNotEmpty;
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Row(
+                children: [
                   Icon(Icons.check, size: 18.r, color: const Color(0xFF00C566)),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        feature.title,
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      feature.title,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: AppColors.textSecondary,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          }),
           SizedBox(height: 8.h),
           Builder(
             builder: (context) => GestureDetector(
-              onTap: () => _showPackageDetailsSheet(
-                context,
-                package,
-                service.priceUnit,
-              ),
+              onTap: () =>
+                  _showPackageDetailsSheet(context, package, service.priceUnit),
               child: Text(
                 'viewAll'.tr,
                 style: GoogleFonts.inter(

@@ -260,9 +260,7 @@ class ApiService {
       }
       headers = await _getHeadersAsync();
     } else {
-      headers = {
-        'Accept': 'application/json',
-      };
+      headers = {'Accept': 'application/json'};
     }
 
     try {
@@ -279,9 +277,7 @@ class ApiService {
       );
       final response = await http.Response.fromStream(streamed);
 
-      Log.d(
-        '=======> FORMDATA POST ${request.url} → ${response.statusCode}',
-      );
+      Log.d('=======> FORMDATA POST ${request.url} → ${response.statusCode}');
 
       return _processResponse(response);
     } on TimeoutException {
@@ -302,15 +298,22 @@ class ApiService {
     Map<String, String>? extraHeaders,
     bool requiresAuth = true,
   }) async {
+    final Map<String, String> headers;
+
     // Ensure token is valid before making request (if auth required)
     if (requiresAuth) {
       final tokenValid = await _ensureValidToken();
       if (!tokenValid) {
         throw ApiException.unauthorized('Session expired. Please login again.');
       }
+      headers = await _getHeadersAsync();
+    } else {
+      // For public endpoints (login, signup, etc.) NEVER send authorization header
+      headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
     }
-
-    final headers = await _getHeadersAsync();
     debugPrint(
       "POST Request to ${_buildUri(endpoint)} with body: ${jsonEncode(body)} and headers: ${{...headers, ...?extraHeaders}}",
     );
@@ -321,6 +324,7 @@ class ApiService {
         headers: {...headers, ...?extraHeaders},
         body: body != null ? jsonEncode(body) : null,
       ),
+      requiresAuth: requiresAuth,
     );
   }
 
@@ -457,22 +461,21 @@ class ApiService {
 
   // ==================== REQUEST HANDLING ====================
 
-  Future<dynamic> _request(Future<http.Response> Function() request) async {
-    if (!await _connectivity.hasConnection) {
-      throw ApiException.noInternet();
-    }
-
+  Future<dynamic> _request(
+    Future<http.Response> Function() request, {
+    bool requiresAuth = true,
+  }) async {
     try {
       final response = await request().timeout(
-        Duration(seconds: AppConstants.connectTimeout),
+        const Duration(seconds: AppConstants.connectTimeout),
       );
 
       Log.d(
         '=======> Method: ${response.request?.method} URL: ${response.request?.url} Status: ${response.statusCode}',
       );
 
-      // If we get a 401, try to refresh the token and retry once
-      if (response.statusCode == 401) {
+      // ONLY run 401 token refresh logic if this request actually required authentication
+      if (requiresAuth && response.statusCode == 401) {
         Log.d('=======> Received 401, attempting token refresh...');
         final refreshed = await _refreshToken();
         if (refreshed) {
@@ -485,6 +488,7 @@ class ApiService {
           return _processResponse(retryResponse);
         } else {
           Log.e('=======> Token refresh failed, cannot retry request');
+          await _handleAuthFailure();
           throw ApiException.unauthorized(
             'Session expired. Please login again.',
           );

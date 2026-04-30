@@ -32,34 +32,47 @@ class RequestsView extends GetView<RequestsController> {
         ),
         centerTitle: false,
       ),
-      body: Obx(() {
-        if (controller.isLoadingUpcoming.value &&
-            controller.upcomingRequests.isEmpty) {
-          return _buildSkeletonList();
-        }
-
-        if (controller.upcomingError.isNotEmpty &&
-            controller.upcomingRequests.isEmpty) {
-          return _buildErrorState(controller.upcomingError.value);
-        }
-
-        if (controller.upcomingRequests.isEmpty) {
-          return _buildEmptyState();
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.fetchUpcomingRequests,
-          color: AppColors.primary,
-          child: ListView.builder(
+      body: RefreshIndicator(
+        onRefresh: controller.fetchUpcomingRequests,
+        color: AppColors.primary,
+        child: Obx(() {
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-            itemCount: controller.upcomingRequests.length,
-            itemBuilder: (context, index) {
-              final request = controller.upcomingRequests[index];
-              return _buildRequestCard(request);
-            },
-          ),
-        );
-      }),
+            children: [
+              if (controller.isLoadingUpcoming.value &&
+                  controller.upcomingRequests.isEmpty)
+                ...List.generate(
+                  5,
+                  (index) => Skeletonizer(
+                    enabled: true,
+                    child: SpServiceCard(
+                      imagePath: 'https://via.placeholder.com/150',
+                      title: 'Loading request title...',
+                      dateTime: '10th Jan - Fri - 4:00 PM',
+                      onTap: () {},
+                    ),
+                  ),
+                )
+              else if (controller.upcomingError.isNotEmpty &&
+                  controller.upcomingRequests.isEmpty)
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: _buildErrorState(controller.upcomingError.value),
+                )
+              else if (controller.upcomingRequests.isEmpty)
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: _buildEmptyState(),
+                )
+              else
+                ...controller.upcomingRequests
+                    .map((request) => _buildRequestCard(request))
+                    .toList(),
+            ],
+          );
+        }),
+      ),
     );
   }
 

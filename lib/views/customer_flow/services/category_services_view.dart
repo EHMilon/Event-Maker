@@ -15,7 +15,11 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
   final String categoryType;
   final String categoryName;
 
-  const CategoryServicesView({super.key, required this.categoryType, required this.categoryName});
+  const CategoryServicesView({
+    super.key,
+    required this.categoryType,
+    required this.categoryName,
+  });
 
   @override
   String get tag => '${categoryType}_$categoryName';
@@ -27,7 +31,13 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
       appBar: AppBar(
         title: Text(
           categoryName,
-          style: TextStyle(color: AppColors.black, fontSize: 18.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: AppColors.black,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
         backgroundColor: AppColors.white,
         elevation: 0,
@@ -82,7 +92,11 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
           SizedBox(height: 16.h),
           Text(
             'No services found',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: AppColors.black),
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
+            ),
           ),
           SizedBox(height: 8.h),
           Text(
@@ -96,20 +110,21 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
   }
 
   /// Fetches full service details from API and navigates to ServiceDetailView
-  Future<void> _openServiceDetail(BuildContext context, {required int serviceId}) async {
+  Future<void> _openServiceDetail(
+    BuildContext context, {
+    required int serviceId,
+  }) async {
     // Show loading indicator
     Get.dialog(
-      const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
-      ),
+      const Center(child: CircularProgressIndicator(color: AppColors.primary)),
       barrierDismissible: false,
     );
 
     try {
       final repository = const ServiceRepository();
-      final fullService = await repository.fetchCustomerServiceDetail(serviceId);
+      final fullService = await repository.fetchCustomerServiceDetail(
+        serviceId,
+      );
 
       // Close loading dialog
       Get.back();
@@ -158,10 +173,7 @@ class CategoryServicesView extends GetView<CategoryServicesController> {
           rating: service.rating?.toString() ?? 'N/A',
           isBookmarked: service.isBookmarked,
           useFullWidth: true,
-          onTap: () => _openServiceDetail(
-            context,
-            serviceId: service.apiId,
-          ),
+          onTap: () => _openServiceDetail(context, serviceId: service.apiId),
         );
       },
     );

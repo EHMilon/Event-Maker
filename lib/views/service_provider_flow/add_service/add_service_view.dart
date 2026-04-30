@@ -419,7 +419,7 @@ class _AddServiceViewState extends State<AddServiceView> {
                   keyboardType: TextInputType.multiline,
                   maxLines: 5,
                 ),
-
+                SizedBox(height: 24.h),
                 Obx(() {
                   if (!controller.showAttendanceCapacity) {
                     return const SizedBox.shrink();

@@ -5,6 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 
 import 'customer_notification_controller.dart';
 import '../../constants/api_constant.dart';
+import '../../widgets/empty_widget.dart';
 import '../../widgets/notification_card.dart';
 
 class CustomerNotificationView extends GetView<CustomerNotificationController> {
@@ -16,8 +17,11 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        controller.refreshNotifications();
         Get.back();
+        // Refresh after navigation completed, not before
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.refreshNotifications();
+        });
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -26,14 +30,16 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
           elevation: 0,
           leading: IconButton(
             onPressed: () {
-              controller.refreshNotifications();
               Get.back();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                controller.refreshNotifications();
+              });
             },
             icon: const Icon(Icons.arrow_back, color: Colors.black),
           ),
           titleSpacing: (Navigator.of(context).canPop()) ? 0 : 24.w,
           title: Text(
-            'Notification',
+            'notifications'.tr,
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
@@ -41,30 +47,40 @@ class CustomerNotificationView extends GetView<CustomerNotificationController> {
             ),
           ),
         ),
-        body: Obx(
-          () => Skeletonizer(
-            enabled: controller.isLoading.value && controller.notifications.isEmpty,
-            child: controller.isLoading.value && controller.notifications.isEmpty
-                ? _buildLoadingList()
-                : RefreshIndicator(
-                    onRefresh: controller.refreshNotifications,
-                    color: Get.theme.colorScheme.primary,
-                    child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                      itemCount: controller.notifications.isEmpty ? 0 : controller.notifications.length,
-                      itemBuilder: (context, index) {
-                        if (controller.isLoading.value && index < controller.notifications.length) {
-                          return const _NotificationCardPlaceholder();
-                        }
-                        final notification = controller.notifications[index];
-                        return _CustomerNotificationCard(
+        body: RefreshIndicator(
+          onRefresh: controller.refreshNotifications,
+          color: Get.theme.colorScheme.primary,
+          child: Obx(() {
+            final isLoading = controller.isLoading.value;
+            final notifications = controller.notifications;
+
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              children: [
+                if (isLoading && notifications.isEmpty)
+                  ...List.generate(
+                    6,
+                    (index) => const _NotificationCardPlaceholder(),
+                  )
+                else if (notifications.isEmpty)
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: const EmptyWidget(message: 'No notifications yet'),
+                  )
+                else
+                  ...notifications
+                      .map(
+                        (notification) => _CustomerNotificationCard(
                           notification: notification,
-                          onTap: () => controller.handleNotificationClick(notification),
-                        );
-                      },
-                    ),
-                  ),
-          ),
+                          onTap: () =>
+                              controller.handleNotificationClick(notification),
+                        ),
+                      )
+                      .toList(),
+              ],
+            );
+          }),
         ),
       ),
     );
@@ -102,7 +118,7 @@ class _CustomerNotificationCard extends StatelessWidget {
       action: action,
       detail: detail,
       timeAgo: notification.timeAgo,
-      avatarAsset: imageUrl, // Use cover_image from API
+      avatarAsset: imageUrl,
       onTap: onTap,
     );
   }

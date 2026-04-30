@@ -98,7 +98,18 @@ class LanguageSelectionView extends GetView<LanguageSelectionController> {
         child: Row(
           children: [
             // Flag
-            Text(language.flag, style: TextStyle(fontSize: 20.sp)),
+            Image.asset(
+              language.flagAssetPath,
+              width: 32.w,
+              height: 24.h,
+              errorBuilder: (context, error, stackTrace) {
+                return SizedBox(
+                  width: 32.w,
+                  height: 24.h,
+                  child: Icon(Icons.flag, size: 20.sp),
+                );
+              },
+            ),
             SizedBox(width: 16.w),
             // Language name
             Expanded(

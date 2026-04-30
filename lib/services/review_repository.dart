@@ -1,3 +1,4 @@
+import 'package:event_maker/constants/api_constant.dart';
 import 'package:event_maker/services/api_exception.dart';
 import 'package:event_maker/services/api_result.dart';
 import 'package:event_maker/services/api_service.dart';
@@ -8,7 +9,7 @@ class ReviewRepository {
   final ApiService _apiService = ApiService();
 
   /// Submit a new review for a service
-  /// POST /services/customer/submit-review/{service_id}
+  /// POST /services/customer/submit-review/{service_id}/
   /// Body: { "rating": int, "comment": String }
   Future<Result<Map<String, dynamic>>> submitReview({
     required int serviceId,
@@ -16,10 +17,12 @@ class ReviewRepository {
     required String comment,
   }) async {
     try {
-      Log.d('=======> Submitting review for service $serviceId');
+      final url = ApiConstant.submitReview(serviceId);
+      Log.d('=======> Submitting review to URL: $url');
+      Log.d('=======> Full URL will be: http://10.10.12.62:8005/api/$url');
 
       final response = await _apiService.post(
-        '/services/customer/submit-review/$serviceId',
+        ApiConstant.submitReview(serviceId),
         body: {'rating': rating, 'comment': comment},
       );
 
@@ -44,7 +47,7 @@ class ReviewRepository {
   }
 
   /// Update an existing review for a service
-  /// PUT /services/customer/update-review/{service_id}
+  /// PUT /services/customer/update-review/{service_id}/
   /// Body: { "rating": int, "comment": String }
   Future<Result<Map<String, dynamic>>> updateReview({
     required int serviceId,
@@ -55,7 +58,7 @@ class ReviewRepository {
       Log.d('=======> Updating review for service $serviceId');
 
       final response = await _apiService.put(
-        '/services/customer/update-review/$serviceId',
+        ApiConstant.updateReview(serviceId),
         body: {'rating': rating, 'comment': comment},
       );
 
@@ -83,11 +86,18 @@ class ReviewRepository {
   /// GET /services/customer/review-detail/{service_id}
   Future<Result<Map<String, dynamic>>> getReviewDetail(int serviceId) async {
     try {
+      final url = ApiConstant.reviewDetail(serviceId);
       Log.d('=======> Fetching review detail for service $serviceId');
+      Log.d('=======> Endpoint URL: $url');
+      Log.d('=======> Full URL: ${ApiConstant.baseUrl}$url');
 
       final response = await _apiService.get(
-        '/services/customer/review-detail/$serviceId',
+        ApiConstant.reviewDetail(serviceId),
       );
+
+      Log.d('=======> Review detail response: $response');
+      Log.d('=======> Response data: ${response['data']}');
+      Log.d('=======> Response success: ${response['success']}');
 
       if (response['success'] == true) {
         Log.d('=======> Review detail fetched successfully');
@@ -121,15 +131,20 @@ class ReviewRepository {
   /// Extract user-friendly error message from ApiException
   /// Prioritizes the 'message' field from API response body
   String _extractErrorMessage(ApiException exception) {
-    // First try to get message from API response body
-    if (exception.data is Map<String, dynamic>) {
-      final message = exception.data['message'] as String?;
+    // First ALWAYS try to get message from API response body - use actual backend message whenever available
+    if (exception.data is Map) {
+      final message = exception.data['message']?.toString();
       if (message != null && message.isNotEmpty) {
         return message;
       }
     }
-    
-    // Fall back to exception message but make it more user-friendly
+
+    // Fallback to exception message first, then generic code messages
+    if (exception.message != null && exception.message!.isNotEmpty) {
+      return exception.message!;
+    }
+
+    // Only fall back to generic messages if no actual message was provided by API
     switch (exception.statusCode) {
       case 400:
         return 'Invalid request. Please check your input.';
@@ -148,7 +163,7 @@ class ReviewRepository {
       case 503:
         return 'Service temporarily unavailable. Please try again later.';
       default:
-        return exception.message;
+        return 'An unknown error occurred.';
     }
   }
 }

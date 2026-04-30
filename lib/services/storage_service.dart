@@ -105,15 +105,16 @@ class StorageService {
   String? getRefreshTokenSync() => _prefs.getString(StorageKeys.refreshToken);
 
   /// Save both access and refresh tokens with expiration
-  /// [expiresIn] is in milliseconds (from backend)
+  /// [expiresIn] is in SECONDS (standard JWT / OAuth format from backend)
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
     required int expiresIn,
   }) async {
-    // expiresIn is in milliseconds from backend
+    // expiresIn is in SECONDS from backend - convert to milliseconds
     // Calculate expiration time (Unix timestamp in milliseconds)
-    final expiresAt = DateTime.now().millisecondsSinceEpoch + expiresIn;
+    final expiresAt =
+        DateTime.now().millisecondsSinceEpoch + (expiresIn * 1000);
 
     await Future.wait([
       _prefs.setString(StorageKeys.token, accessToken),
@@ -203,12 +204,7 @@ class StorageService {
       return null;
     }
 
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'type': type,
-    };
+    return {'id': id, 'name': name, 'email': email, 'type': type};
   }
 
   /// Get user type
